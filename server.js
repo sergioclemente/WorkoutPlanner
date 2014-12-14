@@ -1,5 +1,3 @@
-// node ~/Dropbox/WorkoutPlanner/server.js
-
 var http = require('http');
 var path = require("path");
 var fs = require("fs");

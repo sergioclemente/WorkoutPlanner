@@ -1,5 +1,3 @@
-// tsc --module commonjs ~/Dropbox/WorkoutPlanner/MyMath.ts ~/Dropbox/WorkoutPlanner/model.ts
-
 /// <reference path="MyMath.ts" />
 
 class MyMath {
