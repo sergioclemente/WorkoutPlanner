@@ -1,5 +1,5 @@
 Compiling typescript
-tsc --module commonjs ~/WorkoutPlanner/MyMath.ts ~/WorkoutPlanner/model.ts
+tsc --module commonjs ./MyMath.ts ./model.ts
 
 Starting the node server
-node ~/WorkoutPlanner/server.js
+node ./server.js
