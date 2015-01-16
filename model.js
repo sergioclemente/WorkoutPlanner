@@ -1,11 +1,10 @@
-// tsc --module commonjs ~/Dropbox/WorkoutPlanner/MyMath.ts ~/Dropbox/WorkoutPlanner/model.ts
+/// <reference path="MyMath.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-/// <reference path="MyMath.ts" />
 var MyMath = (function () {
     function MyMath() {
     }
@@ -1484,6 +1483,21 @@ var WorkoutBuilder = (function () {
         result += dataVisitor.getPerfPRODescription();
         result += "[END PERFPRO DESCRIPTIONS]\n";
         return result;
+    };
+    WorkoutBuilder.prototype.getMRCFileName = function () {
+        var duration = this.intervals.getDuration().getSeconds();
+        var mainInterval = null;
+        this.intervals.getIntervals().forEach(function (interval) {
+            if (interval.getDuration().getSeconds() > duration / 2) {
+                mainInterval = interval;
+            }
+        });
+        if (mainInterval != null) {
+            return Formatter.getIntervalTitle(mainInterval) + ".mrc";
+        }
+        else {
+            return "untitled.mrc";
+        }
     };
     return WorkoutBuilder;
 })();

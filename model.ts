@@ -1570,5 +1570,22 @@ export class WorkoutBuilder {
 
 		return result;
 	}
+
+	getMRCFileName() : string {
+		var duration = this.intervals.getDuration().getSeconds();
+
+		var mainInterval = null;
+		this.intervals.getIntervals().forEach(function(interval) {            
+            if (interval.getDuration().getSeconds() > duration / 2) {
+                mainInterval = interval;
+            }
+        });
+
+		if (mainInterval != null) {
+			return Formatter.getIntervalTitle(mainInterval) + ".mrc";
+		} else {
+			return "untitled.mrc";
+		}
+	}
 };
 

@@ -38,7 +38,12 @@ http.createServer(function (req, res) {
           if (params.w && params.ftp && params.tpace && params.st && params.ou) {
             var userProfile = new model.UserProfile(params.ftp, params.tpace);
             var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
-            res.writeHead(200, {"Content-Type": "application/octet-stream"});
+            res.writeHead(200,
+              {
+                "Content-Type": "application/octet-stream",
+                "Content-Disposition": "attachment; filename=\"" + builder.getMRCFileName() + "\";"
+              }
+            );
             res.write(builder.getMRCFile());
             res.end();
           }        
