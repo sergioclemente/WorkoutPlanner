@@ -1,0 +1,7 @@
+// TODO2: Remove getIntensity() from Interval
+// TODO4: More robust parsing
+// TODO6: Extract speed estimation (consider weight, altitude and drag coefficient)
+// TODO7: Add altitude for measuring running speed
+// BUG: Not merging time and distance when specifying mixed miles and duration workouts
+// BUG: L is messing up when typing "left leg out" on description
+// BUG: sasd73asd is being interpreted as a number while parsing

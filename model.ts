@@ -46,13 +46,6 @@ export enum SportType {
 	Run=2
 }
 
-// TODO5: Add description capability to Intervals in parsing
-// TODO2: Remove getIntensity() from Interval
-// TODO4: More robust parsing
-// TODO6: Extract speed estimation (consider weight, altitude and drag coefficient)
-// TODO7: Add altitude for measuring running speed
-// BUG: Not merging time and distance when specifying mixed miles and duration workouts
-
 enum DistanceUnit {
 	Unknown,
 	Miles,
