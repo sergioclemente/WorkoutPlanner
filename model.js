@@ -52,12 +52,6 @@ var MyMath = (function () {
     SportType[SportType["Run"] = 2] = "Run";
 })(exports.SportType || (exports.SportType = {}));
 var SportType = exports.SportType;
-// TODO5: Add description capability to Intervals in parsing
-// TODO2: Remove getIntensity() from Interval
-// TODO4: More robust parsing
-// TODO6: Extract speed estimation (consider weight, altitude and drag coefficient)
-// TODO7: Add altitude for measuring running speed
-// BUG: Not merging time and distance when specifying mixed miles and duration workouts
 var DistanceUnit;
 (function (DistanceUnit) {
     DistanceUnit[DistanceUnit["Unknown"] = 0] = "Unknown";
@@ -1393,7 +1387,8 @@ var PersistedItem = (function () {
     };
     PersistedItem.prototype.load = function () {
         if (window.localStorage) {
-            return window.localStorage.getItem(this.id);
+            var result = window.localStorage.getItem(this.id);
+            return result.trim();
         }
         else {
             return null;
@@ -1464,7 +1459,6 @@ var WorkoutBuilder = (function () {
         }, this);
         result += ("\n");
         result += ("Workout Definition: " + this.workoutDefinition + "\n");
-        console.log(this.getMRCFile());
         return result;
     };
     WorkoutBuilder.prototype.getMRCFile = function () {
@@ -1493,11 +1487,13 @@ var WorkoutBuilder = (function () {
             }
         });
         if (mainInterval != null) {
-            return Formatter.getIntervalTitle(mainInterval) + ".mrc";
+            var filename = Formatter.getIntervalTitle(mainInterval) + ".mrc";
+            // Avoid really long filenames since its not very helpful
+            if (filename.length < 20) {
+                return filename;
+            }
         }
-        else {
-            return "untitled.mrc";
-        }
+        return "untitled.mrc";
     };
     return WorkoutBuilder;
 })();

@@ -5,3 +5,5 @@
 // BUG: Not merging time and distance when specifying mixed miles and duration workouts
 // BUG: L is messing up when typing "left leg out" on description
 // BUG: sasd73asd is being interpreted as a number while parsing
+// BUG: better logging on server (log the error code)
+// BUG: server should log status and error more cleanly

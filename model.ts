@@ -1450,7 +1450,8 @@ class PersistedItem {
 	
 	load() : string {
 		if (window.localStorage) {
-			return window.localStorage.getItem(this.id);
+			var result = window.localStorage.getItem(this.id);
+			return result.trim();
 		} else {
 			return null;
 		}
