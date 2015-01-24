@@ -14,6 +14,8 @@ http.createServer(function (req, res) {
   var uri = parsed_url.pathname;
   var filename = path.join(process.cwd(), uri);
 
+  console.log(req.url);
+
   fs.exists(filename, function(exists) {
     if (exists) {
       if (fs.statSync(filename).isDirectory()) {
