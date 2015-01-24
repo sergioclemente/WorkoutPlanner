@@ -7,6 +7,10 @@ var model = require('./model');
 
 var port = process.argv[2] || 8888;
 
+function logRequest(req) {
+  console.log(new Date().toTimeString() + " " + req.connection.remoteAddress + " " + req.method + " " + req.url);
+}
+
 http.createServer(function (req, res) {
   res.writeHead(200, {'Content-Type': 'text/plain'});
 
@@ -14,7 +18,7 @@ http.createServer(function (req, res) {
   var uri = parsed_url.pathname;
   var filename = path.join(process.cwd(), uri);
 
-  console.log(req.url);
+  logRequest(req);
 
   fs.exists(filename, function(exists) {
     if (exists) {
