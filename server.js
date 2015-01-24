@@ -16,9 +16,18 @@ http.createServer(function (req, res) {
 
   var parsed_url = url.parse(req.url, true);
   var uri = parsed_url.pathname;
-  var filename = path.join(process.cwd(), uri);
+
+  var base_path = process.cwd();
+  var filename = path.normalize(path.join(base_path, uri));
 
   logRequest(req);
+
+  if (filename.indexOf(base_path) < 0) {
+    res.writeHead(303, {"Content-Type": "text/plain"});
+    res.write("No donut for you" + "\n");
+    res.end();
+    return;
+  }
 
   fs.exists(filename, function(exists) {
     if (exists) {
