@@ -1538,8 +1538,6 @@ export class WorkoutBuilder {
 		result += ("\n");
 		result += ("Workout Definition: " + this.workoutDefinition + "\n");
 
-		console.log(this.getMRCFile());
-
 		return result
 	}
 
@@ -1575,10 +1573,19 @@ export class WorkoutBuilder {
         });
 
 		if (mainInterval != null) {
-			return Formatter.getIntervalTitle(mainInterval) + ".mrc";
-		} else {
-			return "untitled.mrc";
+			var filename = Formatter.getIntervalTitle(mainInterval) + ".mrc";
+
+			// Avoid really long filenames since its not very helpful
+			if (filename.length < 20) {
+				return filename;
+			}
+
+			// TODO: do something here if the main set its too big. Some ideas:
+			// 1) Long Ride
+			// 2) Specify the main zones. Something like Z2 with some Z4 tempo
 		}
+
+		return "untitled.mrc";
 	}
 };
 
