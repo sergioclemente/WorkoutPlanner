@@ -7,8 +7,8 @@ var model = require('./model');
 
 var port = process.argv[2] || 8888;
 
-function logRequest(req) {
-  console.log(new Date().toTimeString() + " " + req.connection.remoteAddress + " " + req.method + " " + req.url);
+function logRequest(req, code) {
+  console.log(new Date().toTimeString() + " " + req.connection.remoteAddress + " " + req.method + " " + req.url + " " + code);
 }
 
 http.createServer(function (req, res) {
@@ -19,10 +19,9 @@ http.createServer(function (req, res) {
     var base_path = process.cwd();
     var filename = path.normalize(path.join(base_path, uri));
 
-    logRequest(req);
-
     if (filename.indexOf(base_path) < 0) {
-      res.writeHead(303, {"Content-Type": "text/plain"});
+      logRequest(req, 403);
+      res.writeHead(403, {"Content-Type": "text/plain"});
       res.write("No donut for you" + "\n");
       res.end();
       return;
@@ -35,13 +34,15 @@ http.createServer(function (req, res) {
             filename += '/index.html';
           }
           fs.readFile(filename, "binary", function(err, file) {
-            if(err) {        
+            if(err) {
+              logRequest(req, 500);
               res.writeHead(500, {"Content-Type": "text/plain"});
               res.write(err + "\n");
               res.end();
               return;
             }
 
+            logRequest(req, 200);
             res.writeHead(200);
             res.write(file, "binary");
             res.end();
@@ -53,7 +54,7 @@ http.createServer(function (req, res) {
               if (params.w && params.ftp && params.tpace && params.st && params.ou) {
                 var userProfile = new model.UserProfile(params.ftp, params.tpace);
                 var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
-                console.log("here");
+                logRequest(req, 200);
                 res.writeHead(200,
                   {
                     "Content-Type": "application/octet-stream",
@@ -61,10 +62,10 @@ http.createServer(function (req, res) {
                   }
                 );
                 res.write(builder.getMRCFile());
-                console.log("here");
                 res.end();
               }        
           } else {
+            logRequest(req, 404);
             res.writeHead(404, {"Content-Type": "text/plain"});
             res.write("404 Not Found\n");
             res.end();
@@ -72,6 +73,7 @@ http.createServer(function (req, res) {
           }
         }
       } catch (err1) {
+        logRequest(req, 500);
         res.writeHead(500, {"Content-Type": "text/plain"});
         res.write("Oops... Server error\n");
         res.end();
@@ -80,6 +82,7 @@ http.createServer(function (req, res) {
       }
     });
   } catch (err2) {
+    logRequest(req, 500);
     res.writeHead(500, {"Content-Type": "text/plain"});
     res.write("Oops... Server error\n");
     res.end();
