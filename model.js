@@ -682,6 +682,9 @@ var IntervalParser = (function () {
         // points to the last valid char
         return { i: i - 1, value: value };
     };
+    IntervalParser.isWhitespace = function (ch) {
+        return ch.length == 1 && (ch == " " || ch == "\t" || ch == "\n");
+    };
     IntervalParser.throwParserError = function (column, msg) {
         throw Error("Error while parsing input on column " + column + "-  Error: " + msg);
     };
@@ -704,6 +707,7 @@ var IntervalParser = (function () {
                 };
                 var title = "";
                 var numIndex = 0;
+                var isInTitle = false;
                 for (; i < input.length; i++) {
                     ch = input[i];
                     if (ch == ")") {
@@ -759,26 +763,35 @@ var IntervalParser = (function () {
                     }
                     else if (ch == ",") {
                         numIndex++;
-                    }
-                    else if (IntervalParser.isDigit(ch)) {
-                        var res = IntervalParser.parseInt(input, i);
-                        i = res.i;
-                        nums[numIndex] = res.value;
-                        // look for a unit
-                        var unitStr = "";
-                        for (var j = i + 1; j < input.length; j++) {
-                            if (IntervalParser.isLetter(input[j])) {
-                                unitStr += input[j];
-                            }
-                            else {
-                                break;
-                            }
-                        }
-                        units[numIndex] = unitStr;
-                        i += unitStr.length;
+                        isInTitle = false;
                     }
                     else {
-                        title += ch;
+                        if (IntervalParser.isDigit(ch) && !isInTitle) {
+                            var res = IntervalParser.parseInt(input, i);
+                            i = res.i;
+                            nums[numIndex] = res.value;
+                            // look for a unit
+                            var unitStr = "";
+                            for (var j = i + 1; j < input.length; j++) {
+                                if (IntervalParser.isLetter(input[j])) {
+                                    unitStr += input[j];
+                                }
+                                else {
+                                    break;
+                                }
+                            }
+                            units[numIndex] = unitStr;
+                            i += unitStr.length;
+                        }
+                        else {
+                            // just enter in title mode if its not a whitespace
+                            if (!isInTitle && !IntervalParser.isWhitespace(ch)) {
+                                isInTitle = true;
+                            }
+                            if (isInTitle) {
+                                title += ch;
+                            }
+                        }
                     }
                 }
             }

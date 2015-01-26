@@ -694,6 +694,7 @@ class IntervalParser {
 			IntervalParser.getCharVal(ch) >= IntervalParser.getCharVal("a") &&
 			IntervalParser.getCharVal(ch) <= IntervalParser.getCharVal("z");
 	}
+
 	static parseInt(input: string, i: number) {
 		var value = 0;
 		for (; i < input.length; i++) {
@@ -708,6 +709,9 @@ class IntervalParser {
 		// points to the last valid char
 		return {i: i - 1, value: value} ;
 	}
+	static isWhitespace(ch: string) : boolean {
+		return ch.length == 1 && (ch == " " || ch == "\t" || ch == "\n");
+	}
 	static throwParserError(column : number, msg : string) : void {
 		throw Error("Error while parsing input on column " + column + "-  Error: " + msg);
 	}
@@ -715,11 +719,11 @@ class IntervalParser {
 		var result = new ArrayInterval("Workout", []);
 		
 		var stack = [result];
-		
+
 		for (var i = 0 ; i < input.length; i++) {
 			var ch = input[i];
 			
-			if (ch == "(") { // parse leaf (simple workout)
+			if (ch == "(") { // parse simple workout
 				i++;
 				var nums = {
 					0: 0,
@@ -733,6 +737,8 @@ class IntervalParser {
 				};
 				var title = "";
 				var numIndex = 0;
+				var isInTitle = false;
+
 				for (; i < input.length; i++) {
 					ch = input[i];
 					if (ch == ")") {
@@ -790,27 +796,39 @@ class IntervalParser {
 						stack[stack.length-1].getIntervals().push(interval);
 						break;
 					} else if (ch == ",") {
-						numIndex++; 
-					} else if (IntervalParser.isDigit(ch)) {
-						var res = IntervalParser.parseInt(input, i);
-						i = res.i;
-						nums[numIndex] = res.value;
-						
-						// look for a unit
-						var unitStr = "";
-						for (var j = i+1; j < input.length; j++) {
-							if (IntervalParser.isLetter(input[j])) {
-								unitStr += input[j];
-							} else {
-								break;
+						numIndex++;
+						isInTitle = false;
+					} else {
+						if (IntervalParser.isDigit(ch) && !isInTitle) {
+							var res = IntervalParser.parseInt(input, i);
+							i = res.i;
+							nums[numIndex] = res.value;
+							
+							// look for a unit
+							var unitStr = "";
+							for (var j = i+1; j < input.length; j++) {
+								if (IntervalParser.isLetter(input[j])) {
+									unitStr += input[j];
+								} else {
+									break;
+								}
+							}
+							units[numIndex] = unitStr;
+							i += unitStr.length;
+						} else {
+							// just enter in title mode if its not a whitespace
+							if (!isInTitle && !IntervalParser.isWhitespace(ch)) {
+								isInTitle = true;
+							}
+
+							if (isInTitle) {
+								title += ch;
 							}
 						}
-						units[numIndex] = unitStr;
-						i += unitStr.length;
-					} else {
-						title += ch;
+
 					}
 				}
+			// end simple workout
 			} else if (ch == "[") {
 				var ai = new ArrayInterval("", []);
 				stack[stack.length-1].getIntervals().push(ai);
