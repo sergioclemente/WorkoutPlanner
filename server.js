@@ -8,7 +8,8 @@ var model = require('./model');
 var port = process.argv[2] || 8888;
 
 function logRequest(req, code) {
-  console.log(new Date().toTimeString() + " " + req.connection.remoteAddress + " " + req.method + " " + req.url + " " + code);
+  var user_agent = req.headers['user-agent'];
+  console.log(new Date().toTimeString() + " " + req.connection.remoteAddress + " " + req.method + " " + req.url + " " + code + " " + user_agent);
 }
 
 http.createServer(function (req, res) {
