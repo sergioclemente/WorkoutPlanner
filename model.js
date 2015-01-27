@@ -1401,7 +1401,7 @@ var PersistedItem = (function () {
     PersistedItem.prototype.load = function () {
         if (window.localStorage) {
             var result = window.localStorage.getItem(this.id);
-            return result.trim();
+            return result != null ? result.trim() : result;
         }
         else {
             return null;
