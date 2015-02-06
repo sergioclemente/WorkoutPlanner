@@ -1133,12 +1133,7 @@ var Formatter = (function () {
         // TODO: instantiating visitor is a bit clowny
         var f = new Formatter();
         VisitorHelper.visit(f, interval);
-        if (interval.getTitle().length > 0) {
-            return interval.getTitle() + " (" + f.result + ")";
-        }
-        else {
-            return f.result;
-        }
+        return f.result;
     };
     // ArrayInterval
     Formatter.prototype.visitArrayInterval = function (interval) {
@@ -1401,7 +1396,7 @@ var PersistedItem = (function () {
     PersistedItem.prototype.load = function () {
         if (window.localStorage) {
             var result = window.localStorage.getItem(this.id);
-            return result != null ? result.trim() : result;
+            return result.trim();
         }
         else {
             return null;
@@ -1502,7 +1497,7 @@ var WorkoutBuilder = (function () {
         if (mainInterval != null) {
             var filename = Formatter.getIntervalTitle(mainInterval) + ".mrc";
             // Avoid really long filenames since its not very helpful
-            if (filename.length < 20) {
+            if (filename.length < 50) {
                 return filename;
             }
         }

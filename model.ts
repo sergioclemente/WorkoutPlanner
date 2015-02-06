@@ -1177,11 +1177,7 @@ class Formatter implements Visitor {
 		var f = new Formatter();
 		VisitorHelper.visit(f, interval);
 
-		if (interval.getTitle().length > 0) {
-			return interval.getTitle() + " (" + f.result + ")";
-		} else {
-			return f.result;
-		}
+		return f.result;
 	}
 	
 	// ArrayInterval
@@ -1595,7 +1591,7 @@ export class WorkoutBuilder {
 			var filename = Formatter.getIntervalTitle(mainInterval) + ".mrc";
 
 			// Avoid really long filenames since its not very helpful
-			if (filename.length < 20) {
+			if (filename.length < 50) {
 				return filename;
 			}
 
