@@ -967,12 +967,12 @@ class IntensityIterator extends BaseVisitor {
 
 class ZonesVisitor extends BaseVisitor {
 	private zones = {
-		1 : {name:"Z1", value:0},
-		2 : {name:"Z2", value:0},
-		3 : {name:"Z3", value:0},
-		4 : {name:"Z4", value:0},
-		5 : {name:"Z5", value:0},
-		6 : {name:"Z6+", value:0},
+		1 : {name:"Z1", range:"(0,55%]", value:0},
+		2 : {name:"Z2", range:"(55%;75%]", value:0},
+		3 : {name:"Z3", range:"(75%;90%]", value:0},
+		4 : {name:"Z4", range:"(90%;105%]", value:0},
+		5 : {name:"Z5", range:"(105%;120%]", value:0},
+		6 : {name:"Z6+", range:"(120%;+oo)", value:0},
 	};
 
 	private static getZone(intensity: number) : number {
@@ -1021,6 +1021,7 @@ class ZonesVisitor extends BaseVisitor {
 			if (zone.value > 0) {
 				result.push({
 					name: zone.name,
+					range: zone.range,
 					duration: new Duration(DurationUnit.Seconds, zone.value, 0, 0)	
 				});
 			}
@@ -1536,7 +1537,7 @@ export class WorkoutBuilder {
 		result += ("Zones:\n");
         var zones = this.intervals.getTimeInZones();
         zones.forEach(function(zone) {
-            result += ("\t* "+zone.name + ": " + zone.duration.toString() + "\n");
+            result += ("\t* "+zone.name + " " + zone.range +" : " + zone.duration.toString() + "\n");
         });
 
 		if (this.sportType == SportType.Bike) {
@@ -1578,9 +1579,9 @@ export class WorkoutBuilder {
 	}
 
 	getMRCFileName() : string {
-		var duration = this.intervals.getDuration().getSeconds();
-
 		var mainInterval = null;
+		var duration = this.intervals.getDuration().getSeconds();
+	
 		this.intervals.getIntervals().forEach(function(interval) {            
             if (interval.getDuration().getSeconds() > duration / 2) {
                 mainInterval = interval;
@@ -1594,13 +1595,30 @@ export class WorkoutBuilder {
 			if (filename.length < 50) {
 				return filename;
 			}
-
-			// TODO: do something here if the main set its too big. Some ideas:
-			// 1) Long Ride
-			// 2) Specify the main zones. Something like Z2 with some Z4 tempo
 		}
+		
+		// TODO: do something here if the main set its too big. Some ideas:
+		// 1) Long Ride
+		
+		var timeInZones = this.intervals.getTimeInZones();
 
-		return "untitled.mrc";
+		var zoneMaxTime = 0;
+		var zoneMaxName = -1;
+		for (var id in timeInZones) {
+			var zone = timeInZones[id];
+			var zoneDuration = zone.duration.estimatedDurationInSeconds;
+			if (zoneDuration > zoneMaxTime) {
+				zoneMaxTime = zoneDuration;
+				zoneMaxName = zone.name;
+			}
+		}
+		
+		if (zoneMaxTime != 0) {
+			var duration_hr = Math.round(TimeUnitHelper.convertTo(duration, TimeUnit.Seconds, TimeUnit.Hours));
+			return duration_hr + "hour-" + zoneMaxName + ".mrc";
+		} else {
+			return "untitled.mrc";
+		}
 	}
 };
 
