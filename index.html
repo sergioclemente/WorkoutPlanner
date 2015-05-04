@@ -20,15 +20,17 @@
   function _loadWorkout() {
     var workoutText = _getValue("workout");
     var sportType = parseInt(_getValue("sltSportType"));
-    var tPace = parseFloat(_getValue("txtTPace"));
+
+    // TODO: make it work with other units
+    var tPaceString = _getValue("txtTPace");
+    var tPace = _extractNumber(tPaceString, 60, ":", "min/mi");
     var ftp = parseInt(_getValue("txtFtp"));
     var outputUnit = parseInt(_getValue("sltOutputUnit"));
 
     var iframe = document.getElementById("workout_frame");
-    var anchor = document.getElementById("workout_link");
     var download_anchor = document.getElementById("download_mrc");
 
-    // TODO: Make this nicer by iterating through a map of elements and 
+    // TODO: Make this nicer by iterating through a map of elements and
     // calling encoreURIComponent on each one
     var params = "?w=" + encodeURIComponent(workoutText) +
       "&st=" + encodeURIComponent(sportType) +
@@ -39,13 +41,24 @@
     var url = "workout_view.html" + params;
     var mrc_url = "workout.mrc" + params ;
     iframe.src = url;
-    anchor.href = url;
     download_anchor.href = mrc_url;
 
     workoutPersisted.save(workoutText);
     sportTypePersisted.save(sportType);
-    tPacePersisted.save(tPace);
+    tPacePersisted.save(tPaceString);
     ftpPersisted.save(ftp);
+  }
+  
+  function _extractNumber(numberString, decimalMultiplier, strSeparator, strSuffix) {
+    debugger;
+    var indexSuffix = numberString.indexOf(strSuffix);
+    var indexSeparator = numberString.indexOf(strSeparator);
+    if (indexSuffix < 0 || indexSeparator < 0) {
+      return null;
+    }
+    var integerPart = parseInt(numberString.substr(0, indexSeparator));
+    var fractionPart = parseInt(numberString.substr(indexSeparator+1, indexSuffix - indexSeparator - 1));
+    return integerPart + fractionPart/decimalMultiplier;
   }
 
   function _setValue(element_id, text) {
@@ -134,12 +147,17 @@
   </head>
   <body class="font">
   <form>
+    <h1> User Settings </h1>
+    Bike FTP: <input id="txtFtp" width="20" placeholder="245"></input><br />
+    Run T-Pace: <input id="txtTPace" width="20" placeholder="7:30 min/mi"></input> <br />
+    <br />
+    <h1> Workout Settings </h1>
+    Workout Type:
     <select id="sltSportType">
       <option value="1">Bike</option>
       <option value="2">Run</option>
-    </select>
-    <input id="txtFtp" width="20" placeholder="bike ftp"></input>
-    <input id="txtTPace" width="20" placeholder="run t-pace"></input>
+    </select> <br />
+    Output Unit:
     <select id="sltOutputUnit">
       <option value="1">Watts</option>
       <option value="2">Min/Mile</option>
@@ -148,12 +166,11 @@
       <option value="5">Km/h</option>
       <option value="0">IF</option>
     </select>
-    <input id="btnLoadWorkout" type="button" value="Load Workout" class="btn"/>
     <br/>
     <textarea id="workout" style="height: auto; width: 100%;">
     </textarea>
+    <input id="btnLoadWorkout" type="button" value="Load Workout" class="btn"/>
   </form>
-  <a id="workout_link" >Printer Friendly</a>
   <a id="download_mrc" >Download MRC</a>
   <iframe id="workout_frame" style="height: 100%; width: 100%"/>
   <hr />
