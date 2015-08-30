@@ -437,7 +437,10 @@ class IntensityUnitHelper {
 };
 
 export class Intensity {
-	private value: number;
+	// Sums which can be helpful when combining intensities
+	// Otherwise it might lose a lot of precision
+	private sum1: number;
+	private sum2: number;
 
 	private originalValue: number;
 	private originalUnit: IntensityUnit;
@@ -454,20 +457,22 @@ export class Intensity {
 				value = value / 100;
 			}
 			
-			this.value = ifValue;
+			this.sum1 = ifValue;
+			this.sum2 = 1;
 			this.originalUnit = IntensityUnit.IF;
 			this.originalValue = value;
 		} else {
-			this.value = ifValue;
+			this.sum1 = ifValue;
+			this.sum2 = 1;
 			this.originalUnit = unit;
 			this.originalValue = value;
 		}
 	}
 	
 	getValue() : number {
-		return this.value;
-	}	
-	
+		return this.sum1 / this.sum2;
+	}
+
 	toString() : string {
 		if (this.originalUnit == IntensityUnit.IF) {
 			return MyMath.round10(100*this.originalValue, -1) + "%";
@@ -483,18 +488,18 @@ export class Intensity {
 		// do a weighed sum
 		var sum1 = 0;
 		var sum2 = 0;
-		
+
 		for (var i = 0; i < intensities.length; i++) {
-			sum1 += intensities[i].getValue() * weights[i];
-			sum2 += weights[i];
+			sum1 += intensities[i].sum1 * weights[i];
+			sum2 += intensities[i].sum2 * weights[i];
 		}
 		
-		return Intensity.create(sum1/sum2);
+		// TODO: Cleanup Intensity creation
+		var res = new Intensity(sum1/sum2);
+		res.sum1 = sum1;
+		res.sum2 = sum2;
+		return res;
 	}
-	
-	static create(intensity: number) : Intensity {
-		return new Intensity(intensity);
-	}	
 }
 
 interface Interval {
@@ -1581,6 +1586,8 @@ export class WorkoutBuilder {
 	getMRCFileName() : string {
 		var mainInterval = null;
 		var duration = this.intervals.getDuration().getSeconds();
+
+		var intensity_string = "IF" + Math.round(this.intervals.getIntensity().getValue()*100) + " - ";
 	
 		this.intervals.getIntervals().forEach(function(interval) {            
             if (interval.getDuration().getSeconds() > duration / 2) {
@@ -1589,7 +1596,7 @@ export class WorkoutBuilder {
         });
 
 		if (mainInterval != null) {
-			var filename = Formatter.getIntervalTitle(mainInterval) + ".mrc";
+			var filename = intensity_string + Formatter.getIntervalTitle(mainInterval) + ".mrc";
 
 			// Avoid really long filenames since its not very helpful
 			if (filename.length < 50) {
@@ -1615,9 +1622,9 @@ export class WorkoutBuilder {
 		
 		if (zoneMaxTime != 0) {
 			var duration_hr = Math.round(TimeUnitHelper.convertTo(duration, TimeUnit.Seconds, TimeUnit.Hours));
-			return duration_hr + "hour-" + zoneMaxName + ".mrc";
+			return intensity_string + duration_hr + "hour-" + zoneMaxName + ".mrc";
 		} else {
-			return "untitled.mrc";
+			return intensity_string + ".mrc";
 		}
 	}
 };

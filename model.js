@@ -469,18 +469,20 @@ var Intensity = (function () {
             if (value > 10) {
                 value = value / 100;
             }
-            this.value = ifValue;
+            this.sum1 = ifValue;
+            this.sum2 = 1;
             this.originalUnit = 0 /* IF */;
             this.originalValue = value;
         }
         else {
-            this.value = ifValue;
+            this.sum1 = ifValue;
+            this.sum2 = 1;
             this.originalUnit = unit;
             this.originalValue = value;
         }
     }
     Intensity.prototype.getValue = function () {
-        return this.value;
+        return this.sum1 / this.sum2;
     };
     Intensity.prototype.toString = function () {
         if (this.originalUnit == 0 /* IF */) {
@@ -498,13 +500,14 @@ var Intensity = (function () {
         var sum1 = 0;
         var sum2 = 0;
         for (var i = 0; i < intensities.length; i++) {
-            sum1 += intensities[i].getValue() * weights[i];
-            sum2 += weights[i];
+            sum1 += intensities[i].sum1 * weights[i];
+            sum2 += intensities[i].sum2 * weights[i];
         }
-        return Intensity.create(sum1 / sum2);
-    };
-    Intensity.create = function (intensity) {
-        return new Intensity(intensity);
+        // TODO: Cleanup Intensity creation
+        var res = new Intensity(sum1 / sum2);
+        res.sum1 = sum1;
+        res.sum2 = sum2;
+        return res;
     };
     return Intensity;
 })();
@@ -1490,13 +1493,14 @@ var WorkoutBuilder = (function () {
     WorkoutBuilder.prototype.getMRCFileName = function () {
         var mainInterval = null;
         var duration = this.intervals.getDuration().getSeconds();
+        var intensity_string = "IF" + Math.round(this.intervals.getIntensity().getValue() * 100) + " - ";
         this.intervals.getIntervals().forEach(function (interval) {
             if (interval.getDuration().getSeconds() > duration / 2) {
                 mainInterval = interval;
             }
         });
         if (mainInterval != null) {
-            var filename = Formatter.getIntervalTitle(mainInterval) + ".mrc";
+            var filename = intensity_string + Formatter.getIntervalTitle(mainInterval) + ".mrc";
             // Avoid really long filenames since its not very helpful
             if (filename.length < 50) {
                 return filename;
@@ -1517,10 +1521,10 @@ var WorkoutBuilder = (function () {
         }
         if (zoneMaxTime != 0) {
             var duration_hr = Math.round(TimeUnitHelper.convertTo(duration, 1 /* Seconds */, 3 /* Hours */));
-            return duration_hr + "hour-" + zoneMaxName + ".mrc";
+            return intensity_string + duration_hr + "hour-" + zoneMaxName + ".mrc";
         }
         else {
-            return "untitled.mrc";
+            return intensity_string + ".mrc";
         }
     };
     return WorkoutBuilder;
