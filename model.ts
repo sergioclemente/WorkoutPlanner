@@ -247,10 +247,6 @@ class Duration {
 			result += seconds + "sec";
 		}
 		
-		if (result.length == 0) {
-			throw new Error("Result cannot be empty. seconds:" + this.estimatedDurationInSeconds);
-		}
-		
 		return result;
 	}
 	
@@ -603,8 +599,14 @@ class ArrayInterval implements Interval {
 		return Intensity.combine(intensities, weights);
 	}
 	getDuration(): Duration {
+		// If the interval is empty lets bail right away otherwise reducing the array will cause an
+		// exception
+		if (this.intervals.length == 0) {
+			return new Duration(DurationUnit.Seconds, 0, 0, 0);
+		}
+
 		// It will create dummy intervals along the way so that I can use
-		// the reduce abstraction
+		// the reduce abstraction		
 		var res = this.intervals.reduce(function(previousValue, currentValue) {
 			var duration = Duration.combine(previousValue.getDuration(), currentValue.getDuration());
 			
@@ -719,6 +721,14 @@ class IntervalParser {
 	}
 	static throwParserError(column : number, msg : string) : void {
 		throw Error("Error while parsing input on column " + column + "-  Error: " + msg);
+	}
+	static shouldParse(input: string) {
+		if (input.length > 0) {
+			var lastChar = input[input.length-1];
+			return lastChar == "," || lastChar == ")" || lastChar == "]" || lastChar == "\n";
+		} else {
+			return false;
+		}
 	}
 	static parse(factory: ObjectFactory, input: string) : ArrayInterval{
 		var result = new ArrayInterval("Workout", []);
@@ -1027,7 +1037,7 @@ class ZonesVisitor extends BaseVisitor {
 				result.push({
 					name: zone.name,
 					range: zone.range,
-					duration: new Duration(DurationUnit.Seconds, zone.value, 0, 0)	
+					duration: new Duration(DurationUnit.Seconds, zone.value, 0, 0)
 				});
 			}
 		}
@@ -1250,6 +1260,10 @@ class Formatter implements Visitor {
 	// SimpleInterval
 	visitSimpleInterval(interval: SimpleInterval) : any {
 		this.result += interval.getIntensity().toString() + " for " + interval.getDuration().toString(); 
+		var title = interval.getTitle();
+		if (title.length > 0) {
+			this.result += " (" + title + ")";
+		}
 	}
 }
 

@@ -17,8 +17,17 @@
   var ftpPersisted = new PersistedItem("ftp");
   var tPacePersisted = new PersistedItem("tpace");
 
-  function _loadWorkout() {
-    var workoutText = _getValue("workout");
+  function _onKeyChanged(e) {
+    var ch = String.fromCharCode(e.keyCode);
+    if (!IntervalParser.shouldParse(ch)) {
+        return;
+    }
+    _loadWorkout(ch);
+  }
+
+  function _loadWorkout(ch) {
+    var workoutText = _getValue("workout") + ch;
+
     var sportType = parseInt(_getValue("sltSportType"));
 
     // TODO: make it work with other units
@@ -50,14 +59,23 @@
   }
   
   function _extractNumber(numberString, decimalMultiplier, strSeparator, strSuffix) {
-    debugger;
     var indexSuffix = numberString.indexOf(strSuffix);
     var indexSeparator = numberString.indexOf(strSeparator);
-    if (indexSuffix < 0 || indexSeparator < 0) {
-      return null;
+    // Lets be forgiving if the user didn't specify the separators
+    // 6:00 => 6:00 min/mi
+    // 6 min/mi => 6:00 min/mi
+    // 6 => 6:00 min/mi
+    if (indexSuffix < 0) {
+      indexSuffix = numberString.length;
+    }
+    if (indexSeparator < 0) {
+      indexSeparator = numberString.length;
     }
     var integerPart = parseInt(numberString.substr(0, indexSeparator));
-    var fractionPart = parseInt(numberString.substr(indexSeparator+1, indexSuffix - indexSeparator - 1));
+    var fractionPart = parseInt(numberString.substr(indexSeparator+1, indexSuffix - indexSeparator));
+    if (isNaN(fractionPart)) {
+      fractionPart = 0;
+    }
     return integerPart + fractionPart/decimalMultiplier;
   }
 
@@ -95,7 +113,7 @@
       "click"
     );
     var loadWorkoutClicksSubscription = loadWorkoutClicks.forEach(
-      _loadWorkout
+      _loadWorkout("")
     );
 
     // Selection changed
@@ -104,6 +122,14 @@
       "change");
     var sltSportTypeOnChangeSubscription = sltSportTypeOnChange.forEach(
       _initOutputUnit
+    );
+
+    // Key Pressed
+    var txtAreaOnKey = Rx.Observable.fromEvent(
+      document.getElementById("workout"),
+      "keypress");
+    var txtAreaOnKeySubscription = txtAreaOnKey.forEach(
+      _onKeyChanged
     );
 
     _initOutputUnit();
