@@ -1,0 +1,24 @@
+{
+  "name": "WorkoutPlanner",
+  "version": "0.1.1",
+  "description": "A simple generator of workouts for bike/run",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+  },
+  "engines": {
+    "node": "0.10.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sergioclemente/WorkoutPlanner.git"
+  },
+  "keywords": [
+    "node",
+    "heroku",
+    "express"
+  ],
+  "license": "Gibhub"
+}

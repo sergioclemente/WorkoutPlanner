@@ -25,6 +25,10 @@
     _loadWorkout(ch);
   }
 
+  function _onButtonPressed(e) {
+    _loadWorkout("");
+  }
+
   function _loadWorkout(ch) {
     var workoutText = _getValue("workout") + ch;
 
@@ -113,7 +117,7 @@
       "click"
     );
     var loadWorkoutClicksSubscription = loadWorkoutClicks.forEach(
-      _loadWorkout("")
+      _onButtonPressed
     );
 
     // Selection changed
