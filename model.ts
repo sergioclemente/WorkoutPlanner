@@ -1,6 +1,6 @@
 /// <reference path="MyMath.ts" />
 
-class MyMath {
+export class MyMath {
     /**
      * Decimal adjustment of a number.
      *
@@ -46,7 +46,7 @@ export enum SportType {
 	Run=2
 }
 
-enum DistanceUnit {
+export enum DistanceUnit {
 	Unknown,
 	Miles,
 	Kilometers,
@@ -54,7 +54,7 @@ enum DistanceUnit {
 	Yards
 }
 
-class DistanceUnitHelper {
+export class DistanceUnitHelper {
 	static convertTo(value: number, unitFrom: DistanceUnit, unitTo: DistanceUnit) : number {
 		// convert first to meters
 		var distanceInMeters = 0;
@@ -85,14 +85,14 @@ class DistanceUnitHelper {
 	}
 }
 
-enum TimeUnit {
+export enum TimeUnit {
 	Unknown,
 	Seconds,
 	Minutes,
 	Hours
 }
 
-class TimeUnitHelper {
+export class TimeUnitHelper {
 	static convertTo(value: number, unitFrom: TimeUnit, unitTo: TimeUnit) : number {
 		var timeInSeconds = 0;
 		if (unitFrom == TimeUnit.Seconds) {
@@ -137,7 +137,7 @@ function getStringFromDurationUnit(unit: DurationUnit) {
 	}
 }
 
-class DurationUnitHelper {
+export class DurationUnitHelper {
 	public static isTime(durationUnit: DurationUnit) : boolean {
 		return (durationUnit == DurationUnit.Hours
 			|| durationUnit == DurationUnit.Minutes
@@ -183,7 +183,7 @@ class DurationUnitHelper {
 	}	
 }
 
-class Duration {
+export class Duration {
 	private value: number;
 	private unit: DurationUnit;
 	private estimatedDurationInSeconds: number;
@@ -370,7 +370,7 @@ function isIntensityUnit(value: string) {
 	return getIntensityUnitFromString(value) != IntensityUnit.Unknown;
 }
 
-enum DurationUnit {
+export enum DurationUnit {
 	Unknown=-1,
 	Seconds=0,
 	Minutes=1,
@@ -390,7 +390,7 @@ export enum IntensityUnit {
 	MinKm=5
 }
 
-class IntensityUnitHelper {
+export class IntensityUnitHelper {
 	static convertTo(value: number, unitFrom: IntensityUnit, unitTo: IntensityUnit) : number {
 		var invalidUnitsForConversion = [
 			IntensityUnit.Unknown,
@@ -504,7 +504,7 @@ interface Interval {
 	getDuration() : Duration;
 }
 
-class BaseInterval implements Interval {
+export class BaseInterval implements Interval {
 	private title: string;
 	
 	constructor(title: string) {
@@ -523,7 +523,7 @@ class BaseInterval implements Interval {
 	}
 }
 
-class SimpleInterval extends BaseInterval {
+export class SimpleInterval extends BaseInterval {
 	private intensity: Intensity;
 	private duration:Duration;
 
@@ -540,7 +540,7 @@ class SimpleInterval extends BaseInterval {
 	}
 }
 
-class BuildInterval extends BaseInterval {
+export class BuildInterval extends BaseInterval {
 	private startIntensity : Intensity;
 	private endIntensity: Intensity;
 	private duration:Duration;
@@ -569,7 +569,7 @@ class BuildInterval extends BaseInterval {
 	}
 }
 
-class Point {
+export class Point {
 	x : Duration;
 	y : Intensity;
 	
@@ -579,7 +579,7 @@ class Point {
 	}
 }
 
-class ArrayInterval implements Interval {
+export class ArrayInterval implements Interval {
 	private title: string;
 	private intervals: Interval[];
 	
@@ -657,7 +657,7 @@ class ArrayInterval implements Interval {
 	}
 }
 
-class RepeatInterval extends ArrayInterval {
+export class RepeatInterval extends ArrayInterval {
 	private repeatCount: number;
 
 	constructor(title: string, mainInterval: Interval, restInterval: Interval, repeatCount: number) {
@@ -683,7 +683,7 @@ class RepeatInterval extends ArrayInterval {
 	}
 }
 
-class IntervalParser {
+export class IntervalParser {
 	static getCharVal(ch: string) : number {
 		if (ch.length == 1) {
 			return ch.charCodeAt(0);
@@ -870,7 +870,7 @@ class IntervalParser {
 	}
 }
 
-class VisitorHelper {
+export class VisitorHelper {
 	static visit(visitor: Visitor, interval:Interval) : any {
 		if (interval instanceof SimpleInterval) {
 	      return visitor.visitSimpleInterval(<SimpleInterval>interval);
@@ -886,14 +886,14 @@ class VisitorHelper {
 	}
 }
 
-interface Visitor {
+export interface Visitor {
 	visitSimpleInterval(interval: SimpleInterval) : void;
 	visitBuildInterval(interval: BuildInterval) : void;
 	visitRepeatInterval(interval: RepeatInterval) : void;
 	visitArrayInterval(interval: ArrayInterval) : void;
 }
 
-class BaseVisitor implements Visitor {
+export class BaseVisitor implements Visitor {
 
 	visitSimpleInterval(interval: SimpleInterval) : void {
 		// not aware that typescript supports abstract methods
@@ -918,7 +918,7 @@ class BaseVisitor implements Visitor {
 
 // this class has two responsabilities but let's clean this later
 // TODO: not working yet!
-class IntensityIterator extends BaseVisitor {
+export class IntensityIterator extends BaseVisitor {
 	// visitor part
 	private ifPairs = [];
 	private currentVisitorTime : number = 0;
@@ -980,7 +980,7 @@ class IntensityIterator extends BaseVisitor {
 	}
 }
 
-class ZonesVisitor extends BaseVisitor {
+export class ZonesVisitor extends BaseVisitor {
 	private zones = {
 		1 : {name:"Z1", range:"(0,55%]", value:0},
 		2 : {name:"Z2", range:"(55%;75%]", value:0},
@@ -1045,7 +1045,7 @@ class ZonesVisitor extends BaseVisitor {
 	}
 }
 
-class IntensitiesVisitor extends BaseVisitor {
+export class IntensitiesVisitor extends BaseVisitor {
 	private intensities = {};
 
 	visitSimpleInterval(interval: SimpleInterval) : void {
@@ -1072,7 +1072,7 @@ class IntensitiesVisitor extends BaseVisitor {
 // IF = NP / FTP
 // TSS = [(s x NP x NP/FTP) / (FTP x 3600)] x 100
 // TSS = [s x (NP / FTP) ^ 2] / 36
-class TSSVisitor extends BaseVisitor {
+export class TSSVisitor extends BaseVisitor {
 	private tss : number = 0;
 	
 	visitSimpleInterval(interval: SimpleInterval) : void {
@@ -1099,7 +1099,7 @@ class TSSVisitor extends BaseVisitor {
 	}
 }
 
-class DataPointVisitor extends BaseVisitor {
+export class DataPointVisitor extends BaseVisitor {
 	private x : Duration = null;
 	data : Point[] = [];
 
@@ -1127,7 +1127,7 @@ class DataPointVisitor extends BaseVisitor {
 	}
 }
 
-class MRCCourseDataVisitor extends BaseVisitor {
+export class MRCCourseDataVisitor extends BaseVisitor {
 	private courseData : string = "";
 	private time : number = 0;
 	private idx : number = 0;
@@ -1167,7 +1167,7 @@ class MRCCourseDataVisitor extends BaseVisitor {
 	}
 }
 
-class Formatter implements Visitor {
+export class Formatter implements Visitor {
 	result : string = "";
 	
 	static formatNumber(value: number, decimalMultiplier : number, separator : string, unit : string) {
@@ -1267,7 +1267,7 @@ class Formatter implements Visitor {
 	}
 }
 
-enum RunningPaceUnit {
+export enum RunningPaceUnit {
 	Unknown,
 	MinMi,
 	Mph,
@@ -1275,7 +1275,7 @@ enum RunningPaceUnit {
 	KmHr,
 }
 
-class RunningPaceHelper {
+export class RunningPaceHelper {
 	static convertToMph(value: number, unit: RunningPaceUnit) {
 		if (unit == RunningPaceUnit.Mph) {
 			return value;
@@ -1325,7 +1325,7 @@ export class UserProfile {
 }
 
 // TODO: rename this to factory
-class ObjectFactory {
+export class ObjectFactory {
 	private userProfile: UserProfile;
 	private sportType: SportType;
 	
@@ -1397,7 +1397,7 @@ class ObjectFactory {
 	}
 }
 
-class StopWatch {
+export class StopWatch {
 	startTime: number;
 	stoppedTime: number;
 	
@@ -1433,7 +1433,7 @@ class StopWatch {
 	}
 }
 
-class ArrayIterator {
+export class ArrayIterator {
 	array: any[];
 	index: number;
 
@@ -1471,7 +1471,7 @@ class ArrayIterator {
 	}	
 }
 
-class PersistedItem {
+export class PersistedItem {
 	id : string;
 	constructor(id : string) {
 		this.id = id;
