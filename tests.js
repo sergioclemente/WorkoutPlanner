@@ -43,4 +43,4 @@ expect_eq_nbr(56.3, int1hri75.getTSS());
 var up = new m.UserProfile(310, 6);
 var of = new m.ObjectFactory(up, m.SportType.Bike);
 var int_par = m.IntervalParser.parse(of, "(1hr, 75)");
-expect_eq_nbr(57.3, int_par.getTSS());
+expect_eq_nbr(56.3, int_par.getTSS());
