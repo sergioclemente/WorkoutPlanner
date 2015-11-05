@@ -6,20 +6,20 @@ function assert(condition, message) {
     }
 }
 
-function expect_eq_str(a : string, b : string) {
-	if (a !== b) {
-		console.log("a=", JSON.stringify(a));
-		console.log("b=", JSON.stringify(b));
-		assert(false, "expect_eq failed");
+function expect_eq_str(expected : string, actual : string) {
+	if (expected !== actual) {
+		console.log("expected=", JSON.stringify(expected));
+		console.log("actual=", JSON.stringify(actual));
+		assert(false, "expect_eq_str failed");
 	}
 }
 
-function expect_eq_nbr(a : number, b : number) {
-	var delta = Math.abs(a-b);
+function expect_eq_nbr(expected : number, actual : number) {
+	var delta = Math.abs(expected - actual);
 	if (delta > 0.01) {
-		console.log("a=", JSON.stringify(a));
-		console.log("b=", JSON.stringify(b));
-		assert(false, "expect_eq_dbl failed");
+		console.log("expected=", JSON.stringify(expected));
+		console.log("actual=", JSON.stringify(actual));
+		assert(false, "expect_eq_nbr failed");
 	}
 }
 
@@ -50,9 +50,19 @@ expect_eq_nbr(0.85, res);
 var int1hri75 = new m.ArrayInterval("", [createSimpleInterval(0.75, 3600)]);
 expect_eq_nbr(56.3, int1hri75.getTSS());
 
+var int1hri85 = new m.ArrayInterval("", [createSimpleInterval(0.85, 3600)]);
+expect_eq_nbr(72.2, int1hri85.getTSS());
+
+// IntervalParser
+expect_eq_nbr(123, m.IntervalParser.parseDouble("123", 0).value);
+expect_eq_nbr(123.456, m.IntervalParser.parseDouble("123.456", 0).value);
+
 // Parser tests
 var up = new m.UserProfile(310, 6);
 var of = new m.ObjectFactory(up, m.SportType.Bike);
 
-var int_par = m.IntervalParser.parse(of, "(1hr, 75)");
-expect_eq_nbr(56.3, int_par.getTSS());
+var int_par_1hr_75 = m.IntervalParser.parse(of, "(1hr, 75)");
+expect_eq_nbr(56.3, int_par_1hr_75.getTSS());
+
+var int_par_2hr_75_85 = m.IntervalParser.parse(of, "(1hr, 75), (1hr, 85)");
+expect_eq_nbr(56.3 + 72.2, int_par_2hr_75_85.getTSS());

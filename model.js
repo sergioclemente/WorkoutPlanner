@@ -695,12 +695,27 @@ var IntervalParser = (function () {
             IntervalParser.getCharVal(ch) >= IntervalParser.getCharVal("a") &&
             IntervalParser.getCharVal(ch) <= IntervalParser.getCharVal("z");
     };
-    IntervalParser.parseInt = function (input, i) {
+    IntervalParser.parseDouble = function (input, i) {
         var value = 0;
         for (; i < input.length; i++) {
             var ch = input[i];
             if (IntervalParser.isDigit(ch)) {
                 value = value * 10 + IntervalParser.getCharVal(ch) - IntervalParser.getCharVal("0");
+            }
+            else if (ch == ".") {
+                i++;
+                var base = 10;
+                for (; i < input.length; i++) {
+                    var ch = input[i];
+                    if (IntervalParser.isDigit(ch)) {
+                        value = value + (IntervalParser.getCharVal(ch) - IntervalParser.getCharVal("0")) / base;
+                        base = base * 10;
+                    }
+                    else {
+                        break;
+                    }
+                }
+                break;
             }
             else {
                 break;
@@ -806,7 +821,7 @@ var IntervalParser = (function () {
                     }
                     else {
                         if (IntervalParser.isDigit(ch) && !isInTitle) {
-                            var res = IntervalParser.parseInt(input, i);
+                            var res = IntervalParser.parseDouble(input, i);
                             i = res.i;
                             nums[numIndex] = res.value;
                             // look for a unit
@@ -843,7 +858,7 @@ var IntervalParser = (function () {
                 stack.pop();
             }
             else if (IntervalParser.isDigit(ch)) {
-                var res = IntervalParser.parseInt(input, i);
+                var res = IntervalParser.parseDouble(input, i);
                 i = res.i;
                 var ri = new RepeatInterval("", null, null, res.value);
                 stack[stack.length - 1].getIntervals().push(ri);
@@ -908,63 +923,24 @@ var BaseVisitor = (function () {
     return BaseVisitor;
 })();
 exports.BaseVisitor = BaseVisitor;
-// this class has two responsabilities but let's clean this later
-// TODO: not working yet!
-var IntensityIterator = (function (_super) {
-    __extends(IntensityIterator, _super);
-    function IntensityIterator(stepInSeconds) {
-        _super.call(this);
-        // visitor part
-        this.ifPairs = [];
-        this.currentVisitorTime = 0;
-        // iterator part
-        this.stepInSeconds = 1;
-        this.currentIteratorTime = 0;
-        this.currentIdx = 0;
-        this.stepInSeconds = stepInSeconds;
+var DateHelper = (function () {
+    function DateHelper() {
     }
-    // Visitor part
-    IntensityIterator.prototype.processIntensityForGivenDuration = function (ifValue, durationInSeconds) {
-        this.ifPairs.push({
-            time: this.currentVisitorTime,
-            value: ifValue
-        });
-        this.currentVisitorTime += durationInSeconds;
+    DateHelper.getDayOfWeek = function () {
+        var d = new Date();
+        var weekday = new Array(7);
+        weekday[0] = "Sunday";
+        weekday[1] = "Monday";
+        weekday[2] = "Tuesday";
+        weekday[3] = "Wednesday";
+        weekday[4] = "Thursday";
+        weekday[5] = "Friday";
+        weekday[6] = "Saturday";
+        return weekday[d.getDay()];
     };
-    IntensityIterator.prototype.visitSimpleInterval = function (interval) {
-        var ifValue = interval.getIntensity().getValue();
-        var durationInSeconds = interval.getDuration().getSeconds();
-        this.processIntensityForGivenDuration(ifValue, durationInSeconds);
-    };
-    IntensityIterator.prototype.visitBuildInterval = function (interval) {
-        var startIntensity = interval.getStartIntensity().getValue();
-        var endIntensity = interval.getEndIntensity().getValue();
-        var durationInSeconds = interval.getDuration().getSeconds();
-        // Go on 1 second increments 
-        var intensity = startIntensity;
-        var intensityIncrement = (endIntensity - startIntensity) / durationInSeconds;
-        for (var t = 0; t < durationInSeconds; t++) {
-            this.processIntensityForGivenDuration(intensity, 1);
-            intensity += intensityIncrement;
-        }
-    };
-    IntensityIterator.prototype.hasNext = function () {
-        this.currentIteratorTime++;
-        if (this.currentIdx < this.ifPairs.length &&
-            this.currentIteratorTime >= this.ifPairs[this.currentIdx].time) {
-            this.currentIdx++;
-        }
-        return this.currentIteratorTime < this.currentVisitorTime;
-    };
-    IntensityIterator.prototype.getCurrentIF = function () {
-        return this.ifPairs[this.currentIdx].value;
-    };
-    IntensityIterator.prototype.getCurrentTime = function () {
-        return this.ifPairs[this.currentIdx].time;
-    };
-    return IntensityIterator;
-})(BaseVisitor);
-exports.IntensityIterator = IntensityIterator;
+    return DateHelper;
+})();
+exports.DateHelper = DateHelper;
 var ZonesVisitor = (function (_super) {
     __extends(ZonesVisitor, _super);
     function ZonesVisitor() {
@@ -1073,7 +1049,7 @@ var TSSVisitor = (function (_super) {
     TSSVisitor.prototype.visitSimpleInterval = function (interval) {
         var duration = interval.getDuration().getSeconds();
         var intensity = interval.getIntensity().getValue();
-        this.tss += duration * (intensity * intensity) / 36;
+        this.tss += duration * (intensity * intensity);
     };
     TSSVisitor.prototype.visitBuildInterval = function (interval) {
         var startIntensity = interval.getStartIntensity().getValue();
@@ -1083,12 +1059,12 @@ var TSSVisitor = (function (_super) {
         var intensity = startIntensity;
         var intensityIncrement = (endIntensity - startIntensity) / duration;
         for (var t = 0; t < duration; t++) {
-            this.tss += 1 * (intensity * intensity) / 36;
+            this.tss += 1 * (intensity * intensity);
             intensity += intensityIncrement;
         }
     };
     TSSVisitor.prototype.getTSS = function () {
-        return this.tss;
+        return this.tss / 36;
     };
     return TSSVisitor;
 })(BaseVisitor);
@@ -1163,6 +1139,50 @@ var MRCCourseDataVisitor = (function (_super) {
     return MRCCourseDataVisitor;
 })(BaseVisitor);
 exports.MRCCourseDataVisitor = MRCCourseDataVisitor;
+var MRCFileNameHelper = (function () {
+    function MRCFileNameHelper(intervals) {
+        this.intervals = intervals;
+    }
+    MRCFileNameHelper.prototype.getFileName = function () {
+        var mainInterval = null;
+        var duration = this.intervals.getDuration().getSeconds();
+        var intensity_string = DateHelper.getDayOfWeek() + " - IF" + Math.round(this.intervals.getIntensity().getValue() * 100) + " - ";
+        this.intervals.getIntervals().forEach(function (interval) {
+            if (interval.getDuration().getSeconds() > duration / 2) {
+                mainInterval = interval;
+            }
+        });
+        if (mainInterval != null) {
+            var filename = intensity_string + Formatter.getIntervalTitle(mainInterval) + ".mrc";
+            // Avoid really long filenames since its not very helpful
+            if (filename.length < 50) {
+                return filename;
+            }
+        }
+        // TODO: do something here if the main set its too big. Some ideas:
+        // 1) Long Ride
+        var timeInZones = this.intervals.getTimeInZones();
+        var zoneMaxTime = 0;
+        var zoneMaxName = -1;
+        for (var id in timeInZones) {
+            var zone = timeInZones[id];
+            var zoneDuration = zone.duration.estimatedDurationInSeconds;
+            if (zoneDuration > zoneMaxTime) {
+                zoneMaxTime = zoneDuration;
+                zoneMaxName = zone.name;
+            }
+        }
+        if (zoneMaxTime != 0) {
+            var duration_hr = Math.round(TimeUnitHelper.convertTo(duration, TimeUnit.Seconds, TimeUnit.Hours));
+            return intensity_string + duration_hr + "hour-" + zoneMaxName + ".mrc";
+        }
+        else {
+            return intensity_string + ".mrc";
+        }
+    };
+    return MRCFileNameHelper;
+})();
+exports.MRCFileNameHelper = MRCFileNameHelper;
 var Formatter = (function () {
     function Formatter() {
         this.result = "";
@@ -1313,7 +1333,6 @@ var UserProfile = (function () {
     return UserProfile;
 })();
 exports.UserProfile = UserProfile;
-// TODO: rename this to factory
 var ObjectFactory = (function () {
     function ObjectFactory(userProfile, sportType) {
         this.userProfile = userProfile;
@@ -1553,41 +1572,8 @@ var WorkoutBuilder = (function () {
         return result;
     };
     WorkoutBuilder.prototype.getMRCFileName = function () {
-        var mainInterval = null;
-        var duration = this.intervals.getDuration().getSeconds();
-        var intensity_string = "IF" + Math.round(this.intervals.getIntensity().getValue() * 100) + " - ";
-        this.intervals.getIntervals().forEach(function (interval) {
-            if (interval.getDuration().getSeconds() > duration / 2) {
-                mainInterval = interval;
-            }
-        });
-        if (mainInterval != null) {
-            var filename = intensity_string + Formatter.getIntervalTitle(mainInterval) + ".mrc";
-            // Avoid really long filenames since its not very helpful
-            if (filename.length < 50) {
-                return filename;
-            }
-        }
-        // TODO: do something here if the main set its too big. Some ideas:
-        // 1) Long Ride
-        var timeInZones = this.intervals.getTimeInZones();
-        var zoneMaxTime = 0;
-        var zoneMaxName = -1;
-        for (var id in timeInZones) {
-            var zone = timeInZones[id];
-            var zoneDuration = zone.duration.estimatedDurationInSeconds;
-            if (zoneDuration > zoneMaxTime) {
-                zoneMaxTime = zoneDuration;
-                zoneMaxName = zone.name;
-            }
-        }
-        if (zoneMaxTime != 0) {
-            var duration_hr = Math.round(TimeUnitHelper.convertTo(duration, TimeUnit.Seconds, TimeUnit.Hours));
-            return intensity_string + duration_hr + "hour-" + zoneMaxName + ".mrc";
-        }
-        else {
-            return intensity_string + ".mrc";
-        }
+        var mrcFileNameHelper = new MRCFileNameHelper(this.intervals);
+        return mrcFileNameHelper.getFileName();
     };
     return WorkoutBuilder;
 })();

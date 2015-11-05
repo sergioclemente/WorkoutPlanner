@@ -702,12 +702,25 @@ export class IntervalParser {
 			IntervalParser.getCharVal(ch) <= IntervalParser.getCharVal("z");
 	}
 
-	static parseInt(input: string, i: number) {
+	static parseDouble(input: string, i: number) {
 		var value = 0;
 		for (; i < input.length; i++) {
 			var ch = input[i];
 			if (IntervalParser.isDigit(ch)) {
 				value = value * 10 + IntervalParser.getCharVal(ch) - IntervalParser.getCharVal("0"); 
+			} else if (ch == ".") {
+				i++;
+				var base = 10;
+				for (; i < input.length; i++) {
+					var ch = input[i];
+					if (IntervalParser.isDigit(ch)) {
+						value = value + (IntervalParser.getCharVal(ch) - IntervalParser.getCharVal("0")) / base; 
+						base = base * 10;
+					} else {
+						break;
+					}
+				}
+				break;
 			} else {
 				break;
 			}
@@ -815,7 +828,7 @@ export class IntervalParser {
 						isInTitle = false;
 					} else {
 						if (IntervalParser.isDigit(ch) && !isInTitle) {
-							var res = IntervalParser.parseInt(input, i);
+							var res = IntervalParser.parseDouble(input, i);
 							i = res.i;
 							nums[numIndex] = res.value;
 							
@@ -851,7 +864,7 @@ export class IntervalParser {
 			} else if (ch == "]") {
 				stack.pop();
 			} else if (IntervalParser.isDigit(ch)) {
-				var res = IntervalParser.parseInt(input, i);
+				var res = IntervalParser.parseDouble(input, i);
 				i = res.i;
 				var ri = new RepeatInterval("", null, null, res.value);
 				stack[stack.length-1].getIntervals().push(ri);
@@ -916,67 +929,19 @@ export class BaseVisitor implements Visitor {
 	}
 }
 
-// this class has two responsabilities but let's clean this later
-// TODO: not working yet!
-export class IntensityIterator extends BaseVisitor {
-	// visitor part
-	private ifPairs = [];
-	private currentVisitorTime : number = 0;
-	
-	// iterator part
-	private stepInSeconds = 1;
-	private currentIteratorTime = 0;
-	private currentIdx = 0;
+export class DateHelper {
+	public static getDayOfWeek() : string {
+		var d = new Date();
+		var weekday = new Array(7);
+		weekday[0]=  "Sunday";
+		weekday[1] = "Monday";
+		weekday[2] = "Tuesday";
+		weekday[3] = "Wednesday";
+		weekday[4] = "Thursday";
+		weekday[5] = "Friday";
+		weekday[6] = "Saturday";
 
-	constructor(stepInSeconds: number) {
-		super();
-		this.stepInSeconds = stepInSeconds; 
-	}
-
-	// Visitor part
-	processIntensityForGivenDuration(ifValue: number, durationInSeconds: number) {
-		this.ifPairs.push({
-			time: this.currentVisitorTime,
-			value: ifValue
-		});
-		this.currentVisitorTime += durationInSeconds;
-	}
-
-	visitSimpleInterval(interval: SimpleInterval) : void {
-		var ifValue = interval.getIntensity().getValue();
-		var durationInSeconds = interval.getDuration().getSeconds();
-		this.processIntensityForGivenDuration(ifValue, durationInSeconds);
-	}
-
-	visitBuildInterval(interval: BuildInterval) : void {
-		var startIntensity = interval.getStartIntensity().getValue();
-		var endIntensity = interval.getEndIntensity().getValue();
-		var durationInSeconds = interval.getDuration().getSeconds();
-
-		// Go on 1 second increments 
-		var intensity = startIntensity;
-		var intensityIncrement = (endIntensity - startIntensity) / durationInSeconds;
-
-		for (var t = 0; t < durationInSeconds; t++) {
-			this.processIntensityForGivenDuration(intensity, 1);
-			intensity += intensityIncrement;
-		}
-	}
-	
-	hasNext() : boolean {
-		this.currentIteratorTime++;
-		if (this.currentIdx < this.ifPairs.length &&
-			this.currentIteratorTime >= this.ifPairs[this.currentIdx].time) {
-				this.currentIdx++;
-		}
-		return this.currentIteratorTime < this.currentVisitorTime;
-	}
-	
-	getCurrentIF() : number {
-		return this.ifPairs[this.currentIdx].value;
-	}
-	getCurrentTime() : number {
-		return this.ifPairs[this.currentIdx].time;
+		return weekday[d.getDay()];
 	}
 }
 
@@ -1078,7 +1043,7 @@ export class TSSVisitor extends BaseVisitor {
 	visitSimpleInterval(interval: SimpleInterval) : void {
 		var duration = interval.getDuration().getSeconds();
 		var intensity = interval.getIntensity().getValue();
-		this.tss += duration * (intensity * intensity) / 36;		
+		this.tss += duration * (intensity * intensity);		
 	}
 	visitBuildInterval(interval: BuildInterval) : void {
 		var startIntensity = interval.getStartIntensity().getValue();
@@ -1089,13 +1054,13 @@ export class TSSVisitor extends BaseVisitor {
 		var intensity = startIntensity;
 		var intensityIncrement = (endIntensity - startIntensity) / duration;
 		for (var t = 0; t < duration; t++) {
-			this.tss += 1 * (intensity * intensity) / 36;
+			this.tss += 1 * (intensity * intensity);
 			intensity += intensityIncrement;
 		}
 	}
 	
 	getTSS(): number {
-		return this.tss;	
+		return this.tss / 36;	
 	}
 }
 
@@ -1164,6 +1129,59 @@ export class MRCCourseDataVisitor extends BaseVisitor {
 		this.processCourseData(interval.getStartIntensity(), 0);
 		this.processCourseData(interval.getEndIntensity(), interval.getDuration().getSeconds());
 		this.processTitle(interval);
+	}
+}
+
+export class MRCFileNameHelper {
+	private intervals: ArrayInterval;
+
+	constructor(intervals: ArrayInterval) {
+		this.intervals = intervals;
+	}
+
+	getFileName() : string {
+		var mainInterval = null;
+		var duration = this.intervals.getDuration().getSeconds();
+
+		var intensity_string = DateHelper.getDayOfWeek() + " - IF" + Math.round(this.intervals.getIntensity().getValue()*100) + " - ";
+	
+		this.intervals.getIntervals().forEach(function(interval) {            
+            if (interval.getDuration().getSeconds() > duration / 2) {
+                mainInterval = interval;
+            }
+        });
+
+		if (mainInterval != null) {
+			var filename = intensity_string + Formatter.getIntervalTitle(mainInterval) + ".mrc";
+
+			// Avoid really long filenames since its not very helpful
+			if (filename.length < 50) {
+				return filename;
+			}
+		}
+		
+		// TODO: do something here if the main set its too big. Some ideas:
+		// 1) Long Ride
+		
+		var timeInZones = this.intervals.getTimeInZones();
+
+		var zoneMaxTime = 0;
+		var zoneMaxName = -1;
+		for (var id in timeInZones) {
+			var zone = timeInZones[id];
+			var zoneDuration = zone.duration.estimatedDurationInSeconds;
+			if (zoneDuration > zoneMaxTime) {
+				zoneMaxTime = zoneDuration;
+				zoneMaxName = zone.name;
+			}
+		}
+		
+		if (zoneMaxTime != 0) {
+			var duration_hr = Math.round(TimeUnitHelper.convertTo(duration, TimeUnit.Seconds, TimeUnit.Hours));
+			return intensity_string + duration_hr + "hour-" + zoneMaxName + ".mrc";
+		} else {
+			return intensity_string + ".mrc";
+		}
 	}
 }
 
@@ -1324,7 +1342,6 @@ export class UserProfile {
 	}
 }
 
-// TODO: rename this to factory
 export class ObjectFactory {
 	private userProfile: UserProfile;
 	private sportType: SportType;
@@ -1598,48 +1615,8 @@ export class WorkoutBuilder {
 	}
 
 	getMRCFileName() : string {
-		var mainInterval = null;
-		var duration = this.intervals.getDuration().getSeconds();
-
-		var intensity_string = "IF" + Math.round(this.intervals.getIntensity().getValue()*100) + " - ";
-	
-		this.intervals.getIntervals().forEach(function(interval) {            
-            if (interval.getDuration().getSeconds() > duration / 2) {
-                mainInterval = interval;
-            }
-        });
-
-		if (mainInterval != null) {
-			var filename = intensity_string + Formatter.getIntervalTitle(mainInterval) + ".mrc";
-
-			// Avoid really long filenames since its not very helpful
-			if (filename.length < 50) {
-				return filename;
-			}
-		}
-		
-		// TODO: do something here if the main set its too big. Some ideas:
-		// 1) Long Ride
-		
-		var timeInZones = this.intervals.getTimeInZones();
-
-		var zoneMaxTime = 0;
-		var zoneMaxName = -1;
-		for (var id in timeInZones) {
-			var zone = timeInZones[id];
-			var zoneDuration = zone.duration.estimatedDurationInSeconds;
-			if (zoneDuration > zoneMaxTime) {
-				zoneMaxTime = zoneDuration;
-				zoneMaxName = zone.name;
-			}
-		}
-		
-		if (zoneMaxTime != 0) {
-			var duration_hr = Math.round(TimeUnitHelper.convertTo(duration, TimeUnit.Seconds, TimeUnit.Hours));
-			return intensity_string + duration_hr + "hour-" + zoneMaxName + ".mrc";
-		} else {
-			return intensity_string + ".mrc";
-		}
+		var mrcFileNameHelper = new MRCFileNameHelper(this.intervals);
+		return mrcFileNameHelper.getFileName();
 	}
 };
 
