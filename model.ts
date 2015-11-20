@@ -1327,18 +1327,13 @@ export class UserProfile {
 	}
 	
 	getPaceMinMi(intensity: Intensity) {
-		// Getting the pace from IF is not that straightforward. The way I did was
-		// plotting some data in excel to get the relation between the running
-		// zones and correlation with pace. For example:
-		// IF 55% = 129% of T Pace
-		// IF 100% = 100% of T Pace
-		// y = ax + b
-		// a = DeltaY/DeltaX = -0.64
-		// b = y - ax = 1 + 0.64*1 = 1.64
-
-		// y = -0.64 * IF + 1.64
-		 
-		return this.getRunningTPaceMinMi() * (-0.64 * intensity.getValue() + 1.64);
+		var pace_mph = IntensityUnitHelper.convertTo(
+			this.getRunningTPaceMinMi(),
+			IntensityUnit.MinMi,
+			IntensityUnit.Mph) * intensity.getValue();
+		return IntensityUnitHelper.convertTo(pace_mph,
+			IntensityUnit.Mph,
+			IntensityUnit.MinMi);
 	}
 }
 

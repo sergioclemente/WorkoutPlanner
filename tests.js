@@ -51,3 +51,13 @@ var int_par_1hr_75 = m.IntervalParser.parse(of, "(1hr, 75)");
 expect_eq_nbr(56.3, int_par_1hr_75.getTSS());
 var int_par_2hr_75_85 = m.IntervalParser.parse(of, "(1hr, 75), (1hr, 85)");
 expect_eq_nbr(56.3 + 72.2, int_par_2hr_75_85.getTSS());
+// UserProfile 
+var up_6tpace = new m.UserProfile(310, 6);
+expect_eq_nbr(6, up_6tpace.getPaceMinMi(new m.Intensity(1, 1)));
+expect_eq_nbr(7.05, up_6tpace.getPaceMinMi(new m.Intensity(0.85, 0.85)));
+expect_eq_nbr(8, up_6tpace.getPaceMinMi(new m.Intensity(0.75, 0.75)));
+for (var i = 5; i <= 100; i = i + 5) {
+    var garbage = new m.UserProfile(310, 6);
+    var ifv = i / 100.0;
+    console.log("IF:" + i + ": " + garbage.getPaceMinMi(new m.Intensity(ifv, ifv)));
+}
