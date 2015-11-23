@@ -287,14 +287,14 @@ var Duration = (function () {
                 return new Duration(DurationUnit.Seconds, time1 + time2, estTime, estDistance);
             }
             else {
-                // Not supported merging
-                throw new Error("Not supported merging durations of time and distance");
+                // Use the unit of time in case is different
+                return new Duration(DurationUnit.Seconds, estTime, estTime, estDistance);
             }
         }
         else {
             if (DurationUnitHelper.isTime(dur2.getUnit())) {
-                // Not supported merging
-                throw new Error("Not supported merging durations of time and distance");
+                // Use the unit of time in case is different
+                return new Duration(DurationUnit.Seconds, estTime, estTime, estDistance);
             }
             else {
                 var distance1 = DurationUnitHelper.getDistanceMiles(dur1.getUnit(), dur1.getValue());

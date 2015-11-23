@@ -56,8 +56,11 @@ var up_6tpace = new m.UserProfile(310, 6);
 expect_eq_nbr(6, up_6tpace.getPaceMinMi(new m.Intensity(1, 1)));
 expect_eq_nbr(7.05, up_6tpace.getPaceMinMi(new m.Intensity(0.85, 0.85)));
 expect_eq_nbr(8, up_6tpace.getPaceMinMi(new m.Intensity(0.75, 0.75)));
-for (var i = 5; i <= 100; i = i + 5) {
+for (var i = 50; i <= 100; i = i + 5) {
     var garbage = new m.UserProfile(310, 6);
     var ifv = i / 100.0;
     console.log("IF:" + i + ": " + garbage.getPaceMinMi(new m.Intensity(ifv, ifv)));
 }
+var int_par_bug = m.IntervalParser.parse(of, "(1hr, 75), (20mi, 85)");
+expect_eq_nbr(2, int_par_bug.getIntensities().length);
+console.log(JSON.stringify(int_par_bug.getIntervals()));
