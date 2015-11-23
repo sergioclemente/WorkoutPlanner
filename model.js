@@ -351,6 +351,7 @@ function getIntensityUnitFromString(unit) {
         "%": IntensityUnit.IF,
         "min/mi": IntensityUnit.MinMi,
         "mi/hr": IntensityUnit.Mph,
+        "mph": IntensityUnit.Mph,
         "km/hr": IntensityUnit.Kmh,
         "min/km": IntensityUnit.MinKm
     };
@@ -827,7 +828,15 @@ var IntervalParser = (function () {
                             // look for a unit
                             var unitStr = "";
                             for (var j = i + 1; j < input.length; j++) {
-                                if (IntervalParser.isLetter(input[j])) {
+                                // check for letters or (slashes/percent)
+                                // this will cover for example: 
+                                // 210w
+                                // 75w
+                                // 10mph
+                                // 6min/mi
+                                if (IntervalParser.isLetter(input[j])
+                                    || input[j] == "%"
+                                    || input[j] == "/") {
                                     unitStr += input[j];
                                 }
                                 else {
@@ -1359,8 +1368,16 @@ var ObjectFactory = (function () {
             }
         }
         else {
+            var running_tpace_mph = IntensityUnitHelper.convertTo(this.userProfile.getRunningTPaceMinMi(), IntensityUnit.MinMi, IntensityUnit.Mph);
             if (unit == IntensityUnit.IF) {
                 ifValue = value;
+            }
+            else if (unit == IntensityUnit.MinMi) {
+                var running_mph = IntensityUnitHelper.convertTo(this.userProfile.getRunningTPaceMinMi(), IntensityUnit.MinMi, IntensityUnit.Mph);
+                ifValue = running_mph / running_tpace_mph;
+            }
+            else if (unit == IntensityUnit.Mph) {
+                ifValue = value / running_tpace_mph;
             }
             else {
                 throw new Error("Not implemented");
