@@ -474,7 +474,11 @@ export class Intensity {
 		if (this.originalUnit == IntensityUnit.IF) {
 			return MyMath.round10(100*this.originalValue, -1) + "%";
 		} else {
-			return MyMath.round10(this.originalValue, -1) + getStringFromIntensityUnit(this.originalUnit);				
+			if (this.originalUnit == IntensityUnit.MinMi) {
+				return Formatter.formatNumber(this.originalValue, 60, ":", "min/mi");
+			} else {
+				return MyMath.round10(this.originalValue, -1) + getStringFromIntensityUnit(this.originalUnit);
+			}
 		}
 	}
 	
