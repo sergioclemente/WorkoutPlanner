@@ -1391,7 +1391,7 @@ export class ObjectFactory {
 				ifValue = value;
 			} else if (unit == IntensityUnit.MinMi) {
 				var running_mph = IntensityUnitHelper.convertTo(
-					this.userProfile.getRunningTPaceMinMi(),
+					value,
 					IntensityUnit.MinMi,
 					IntensityUnit.Mph);
 				ifValue = running_mph / running_tpace_mph;

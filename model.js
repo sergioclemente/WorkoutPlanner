@@ -1373,7 +1373,7 @@ var ObjectFactory = (function () {
                 ifValue = value;
             }
             else if (unit == IntensityUnit.MinMi) {
-                var running_mph = IntensityUnitHelper.convertTo(this.userProfile.getRunningTPaceMinMi(), IntensityUnit.MinMi, IntensityUnit.Mph);
+                var running_mph = IntensityUnitHelper.convertTo(value, IntensityUnit.MinMi, IntensityUnit.Mph);
                 ifValue = running_mph / running_tpace_mph;
             }
             else if (unit == IntensityUnit.Mph) {
