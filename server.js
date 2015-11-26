@@ -5,7 +5,7 @@ var url = require("url");
 
 var model = require('./model');
 
-var port = process.argv[2] || 8888;
+var port = process.argv[2] || 5000;
 
 function logRequest(req, code) {
   var user_agent = req.headers['user-agent'];
@@ -91,5 +91,5 @@ http.createServer(function (req, res) {
     console.log(err2.stack);
     return;
   }
-}).listen(8080, '0.0.0.0');
-console.log('Server running at http://127.0.0.1:8080/');
+}).listen(port, '0.0.0.0');
+console.log('Server running at http://127.0.0.1:' + port);

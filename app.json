@@ -1,7 +1,7 @@
 {
   "name": "WorkoutPlanner",
   "description": "A simple generator of workouts for bike/run",
-  "repository": "https://github.com/sergioclemente/WorkoutPlanner.git",
+  "repository": "https://github.com/sergioclemente/WorkoutPlanner",
   "logo": "http://node-js-sample.herokuapp.com/node.svg",
   "keywords": ["node", "express", "static"],
   "image": "heroku/nodejs"
