@@ -5,7 +5,7 @@ var url = require("url");
 
 var model = require('./model');
 
-var port = process.argv[2] || 5000;
+var port = (process.env.PORT || 5000);
 
 function logRequest(req, code) {
   var user_agent = req.headers['user-agent'];
