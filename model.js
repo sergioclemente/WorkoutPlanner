@@ -4,6 +4,45 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var MailSender = (function () {
+    function MailSender(host, port, use_ssl, user, password) {
+        this.host = host;
+        this.port = port;
+        this.use_ssl = use_ssl;
+        this.user = user;
+        this.password = password;
+    }
+    MailSender.prototype.send = function (to, subject, body, attachment) {
+        var smtpConfig = {
+            host: this.host,
+            port: this.port,
+            secure: this.use_ssl,
+            auth: {
+                user: this.user,
+                pass: this.password
+            }
+        };
+        var mailOptions = {
+            from: this.user,
+            to: to,
+            subject: subject,
+            text: body,
+            html: body,
+            attachments: [{ 'filename': attachment.name, 'content': attachment.data }]
+        };
+        // send mail with defined transport object
+        var nodemailer = require('nodemailer');
+        var transporter = nodemailer.createTransport(smtpConfig);
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                return console.log(error);
+            }
+            console.log('Message sent: ' + info.response);
+        });
+    };
+    return MailSender;
+})();
+exports.MailSender = MailSender;
 var MyMath = (function () {
     function MyMath() {
     }
@@ -1187,7 +1226,7 @@ var MRCFileNameHelper = (function () {
             }
         }
         if (zoneMaxTime != 0) {
-            var duration_hr = Math.round(TimeUnitHelper.convertTo(duration, TimeUnit.Seconds, TimeUnit.Hours));
+            var duration_hr = Math.floor(TimeUnitHelper.convertTo(duration, TimeUnit.Seconds, TimeUnit.Hours));
             return intensity_string + duration_hr + "hour-" + zoneMaxName + ".mrc";
         }
         else {
@@ -1322,15 +1361,19 @@ var RunningPaceHelper = (function () {
 exports.RunningPaceHelper = RunningPaceHelper;
 ;
 var UserProfile = (function () {
-    function UserProfile(bikeFTP, runningTPaceMinMi) {
+    function UserProfile(bikeFTP, runningTPaceMinMi, email) {
         this.bikeFTP = bikeFTP;
         this.runningTPaceMinMi = runningTPaceMinMi;
+        this.email = email;
     }
     UserProfile.prototype.getBikeFTP = function () {
         return this.bikeFTP;
     };
     UserProfile.prototype.getRunningTPaceMinMi = function () {
         return this.runningTPaceMinMi;
+    };
+    UserProfile.prototype.getEmail = function () {
+        return this.email;
     };
     UserProfile.prototype.getPaceMinMi = function (intensity) {
         var pace_mph = IntensityUnitHelper.convertTo(this.getRunningTPaceMinMi(), IntensityUnit.MinMi, IntensityUnit.Mph) * intensity.getValue();
@@ -1535,37 +1578,49 @@ var WorkoutBuilder = (function () {
             throw new Error("Not implemented.");
         }
     };
-    WorkoutBuilder.prototype.getPrettyPrint = function () {
+    WorkoutBuilder.prototype.getPrettyPrint = function (new_line) {
+        if (new_line === void 0) { new_line = "\n"; }
         var intensities = this.intervals.getIntensities();
         var distanceInMiles = 0;
-        var result = "\n";
+        var result = new_line;
         this.intervals.getIntervals().forEach(function (interval) {
-            result += ("* " + Formatter.getIntervalTitle(interval) + "\n");
+            result += ("* " + Formatter.getIntervalTitle(interval) + new_line);
             if (interval.getDuration().getDistanceInMiles() > 0) {
                 distanceInMiles += interval.getDuration().getDistanceInMiles();
             }
         });
-        result += ("\n");
-        result += ("Stats:\n");
-        result += ("TSS: " + this.intervals.getTSS() + "\n");
-        result += ("\t* Time: " + this.intervals.getDuration().toStringTime() + "\n");
-        result += ("\t* Distance: " + this.intervals.getDuration().toStringDistance() + "\n");
-        result += ("\t* IF: " + MyMath.round10(this.intervals.getIntensity().getValue() * 100, -1) + "\n");
-        result += ("Zones:\n");
+        result += (new_line);
+        result += ("Stats:");
+        result += (new_line);
+        result += ("TSS: " + this.intervals.getTSS());
+        result += (new_line);
+        result += ("\t* Time: " + this.intervals.getDuration().toStringTime());
+        result += (new_line);
+        result += ("\t* Distance: " + this.intervals.getDuration().toStringDistance());
+        result += (new_line);
+        result += ("\t* IF: " + MyMath.round10(this.intervals.getIntensity().getValue() * 100, -1));
+        result += (new_line);
+        result += ("Zones:");
+        result += (new_line);
         var zones = this.intervals.getTimeInZones();
         zones.forEach(function (zone) {
-            result += ("\t* " + zone.name + " " + zone.range + " : " + zone.duration.toString() + "\n");
+            result += ("\t* " + zone.name + " " + zone.range + " : " + zone.duration.toString());
+            result += (new_line);
         });
         if (this.sportType == SportType.Bike) {
-            result += ("\t* Avg Pwr: " + MyMath.round10(this.userProfile.getBikeFTP() * this.intervals.getIntensity().getValue(), -1) + "w" + "\n");
+            result += ("\t* Avg Pwr: " + MyMath.round10(this.userProfile.getBikeFTP() * this.intervals.getIntensity().getValue(), -1) + "w");
+            result += (new_line);
         }
-        result += ("\n");
-        result += ("Paces:" + "\n");
+        result += (new_line);
+        result += ("Paces:");
+        result += (new_line);
         intensities.forEach(function (intensity) {
-            result += ("\t* " + Math.round(intensity.getValue() * 100) + "% (" + this.getIntensityFriendly(intensity) + ")" + "\n");
+            result += ("\t* " + Math.round(intensity.getValue() * 100) + "% (" + this.getIntensityFriendly(intensity) + ")");
+            result += (new_line);
         }, this);
-        result += ("\n");
-        result += ("Workout Definition: " + this.workoutDefinition + "\n");
+        result += (new_line);
+        result += ("Workout Definition: " + this.workoutDefinition);
+        result += (new_line);
         return result;
     };
     WorkoutBuilder.prototype.getMRCFile = function () {

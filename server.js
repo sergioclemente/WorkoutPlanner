@@ -5,7 +5,9 @@ var url = require("url");
 
 var model = require('./model');
 
-var port = (process.env.PORT || 5000);
+var config = require('./config');
+
+var port = (process.env.PORT || config.port);
 
 function logRequest(req, code) {
   var user_agent = req.headers['user-agent'];
@@ -51,20 +53,39 @@ http.createServer(function (req, res) {
         } else {
           // make this more generic
           if (uri === "/workout.mrc") {
-              var params = parsed_url.query;
-              if (params.w && params.ftp && params.tpace && params.st && params.ou) {
-                var userProfile = new model.UserProfile(params.ftp, params.tpace);
-                var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
-                logRequest(req, 200);
-                res.writeHead(200,
-                  {
-                    "Content-Type": "application/octet-stream",
-                    "Content-Disposition": "attachment; filename=\"" + builder.getMRCFileName() + "\";"
-                  }
-                );
-                res.write(builder.getMRCFile());
-                res.end();
-              }        
+            var params = parsed_url.query;
+            if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
+              var userProfile = new model.UserProfile(params.ftp, params.tpace, params.email);
+              var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
+              logRequest(req, 200);
+              res.writeHead(200,
+                {
+                  "Content-Type": "application/octet-stream",
+                  "Content-Disposition": "attachment; filename=\"" + builder.getMRCFileName() + "\";"
+                }
+              );
+              res.write(builder.getMRCFile());
+              res.end();
+            }        
+          } else if (uri == "/send_mail") {
+            var params = parsed_url.query;
+            if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
+              var userProfile = new model.UserProfile(params.ftp, params.tpace, params.email);
+              var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
+              logRequest(req, 200);
+
+              // sending email
+              var ms = new model.MailSender(config.smtp.server_host, config.smtp.server_port, config.smtp.use_ssl, config.smtp.login, config.smtp.password);
+              var attachment = {
+                name : builder.getMRCFileName(),
+                data : builder.getMRCFile()
+              };
+              ms.send(userProfile.getEmail(), builder.getMRCFileName(), builder.getPrettyPrint("<br />"), attachment);
+              //
+
+              res.write("Email sent");
+              res.end();
+            }
           } else {
             logRequest(req, 404);
             res.writeHead(404, {"Content-Type": "text/plain"});

@@ -16,6 +16,7 @@
   var sportTypePersisted = new PersistedItem("sport-type");
   var ftpPersisted = new PersistedItem("ftp");
   var tPacePersisted = new PersistedItem("tpace");
+  var emailPersisted = new PersistedItem("email");
 
   function _onKeyChanged(e) {
     var ch = String.fromCharCode(e.keyCode);
@@ -36,12 +37,14 @@
 
     // TODO: make it work with other units
     var tPaceString = _getValue("txtTPace");
+    var email = _getValue("txtEmail");
     var tPace = _extractNumber(tPaceString, 60, ":", "min/mi");
     var ftp = parseInt(_getValue("txtFtp"));
     var outputUnit = parseInt(_getValue("sltOutputUnit"));
 
     var iframe = document.getElementById("workout_frame");
     var download_anchor = document.getElementById("download_mrc");
+    var email_send_workout_anchor = document.getElementById("email_send_workout");
 
     // TODO: Make this nicer by iterating through a map of elements and
     // calling encoreURIComponent on each one
@@ -49,16 +52,20 @@
       "&st=" + encodeURIComponent(sportType) +
       "&ftp=" + encodeURIComponent(ftp) +
       "&tpace=" + encodeURIComponent(tPace) +
-      "&ou=" + encodeURIComponent(outputUnit);
+      "&ou=" + encodeURIComponent(outputUnit) +
+      "&email=" + encodeURIComponent(email);
 
     var url = "workout_view.html" + params;
-    var mrc_url = "workout.mrc" + params ;
+    var mrc_url = "workout.mrc" + params;
+    var email_url = "send_mail" + params
     iframe.src = url;
     download_anchor.href = mrc_url;
+    email_send_workout_anchor.href = email_url;
 
     workoutPersisted.save(workoutText);
     sportTypePersisted.save(sportType);
     tPacePersisted.save(tPaceString);
+    emailPersisted.save(email);
     ftpPersisted.save(ftp);
   }
   
@@ -110,6 +117,7 @@
     _setValue("sltSportType", sportTypePersisted.load());
     _setValue("txtFtp", ftpPersisted.load());
     _setValue("txtTPace", tPacePersisted.load());
+    _setValue("txtEmail", emailPersisted.load());
 
     // Load workouts
     var loadWorkoutClicks = Rx.Observable.fromEvent(
@@ -180,6 +188,7 @@
     <h1> User Settings </h1>
     Bike FTP: <input id="txtFtp" width="20" placeholder="245"></input><br />
     Run T-Pace: <input id="txtTPace" width="20" placeholder="7:30 min/mi"></input> <br />
+    Email: <input id="txtEmail" width="20" placeholder="foo@gmail.com"></input> <br />
     <br />
     <h1> Workout Settings </h1>
     Workout Type:
@@ -202,6 +211,7 @@
     <input id="btnLoadWorkout" type="button" value="Load Workout" class="btn"/>
   </form>
   <a id="download_mrc" >Download MRC</a>
+  <a id="email_send_workout" >Email Workout</a>
   <iframe id="workout_frame" style="height: 100%; width: 100%"/>
   <hr />
   </body>

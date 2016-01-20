@@ -13,8 +13,8 @@
     <script src="canvasjs.min.js"></script>
     <script type="text/javascript">
 
-  function _loadWorkoutWithData(sportType, ftp, tPace, workoutText, outputUnit) {
-    var userProfile = new UserProfile(ftp, tPace);
+  function _loadWorkoutWithData(sportType, ftp, tPace, workoutText, outputUnit, email) {
+    var userProfile = new UserProfile(ftp, tPace, email);
     var builder = new WorkoutBuilder(userProfile, sportType, outputUnit).withDefinition(workoutText);
     var workout_pretty = builder.getPrettyPrint();
     _setInnerText("workout_pretty", workout_pretty);
@@ -89,8 +89,8 @@
   function _init() {
     // Check if there is a url parameter
     var params = getQueryParams();
-    if (params.w && params.ftp && params.tpace && params.st && params.ou) {
-      _loadWorkoutWithData(params.st, params.ftp, params.tpace, params.w, params.ou);
+    if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
+      _loadWorkoutWithData(params.st, params.ftp, params.tpace, params.w, params.ou, params.email);
     }
   }
 
