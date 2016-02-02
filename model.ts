@@ -504,7 +504,7 @@ export class Intensity {
 				value = value / 100;
 			}
 			
-			this.sum1 = ifValue;
+			this.sum1 = Math.pow(ifValue, 4);
 			this.sum2 = 1;
 			this.originalUnit = IntensityUnit.IF;
 			this.originalValue = value;
@@ -517,7 +517,7 @@ export class Intensity {
 	}
 	
 	getValue() : number {
-		return this.sum1 / this.sum2;
+		return Math.sqrt(Math.sqrt(this.sum1 / this.sum2));
 	}
 
 	toString() : string {
@@ -1106,7 +1106,8 @@ export class TSSVisitor extends BaseVisitor {
 	visitSimpleInterval(interval: SimpleInterval) : void {
 		var duration = interval.getDuration().getSeconds();
 		var intensity = interval.getIntensity().getValue();
-		this.tss += duration * (intensity * intensity);		
+		this.tss += duration * (intensity * intensity);
+		var tmp = (duration * (intensity * intensity)) / 36;
 	}
 	visitBuildInterval(interval: BuildInterval) : void {
 		var startIntensity = interval.getStartIntensity().getValue();
@@ -1123,7 +1124,7 @@ export class TSSVisitor extends BaseVisitor {
 	}
 	
 	getTSS(): number {
-		return this.tss / 36;	
+		return this.tss / 36;
 	}
 }
 
@@ -1644,6 +1645,9 @@ export class WorkoutBuilder {
 		result += ("Stats:");
 		result += (new_line);
 		result += ("TSS: " + this.intervals.getTSS());
+		result += (new_line);
+		var tss_from_if = (this.intervals.getIntensity().getValue() * this.intervals.getIntensity().getValue() * this.intervals.getDuration().getSeconds()) / 36;
+		result += ("TSS (From IF): " + MyMath.round10(tss_from_if, -1));
 		result += (new_line);
 		result += ("\t* Time: " + this.intervals.getDuration().toStringTime());
 		result += (new_line);
