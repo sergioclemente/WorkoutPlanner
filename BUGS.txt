@@ -1,7 +1,0 @@
-// REFACTOR: Cleanup the url generation wt=...&tp=...&ftp=...
-// FEATURE: Initial link with url parameters should override local storage, specially for new users
-// FEATURE: Add average speed as a profile entity
-// BUG: server should log status and error more cleanly. this includes emails as well
-// FEATURE: Extract speed estimation (consider weight, altitude and drag coefficient)
-// BUG: Fix bug with TSS/IF calculation
-// BUG: Fix heroku deployment
