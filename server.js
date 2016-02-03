@@ -76,11 +76,16 @@ http.createServer(function (req, res) {
 
               // sending email
               var ms = new model.MailSender(config.smtp.server_host, config.smtp.server_port, config.smtp.use_ssl, config.smtp.login, config.smtp.password);
-              var attachment = {
+              var attachment_mrc = {
                 name : builder.getMRCFileName(),
                 data : builder.getMRCFile()
               };
-              ms.send(userProfile.getEmail(), builder.getMRCFileName(), builder.getPrettyPrint("<br />"), attachment);
+              var attachment_zwo = {
+                name : builder.getZWOFileName(),
+                data : builder.getZWOFile()
+              };
+              var attachments = [attachment_mrc, attachment_zwo];
+              ms.send(userProfile.getEmail(), builder.getMRCFileName(), builder.getPrettyPrint("<br />"), attachments);
               //
 
               res.write("Email sent");

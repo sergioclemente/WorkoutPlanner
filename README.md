@@ -47,3 +47,17 @@ node ./server.js
 * Add average speed as a profile entity
 * Extract speed estimation (consider weight, altitude and drag coefficient)
 * Generate zwift files
+* Refactor getMRCFile into a visitor
+* Refactor ZwiftDataVisitor to move finalize() into the base
+* Add training zones
+* Fix running training zones
+Z2:
+(1min, 77)
+(1min, 87)
+
+Z3:
+(1min, 88)
+(1min, 94)
+
+Z4:
+(1min, 95)
