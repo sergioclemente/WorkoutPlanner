@@ -49,15 +49,8 @@ git push heroku master
 * Fix running training zones
 
 ```
-Z2:
-(1min, 77)
-(1min, 87)
+Z2 (77-87)
+Z3 (88-94)
+Z4 (95-101)
 
-Z3:
-(1min, 88)
-(1min, 94)
-
-Z4:
-(1min, 95)
-(1min, 101)
 ```

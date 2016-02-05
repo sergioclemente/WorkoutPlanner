@@ -44,6 +44,7 @@
 
     var iframe = document.getElementById("workout_frame");
     var download_anchor = document.getElementById("download_mrc");
+    var download_anchor_zwo = document.getElementById("download_zwo");
     var email_send_workout_anchor = document.getElementById("email_send_workout");
 
     // TODO: Make this nicer by iterating through a map of elements and
@@ -57,9 +58,11 @@
 
     var url = "workout_view.html" + params;
     var mrc_url = "workout.mrc" + params;
-    var email_url = "send_mail" + params
+    var zwo_url = "workout.zwo" + params;
+    var email_url = "send_mail" + params;
     iframe.src = url;
     download_anchor.href = mrc_url;
+    download_anchor_zwo.href = zwo_url;
     email_send_workout_anchor.href = email_url;
 
     workoutPersisted.save(workoutText);
@@ -211,6 +214,7 @@
     <input id="btnLoadWorkout" type="button" value="Load Workout" class="btn"/>
   </form>
   <a id="download_mrc" >Download MRC</a>
+  <a id="download_zwo" >Download ZWO</a>
   <a id="email_send_workout" >Email Workout</a>
   <iframe id="workout_frame" style="height: 100%; width: 100%"/>
   <hr />

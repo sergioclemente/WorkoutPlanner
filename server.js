@@ -67,6 +67,21 @@ http.createServer(function (req, res) {
               res.write(builder.getMRCFile());
               res.end();
             }        
+          } else if (uri === "/workout.zwo") {
+            var params = parsed_url.query;
+            if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
+              var userProfile = new model.UserProfile(params.ftp, params.tpace, params.email);
+              var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
+              logRequest(req, 200);
+              res.writeHead(200,
+                {
+                  "Content-Type": "application/octet-stream",
+                  "Content-Disposition": "attachment; filename=\"" + builder.getZWOFileName() + "\";"
+                }
+              );
+              res.write(builder.getZWOFile());
+              res.end();
+            }        
           } else if (uri == "/send_mail") {
             var params = parsed_url.query;
             if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
