@@ -1168,10 +1168,20 @@ var ZwiftDataVisitor = (function (_super) {
     ZwiftDataVisitor.prototype.finalize = function () {
         this.content += "\t</workout>\n</workout_file>";
     };
+    ZwiftDataVisitor.prototype.getIntervalTitle = function (interval) {
+        var title = interval.getTitle();
+        if (title.length == 0) {
+            title = Formatter.getIntervalTitle(interval);
+        }
+        return title;
+    };
     ZwiftDataVisitor.prototype.visitSimpleInterval = function (interval) {
         var duration = interval.getDuration().getSeconds();
         var intensity = interval.getIntensity().getValue();
-        this.content += "\t\t<SteadyState Duration='" + duration + "' Power='" + intensity + "'/>\n";
+        var title = this.getIntervalTitle(interval);
+        this.content += "\t\t<SteadyState Duration='" + duration + "' Power='" + intensity + "'>\n";
+        this.content += "\t\t\t<textevent timeoffset='0' message='" + title + "'/>\n";
+        this.content += "\t\t</SteadyState>\n";
     };
     ZwiftDataVisitor.prototype.visitBuildInterval = function (interval) {
         var duration = interval.getDuration().getSeconds();

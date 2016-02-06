@@ -116,7 +116,9 @@ var expected_content = `<workout_file>
 	</tags>
 	<workout>
 		<Warmup Duration='600' PowerLow='0.55' PowerHigh='0.75'/>
-		<SteadyState Duration='3600' Power='0.8'/>
+		<SteadyState Duration='3600' Power='0.8'>
+			<textevent timeoffset='0' message='80% for 1hr'/>
+		</SteadyState>
 		<Cooldown Duration='300' PowerLow='0.75' PowerHigh='0.55'/>
 	</workout>
 </workout_file>`;

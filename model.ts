@@ -1179,10 +1179,20 @@ export class ZwiftDataVisitor extends BaseVisitor {
 		this.content += `\t</workout>
 </workout_file>`;
 	}
+	getIntervalTitle(interval: Interval) {
+		var title = interval.getTitle();
+		if (title.length == 0) {
+			title = Formatter.getIntervalTitle(interval);
+		}
+		return title;
+	}
 	visitSimpleInterval(interval: SimpleInterval) {
 		var duration = interval.getDuration().getSeconds();
 		var intensity = interval.getIntensity().getValue();
-		this.content += `\t\t<SteadyState Duration='${duration}' Power='${intensity}'/>\n`;
+		var title = this.getIntervalTitle(interval);
+		this.content += `\t\t<SteadyState Duration='${duration}' Power='${intensity}'>\n`;
+		this.content += `\t\t\t<textevent timeoffset='0' message='${title}'/>\n`;
+		this.content += `\t\t</SteadyState>\n`;
 	}
 	visitBuildInterval(interval: BuildInterval) {
 		var duration = interval.getDuration().getSeconds();

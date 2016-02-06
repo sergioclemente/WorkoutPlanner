@@ -54,3 +54,5 @@ Z3 (88-94)
 Z4 (95-101)
 
 ```
+* Add free ride do zwift
+        <FreeRide Duration="600" FlatRoad="1"/>
