@@ -632,10 +632,12 @@ export class BuildInterval extends BaseInterval {
 export class Point {
 	x : Duration;
 	y : Intensity;
+	label: string;
 	
-	constructor(x: Duration, y: Intensity) {
+	constructor(x: Duration, y: Intensity, label: string) {
 		this.x = x;
 		this.y = y;
+		this.label = label;
 	}
 }
 
@@ -705,7 +707,8 @@ export class ArrayInterval implements Interval {
 		return pv.data.map(function(item) {
 			return {
 				x: item.x.getSeconds() / 60,
-				y: Math.round(item.y.getValue() * 100)
+				y: Math.round(item.y.getValue() * 100),
+				label: item.label,
 			};
 		});
 	}
@@ -1148,16 +1151,18 @@ export class DataPointVisitor extends BaseVisitor {
 	}
 
 	visitSimpleInterval(interval: SimpleInterval) {
+		var title = Formatter.getIntervalTitle(interval);
 		this.initX(interval.getDuration());
-		this.data.push(new Point(this.x, interval.getIntensity()));
+		this.data.push(new Point(this.x, interval.getIntensity(), title));
 		this.incrementX(interval.getDuration());
-		this.data.push(new Point(this.x, interval.getIntensity()));
+		this.data.push(new Point(this.x, interval.getIntensity(), title));
 	}
 	visitBuildInterval(interval: BuildInterval) {
+		var title = Formatter.getIntervalTitle(interval);
 		this.initX(interval.getDuration());
-		this.data.push(new Point(this.x, interval.getStartIntensity()));
+		this.data.push(new Point(this.x, interval.getStartIntensity(), title));
 		this.incrementX(interval.getDuration());
-		this.data.push(new Point(this.x, interval.getEndIntensity()));
+		this.data.push(new Point(this.x, interval.getEndIntensity(), title));
 	}
 }
 

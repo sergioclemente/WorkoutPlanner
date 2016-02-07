@@ -630,9 +630,10 @@ var BuildInterval = (function (_super) {
 })(BaseInterval);
 exports.BuildInterval = BuildInterval;
 var Point = (function () {
-    function Point(x, y) {
+    function Point(x, y, label) {
         this.x = x;
         this.y = y;
+        this.label = label;
     }
     return Point;
 })();
@@ -689,7 +690,8 @@ var ArrayInterval = (function () {
         return pv.data.map(function (item) {
             return {
                 x: item.x.getSeconds() / 60,
-                y: Math.round(item.y.getValue() * 100)
+                y: Math.round(item.y.getValue() * 100),
+                label: item.label
             };
         });
     };
@@ -1144,16 +1146,18 @@ var DataPointVisitor = (function (_super) {
         this.x = Duration.combine(this.x, duration);
     };
     DataPointVisitor.prototype.visitSimpleInterval = function (interval) {
+        var title = Formatter.getIntervalTitle(interval);
         this.initX(interval.getDuration());
-        this.data.push(new Point(this.x, interval.getIntensity()));
+        this.data.push(new Point(this.x, interval.getIntensity(), title));
         this.incrementX(interval.getDuration());
-        this.data.push(new Point(this.x, interval.getIntensity()));
+        this.data.push(new Point(this.x, interval.getIntensity(), title));
     };
     DataPointVisitor.prototype.visitBuildInterval = function (interval) {
+        var title = Formatter.getIntervalTitle(interval);
         this.initX(interval.getDuration());
-        this.data.push(new Point(this.x, interval.getStartIntensity()));
+        this.data.push(new Point(this.x, interval.getStartIntensity(), title));
         this.incrementX(interval.getDuration());
-        this.data.push(new Point(this.x, interval.getEndIntensity()));
+        this.data.push(new Point(this.x, interval.getEndIntensity(), title));
     };
     return DataPointVisitor;
 })(BaseVisitor);
