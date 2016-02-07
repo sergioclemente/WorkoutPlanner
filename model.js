@@ -521,20 +521,21 @@ var Intensity = (function () {
             if (value > 10) {
                 value = value / 100;
             }
-            this.sum1 = Math.pow(ifValue, 4);
-            this.sum2 = 1;
+            if (value == 0) {
+                value = ifValue;
+            }
+            this.ifValue = ifValue;
             this.originalUnit = IntensityUnit.IF;
             this.originalValue = value;
         }
         else {
-            this.sum1 = ifValue;
-            this.sum2 = 1;
+            this.ifValue = ifValue;
             this.originalUnit = unit;
             this.originalValue = value;
         }
     }
     Intensity.prototype.getValue = function () {
-        return Math.sqrt(Math.sqrt(this.sum1 / this.sum2));
+        return this.ifValue;
     };
     Intensity.prototype.toString = function () {
         if (this.originalUnit == IntensityUnit.IF) {
@@ -557,14 +558,10 @@ var Intensity = (function () {
         var sum1 = 0;
         var sum2 = 0;
         for (var i = 0; i < intensities.length; i++) {
-            sum1 += intensities[i].sum1 * weights[i];
-            sum2 += intensities[i].sum2 * weights[i];
+            sum1 += Math.pow(intensities[i].ifValue, 4) * weights[i];
+            sum2 += weights[i];
         }
-        // TODO: Cleanup Intensity creation
-        var res = new Intensity(sum1 / sum2);
-        res.sum1 = sum1;
-        res.sum2 = sum2;
-        return res;
+        return new Intensity(Math.sqrt(Math.sqrt(sum1 / sum2)));
     };
     return Intensity;
 })();
@@ -674,9 +671,7 @@ var ArrayInterval = (function () {
         return this.intervals;
     };
     ArrayInterval.prototype.getTSS = function () {
-        var tssVisitor = new TSSVisitor();
-        VisitorHelper.visit(tssVisitor, this);
-        return MyMath.round10(tssVisitor.getTSS(), -1);
+        return (this.getIntensity().getValue() * this.getIntensity().getValue() * this.getDuration().getSeconds()) / 36;
     };
     ArrayInterval.prototype.getIntensities = function () {
         var iv = new IntensitiesVisitor();
@@ -718,7 +713,10 @@ var RepeatInterval = (function (_super) {
     }
     RepeatInterval.prototype.getDuration = function () {
         var baseDuration = _super.prototype.getDuration.call(this);
-        return new Duration(baseDuration.getUnit(), baseDuration.getValue() * this.repeatCount, baseDuration.getSeconds() * this.getRepeatCount(), baseDuration.getDistanceInMiles() * this.getRepeatCount());
+        var durationRaw = baseDuration.getValue() * this.repeatCount;
+        var durationSecs = baseDuration.getSeconds() * this.repeatCount;
+        var durationMiles = baseDuration.getDistanceInMiles() * this.repeatCount;
+        return new Duration(baseDuration.getUnit(), durationRaw, durationSecs, durationMiles);
     };
     RepeatInterval.prototype.getRepeatCount = function () {
         return this.repeatCount;
@@ -1096,40 +1094,6 @@ var IntensitiesVisitor = (function (_super) {
     return IntensitiesVisitor;
 })(BaseVisitor);
 exports.IntensitiesVisitor = IntensitiesVisitor;
-// TSS = [(s x NP x IF) / (FTP x 3600)] x 100
-// IF = NP / FTP
-// TSS = [(s x NP x NP/FTP) / (FTP x 3600)] x 100
-// TSS = [s x (NP / FTP) ^ 2] / 36
-var TSSVisitor = (function (_super) {
-    __extends(TSSVisitor, _super);
-    function TSSVisitor() {
-        _super.apply(this, arguments);
-        this.tss = 0;
-    }
-    TSSVisitor.prototype.visitSimpleInterval = function (interval) {
-        var duration = interval.getDuration().getSeconds();
-        var intensity = interval.getIntensity().getValue();
-        this.tss += duration * (intensity * intensity);
-        var tmp = (duration * (intensity * intensity)) / 36;
-    };
-    TSSVisitor.prototype.visitBuildInterval = function (interval) {
-        var startIntensity = interval.getStartIntensity().getValue();
-        var endIntensity = interval.getEndIntensity().getValue();
-        var duration = interval.getDuration().getSeconds();
-        // Right way to estimate the intensity is by doing incremental of 1 sec
-        var intensity = startIntensity;
-        var intensityIncrement = (endIntensity - startIntensity) / duration;
-        for (var t = 0; t < duration; t++) {
-            this.tss += 1 * (intensity * intensity);
-            intensity += intensityIncrement;
-        }
-    };
-    TSSVisitor.prototype.getTSS = function () {
-        return this.tss / 36;
-    };
-    return TSSVisitor;
-})(BaseVisitor);
-exports.TSSVisitor = TSSVisitor;
 var DataPointVisitor = (function (_super) {
     __extends(DataPointVisitor, _super);
     function DataPointVisitor() {
@@ -1644,10 +1608,7 @@ var WorkoutBuilder = (function () {
         result += (new_line);
         result += ("Stats:");
         result += (new_line);
-        result += ("TSS: " + this.intervals.getTSS());
-        result += (new_line);
-        var tss_from_if = (this.intervals.getIntensity().getValue() * this.intervals.getIntensity().getValue() * this.intervals.getDuration().getSeconds()) / 36;
-        result += ("TSS (From IF): " + MyMath.round10(tss_from_if, -1));
+        result += ("TSS: " + MyMath.round10(this.intervals.getTSS(), -1));
         result += (new_line);
         result += ("\t* Time: " + this.intervals.getDuration().toStringTime());
         result += (new_line);

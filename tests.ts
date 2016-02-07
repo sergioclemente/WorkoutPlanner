@@ -2,7 +2,8 @@ var m = require('./model');
 
 function assert(condition, message) {
     if (!condition) {
-        throw message || "Assertion failed";
+		console.log(message);
+		console.trace();
     }
 }
 
@@ -14,9 +15,9 @@ function expect_eq_str(expected : string, actual : string) {
 	}
 }
 
-function expect_eq_nbr(expected : number, actual : number) {
+function expect_eq_nbr(expected : number, actual : number, error : number = 0.01) {
 	var delta = Math.abs(expected - actual);
-	if (delta > 0.01) {
+	if (delta > error) {
 		console.log("expected=", JSON.stringify(expected));
 		console.log("actual=", JSON.stringify(actual));
 		assert(false, "expect_eq_nbr failed");
@@ -48,10 +49,10 @@ expect_eq_nbr(0.85, res);
 
 // TSS tests
 var int1hri75 = new m.ArrayInterval("", [createSimpleInterval(0.75, 3600)]);
-expect_eq_nbr(56.3, int1hri75.getTSS());
+expect_eq_nbr(56.25, int1hri75.getTSS());
 
 var int1hri85 = new m.ArrayInterval("", [createSimpleInterval(0.85, 3600)]);
-expect_eq_nbr(72.2, int1hri85.getTSS());
+expect_eq_nbr(72.25, int1hri85.getTSS());
 
 // IntervalParser
 expect_eq_nbr(123, m.IntervalParser.parseDouble("123", 0).value);
@@ -63,10 +64,10 @@ var of_bike = new m.ObjectFactory(up, m.SportType.Bike);
 var of_run = new m.ObjectFactory(up, m.SportType.Run);
 
 var int_par_1hr_75 = m.IntervalParser.parse(of_bike, "(1hr, 75)");
-expect_eq_nbr(56.3, int_par_1hr_75.getTSS());
+expect_eq_nbr(56.25, int_par_1hr_75.getTSS());
 
 var int_par_2hr_75_85 = m.IntervalParser.parse(of_bike, "(1hr, 75), (1hr, 85)");
-expect_eq_nbr(56.3 + 72.2, int_par_2hr_75_85.getTSS());
+expect_eq_nbr(129.5, int_par_2hr_75_85.getTSS());
 
 
 // UserProfile 
@@ -124,3 +125,17 @@ var expected_content = `<workout_file>
 </workout_file>`;
 expect_eq_str(expected_content, zwift.getContent());
 
+// Repeat interval bug
+var repeat_85_1 = m.IntervalParser.parse(of_bike, `1[(1hr, 85)]`);
+var repeat_85_2 = m.IntervalParser.parse(of_bike, `2[(1hr, 85)]`);
+
+expect_eq_nbr(72.25, repeat_85_1.getTSS());
+expect_eq_nbr(0.85, repeat_85_1.getIntensity().getValue());
+
+expect_eq_nbr(144.5, repeat_85_2.getTSS());
+expect_eq_nbr(0.85, repeat_85_2.getIntensity().getValue());
+
+var baseLinePlusRepeat = m.IntervalParser.parse(of_bike, `(1hr, 75) 2[(1hr, 85)]`);
+expect_eq_nbr(202, baseLinePlusRepeat.getTSS(), 0.1);
+expect_eq_nbr(3 * 3600, baseLinePlusRepeat.getDuration().getSeconds());
+expect_eq_nbr(0.816, baseLinePlusRepeat.getIntensity().getValue());
