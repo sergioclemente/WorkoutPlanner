@@ -13,7 +13,8 @@ npm install nodemailer
 * Compile
 
 ```
-tsc --module commonjs ./MyMath.ts ./model.ts ./tests.ts
+tsc --module commonjs ./MyMath.ts ./model.ts --removeComments
+tsc --module commonjs ./tests.ts
 ```
 
 * Running the tests

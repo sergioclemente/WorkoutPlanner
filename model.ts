@@ -1,5 +1,3 @@
-/// <reference path="MyMath.ts" />
-
 export class MailSender {
 	host: string;
 	port: number;

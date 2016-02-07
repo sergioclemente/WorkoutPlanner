@@ -1,4 +1,3 @@
-/// <reference path="MyMath.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -35,7 +34,6 @@ var MailSender = (function () {
             html: body,
             attachments: mailAttachments
         };
-        // send mail with defined transport object
         var nodemailer = require('nodemailer');
         var transporter = nodemailer.createTransport(smtpConfig);
         transporter.sendMail(mailOptions, function (error, info) {
@@ -51,29 +49,17 @@ exports.MailSender = MailSender;
 var MyMath = (function () {
     function MyMath() {
     }
-    /**
-     * Decimal adjustment of a number.
-     *
-     * @param   {String}    type    The type of adjustment.
-     * @param   {Number}    value   The number.
-     * @param   {Integer}   exp     The exponent (the 10 logarithm of the adjustment base).
-     * @returns {Number}            The adjusted value.
-     */
     MyMath.decimalAdjust = function (type, value, exp) {
-        // If the exp is undefined or zero...
         if (typeof exp === 'undefined' || +exp === 0) {
             return Math[type](value);
         }
         value = +value;
         exp = +exp;
-        // If the value is not a number or the exp is not an integer...
         if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
             return NaN;
         }
-        // Shift
         value = value.toString().split('e');
         value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
-        // Shift back
         value = value.toString().split('e');
         return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
     };
@@ -108,7 +94,6 @@ var DistanceUnitHelper = (function () {
     function DistanceUnitHelper() {
     }
     DistanceUnitHelper.convertTo = function (value, unitFrom, unitTo) {
-        // convert first to meters
         var distanceInMeters = 0;
         if (unitFrom == DistanceUnit.Kilometers) {
             distanceInMeters = value * 1000;
@@ -125,7 +110,6 @@ var DistanceUnitHelper = (function () {
         else {
             throw new Error("Unknown distance unit");
         }
-        // convert to final unit
         if (unitTo == DistanceUnit.Kilometers) {
             return distanceInMeters / 1000;
         }
@@ -169,7 +153,6 @@ var TimeUnitHelper = (function () {
         else {
             throw new Error("Unknown time unit");
         }
-        // convert to final unit
         if (unitTo == TimeUnit.Seconds) {
             return timeInSeconds;
         }
@@ -324,20 +307,16 @@ var Duration = (function () {
         var estDistance = dur1.getDistanceInMiles() + dur2.getDistanceInMiles();
         if (DurationUnitHelper.isTime(dur1.getUnit())) {
             if (DurationUnitHelper.isTime(dur2.getUnit())) {
-                // Both are Time
-                // Convert both to seconds
                 var time1 = DurationUnitHelper.getDurationSeconds(dur1.getUnit(), dur1.getValue());
                 var time2 = DurationUnitHelper.getDurationSeconds(dur2.getUnit(), dur2.getValue());
                 return new Duration(DurationUnit.Seconds, time1 + time2, estTime, estDistance);
             }
             else {
-                // Use the unit of time in case is different
                 return new Duration(DurationUnit.Seconds, estTime, estTime, estDistance);
             }
         }
         else {
             if (DurationUnitHelper.isTime(dur2.getUnit())) {
-                // Use the unit of time in case is different
                 return new Duration(DurationUnit.Seconds, estTime, estTime, estDistance);
             }
             else {
@@ -512,12 +491,10 @@ var Intensity = (function () {
         if (ifValue === void 0) { ifValue = 0; }
         if (value === void 0) { value = 0; }
         if (unit === void 0) { unit = IntensityUnit.IF; }
-        // HACK: Find a better way of doing this
         if (ifValue > 10) {
             ifValue = ifValue / 100;
         }
         if (unit == IntensityUnit.IF) {
-            // HACK: Find a vetter way of doing this
             if (value > 10) {
                 value = value / 100;
             }
@@ -554,7 +531,6 @@ var Intensity = (function () {
         if (weights.length != intensities.length) {
             throw new Error("The size of intensities and weights should be the same");
         }
-        // do a weighed sum
         var sum1 = 0;
         var sum2 = 0;
         for (var i = 0; i < intensities.length; i++) {
@@ -574,11 +550,9 @@ var BaseInterval = (function () {
         return this.title;
     };
     BaseInterval.prototype.getIntensity = function () {
-        // not aware that typescript supports abstract methods
         throw new Error("not implemented");
     };
     BaseInterval.prototype.getDuration = function () {
-        // not aware that typescript supports abstract methods
         throw new Error("not implemented");
     };
     return BaseInterval;
@@ -650,16 +624,11 @@ var ArrayInterval = (function () {
         return Intensity.combine(intensities, weights);
     };
     ArrayInterval.prototype.getDuration = function () {
-        // If the interval is empty lets bail right away otherwise reducing the array will cause an
-        // exception
         if (this.intervals.length == 0) {
             return new Duration(DurationUnit.Seconds, 0, 0, 0);
         }
-        // It will create dummy intervals along the way so that I can use
-        // the reduce abstraction		
         var res = this.intervals.reduce(function (previousValue, currentValue) {
             var duration = Duration.combine(previousValue.getDuration(), currentValue.getDuration());
-            // Create a dummy interval with the proper duration
             return new SimpleInterval("", new Intensity(0), duration);
         });
         return res.getDuration();
@@ -681,7 +650,6 @@ var ArrayInterval = (function () {
     ArrayInterval.prototype.getTimeSeries = function () {
         var pv = new DataPointVisitor();
         VisitorHelper.visit(pv, this);
-        // TODO: Massaging the data here to show in minutes
         return pv.data.map(function (item) {
             return {
                 x: item.x.getSeconds() / 60,
@@ -771,7 +739,6 @@ var IntervalParser = (function () {
                 break;
             }
         }
-        // points to the last valid char
         return { i: i - 1, value: value };
     };
     IntervalParser.isWhitespace = function (ch) {
@@ -812,17 +779,13 @@ var IntervalParser = (function () {
                 for (; i < input.length; i++) {
                     ch = input[i];
                     if (ch == ")") {
-                        // simple workout completed, pop element from stack and create
                         var interval;
                         var durationValue;
                         var durationUnit;
                         var intensities = [];
-                        // Do we have the units?
                         var containsUnit = units[0] != "" ||
                             units[1] != "" ||
                             units[2] != "";
-                        // Tries to be forgiving by guessing the unit by using the biggest value
-                        // TODO: not working with build intervals
                         if (!containsUnit) {
                             if (nums[0] < nums[1]) {
                                 units[0] = "min";
@@ -833,7 +796,6 @@ var IntervalParser = (function () {
                                 units[1] = "min";
                             }
                         }
-                        // Handle properly the duration unit
                         for (var k = 0; k < 3; k++) {
                             if (isDurationUnit(units[k])) {
                                 durationUnit = getDurationUnitFromString(units[k]);
@@ -874,15 +836,8 @@ var IntervalParser = (function () {
                             var res = IntervalParser.parseDouble(input, i);
                             i = res.i;
                             nums[numIndex] = res.value;
-                            // look for a unit
                             var unitStr = "";
                             for (var j = i + 1; j < input.length; j++) {
-                                // check for letters or (slashes/percent)
-                                // this will cover for example: 
-                                // 210w
-                                // 75w
-                                // 10mph
-                                // 6min/mi
                                 if (IntervalParser.isLetter(input[j])
                                     || input[j] == "%"
                                     || input[j] == "/") {
@@ -896,7 +851,6 @@ var IntervalParser = (function () {
                             i += unitStr.length;
                         }
                         else {
-                            // just enter in title mode if its not a whitespace
                             if (!isInTitle && !IntervalParser.isWhitespace(ch)) {
                                 isInTitle = true;
                             }
@@ -921,9 +875,6 @@ var IntervalParser = (function () {
                 var ri = new RepeatInterval("", null, null, res.value);
                 stack[stack.length - 1].getIntervals().push(ri);
                 stack.push(ri);
-                // Repeat interval format is something like
-                // 4[(3,90),(3,55)], so let's consume the next bracket 
-                // so that it goes into the regular main flow
                 while (i < input.length && input[i] != "[") {
                     i++;
                 }
@@ -961,11 +912,9 @@ var BaseVisitor = (function () {
     function BaseVisitor() {
     }
     BaseVisitor.prototype.visitSimpleInterval = function (interval) {
-        // not aware that typescript supports abstract methods
         throw new Error("not implemented");
     };
     BaseVisitor.prototype.visitBuildInterval = function (interval) {
-        // not aware that typescript supports abstract methods
         throw new Error("not implemented");
     };
     BaseVisitor.prototype.visitRepeatInterval = function (interval) {
@@ -1043,7 +992,6 @@ var ZonesVisitor = (function (_super) {
         var startIntensity = interval.getStartIntensity().getValue();
         var endIntensity = interval.getEndIntensity().getValue();
         var duration = interval.getDuration().getSeconds();
-        // Go on 1 second increments 
         var intensity = startIntensity;
         var intensityIncrement = (endIntensity - startIntensity) / duration;
         for (var t = 0; t < duration; t++) {
@@ -1179,7 +1127,6 @@ var MRCCourseDataVisitor = (function (_super) {
     }
     MRCCourseDataVisitor.prototype.processCourseData = function (intensity, durationInSeconds) {
         this.time += durationInSeconds;
-        // Course Data has to be in minutes
         this.courseData += (this.time / 60) + "\t" + Math.round(intensity.getValue() * 100) + "\n";
     };
     MRCCourseDataVisitor.prototype.processTitle = function (interval) {
@@ -1223,13 +1170,10 @@ var FileNameHelper = (function () {
         });
         if (mainInterval != null) {
             var filename = intensity_string + Formatter.getIntervalTitle(mainInterval);
-            // Avoid really long filenames since its not very helpful
             if (filename.length < 50) {
                 return filename;
             }
         }
-        // TODO: do something here if the main set its too big. Some ideas:
-        // 1) Long Ride
         var timeInZones = this.intervals.getTimeInZones();
         var zoneMaxTime = 0;
         var zoneMaxName = -1;
@@ -1274,16 +1218,11 @@ var Formatter = (function () {
         }
     };
     Formatter.getIntervalTitle = function (interval) {
-        // TODO: instantiating visitor is a bit clowny
         var f = new Formatter();
         VisitorHelper.visit(f, interval);
         return f.result;
     };
-    // ArrayInterval
     Formatter.prototype.visitArrayInterval = function (interval) {
-        // Detect which subtype is. Couple of possibilities:
-        // * Last interval is the minimum (rest interval)
-        // * A combination with both
         var prevIntensity = interval.getIntervals()[0].getIntensity();
         var prevDuration = interval.getIntervals()[0].getDuration();
         var isIncreasing = true;
@@ -1293,7 +1232,6 @@ var Formatter = (function () {
             var curIntensity = interval.getIntervals()[i].getIntensity();
             var curDuration = interval.getIntervals()[i].getDuration();
             if (prevIntensity.getValue() > curIntensity.getValue()) {
-                // Ignore the last interval
                 if (i != interval.getIntervals().length - 1) {
                     isIncreasing = false;
                 }
@@ -1323,17 +1261,14 @@ var Formatter = (function () {
         }
         this.result = this.result.slice(0, this.result.length - 2);
     };
-    // RepeatInterval
     Formatter.prototype.visitRepeatInterval = function (interval) {
         this.result += interval.getRepeatCount() + "x (";
         this.visitArrayInterval(interval);
         this.result += ")";
     };
-    // BuildInterval
     Formatter.prototype.visitBuildInterval = function (interval) {
         this.result += "Build from " + interval.getStartIntensity().toString() + " to " + interval.getEndIntensity().toString() + " for " + interval.getDuration().toString();
     };
-    // SimpleInterval
     Formatter.prototype.visitSimpleInterval = function (interval) {
         this.result += interval.getIntensity().toString() + " for " + interval.getDuration().toString();
         var title = interval.getTitle();
@@ -1404,7 +1339,6 @@ var ObjectFactory = (function () {
         this.sportType = sportType;
     }
     ObjectFactory.prototype.getBikeSpeedMphForIntensity = function (intensity) {
-        // TODO: simplifying it for now
         var actualSpeedMph = 0;
         if (intensity.getValue() < 0.65) {
             actualSpeedMph = 15;
@@ -1461,14 +1395,10 @@ var ObjectFactory = (function () {
         }
         if (DurationUnitHelper.isTime(unit)) {
             estimatedTimeInSeconds = DurationUnitHelper.getDurationSeconds(unit, value);
-            // v = s/t
-            // s = v * t
             estimatedDistanceInMiles = estimatedSpeedMph * (estimatedTimeInSeconds / 3600);
         }
         else {
             estimatedDistanceInMiles = DurationUnitHelper.getDistanceMiles(unit, value);
-            // v = s/t;
-            // t = s / v;
             estimatedTimeInSeconds = 3600 * (estimatedDistanceInMiles / estimatedSpeedMph);
         }
         return new Duration(unit, value, estimatedTimeInSeconds, estimatedDistanceInMiles);
