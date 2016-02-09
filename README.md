@@ -13,7 +13,7 @@ npm install nodemailer
 * Compile
 
 ```
-tsc --module commonjs ./MyMath.ts ./model.ts --removeComments
+tsc --module commonjs ./model.ts ./ui.ts --removeComments
 tsc --module commonjs ./tests.ts
 ```
 
@@ -37,11 +37,8 @@ git push heroku master
 
 # Known Bugs
 * server should log status and error more cleanly. this includes emails as well
-* Fix bug with TSS/IF calculation
 
 # Feature requests
-* the url generation wt=...&tp=...&ftp=...
-* Initial link with url parameters should override local storage, specially for new users
 * Add average speed as a profile entity
 * Extract speed estimation (consider weight, altitude and drag coefficient)
 * Refactor getMRCFile into a visitor

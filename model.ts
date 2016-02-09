@@ -698,7 +698,6 @@ export class ArrayInterval implements Interval {
 			return {
 				x: item.x.getSeconds() / 60,
 				y: Math.round(item.y.getValue() * 100),
-				label: item.label,
 			};
 		});
 	}
@@ -1583,27 +1582,6 @@ export class ArrayIterator {
 		this.index++;
         return this.getIsValid();
 	}	
-}
-
-export class PersistedItem {
-	id : string;
-	constructor(id : string) {
-		this.id = id;
-	}
-	save(value : string) : void {
-		if (window.localStorage) {
-			window.localStorage.setItem(this.id, value);
-		}
-	}
-	
-	load() : string {
-		if (window.localStorage) {
-			var result = window.localStorage.getItem(this.id);
-			return result ? result.trim() : "";
-		} else {
-			return null;
-		}
-	}
 }
 
 export class WorkoutBuilder {

@@ -7,14 +7,15 @@
       // make the commonjs happy
       window.exports = {}
     </script>
+    <script src="ui.js"></script>
     <script src="model.js"></script>
     <script src="rx.all.js"></script>
     <script src="canvasjs.min.js"></script>
     <script type="text/javascript">
 
-  function _loadWorkoutWithData(sportType, ftp, tPace, workoutText, outputUnit, email) {
-    var userProfile = new UserProfile(ftp, tPace, email);
-    var builder = new WorkoutBuilder(userProfile, sportType, outputUnit).withDefinition(workoutText);
+  function _loadWorkoutWithData(params) {
+    var userProfile = new UserProfile(params.ftp_watts, params.t_pace, params.email);
+    var builder = new WorkoutBuilder(userProfile, params.workout_type, params.output_unit).withDefinition(params.workout_text);
     var workout_pretty = builder.getPrettyPrint();
     _setInnerText("workout_pretty", workout_pretty);
 
@@ -86,26 +87,10 @@
   }
 
   function _init() {
-    // Check if there is a url parameter
-    var params = getQueryParams();
-    if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
-      _loadWorkoutWithData(params.st, params.ftp, params.tpace, params.w, params.ou, params.email);
+    var params = new QueryParams();
+    if (params.validate()) {
+      _loadWorkoutWithData(params);
     }
-  }
-
-  function getQueryParams() {
-      var qs = document.location.search;
-      qs = qs.split("+").join(" ");
-
-      var params = {}, tokens,
-          re = /[?&]?([^=]+)=([^&]*)/g;
-
-      while (tokens = re.exec(qs)) {
-          params[decodeURIComponent(tokens[1])]
-              = decodeURIComponent(tokens[2]);
-      }
-
-      return params;
   }
 
   var windowLoads = Rx.Observable.fromEvent(window, "DOMContentLoaded");

@@ -52,34 +52,31 @@ http.createServer(function (req, res) {
           });
         } else {
           // make this more generic
-          if (uri === "/workout.mrc") {
+          if (uri === "/workout.mrc" || uri === "/workout.zwo") {
             var params = parsed_url.query;
             if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
               var userProfile = new model.UserProfile(params.ftp, params.tpace, params.email);
               var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
               logRequest(req, 200);
+
+              var workout_filename = "";
+              var workout_content = "";
+
+              if (uri === "/workout.mrc") {
+                workout_filename = builder.getMRCFileName();
+                workout_content = builder.getMRCFile();
+              } else {
+                workout_filename = builder.getZWOFileName();
+                workout_content = builder.getZWOFile();
+              }
+
               res.writeHead(200,
                 {
                   "Content-Type": "application/octet-stream",
-                  "Content-Disposition": "attachment; filename=\"" + builder.getMRCFileName() + "\";"
+                  "Content-Disposition": "attachment; filename=\"" + workout_filename + "\";"
                 }
               );
-              res.write(builder.getMRCFile());
-              res.end();
-            }        
-          } else if (uri === "/workout.zwo") {
-            var params = parsed_url.query;
-            if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
-              var userProfile = new model.UserProfile(params.ftp, params.tpace, params.email);
-              var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
-              logRequest(req, 200);
-              res.writeHead(200,
-                {
-                  "Content-Type": "application/octet-stream",
-                  "Content-Disposition": "attachment; filename=\"" + builder.getZWOFileName() + "\";"
-                }
-              );
-              res.write(builder.getZWOFile());
+              res.write(workout_content);
               res.end();
             }        
           } else if (uri == "/send_mail") {

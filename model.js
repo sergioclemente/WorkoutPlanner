@@ -653,8 +653,7 @@ var ArrayInterval = (function () {
         return pv.data.map(function (item) {
             return {
                 x: item.x.getSeconds() / 60,
-                y: Math.round(item.y.getValue() * 100),
-                label: item.label
+                y: Math.round(item.y.getValue() * 100)
             };
         });
     };
@@ -1471,27 +1470,6 @@ var ArrayIterator = (function () {
     return ArrayIterator;
 })();
 exports.ArrayIterator = ArrayIterator;
-var PersistedItem = (function () {
-    function PersistedItem(id) {
-        this.id = id;
-    }
-    PersistedItem.prototype.save = function (value) {
-        if (window.localStorage) {
-            window.localStorage.setItem(this.id, value);
-        }
-    };
-    PersistedItem.prototype.load = function () {
-        if (window.localStorage) {
-            var result = window.localStorage.getItem(this.id);
-            return result ? result.trim() : "";
-        }
-        else {
-            return null;
-        }
-    };
-    return PersistedItem;
-})();
-exports.PersistedItem = PersistedItem;
 var WorkoutBuilder = (function () {
     function WorkoutBuilder(userProfile, sportType, outputUnit) {
         this.userProfile = userProfile;
