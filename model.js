@@ -1185,7 +1185,7 @@ var FileNameHelper = (function () {
             }
         }
         if (zoneMaxTime != 0) {
-            var duration_hr = Math.floor(TimeUnitHelper.convertTo(duration, TimeUnit.Seconds, TimeUnit.Hours));
+            var duration_hr = Math.round(TimeUnitHelper.convertTo(duration, TimeUnit.Seconds, TimeUnit.Hours));
             return intensity_string + duration_hr + "hour-" + zoneMaxName;
         }
         else {
@@ -1478,6 +1478,9 @@ var WorkoutBuilder = (function () {
     }
     WorkoutBuilder.prototype.getInterval = function () {
         return this.intervals;
+    };
+    WorkoutBuilder.prototype.getSportType = function () {
+        return this.sportType;
     };
     WorkoutBuilder.prototype.withDefinition = function (workoutDefinition) {
         this.intervals = IntervalParser.parse(new ObjectFactory(this.userProfile, this.sportType), workoutDefinition);

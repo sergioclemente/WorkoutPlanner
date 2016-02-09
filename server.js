@@ -88,15 +88,23 @@ http.createServer(function (req, res) {
 
               // sending email
               var ms = new model.MailSender(config.smtp.server_host, config.smtp.server_port, config.smtp.use_ssl, config.smtp.login, config.smtp.password);
-              var attachment_mrc = {
-                name : builder.getMRCFileName(),
-                data : builder.getMRCFile()
-              };
-              var attachment_zwo = {
-                name : builder.getZWOFileName(),
-                data : builder.getZWOFile()
-              };
-              var attachments = [attachment_mrc, attachment_zwo];
+
+              var attachments = [];
+
+              // Just send the attachment if its a bike workout
+              if (builder.getSportType() == model.SportType.Bike) {
+                var attachment_mrc = {
+                  name : builder.getMRCFileName(),
+                  data : builder.getMRCFile()
+                };
+                var attachment_zwo = {
+                  name : builder.getZWOFileName(),
+                  data : builder.getZWOFile()
+                };                
+                attachments.push(attachment_zwo);
+                attachments.push(attachment_mrc);
+              }
+
               ms.send(userProfile.getEmail(), builder.getMRCFileName(), builder.getPrettyPrint("<br />"), attachments);
               //
 

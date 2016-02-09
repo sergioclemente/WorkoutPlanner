@@ -39,14 +39,6 @@ var QueryParams = (function () {
             }
         }
     }
-    QueryParams.prototype.fromQueryObject = function (query) {
-        this.workout_text = query.w;
-        this.ftp_watts = query.ftp;
-        this.t_pace = query.tpace;
-        this.workout_type = query.st;
-        this.output_unit = query.ou;
-        this.email = query.email;
-    };
     QueryParams.prototype.loadFromURL = function () {
         var params = getQueryParams();
         this.workout_text = params.w;

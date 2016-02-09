@@ -1259,7 +1259,7 @@ export class FileNameHelper {
 		}
 		
 		if (zoneMaxTime != 0) {
-			var duration_hr = Math.floor(TimeUnitHelper.convertTo(duration, TimeUnit.Seconds, TimeUnit.Hours));
+			var duration_hr = Math.round(TimeUnitHelper.convertTo(duration, TimeUnit.Seconds, TimeUnit.Hours));
 			return intensity_string + duration_hr + "hour-" + zoneMaxName;
 		} else {
 			return intensity_string;
@@ -1599,6 +1599,10 @@ export class WorkoutBuilder {
 	
 	getInterval() : ArrayInterval {
 		return this.intervals;
+	}
+
+	getSportType() : SportType {
+		return this.sportType;
 	}
 
 	withDefinition(workoutDefinition: string) : WorkoutBuilder {
