@@ -529,6 +529,12 @@ var Model;
                 }
             }
         };
+        Intensity.prototype.getOriginalUnit = function () {
+            return this.originalUnit;
+        };
+        Intensity.prototype.getOriginalValue = function () {
+            return this.originalValue;
+        };
         Intensity.combine = function (intensities, weights) {
             if (weights.length != intensities.length) {
                 throw new Error("The size of intensities and weights should be the same");
@@ -1314,6 +1320,7 @@ var Model;
     ;
     var UserProfile = (function () {
         function UserProfile(bikeFTP, runningTPaceMinMi, email) {
+            if (email === void 0) { email = ""; }
             this.bikeFTP = bikeFTP;
             this.runningTPaceMinMi = runningTPaceMinMi;
             this.email = email;
@@ -1589,4 +1596,4 @@ var Model;
     })();
     Model.WorkoutBuilder = WorkoutBuilder;
     ;
-})(Model || (Model = {}));
+})(Model = exports.Model || (exports.Model = {}));

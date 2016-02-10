@@ -3,8 +3,7 @@ var path = require("path");
 var fs = require("fs");
 var url = require("url");
 
-var model = require('./model');
-
+var model = require("./model").Model;
 var config = require('./config');
 
 var port = (process.env.PORT || config.port);

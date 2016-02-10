@@ -1,6 +1,6 @@
 /// <reference path="type_definitions/nodemailer.d.ts" />
 
-module Model {
+export module Model {
 
 export class MailSender {
 	host: string;
@@ -536,6 +536,13 @@ export class Intensity {
 			}
 		}
 	}
+
+    getOriginalUnit(): number {
+		return this.originalUnit;
+    }
+    getOriginalValue(): number {
+		return this.originalValue;
+    }
 	
 	static combine(intensities: Intensity[], weights: number[]) : Intensity {
 		if (weights.length != intensities.length) {
@@ -554,7 +561,7 @@ export class Intensity {
 	}
 }
 
-interface Interval {
+export interface Interval {
 	getTitle() : string;
 	getIntensity(): Intensity;	
 	getDuration() : Duration;
@@ -1400,7 +1407,7 @@ export class UserProfile {
 	private runningTPaceMinMi: number;
 	private email: string;
 	
-	constructor(bikeFTP: number, runningTPaceMinMi: number, email: string) {
+	constructor(bikeFTP: number, runningTPaceMinMi: number, email: string = "") {
 		this.bikeFTP = bikeFTP;
 		this.runningTPaceMinMi = runningTPaceMinMi;
 		this.email = email;
