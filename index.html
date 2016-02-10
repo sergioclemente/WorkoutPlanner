@@ -42,7 +42,7 @@
     var download_anchor_zwo = document.getElementById("download_zwo");
     var email_send_workout_anchor = document.getElementById("email_send_workout");
 
-    var qp = new QueryParams(workoutText, ftp, tPace, sportType, outputUnit, email);
+    var qp = new UI.QueryParams(workoutText, ftp, tPace, sportType, outputUnit, email);
     var params = qp.getURL();
 
     var url = "workout_view.html" + params;
@@ -102,7 +102,7 @@
 
   function _init() {
     // Initialize the fields
-    var qp = new QueryParams();
+    var qp = new UI.QueryParams();
     _setValue("workout", qp.workout_text);
     _setValue("sltSportType", qp.workout_type);
     _setValue("txtFtp", qp.ftp_watts);

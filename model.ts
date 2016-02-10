@@ -1,3 +1,7 @@
+/// <reference path="type_definitions/nodemailer.d.ts" />
+
+module Model {
+
 export class MailSender {
 	host: string;
 	port: number;
@@ -1724,3 +1728,4 @@ export class WorkoutBuilder {
 	}
 };
 
+}

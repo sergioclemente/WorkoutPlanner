@@ -1,5 +1,8 @@
+/// <reference path="type_definitions/node.d.ts" />
 
-export class PersistedItem {
+module UI {
+
+	export class PersistedItem {
 	id: string;
 	constructor(id: string) {
 		this.id = id;
@@ -89,12 +92,12 @@ export class QueryParams {
 	}
 
 	getURL(): string {
-		return "?w=" + window.encodeURIComponent(this.workout_text) +
-			"&st=" + window.encodeURIComponent(this.workout_type) +
-			"&ftp=" + window.encodeURIComponent(this.ftp_watts) +
-			"&tpace=" + window.encodeURIComponent(this.t_pace) +
-			"&ou=" + window.encodeURIComponent(this.output_unit) +
-			"&email=" + window.encodeURIComponent(this.email);
+		return "?w=" + encodeURIComponent(this.workout_text) +
+			"&st=" + encodeURIComponent(this.workout_type) +
+			"&ftp=" + encodeURIComponent(this.ftp_watts) +
+			"&tpace=" + encodeURIComponent(this.t_pace) +
+			"&ou=" + encodeURIComponent(this.output_unit) +
+			"&email=" + encodeURIComponent(this.email);
 	}
 }
 
@@ -111,4 +114,6 @@ function getQueryParams() : any {
   }
 
   return params;
+}
+
 }

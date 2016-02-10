@@ -14,8 +14,8 @@
     <script type="text/javascript">
 
   function _loadWorkoutWithData(params) {
-    var userProfile = new UserProfile(params.ftp_watts, params.t_pace, params.email);
-    var builder = new WorkoutBuilder(userProfile, params.workout_type, params.output_unit).withDefinition(params.workout_text);
+    var userProfile = new Model.UserProfile(params.ftp_watts, params.t_pace, params.email);
+    var builder = new Model.WorkoutBuilder(userProfile, params.workout_type, params.output_unit).withDefinition(params.workout_text);
     var workout_pretty = builder.getPrettyPrint();
     _setInnerText("workout_pretty", workout_pretty);
 
@@ -87,7 +87,7 @@
   }
 
   function _init() {
-    var params = new QueryParams();
+    var params = new UI.QueryParams();
     if (params.validate()) {
       _loadWorkoutWithData(params);
     }
