@@ -61,7 +61,7 @@ expect_eq_nbr(123, _.Model.IntervalParser.parseDouble("123", 0).value);
 expect_eq_nbr(123.456, _.Model.IntervalParser.parseDouble("123.456", 0).value);
 
 // Parser tests
-var up = new _.Model.UserProfile(310, 6);
+var up = new _.Model.UserProfile(310, "6:00min/mi");
 var of_bike = new _.Model.ObjectFactory(up, _.Model.SportType.Bike);
 var of_run = new _.Model.ObjectFactory(up, _.Model.SportType.Run);
 
@@ -73,13 +73,13 @@ expect_eq_nbr(129.5, int_par_2hr_75_85.getTSS());
 
 
 // UserProfile 
-var up_6tpace = new _.Model.UserProfile(310, 6);
+var up_6tpace = new _.Model.UserProfile(310, "6:00min/mi");
 expect_eq_nbr(6, up_6tpace.getPaceMinMi(new _.Model.Intensity(1, 1)));
 expect_eq_nbr(7.05, up_6tpace.getPaceMinMi(new _.Model.Intensity(0.85, 0.85)));
 expect_eq_nbr(8, up_6tpace.getPaceMinMi(new _.Model.Intensity(0.75, 0.75)));
 
 for (var i = 50; i <= 100; i=i+5) {
-	var garbage = new _.Model.UserProfile(310, 6);
+	var garbage = new _.Model.UserProfile(310, "6:00min/mi");
 	var ifv = i / 100.0;
 }
 

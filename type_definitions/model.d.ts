@@ -259,10 +259,11 @@ export declare module Model {
         private bikeFTP;
         private runningTPaceMinMi;
         private email;
-        constructor(bikeFTP: number, runningTPaceMinMi: number, email?: string);
+        constructor(bikeFTP: number, runningTPace: string, email?: string);
         getBikeFTP(): number;
         getRunningTPaceMinMi(): number;
         getEmail(): string;
+        _extractNumber(numberString: any, decimalMultiplier: any, strSeparator: any, strSuffix: any): number;
         getPaceMinMi(intensity: Intensity): number;
     }
     class ObjectFactory {

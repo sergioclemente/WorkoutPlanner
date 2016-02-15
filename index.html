@@ -30,10 +30,8 @@
 
     var sportType = _getValue("sltSportType");
 
-    // TODO: make it work with other units
-    var tPaceString = _getValue("txtTPace");
     var email = _getValue("txtEmail");
-    var tPace = _extractNumber(tPaceString, 60, ":", "min/mi");
+    var tPace = _getValue("txtTPace");
     var ftp = _getValue("txtFtp");
     var outputUnit = _getValue("sltOutputUnit");
 
@@ -57,28 +55,7 @@
 
     qp.saveToStorage();
   }
-  
-  function _extractNumber(numberString, decimalMultiplier, strSeparator, strSuffix) {
-    var indexSuffix = numberString.indexOf(strSuffix);
-    var indexSeparator = numberString.indexOf(strSeparator);
-    // Lets be forgiving if the user didn't specify the separators
-    // 6:00 => 6:00 min/mi
-    // 6 min/mi => 6:00 min/mi
-    // 6 => 6:00 min/mi
-    if (indexSuffix < 0) {
-      indexSuffix = numberString.length;
-    }
-    if (indexSeparator < 0) {
-      indexSeparator = numberString.length;
-    }
-    var integerPart = parseInt(numberString.substr(0, indexSeparator));
-    var fractionPart = parseInt(numberString.substr(indexSeparator+1, indexSuffix - indexSeparator));
-    if (isNaN(fractionPart)) {
-      fractionPart = 0;
-    }
-    return integerPart + fractionPart/decimalMultiplier;
-  }
-
+ 
   function _setValue(element_id, text) {
     if (!text) {
       return;

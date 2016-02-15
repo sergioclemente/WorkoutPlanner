@@ -1,3 +1,9 @@
+# Playing with the app
+
+The current deployed code is been deployed at:
+
+https://intense-thicket-9526.herokuapp.com
+
 # Installing dependencies
 
 First of all install node js. Then install the following dependencies:
@@ -10,17 +16,10 @@ npm install nodemailer
 
 # Compiling and running
 
-* Compile
+* Compile and run tests
 
 ```
-tsc --module commonjs ./model.ts ./ui.ts --removeComments
-tsc --module commonjs ./tests.ts
-```
-
-* Running the tests
-
-```
-node tests.js
+build.sh
 ```
 
 * Starting the node server

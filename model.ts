@@ -1407,9 +1407,10 @@ export class UserProfile {
 	private runningTPaceMinMi: number;
 	private email: string;
 	
-	constructor(bikeFTP: number, runningTPaceMinMi: number, email: string = "") {
+	constructor(bikeFTP: number, runningTPace: string, email: string = "") {
 		this.bikeFTP = bikeFTP;
-		this.runningTPaceMinMi = runningTPaceMinMi;
+		// TODO: not working with other units
+		this.runningTPaceMinMi = this._extractNumber(runningTPace, 60, ":", "min/mi");
 		this.email = email;
 	}
 	
@@ -1424,7 +1425,28 @@ export class UserProfile {
 	getEmail() : string {
 		return this.email;
 	}
-	
+
+	_extractNumber(numberString, decimalMultiplier, strSeparator, strSuffix) {
+		var indexSuffix = numberString.indexOf(strSuffix);
+		var indexSeparator = numberString.indexOf(strSeparator);
+		// Lets be forgiving if the user didn't specify the separators
+		// 6:00 => 6:00 min/mi
+		// 6 min/mi => 6:00 min/mi
+		// 6 => 6:00 min/mi
+		if (indexSuffix < 0) {
+			indexSuffix = numberString.length;
+		}
+		if (indexSeparator < 0) {
+			indexSeparator = numberString.length;
+		}
+		var integerPart = parseInt(numberString.substr(0, indexSeparator));
+		var fractionPart = parseInt(numberString.substr(indexSeparator+1, indexSuffix - indexSeparator));
+		if (isNaN(fractionPart)) {
+			fractionPart = 0;
+		}
+		return integerPart + fractionPart/decimalMultiplier;
+	}
+
 	getPaceMinMi(intensity: Intensity) {
 		var pace_mph = IntensityUnitHelper.convertTo(
 			this.getRunningTPaceMinMi(),
