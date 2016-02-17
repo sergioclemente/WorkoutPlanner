@@ -1260,8 +1260,17 @@ var Model;
     })();
     Model.FileNameHelper = FileNameHelper;
     var Formatter = (function () {
-        function Formatter() {
+        function Formatter(userProfile, sportType, outputUnit) {
+            if (userProfile === void 0) { userProfile = null; }
+            if (sportType === void 0) { sportType = SportType.Unknown; }
+            if (outputUnit === void 0) { outputUnit = IntensityUnit.Unknown; }
             this.result = "";
+            this.userProfile = null;
+            this.sportType = SportType.Unknown;
+            this.outputUnit = IntensityUnit.Unknown;
+            this.userProfile = userProfile;
+            this.sportType = sportType;
+            this.outputUnit = outputUnit;
         }
         Formatter.formatNumber = function (value, decimalMultiplier, separator, unit) {
             var integerPart = Math.floor(value);
@@ -1280,9 +1289,12 @@ var Model;
                 return result;
             }
         };
-        Formatter.getIntervalTitle = function (interval) {
+        Formatter.getIntervalTitle = function (interval, userProfile, sportType, outputUnit) {
+            if (userProfile === void 0) { userProfile = null; }
+            if (sportType === void 0) { sportType = SportType.Unknown; }
+            if (outputUnit === void 0) { outputUnit = IntensityUnit.Unknown; }
             // TODO: instantiating visitor is a bit clowny
-            var f = new Formatter();
+            var f = new Formatter(userProfile, sportType, outputUnit);
             VisitorHelper.visit(f, interval);
             return f.result;
         };
@@ -1320,14 +1332,16 @@ var Model;
             for (var i = 0; i < interval.getIntervals().length; i++) {
                 var subInterval = interval.getIntervals()[i];
                 if (i == interval.getIntervals().length - 1 && isRestIncluded) {
+                    // remove extra ", "
                     this.result = this.result.slice(0, this.result.length - 2);
-                    this.result += " w/ " + subInterval.getDuration().toString() + " rest at " + subInterval.getIntensity().toString();
+                    this.result += " w/ " + subInterval.getDuration().toString() + " rest at " + this.getIntensityPretty(subInterval.getIntensity());
                 }
                 else {
-                    this.result += Formatter.getIntervalTitle(subInterval);
+                    this.result += Formatter.getIntervalTitle(subInterval, this.userProfile, this.sportType, this.outputUnit);
                 }
                 this.result += ", ";
             }
+            // remove extra ", "
             this.result = this.result.slice(0, this.result.length - 2);
         };
         // RepeatInterval
@@ -1338,14 +1352,35 @@ var Model;
         };
         // BuildInterval
         Formatter.prototype.visitBuildInterval = function (interval) {
-            this.result += "Build from " + interval.getStartIntensity().toString() + " to " + interval.getEndIntensity().toString() + " for " + interval.getDuration().toString();
+            this.result += "Build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity()) + " for " + interval.getDuration().toString();
         };
         // SimpleInterval
         Formatter.prototype.visitSimpleInterval = function (interval) {
-            this.result += interval.getIntensity().toString() + " for " + interval.getDuration().toString();
+            this.result += this.getIntensityPretty(interval.getIntensity()) + " for " + interval.getDuration().toString();
             var title = interval.getTitle();
             if (title.length > 0) {
                 this.result += " (" + title + ")";
+            }
+        };
+        Formatter.prototype.getIntensityPretty = function (intensity) {
+            if (this.outputUnit == IntensityUnit.Unknown || this.sportType == SportType.Unknown) {
+                return intensity.toString();
+            }
+            if (this.sportType == SportType.Bike) {
+                return intensity.toString() + "(" + Math.round(this.userProfile.getBikeFTP() * intensity.getValue()) + "w)";
+            }
+            else if (this.sportType == SportType.Run) {
+                var minMi = this.userProfile.getPaceMinMi(intensity);
+                var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, this.outputUnit);
+                if (this.outputUnit == IntensityUnit.Kmh || this.outputUnit == IntensityUnit.Mph) {
+                    return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
+                }
+                else {
+                    return Formatter.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
+                }
+            }
+            else {
+                return "Unknown";
             }
         };
         return Formatter;
@@ -1588,22 +1623,8 @@ var Model;
             return this;
         };
         WorkoutBuilder.prototype.getIntensityFriendly = function (intensity) {
-            if (this.sportType == SportType.Bike) {
-                return Math.round(this.userProfile.getBikeFTP() * intensity.getValue()) + "w";
-            }
-            else if (this.sportType == SportType.Run) {
-                var minMi = this.userProfile.getPaceMinMi(intensity);
-                var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, this.outputUnit);
-                if (this.outputUnit == IntensityUnit.Kmh || this.outputUnit == IntensityUnit.Mph) {
-                    return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
-                }
-                else {
-                    return Formatter.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
-                }
-            }
-            else {
-                throw new Error("Not implemented.");
-            }
+            var f = new Formatter(this.userProfile, this.sportType, this.outputUnit);
+            return f.getIntensityPretty(intensity);
         };
         WorkoutBuilder.prototype.getPrettyPrint = function (new_line) {
             if (new_line === void 0) { new_line = "\n"; }
@@ -1611,11 +1632,11 @@ var Model;
             var distanceInMiles = 0;
             var result = new_line;
             this.intervals.getIntervals().forEach(function (interval) {
-                result += ("* " + Formatter.getIntervalTitle(interval) + new_line);
+                result += ("* " + Formatter.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit) + new_line);
                 if (interval.getDuration().getDistanceInMiles() > 0) {
                     distanceInMiles += interval.getDuration().getDistanceInMiles();
                 }
-            });
+            }.bind(this));
             result += (new_line);
             result += ("Stats:");
             result += (new_line);

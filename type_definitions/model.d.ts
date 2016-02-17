@@ -237,13 +237,18 @@ export declare module Model {
     }
     class Formatter implements Visitor {
         result: string;
+        userProfile: UserProfile;
+        sportType: SportType;
+        outputUnit: IntensityUnit;
+        constructor(userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit);
         static formatNumber(value: number, decimalMultiplier: number, separator: string, unit: string): string;
         private static enforceDigits(value, digits);
-        static getIntervalTitle(interval: Interval): string;
+        static getIntervalTitle(interval: Interval, userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit): string;
         visitArrayInterval(interval: ArrayInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
         visitBuildInterval(interval: BuildInterval): any;
         visitSimpleInterval(interval: SimpleInterval): any;
+        getIntensityPretty(intensity: Intensity): string;
     }
     enum RunningPaceUnit {
         Unknown = 0,
@@ -299,9 +304,9 @@ export declare module Model {
     class WorkoutBuilder {
         private userProfile;
         private sportType;
+        private outputUnit;
         private intervals;
         private workoutDefinition;
-        private outputUnit;
         constructor(userProfile: UserProfile, sportType: SportType, outputUnit: IntensityUnit);
         getInterval(): ArrayInterval;
         getSportType(): SportType;

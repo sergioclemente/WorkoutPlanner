@@ -34,16 +34,16 @@ node ./server.js
 git push heroku master
 ```
 
-# Known Bugs
-* server should log status and error more cleanly. this includes emails as well
-
-# Feature requests
-* Add average speed as a profile entity
-* Extract speed estimation (consider weight, altitude and drag coefficient)
-* Refactor getMRCFile into a visitor
-* Refactor ZwiftDataVisitor to move finalize() into the base
-* Add training zones
-* Fix running training zones
+# Bugs/Feature requests
+* [P1] Add a new type of interval. Something like:
+3x[(1min, power), (30s, 55)] where power=80,90,100 Not sure what is the best way to represent this
+* [P2] Be more forgiving in the UI and show validation errors
+* [P3] server should log status and error more cleanly. this includes emails as well
+* [P3] Add average speed as a profile entity
+* [P3] Extract speed estimation (consider weight, altitude and drag coefficient)
+* [P3] Refactor getMRCFile into a visitor
+* [P3] Refactor ZwiftDataVisitor to move finalize() into the base
+* [P3] Fix running training zones
 
 ```
 Z2 (77-87)
@@ -51,10 +51,10 @@ Z3 (88-94)
 Z4 (95-101)
 
 ```
-* Add free ride do zwift
+* [P3] Add free ride do zwift
         <FreeRide Duration="600" FlatRoad="1"/>
-* Add react for generating emails
+* [P3] Add react for generating emails
 
 
-* D.ts files:
+# Where to find type definition files:
 ** https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/node/node.d.ts

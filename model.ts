@@ -1280,7 +1280,18 @@ export class FileNameHelper {
 
 export class Formatter implements Visitor {
 	result : string = "";
-	
+	userProfile: UserProfile = null;
+	sportType: SportType = SportType.Unknown;
+	outputUnit: IntensityUnit = IntensityUnit.Unknown;
+
+	constructor(userProfile: UserProfile = null,
+				sportType: SportType = SportType.Unknown,
+				outputUnit: IntensityUnit = IntensityUnit.Unknown) {
+		this.userProfile = userProfile;
+		this.sportType = sportType;
+		this.outputUnit = outputUnit;
+	}
+
 	static formatNumber(value: number, decimalMultiplier : number, separator : string, unit : string) {
 	    var integerPart = Math.floor(value);
 	    var fractionPart = Math.round(decimalMultiplier * (value - integerPart));
@@ -1299,9 +1310,12 @@ export class Formatter implements Visitor {
 		}
 	}
 	
-	static getIntervalTitle(interval: Interval) : string {
+	static getIntervalTitle(interval: Interval,
+							userProfile: UserProfile = null,
+							sportType: SportType = SportType.Unknown,
+							outputUnit: IntensityUnit = IntensityUnit.Unknown) : string {
 		// TODO: instantiating visitor is a bit clowny
-		var f = new Formatter();
+		var f = new Formatter(userProfile, sportType, outputUnit);
 		VisitorHelper.visit(f, interval);
 
 		return f.result;
@@ -1345,14 +1359,16 @@ export class Formatter implements Visitor {
 			var subInterval = interval.getIntervals()[i];
 			
 			if (i == interval.getIntervals().length - 1 && isRestIncluded) {
+				// remove extra ", "
 				this.result = this.result.slice(0, this.result.length - 2);
-				this.result += " w/ " + subInterval.getDuration().toString() + " rest at " + subInterval.getIntensity().toString();
+				this.result += " w/ " + subInterval.getDuration().toString() + " rest at " + this.getIntensityPretty(subInterval.getIntensity());
 			} else {
-				this.result += Formatter.getIntervalTitle(subInterval);
+				this.result += Formatter.getIntervalTitle(subInterval, this.userProfile, this.sportType, this.outputUnit);
 			}
 			this.result += ", ";
 		}
 		
+		// remove extra ", "
 		this.result = this.result.slice(0, this.result.length - 2);
 	}
 	
@@ -1365,15 +1381,34 @@ export class Formatter implements Visitor {
 	
 	// BuildInterval
 	visitBuildInterval(interval: BuildInterval) : any {
-		this.result += "Build from " + interval.getStartIntensity().toString() + " to " + interval.getEndIntensity().toString() + " for " + interval.getDuration().toString();
+		this.result += "Build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity()) + " for " + interval.getDuration().toString();
 	}
 	
 	// SimpleInterval
 	visitSimpleInterval(interval: SimpleInterval) : any {
-		this.result += interval.getIntensity().toString() + " for " + interval.getDuration().toString(); 
+		this.result += this.getIntensityPretty(interval.getIntensity()) + " for " + interval.getDuration().toString(); 
 		var title = interval.getTitle();
 		if (title.length > 0) {
 			this.result += " (" + title + ")";
+		}
+	}
+
+	getIntensityPretty(intensity: Intensity): string {
+		if (this.outputUnit == IntensityUnit.Unknown || this.sportType == SportType.Unknown) {
+			return intensity.toString();
+		}
+		if (this.sportType == SportType.Bike) {
+			return intensity.toString() + "(" + Math.round(this.userProfile.getBikeFTP() * intensity.getValue()) + "w)";
+		} else if (this.sportType == SportType.Run) {
+			var minMi = this.userProfile.getPaceMinMi(intensity);
+			var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, this.outputUnit); 
+			if (this.outputUnit == IntensityUnit.Kmh || this.outputUnit == IntensityUnit.Mph) {
+				return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
+			} else {
+				return Formatter.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
+			}
+		} else {
+			return "Unknown";
 		}
 	}
 }
@@ -1620,9 +1655,9 @@ export class ArrayIterator {
 export class WorkoutBuilder {
 	private userProfile: UserProfile;
 	private sportType: SportType;
+	private outputUnit: IntensityUnit;
 	private intervals: ArrayInterval;
 	private workoutDefinition: string;
-	private outputUnit: IntensityUnit;
 	
 	constructor(userProfile: UserProfile, sportType: SportType, outputUnit: IntensityUnit) {
 		this.userProfile = userProfile;
@@ -1648,19 +1683,8 @@ export class WorkoutBuilder {
 	}
 	
 	getIntensityFriendly(intensity: Intensity) {
-		if (this.sportType == SportType.Bike) {
-			return Math.round(this.userProfile.getBikeFTP() * intensity.getValue()) + "w";
-		} else if (this.sportType == SportType.Run) {
-			var minMi = this.userProfile.getPaceMinMi(intensity);
-			var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, this.outputUnit); 
-			if (this.outputUnit == IntensityUnit.Kmh || this.outputUnit == IntensityUnit.Mph) {
-				return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
-			} else {
-				return Formatter.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
-			}
-		} else {
-			throw new Error("Not implemented.");
-		}
+		var f = new Formatter(this.userProfile, this.sportType, this.outputUnit);
+		return f.getIntensityPretty(intensity);
 	}
 	
 	getPrettyPrint(new_line : string = "\n") : string {
@@ -1669,11 +1693,11 @@ export class WorkoutBuilder {
 		var distanceInMiles = 0;
 		var result = new_line;
         this.intervals.getIntervals().forEach(function(interval) {
-            result += ("* " + Formatter.getIntervalTitle(interval) + new_line);
+            result += ("* " + Formatter.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit) + new_line);
             if (interval.getDuration().getDistanceInMiles() > 0) {
                 distanceInMiles += interval.getDuration().getDistanceInMiles();
             }
-        });
+        }.bind(this));
 		
 		result += (new_line);
 		result += ("Stats:");
