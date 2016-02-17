@@ -71,6 +71,12 @@ expect_eq_nbr(56.25, int_par_1hr_75.getTSS());
 var int_par_2hr_75_85 = _.Model.IntervalParser.parse(of_bike, "(1hr, 75), (1hr, 85)");
 expect_eq_nbr(129.5, int_par_2hr_75_85.getTSS());
 
+var simple1min85 = _.Model.IntervalParser.parse(of_bike, "(1, 85)");
+expect_eq_nbr(0.85, simple1min85.getIntensities()[0].getValue());
+
+var build1min5585 = _.Model.IntervalParser.parse(of_bike, "(1, 55, 85)");
+expect_eq_nbr(0.55, build1min5585.getIntensities()[0].getValue());
+expect_eq_nbr(0.85, build1min5585.getIntensities()[1].getValue());
 
 // UserProfile 
 var up_6tpace = new _.Model.UserProfile(310, "6:00min/mi");

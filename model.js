@@ -803,16 +803,8 @@ var Model;
                 var ch = input[i];
                 if (ch == "(") {
                     i++;
-                    var nums = {
-                        0: 0,
-                        1: 0,
-                        2: 0
-                    };
-                    var units = {
-                        0: "",
-                        1: "",
-                        2: ""
-                    };
+                    var nums = {};
+                    var units = {};
                     var title = "";
                     var numIndex = 0;
                     var isInTitle = false;
@@ -825,23 +817,34 @@ var Model;
                             var durationUnit;
                             var intensities = [];
                             // Do we have the units?
-                            var containsUnit = units[0] != "" ||
-                                units[1] != "" ||
-                                units[2] != "";
-                            // Tries to be forgiving by guessing the unit by using the biggest value
-                            // TODO: not working with build intervals
-                            if (!containsUnit) {
-                                if (nums[0] < nums[1]) {
-                                    units[0] = "min";
-                                    units[1] = "%";
+                            var containsUnit = false;
+                            // Tries to guess where is the time and where is the intensity
+                            // The assumption here is that intensity will likely be bigger
+                            // than time. For example: 65% for 60min
+                            var minIndex = -1;
+                            var minValue = 9999999999999;
+                            for (var k = 0; k < Object.keys(units).length; k++) {
+                                containsUnit = containsUnit || units[k] != "";
+                                if (nums[k] < minValue) {
+                                    minValue = nums[k];
+                                    minIndex = k;
                                 }
-                                else {
-                                    units[0] = "%";
-                                    units[1] = "min";
+                            }
+                            // Patch the missing units now
+                            if (!containsUnit) {
+                                for (var k = 0; k < Object.keys(units).length; k++) {
+                                    if (units[k] == "") {
+                                        if (k == minIndex) {
+                                            units[k] = "min";
+                                        }
+                                        else {
+                                            units[k] = "%";
+                                        }
+                                    }
                                 }
                             }
                             // Handle properly the duration unit
-                            for (var k = 0; k < 3; k++) {
+                            for (var k = 0; k < Object.keys(units).length; k++) {
                                 if (isDurationUnit(units[k])) {
                                     durationUnit = getDurationUnitFromString(units[k]);
                                     durationValue = nums[k];

@@ -36,7 +36,8 @@ git push heroku master
 
 # Bugs/Feature requests
 * [P1] Add a new type of interval. Something like:
-3x[(1min, power), (30s, 55)] where power=80,90,100 Not sure what is the best way to represent this
+3x[(1min, 90, 100, 110), (30s, 55)]
+Probably best way of implementing this would be translating into an array interval with 6 segments.
 * [P2] Be more forgiving in the UI and show validation errors
 * [P3] server should log status and error more cleanly. this includes emails as well
 * [P3] Add average speed as a profile entity
