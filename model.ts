@@ -603,7 +603,7 @@ export class SimpleInterval extends BaseInterval {
 	}
 }
 
-export class BuildInterval extends BaseInterval {
+export class RampBuildInterval extends BaseInterval {
 	private startIntensity : Intensity;
 	private endIntensity: Intensity;
 	private duration:Duration;
@@ -615,7 +615,7 @@ export class BuildInterval extends BaseInterval {
 		this.duration = duration;
 	}
 	getIntensity() : Intensity {
-		return BuildInterval.computeAverageIntensity(this.startIntensity, this.endIntensity);
+		return RampBuildInterval.computeAverageIntensity(this.startIntensity, this.endIntensity);
 	}
 	getDuration(): Duration {
 		return this.duration;
@@ -881,9 +881,9 @@ export class IntervalParser {
 						if (intensities.length == 2) {
 							var startIntensity = intensities[0];
 							var endIntensity = intensities[1]
-							var intensity = BuildInterval.computeAverageIntensity(startIntensity, endIntensity);
+							var intensity = RampBuildInterval.computeAverageIntensity(startIntensity, endIntensity);
 							var duration = factory.createDuration(intensity, durationUnit, durationValue);
-							interval = new BuildInterval(title.trim(), startIntensity, endIntensity, duration);
+							interval = new RampBuildInterval(title.trim(), startIntensity, endIntensity, duration);
 						} else if (intensities.length == 1) {
 							var intensity = intensities[0];
 							var duration = factory.createDuration(intensity, durationUnit, durationValue);
@@ -966,8 +966,8 @@ export class VisitorHelper {
 	static visit(visitor: Visitor, interval:Interval) : any {
 		if (interval instanceof SimpleInterval) {
 	      return visitor.visitSimpleInterval(<SimpleInterval>interval);
-	    } else if (interval instanceof BuildInterval) {
-	      return visitor.visitBuildInterval(<BuildInterval>interval);
+	    } else if (interval instanceof RampBuildInterval) {
+	      return visitor.visitRampBuildInterval(<RampBuildInterval>interval);
 	    } else if (interval instanceof RepeatInterval) {
 	      return visitor.visitRepeatInterval(<RepeatInterval>interval);
 	    } else if (interval instanceof ArrayInterval) {
@@ -980,7 +980,7 @@ export class VisitorHelper {
 
 export interface Visitor {
 	visitSimpleInterval(interval: SimpleInterval) : void;
-	visitBuildInterval(interval: BuildInterval) : void;
+	visitRampBuildInterval(interval: RampBuildInterval) : void;
 	visitRepeatInterval(interval: RepeatInterval) : void;
 	visitArrayInterval(interval: ArrayInterval) : void;
 }
@@ -991,7 +991,7 @@ export class BaseVisitor implements Visitor {
 		// not aware that typescript supports abstract methods
 		throw new Error("not implemented");
 	}
-	visitBuildInterval(interval: BuildInterval) : void {
+	visitRampBuildInterval(interval: RampBuildInterval) : void {
 		// not aware that typescript supports abstract methods
 		throw new Error("not implemented");
 	}
@@ -1059,7 +1059,7 @@ export class ZonesVisitor extends BaseVisitor {
 		this.incrementZoneTime(interval.getIntensity().getValue(), interval.getDuration().getSeconds());
 				
 	}
-	visitBuildInterval(interval: BuildInterval) : void {
+	visitRampBuildInterval(interval: RampBuildInterval) : void {
 		var startIntensity = interval.getStartIntensity().getValue();
 		var endIntensity = interval.getEndIntensity().getValue();
 		var duration = interval.getDuration().getSeconds();
@@ -1095,7 +1095,7 @@ export class IntensitiesVisitor extends BaseVisitor {
 	visitSimpleInterval(interval: SimpleInterval) : void {
 		this.intensities[interval.getIntensity().getValue()] = interval.getIntensity();		
 	}
-	visitBuildInterval(interval: BuildInterval) : void {
+	visitRampBuildInterval(interval: RampBuildInterval) : void {
 		this.intensities[interval.getStartIntensity().getValue()] = interval.getStartIntensity();
 		this.intensities[interval.getEndIntensity().getValue()] = interval.getEndIntensity();
 	}
@@ -1133,7 +1133,7 @@ export class DataPointVisitor extends BaseVisitor {
 		this.incrementX(interval.getDuration());
 		this.data.push(new Point(this.x, interval.getIntensity(), title));
 	}
-	visitBuildInterval(interval: BuildInterval) {
+	visitRampBuildInterval(interval: RampBuildInterval) {
 		var title = Formatter.getIntervalTitle(interval);
 		this.initX(interval.getDuration());
 		this.data.push(new Point(this.x, interval.getStartIntensity(), title));
@@ -1175,7 +1175,7 @@ export class ZwiftDataVisitor extends BaseVisitor {
 		this.content += `\t\t\t<textevent timeoffset='0' message='${title}'/>\n`;
 		this.content += `\t\t</SteadyState>\n`;
 	}
-	visitBuildInterval(interval: BuildInterval) {
+	visitRampBuildInterval(interval: RampBuildInterval) {
 		var duration = interval.getDuration().getSeconds();
 		var intensityStart = interval.getStartIntensity().getValue();
 		var intensityEnd = interval.getEndIntensity().getValue();
@@ -1223,7 +1223,7 @@ export class MRCCourseDataVisitor extends BaseVisitor {
 		this.processCourseData(interval.getIntensity(), interval.getDuration().getSeconds());
 		this.processTitle(interval);
 	}
-	visitBuildInterval(interval: BuildInterval) {
+	visitRampBuildInterval(interval: RampBuildInterval) {
 		this.processCourseData(interval.getStartIntensity(), 0);
 		this.processCourseData(interval.getEndIntensity(), interval.getDuration().getSeconds());
 		this.processTitle(interval);
@@ -1384,8 +1384,8 @@ export class Formatter implements Visitor {
 		this.result += ")";
 	}
 	
-	// BuildInterval
-	visitBuildInterval(interval: BuildInterval) : any {
+	// RampBuildInterval
+	visitRampBuildInterval(interval: RampBuildInterval) : any {
 		this.result += "Build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity()) + " for " + interval.getDuration().toString();
 	}
 	

@@ -120,7 +120,7 @@ export declare module Model {
         getIntensity(): Intensity;
         getDuration(): Duration;
     }
-    class BuildInterval extends BaseInterval {
+    class RampBuildInterval extends BaseInterval {
         private startIntensity;
         private endIntensity;
         private duration;
@@ -174,13 +174,13 @@ export declare module Model {
     }
     interface Visitor {
         visitSimpleInterval(interval: SimpleInterval): void;
-        visitBuildInterval(interval: BuildInterval): void;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
         visitArrayInterval(interval: ArrayInterval): void;
     }
     class BaseVisitor implements Visitor {
         visitSimpleInterval(interval: SimpleInterval): void;
-        visitBuildInterval(interval: BuildInterval): void;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
         visitArrayInterval(interval: ArrayInterval): void;
     }
@@ -192,13 +192,13 @@ export declare module Model {
         private static getZone(intensity);
         incrementZoneTime(intensity: number, numberOfSeconds: number): void;
         visitSimpleInterval(interval: SimpleInterval): void;
-        visitBuildInterval(interval: BuildInterval): void;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
         getTimeInZones(): any[];
     }
     class IntensitiesVisitor extends BaseVisitor {
         private intensities;
         visitSimpleInterval(interval: SimpleInterval): void;
-        visitBuildInterval(interval: BuildInterval): void;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
         getIntensities(): Intensity[];
     }
     class DataPointVisitor extends BaseVisitor {
@@ -207,7 +207,7 @@ export declare module Model {
         initX(duration: Duration): void;
         incrementX(duration: Duration): void;
         visitSimpleInterval(interval: SimpleInterval): void;
-        visitBuildInterval(interval: BuildInterval): void;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
     }
     class ZwiftDataVisitor extends BaseVisitor {
         private content;
@@ -215,7 +215,7 @@ export declare module Model {
         finalize(): void;
         getIntervalTitle(interval: Interval): string;
         visitSimpleInterval(interval: SimpleInterval): void;
-        visitBuildInterval(interval: BuildInterval): void;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
         getContent(): string;
     }
     class MRCCourseDataVisitor extends BaseVisitor {
@@ -228,7 +228,7 @@ export declare module Model {
         getCourseData(): string;
         getPerfPRODescription(): string;
         visitSimpleInterval(interval: SimpleInterval): void;
-        visitBuildInterval(interval: BuildInterval): void;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
     }
     class FileNameHelper {
         private intervals;
@@ -246,7 +246,7 @@ export declare module Model {
         static getIntervalTitle(interval: Interval, userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit): string;
         visitArrayInterval(interval: ArrayInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
-        visitBuildInterval(interval: BuildInterval): any;
+        visitRampBuildInterval(interval: RampBuildInterval): any;
         visitSimpleInterval(interval: SimpleInterval): any;
         getIntensityPretty(intensity: Intensity): string;
     }

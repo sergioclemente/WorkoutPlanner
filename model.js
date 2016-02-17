@@ -608,32 +608,32 @@ var Model;
         return SimpleInterval;
     })(BaseInterval);
     Model.SimpleInterval = SimpleInterval;
-    var BuildInterval = (function (_super) {
-        __extends(BuildInterval, _super);
-        function BuildInterval(title, startIntensity, endIntensity, duration) {
+    var RampBuildInterval = (function (_super) {
+        __extends(RampBuildInterval, _super);
+        function RampBuildInterval(title, startIntensity, endIntensity, duration) {
             _super.call(this, title);
             this.startIntensity = startIntensity;
             this.endIntensity = endIntensity;
             this.duration = duration;
         }
-        BuildInterval.prototype.getIntensity = function () {
-            return BuildInterval.computeAverageIntensity(this.startIntensity, this.endIntensity);
+        RampBuildInterval.prototype.getIntensity = function () {
+            return RampBuildInterval.computeAverageIntensity(this.startIntensity, this.endIntensity);
         };
-        BuildInterval.prototype.getDuration = function () {
+        RampBuildInterval.prototype.getDuration = function () {
             return this.duration;
         };
-        BuildInterval.prototype.getStartIntensity = function () {
+        RampBuildInterval.prototype.getStartIntensity = function () {
             return this.startIntensity;
         };
-        BuildInterval.prototype.getEndIntensity = function () {
+        RampBuildInterval.prototype.getEndIntensity = function () {
             return this.endIntensity;
         };
-        BuildInterval.computeAverageIntensity = function (intensity1, intensity2) {
+        RampBuildInterval.computeAverageIntensity = function (intensity1, intensity2) {
             return Intensity.combine([intensity1, intensity2], [1, 1]);
         };
-        return BuildInterval;
+        return RampBuildInterval;
     })(BaseInterval);
-    Model.BuildInterval = BuildInterval;
+    Model.RampBuildInterval = RampBuildInterval;
     var Point = (function () {
         function Point(x, y, label) {
             this.x = x;
@@ -860,9 +860,9 @@ var Model;
                             if (intensities.length == 2) {
                                 var startIntensity = intensities[0];
                                 var endIntensity = intensities[1];
-                                var intensity = BuildInterval.computeAverageIntensity(startIntensity, endIntensity);
+                                var intensity = RampBuildInterval.computeAverageIntensity(startIntensity, endIntensity);
                                 var duration = factory.createDuration(intensity, durationUnit, durationValue);
-                                interval = new BuildInterval(title.trim(), startIntensity, endIntensity, duration);
+                                interval = new RampBuildInterval(title.trim(), startIntensity, endIntensity, duration);
                             }
                             else if (intensities.length == 1) {
                                 var intensity = intensities[0];
@@ -951,8 +951,8 @@ var Model;
             if (interval instanceof SimpleInterval) {
                 return visitor.visitSimpleInterval(interval);
             }
-            else if (interval instanceof BuildInterval) {
-                return visitor.visitBuildInterval(interval);
+            else if (interval instanceof RampBuildInterval) {
+                return visitor.visitRampBuildInterval(interval);
             }
             else if (interval instanceof RepeatInterval) {
                 return visitor.visitRepeatInterval(interval);
@@ -974,7 +974,7 @@ var Model;
             // not aware that typescript supports abstract methods
             throw new Error("not implemented");
         };
-        BaseVisitor.prototype.visitBuildInterval = function (interval) {
+        BaseVisitor.prototype.visitRampBuildInterval = function (interval) {
             // not aware that typescript supports abstract methods
             throw new Error("not implemented");
         };
@@ -1049,7 +1049,7 @@ var Model;
         ZonesVisitor.prototype.visitSimpleInterval = function (interval) {
             this.incrementZoneTime(interval.getIntensity().getValue(), interval.getDuration().getSeconds());
         };
-        ZonesVisitor.prototype.visitBuildInterval = function (interval) {
+        ZonesVisitor.prototype.visitRampBuildInterval = function (interval) {
             var startIntensity = interval.getStartIntensity().getValue();
             var endIntensity = interval.getEndIntensity().getValue();
             var duration = interval.getDuration().getSeconds();
@@ -1087,7 +1087,7 @@ var Model;
         IntensitiesVisitor.prototype.visitSimpleInterval = function (interval) {
             this.intensities[interval.getIntensity().getValue()] = interval.getIntensity();
         };
-        IntensitiesVisitor.prototype.visitBuildInterval = function (interval) {
+        IntensitiesVisitor.prototype.visitRampBuildInterval = function (interval) {
             this.intensities[interval.getStartIntensity().getValue()] = interval.getStartIntensity();
             this.intensities[interval.getEndIntensity().getValue()] = interval.getEndIntensity();
         };
@@ -1126,7 +1126,7 @@ var Model;
             this.incrementX(interval.getDuration());
             this.data.push(new Point(this.x, interval.getIntensity(), title));
         };
-        DataPointVisitor.prototype.visitBuildInterval = function (interval) {
+        DataPointVisitor.prototype.visitRampBuildInterval = function (interval) {
             var title = Formatter.getIntervalTitle(interval);
             this.initX(interval.getDuration());
             this.data.push(new Point(this.x, interval.getStartIntensity(), title));
@@ -1161,7 +1161,7 @@ var Model;
             this.content += "\t\t\t<textevent timeoffset='0' message='" + title + "'/>\n";
             this.content += "\t\t</SteadyState>\n";
         };
-        ZwiftDataVisitor.prototype.visitBuildInterval = function (interval) {
+        ZwiftDataVisitor.prototype.visitRampBuildInterval = function (interval) {
             var duration = interval.getDuration().getSeconds();
             var intensityStart = interval.getStartIntensity().getValue();
             var intensityEnd = interval.getEndIntensity().getValue();
@@ -1210,7 +1210,7 @@ var Model;
             this.processCourseData(interval.getIntensity(), interval.getDuration().getSeconds());
             this.processTitle(interval);
         };
-        MRCCourseDataVisitor.prototype.visitBuildInterval = function (interval) {
+        MRCCourseDataVisitor.prototype.visitRampBuildInterval = function (interval) {
             this.processCourseData(interval.getStartIntensity(), 0);
             this.processCourseData(interval.getEndIntensity(), interval.getDuration().getSeconds());
             this.processTitle(interval);
@@ -1353,8 +1353,8 @@ var Model;
             this.visitArrayInterval(interval);
             this.result += ")";
         };
-        // BuildInterval
-        Formatter.prototype.visitBuildInterval = function (interval) {
+        // RampBuildInterval
+        Formatter.prototype.visitRampBuildInterval = function (interval) {
             this.result += "Build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity()) + " for " + interval.getDuration().toString();
         };
         // SimpleInterval
