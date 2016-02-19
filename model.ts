@@ -645,8 +645,8 @@ export class Point {
 }
 
 export class ArrayInterval implements Interval {
-	private title: string;
-	private intervals: Interval[];
+	protected title: string;
+	protected intervals: Interval[];
 	
 	constructor(title: string, intervals: Interval[]) {
 		this.title = title;
@@ -663,7 +663,7 @@ export class ArrayInterval implements Interval {
 
 		return Intensity.combine(intensities, weights);
 	}
-	getDuration(): Duration {
+	getDuration() : Duration {
 		// If the interval is empty lets bail right away otherwise reducing the array will cause an
 		// exception
 		if (this.intervals.length == 0) {
@@ -749,6 +749,62 @@ export class RepeatInterval extends ArrayInterval {
 	}
 }
 
+// Step is defined as follows
+// 2[(1min, 85, 95), (30s, 55)]
+// Which in fact translates to:
+// * 1min @ 85
+// * 30s @ 55
+// * 1min @ 95
+// * 30s @ 55
+export class StepBuildInterval extends ArrayInterval {
+	// The constructor receives the step intervals, the rest will be added later on
+	// so that for the above interval it will look like:
+	// [(1min, 85), (1min, 95), (30s, 55)]
+	constructor(title: string, intervals: Interval[]) {
+		super(title, intervals);
+	}
+	getIntensity(): Intensity {
+		var intensities : Intensity[] = this.intervals.map(function(value, index, array) {
+			return value.getIntensity();
+		});
+		var repeatCount = this.getRepeatCount();
+		var weights : number[] = this.intervals.map(function(value, index, array) {
+			return value.getDuration().getSeconds() * repeatCount;
+		});
+
+		return Intensity.combine(intensities, weights);
+	}
+	getRepeatCount() : number {
+		return this.intervals.length - 1;
+	}
+	getStepInterval(idx : number) : Interval {
+		return this.intervals[idx];
+	}
+	getRestInterval() : Interval {
+		return this.intervals[this.intervals.length - 1];
+	}
+	getDuration(): Duration {
+		var durations = [];
+		for (var i = 0; i < this.intervals.length; i++) {
+			durations[i] = this.intervals[i].getDuration();
+		}
+		if (durations.length < 2) {
+			return durations[0];
+		} else if (durations.length <= 2) {
+			return Duration.combine(durations[0], durations[1]);
+		} else {
+			var duration = Duration.combine(durations[0], durations[1]);
+			for (var i = 2 ; i < durations.length - 1; i++) {
+				duration = Duration.combine(duration, durations[i]);
+			}
+			for (var i = 0 ; i < this.getRepeatCount(); i++) {
+				duration = Duration.combine(duration, durations[durations.length-1]);
+			}
+			return duration;
+		}
+	}
+}
+
 export class IntervalParser {
 	static getCharVal(ch: string) : number {
 		if (ch.length == 1) {
@@ -812,7 +868,8 @@ export class IntervalParser {
 	static parse(factory: ObjectFactory, input: string) : ArrayInterval{
 		var result = new ArrayInterval("Workout", []);
 		
-		var stack = [result];
+		var stack = [];
+		stack.push(result);
 
 		for (var i = 0 ; i < input.length; i++) {
 			var ch = input[i];
@@ -878,6 +935,33 @@ export class IntervalParser {
 							}
 						}
 						
+						// Take a peek at the top of the stack
+						if (stack[stack.length-1] instanceof RepeatInterval) {
+							if (intensities.length >= 2) {
+								// OK this should not be a RepeatInterval, it should be
+								// a StepBuildInterval instead
+
+								// Remove the ArrayInterval from the top and from the parent
+								stack.pop();
+								stack[stack.length-1].getIntervals().pop();
+
+								// add the new intervals
+								var step_intervals = [];
+								for (var k = 0 ; k < intensities.length; k++) {
+									var step_duration = factory.createDuration(intensities[k], durationUnit, durationValue);
+									step_intervals.push(new SimpleInterval("", intensities[k], step_duration));
+								}
+
+								var bsi = new StepBuildInterval("", step_intervals);
+
+								// put back to the parent and top of the stack
+								stack[stack.length-1].getIntervals().push(bsi);
+								stack.push(bsi);
+								break;
+							}
+						}
+	
+
 						if (intensities.length == 2) {
 							var startIntensity = intensities[0];
 							var endIntensity = intensities[1]
@@ -947,7 +1031,7 @@ export class IntervalParser {
 				i = res.i;
 				var ri = new RepeatInterval("", null, null, res.value);
 				stack[stack.length-1].getIntervals().push(ri);
-				stack.push(ri);	
+				stack.push(ri);
 				
 				// Repeat interval format is something like
 				// 4[(3,90),(3,55)], so let's consume the next bracket 
@@ -965,8 +1049,10 @@ export class IntervalParser {
 export class VisitorHelper {
 	static visit(visitor: Visitor, interval:Interval) : any {
 		if (interval instanceof SimpleInterval) {
-	      return visitor.visitSimpleInterval(<SimpleInterval>interval);
-	    } else if (interval instanceof RampBuildInterval) {
+			return visitor.visitSimpleInterval(<SimpleInterval>interval);
+		} else if (interval instanceof StepBuildInterval) {
+			return visitor.visitStepBuildInterval(<StepBuildInterval>interval);
+		} else if (interval instanceof RampBuildInterval) {
 	      return visitor.visitRampBuildInterval(<RampBuildInterval>interval);
 	    } else if (interval instanceof RepeatInterval) {
 	      return visitor.visitRepeatInterval(<RepeatInterval>interval);
@@ -980,6 +1066,7 @@ export class VisitorHelper {
 
 export interface Visitor {
 	visitSimpleInterval(interval: SimpleInterval) : void;
+	visitStepBuildInterval(interval: StepBuildInterval): void;
 	visitRampBuildInterval(interval: RampBuildInterval) : void;
 	visitRepeatInterval(interval: RepeatInterval) : void;
 	visitArrayInterval(interval: ArrayInterval) : void;
@@ -990,6 +1077,15 @@ export class BaseVisitor implements Visitor {
 	visitSimpleInterval(interval: SimpleInterval) : void {
 		// not aware that typescript supports abstract methods
 		throw new Error("not implemented");
+	}
+	visitStepBuildInterval(interval: StepBuildInterval) : void {
+		// Generic implementation
+		for (var i = 0; i < interval.getRepeatCount() ; i++) {
+			// step interval
+			this.visitSimpleInterval(<SimpleInterval>(interval.getStepInterval(i)));
+			// rest interval
+			this.visitSimpleInterval(<SimpleInterval>(interval.getRestInterval()));
+		}
 	}
 	visitRampBuildInterval(interval: RampBuildInterval) : void {
 		// not aware that typescript supports abstract methods
@@ -1326,6 +1422,10 @@ export class Formatter implements Visitor {
 		return f.result;
 	}
 	
+	visitRestInterval(interval: Interval) : void {
+		this.result += " w/ " + interval.getDuration().toString() + " rest at " + this.getIntensityPretty(interval.getIntensity());
+	}
+
 	// ArrayInterval
 	visitArrayInterval(interval: ArrayInterval) {
 		// Detect which subtype is. Couple of possibilities:
@@ -1366,7 +1466,7 @@ export class Formatter implements Visitor {
 			if (i == interval.getIntervals().length - 1 && isRestIncluded) {
 				// remove extra ", "
 				this.result = this.result.slice(0, this.result.length - 2);
-				this.result += " w/ " + subInterval.getDuration().toString() + " rest at " + this.getIntensityPretty(subInterval.getIntensity());
+				this.visitRestInterval(subInterval);
 			} else {
 				this.result += Formatter.getIntervalTitle(subInterval, this.userProfile, this.sportType, this.outputUnit);
 			}
@@ -1389,6 +1489,25 @@ export class Formatter implements Visitor {
 		this.result += "Build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity()) + " for " + interval.getDuration().toString();
 	}
 	
+	visitStepBuildInterval(interval: StepBuildInterval) : void {
+		// TODO: There is a bit of semantic coupling here.
+		// visitStepBuildInterval knows that all durations of the step are the same.
+		this.result += interval.getRepeatCount() + "x (";
+		
+		this.result += interval.getStepInterval(0).getDuration().toString() + " at ";
+
+		for (var i = 0 ; i < interval.getRepeatCount(); i++) {
+			this.result += this.getIntensityPretty(interval.getStepInterval(i).getIntensity());
+			this.result += ", ";			
+		}
+		// remove extra ", "
+		this.result = this.result.slice(0, this.result.length - 2);
+		
+		this.visitRestInterval(interval.getRestInterval());		
+
+		this.result += ")";
+	}
+
 	// SimpleInterval
 	visitSimpleInterval(interval: SimpleInterval) : any {
 		this.result += this.getIntensityPretty(interval.getIntensity()) + " for " + interval.getDuration().toString(); 

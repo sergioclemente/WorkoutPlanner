@@ -102,3 +102,17 @@ var baseLinePlusRepeat = _.Model.IntervalParser.parse(of_bike, "(1hr, 75) 2[(1hr
 expect_eq_nbr(202, baseLinePlusRepeat.getTSS(), 0.1);
 expect_eq_nbr(3 * 3600, baseLinePlusRepeat.getDuration().getSeconds());
 expect_eq_nbr(0.816, baseLinePlusRepeat.getIntensity().getValue());
+// StepBuildInterval basic tests
+var duration1min = new _.Model.Duration(_.Model.DurationUnit.Seconds, 60, 60, 0);
+var duration30s = new _.Model.Duration(_.Model.DurationUnit.Seconds, 30, 30, 0);
+var si1min80 = new _.Model.SimpleInterval("", new _.Model.Intensity(80), duration1min);
+var si1min90 = new _.Model.SimpleInterval("", new _.Model.Intensity(90), duration1min);
+var si1min100 = new _.Model.SimpleInterval("", new _.Model.Intensity(100), duration1min);
+var si30s50 = new _.Model.SimpleInterval("", new _.Model.Intensity(50), duration30s);
+var sbi = new _.Model.StepBuildInterval("", [si1min80, si1min90, si1min100, si30s50]);
+expect_eq_nbr(3, sbi.getRepeatCount());
+expect_eq_nbr(3 * 60 + 3 * 30, sbi.getDuration().getSeconds());
+var step_build_85_100 = _.Model.IntervalParser.parse(of_bike, "3[(1min, 80, 90, 100), (30s, 50)]");
+expect_eq_nbr(5.8, step_build_85_100.getTSS(), 0.1);
+expect_eq_nbr(3 * 60 + 3 * 30, step_build_85_100.getDuration().getSeconds());
+expect_eq_nbr(0.88, step_build_85_100.getIntensity().getValue());

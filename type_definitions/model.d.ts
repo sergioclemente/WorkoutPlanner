@@ -138,8 +138,8 @@ export declare module Model {
         constructor(x: Duration, y: Intensity, label: string);
     }
     class ArrayInterval implements Interval {
-        private title;
-        private intervals;
+        protected title: string;
+        protected intervals: Interval[];
         constructor(title: string, intervals: Interval[]);
         getIntensity(): Intensity;
         getDuration(): Duration;
@@ -155,6 +155,14 @@ export declare module Model {
         constructor(title: string, mainInterval: Interval, restInterval: Interval, repeatCount: number);
         getDuration(): Duration;
         getRepeatCount(): number;
+    }
+    class StepBuildInterval extends ArrayInterval {
+        constructor(title: string, intervals: Interval[]);
+        getIntensity(): Intensity;
+        getRepeatCount(): number;
+        getStepInterval(idx: number): Interval;
+        getRestInterval(): Interval;
+        getDuration(): Duration;
     }
     class IntervalParser {
         static getCharVal(ch: string): number;
@@ -174,12 +182,14 @@ export declare module Model {
     }
     interface Visitor {
         visitSimpleInterval(interval: SimpleInterval): void;
+        visitStepBuildInterval(interval: StepBuildInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
         visitArrayInterval(interval: ArrayInterval): void;
     }
     class BaseVisitor implements Visitor {
         visitSimpleInterval(interval: SimpleInterval): void;
+        visitStepBuildInterval(interval: StepBuildInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
         visitArrayInterval(interval: ArrayInterval): void;
@@ -244,9 +254,11 @@ export declare module Model {
         static formatNumber(value: number, decimalMultiplier: number, separator: string, unit: string): string;
         private static enforceDigits(value, digits);
         static getIntervalTitle(interval: Interval, userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit): string;
+        visitRestInterval(interval: Interval): void;
         visitArrayInterval(interval: ArrayInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): any;
+        visitStepBuildInterval(interval: StepBuildInterval): void;
         visitSimpleInterval(interval: SimpleInterval): any;
         getIntensityPretty(intensity: Intensity): string;
     }

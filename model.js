@@ -731,6 +731,65 @@ var Model;
         return RepeatInterval;
     })(ArrayInterval);
     Model.RepeatInterval = RepeatInterval;
+    // Step is defined as follows
+    // 2[(1min, 85, 95), (30s, 55)]
+    // Which in fact translates to:
+    // * 1min @ 85
+    // * 30s @ 55
+    // * 1min @ 95
+    // * 30s @ 55
+    var StepBuildInterval = (function (_super) {
+        __extends(StepBuildInterval, _super);
+        // The constructor receives the step intervals, the rest will be added later on
+        // so that for the above interval it will look like:
+        // [(1min, 85), (1min, 95), (30s, 55)]
+        function StepBuildInterval(title, intervals) {
+            _super.call(this, title, intervals);
+        }
+        StepBuildInterval.prototype.getIntensity = function () {
+            var intensities = this.intervals.map(function (value, index, array) {
+                return value.getIntensity();
+            });
+            var repeatCount = this.getRepeatCount();
+            var weights = this.intervals.map(function (value, index, array) {
+                return value.getDuration().getSeconds() * repeatCount;
+            });
+            return Intensity.combine(intensities, weights);
+        };
+        StepBuildInterval.prototype.getRepeatCount = function () {
+            return this.intervals.length - 1;
+        };
+        StepBuildInterval.prototype.getStepInterval = function (idx) {
+            return this.intervals[idx];
+        };
+        StepBuildInterval.prototype.getRestInterval = function () {
+            return this.intervals[this.intervals.length - 1];
+        };
+        StepBuildInterval.prototype.getDuration = function () {
+            var durations = [];
+            for (var i = 0; i < this.intervals.length; i++) {
+                durations[i] = this.intervals[i].getDuration();
+            }
+            if (durations.length < 2) {
+                return durations[0];
+            }
+            else if (durations.length <= 2) {
+                return Duration.combine(durations[0], durations[1]);
+            }
+            else {
+                var duration = Duration.combine(durations[0], durations[1]);
+                for (var i = 2; i < durations.length - 1; i++) {
+                    duration = Duration.combine(duration, durations[i]);
+                }
+                for (var i = 0; i < this.getRepeatCount(); i++) {
+                    duration = Duration.combine(duration, durations[durations.length - 1]);
+                }
+                return duration;
+            }
+        };
+        return StepBuildInterval;
+    })(ArrayInterval);
+    Model.StepBuildInterval = StepBuildInterval;
     var IntervalParser = (function () {
         function IntervalParser() {
         }
@@ -798,7 +857,8 @@ var Model;
         };
         IntervalParser.parse = function (factory, input) {
             var result = new ArrayInterval("Workout", []);
-            var stack = [result];
+            var stack = [];
+            stack.push(result);
             for (var i = 0; i < input.length; i++) {
                 var ch = input[i];
                 if (ch == "(") {
@@ -855,6 +915,27 @@ var Model;
                                         intensityUnit = getIntensityUnitFromString(units[k]);
                                     }
                                     intensities.push(factory.createIntensity(nums[k], intensityUnit));
+                                }
+                            }
+                            // Take a peek at the top of the stack
+                            if (stack[stack.length - 1] instanceof RepeatInterval) {
+                                if (intensities.length >= 2) {
+                                    // OK this should not be a RepeatInterval, it should be
+                                    // a StepBuildInterval instead
+                                    // Remove the ArrayInterval from the top and from the parent
+                                    stack.pop();
+                                    stack[stack.length - 1].getIntervals().pop();
+                                    // add the new intervals
+                                    var step_intervals = [];
+                                    for (var k = 0; k < intensities.length; k++) {
+                                        var step_duration = factory.createDuration(intensities[k], durationUnit, durationValue);
+                                        step_intervals.push(new SimpleInterval("", intensities[k], step_duration));
+                                    }
+                                    var bsi = new StepBuildInterval("", step_intervals);
+                                    // put back to the parent and top of the stack
+                                    stack[stack.length - 1].getIntervals().push(bsi);
+                                    stack.push(bsi);
+                                    break;
                                 }
                             }
                             if (intensities.length == 2) {
@@ -951,6 +1032,9 @@ var Model;
             if (interval instanceof SimpleInterval) {
                 return visitor.visitSimpleInterval(interval);
             }
+            else if (interval instanceof StepBuildInterval) {
+                return visitor.visitStepBuildInterval(interval);
+            }
             else if (interval instanceof RampBuildInterval) {
                 return visitor.visitRampBuildInterval(interval);
             }
@@ -973,6 +1057,15 @@ var Model;
         BaseVisitor.prototype.visitSimpleInterval = function (interval) {
             // not aware that typescript supports abstract methods
             throw new Error("not implemented");
+        };
+        BaseVisitor.prototype.visitStepBuildInterval = function (interval) {
+            // Generic implementation
+            for (var i = 0; i < interval.getRepeatCount(); i++) {
+                // step interval
+                this.visitSimpleInterval((interval.getStepInterval(i)));
+                // rest interval
+                this.visitSimpleInterval((interval.getRestInterval()));
+            }
         };
         BaseVisitor.prototype.visitRampBuildInterval = function (interval) {
             // not aware that typescript supports abstract methods
@@ -1301,6 +1394,9 @@ var Model;
             VisitorHelper.visit(f, interval);
             return f.result;
         };
+        Formatter.prototype.visitRestInterval = function (interval) {
+            this.result += " w/ " + interval.getDuration().toString() + " rest at " + this.getIntensityPretty(interval.getIntensity());
+        };
         // ArrayInterval
         Formatter.prototype.visitArrayInterval = function (interval) {
             // Detect which subtype is. Couple of possibilities:
@@ -1337,7 +1433,7 @@ var Model;
                 if (i == interval.getIntervals().length - 1 && isRestIncluded) {
                     // remove extra ", "
                     this.result = this.result.slice(0, this.result.length - 2);
-                    this.result += " w/ " + subInterval.getDuration().toString() + " rest at " + this.getIntensityPretty(subInterval.getIntensity());
+                    this.visitRestInterval(subInterval);
                 }
                 else {
                     this.result += Formatter.getIntervalTitle(subInterval, this.userProfile, this.sportType, this.outputUnit);
@@ -1356,6 +1452,20 @@ var Model;
         // RampBuildInterval
         Formatter.prototype.visitRampBuildInterval = function (interval) {
             this.result += "Build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity()) + " for " + interval.getDuration().toString();
+        };
+        Formatter.prototype.visitStepBuildInterval = function (interval) {
+            // TODO: There is a bit of semantic coupling here.
+            // visitStepBuildInterval knows that all durations of the step are the same.
+            this.result += interval.getRepeatCount() + "x (";
+            this.result += interval.getStepInterval(0).getDuration().toString() + " at ";
+            for (var i = 0; i < interval.getRepeatCount(); i++) {
+                this.result += this.getIntensityPretty(interval.getStepInterval(i).getIntensity());
+                this.result += ", ";
+            }
+            // remove extra ", "
+            this.result = this.result.slice(0, this.result.length - 2);
+            this.visitRestInterval(interval.getRestInterval());
+            this.result += ")";
         };
         // SimpleInterval
         Formatter.prototype.visitSimpleInterval = function (interval) {
