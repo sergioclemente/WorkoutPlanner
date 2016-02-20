@@ -53,7 +53,7 @@
     chartTimeline.render();
 
     // Zones chart
-    var dataPoints = builder.getInterval().getTimeInZones().map(
+    var dataPoints = builder.getInterval().getTimeInZones(builder.getSportType()).map(
       function(zone) {
         return {
           y: zone.duration.getSeconds(),

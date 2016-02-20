@@ -116,8 +116,8 @@ var step_build_85_100 = _.Model.IntervalParser.parse(of_bike, "3[(1min, 80, 90, 
 expect_eq_nbr(5.8, step_build_85_100.getTSS(), 0.1);
 expect_eq_nbr(3 * 60 + 3 * 30, step_build_85_100.getDuration().getSeconds());
 expect_eq_nbr(0.88, step_build_85_100.getIntensity().getValue());
-expect_eq_nbr(1, _.Model.ZonesVisitor.getZone(0.50));
-expect_eq_nbr(2, _.Model.ZonesVisitor.getZone(0.55));
-expect_eq_nbr(3, _.Model.ZonesVisitor.getZone(0.75));
-expect_eq_nbr(4, _.Model.ZonesVisitor.getZone(0.90));
-expect_eq_nbr(5, _.Model.ZonesVisitor.getZone(1.05));
+expect_eq_nbr(1, _.Model.ZonesVisitor.getZone(_.Model.SportType.Bike, 0.50));
+expect_eq_nbr(2, _.Model.ZonesVisitor.getZone(_.Model.SportType.Bike, 0.55));
+expect_eq_nbr(3, _.Model.ZonesVisitor.getZone(_.Model.SportType.Bike, 0.75));
+expect_eq_nbr(4, _.Model.ZonesVisitor.getZone(_.Model.SportType.Bike, 0.90));
+expect_eq_nbr(5, _.Model.ZonesVisitor.getZone(_.Model.SportType.Bike, 1.05));

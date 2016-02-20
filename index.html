@@ -132,24 +132,26 @@
 
 	var z = {};
 	if (isBike) {
-		z = Model.ZonesMap.getBikeZoneMap();
+		z = Model.ZonesMap.getZoneMap(Model.SportType.Bike);
 	} else {
-		z = Model.ZonesMap.getRunZoneMap();
+		z = Model.ZonesMap.getZoneMap(Model.SportType.Run);
 	}
 
 	var chart = new CanvasJS.Chart("chartContainer",
 	{
 		title:{
-			text: "Bike Zones",
+			text: "Zones",
 		},
 		axisY: {
 			includeZero:false,
-			title: "Zones",
+			title: "",
 			interval: 5,
+			minimum: 0,
 		}, 
 		axisX: {
-			interval:1,
-			title: "Percentage",
+			minimum: 0,
+			interval: 1,
+			title: "",
 		},
 		data: [
 		{

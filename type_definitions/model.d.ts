@@ -148,7 +148,7 @@ export declare module Model {
         getTSS(): number;
         getIntensities(): Intensity[];
         getTimeSeries(): any;
-        getTimeInZones(): any[];
+        getTimeInZones(sportType: SportType): any[];
     }
     class RepeatInterval extends ArrayInterval {
         private repeatCount;
@@ -198,8 +198,7 @@ export declare module Model {
         static getDayOfWeek(): string;
     }
     class ZonesMap {
-        static getBikeZoneMap(): any;
-        static getRunZoneMap(): {
+        static getZoneMap(sportType: SportType): {
             1: {
                 name: string;
                 low: number;
@@ -229,8 +228,9 @@ export declare module Model {
     }
     class ZonesVisitor extends BaseVisitor {
         private zones;
-        static getZone(intensity: number): number;
-        constructor();
+        private sportType;
+        constructor(sportType: SportType);
+        static getZone(sportType: SportType, intensity: number): number;
         incrementZoneTime(intensity: number, numberOfSeconds: number): void;
         visitSimpleInterval(interval: SimpleInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;

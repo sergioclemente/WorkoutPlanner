@@ -44,7 +44,7 @@ git push heroku master
 * [P3] Add free ride do zwift
         <FreeRide Duration="600" FlatRoad="1"/>
 * [P3] Add react for generating emails
-* [P3] Fix running training zones (Still missing zone chart)
+* Stop build when first command fails
 
 # Where to find type definition files:
 ** https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/node/node.d.ts

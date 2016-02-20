@@ -697,8 +697,8 @@ var Model;
                 };
             });
         };
-        ArrayInterval.prototype.getTimeInZones = function () {
-            var zv = new ZonesVisitor();
+        ArrayInterval.prototype.getTimeInZones = function (sportType) {
+            var zv = new ZonesVisitor(sportType);
             VisitorHelper.visit(zv, this);
             return zv.getTimeInZones();
         };
@@ -1105,33 +1105,36 @@ var Model;
     var ZonesMap = (function () {
         function ZonesMap() {
         }
-        ZonesMap.getBikeZoneMap = function () {
-            return {
-                1: { name: "z1", low: 0.00, high: 0.55 },
-                2: { name: "z2", low: 0.55, high: 0.75 },
-                3: { name: "z3", low: 0.75, high: 0.90 },
-                4: { name: "z4", low: 0.90, high: 1.05 },
-                5: { name: "z5", low: 1.05, high: 1.2 }
-            };
-        };
-        ZonesMap.getRunZoneMap = function () {
-            return {
-                1: { name: "z1", low: 0.00, high: 0.76 },
-                2: { name: "z2", low: 0.76, high: 0.87 },
-                3: { name: "z3", low: 0.87, high: 0.94 },
-                4: { name: "z4", low: 0.94, high: 1.01 },
-                5: { name: "z5", low: 1.01, high: 1.10 }
-            };
+        ZonesMap.getZoneMap = function (sportType) {
+            if (sportType == SportType.Bike) {
+                return {
+                    1: { name: "z1", low: 0.00, high: 0.55 },
+                    2: { name: "z2", low: 0.55, high: 0.75 },
+                    3: { name: "z3", low: 0.75, high: 0.90 },
+                    4: { name: "z4", low: 0.90, high: 1.05 },
+                    5: { name: "z5", low: 1.05, high: 1.2 }
+                };
+            }
+            else if (sportType == SportType.Run) {
+                return {
+                    1: { name: "z1", low: 0.00, high: 0.76 },
+                    2: { name: "z2", low: 0.76, high: 0.87 },
+                    3: { name: "z3", low: 0.87, high: 0.94 },
+                    4: { name: "z4", low: 0.94, high: 1.01 },
+                    5: { name: "z5", low: 1.01, high: 1.10 }
+                };
+            }
         };
         return ZonesMap;
     })();
     Model.ZonesMap = ZonesMap;
     var ZonesVisitor = (function (_super) {
         __extends(ZonesVisitor, _super);
-        function ZonesVisitor() {
+        function ZonesVisitor(sportType) {
             _super.call(this);
             this.zones = {};
             this.zones = {};
+            this.sportType = sportType;
             // Create the zones manually. Something like the following
             // 1 : {name:"Z1", range:"(0,55%]", value:0},
             // 2 : {name:"Z2", range:"(55%;75%]", value:0},
@@ -1139,7 +1142,7 @@ var Model;
             // 4 : {name:"Z4", range:"(90%;105%]", value:0},
             // 5 : {name:"Z5", range:"(105%;120%]", value:0},
             // 6 : {name:"Z6+", range:"(120%;+oo)", value:0},
-            var zone_map = ZonesMap.getBikeZoneMap();
+            var zone_map = ZonesMap.getZoneMap(this.sportType);
             for (var zone = 1; zone <= 5; zone++) {
                 var zone_obj = zone_map[zone];
                 this.zones[zone] = {
@@ -1149,8 +1152,8 @@ var Model;
                 };
             }
         }
-        ZonesVisitor.getZone = function (intensity) {
-            var zone_map = ZonesMap.getBikeZoneMap();
+        ZonesVisitor.getZone = function (sportType, intensity) {
+            var zone_map = ZonesMap.getZoneMap(sportType);
             for (var zone = 1; zone <= 5; zone++) {
                 var zone_obj = zone_map[zone];
                 if (intensity >= zone_obj.low && intensity < zone_obj.high) {
@@ -1160,7 +1163,7 @@ var Model;
             return 6;
         };
         ZonesVisitor.prototype.incrementZoneTime = function (intensity, numberOfSeconds) {
-            var zone = ZonesVisitor.getZone(intensity);
+            var zone = ZonesVisitor.getZone(this.sportType, intensity);
             this.zones[zone].value += numberOfSeconds;
         };
         ZonesVisitor.prototype.visitSimpleInterval = function (interval) {
@@ -1357,7 +1360,7 @@ var Model;
             }
             // TODO: do something here if the main set its too big. Some ideas:
             // 1) Long Ride
-            var timeInZones = this.intervals.getTimeInZones();
+            var timeInZones = this.intervals.getTimeInZones(SportType.Bike);
             var zoneMaxTime = 0;
             var zoneMaxName = -1;
             for (var id in timeInZones) {
@@ -1787,7 +1790,7 @@ var Model;
             result += (new_line);
             result += ("Zones:");
             result += (new_line);
-            var zones = this.intervals.getTimeInZones();
+            var zones = this.intervals.getTimeInZones(this.sportType);
             zones.forEach(function (zone) {
                 result += ("\t* " + zone.name + " " + zone.range + " : " + zone.duration.toString());
                 result += (new_line);
