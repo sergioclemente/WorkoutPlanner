@@ -197,9 +197,40 @@ export declare module Model {
     class DateHelper {
         static getDayOfWeek(): string;
     }
+    class ZonesMap {
+        static getBikeZoneMap(): any;
+        static getRunZoneMap(): {
+            1: {
+                name: string;
+                low: number;
+                high: number;
+            };
+            2: {
+                name: string;
+                low: number;
+                high: number;
+            };
+            3: {
+                name: string;
+                low: number;
+                high: number;
+            };
+            4: {
+                name: string;
+                low: number;
+                high: number;
+            };
+            5: {
+                name: string;
+                low: number;
+                high: number;
+            };
+        };
+    }
     class ZonesVisitor extends BaseVisitor {
         private zones;
-        private static getZone(intensity);
+        static getZone(intensity: number): number;
+        constructor();
         incrementZoneTime(intensity: number, numberOfSeconds: number): void;
         visitSimpleInterval(interval: SimpleInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;

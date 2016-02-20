@@ -1120,29 +1120,61 @@ export class DateHelper {
 	}
 }
 
-export class ZonesVisitor extends BaseVisitor {
-	private zones = {
-		1 : {name:"Z1", range:"(0,55%]", value:0},
-		2 : {name:"Z2", range:"(55%;75%]", value:0},
-		3 : {name:"Z3", range:"(75%;90%]", value:0},
-		4 : {name:"Z4", range:"(90%;105%]", value:0},
-		5 : {name:"Z5", range:"(105%;120%]", value:0},
-		6 : {name:"Z6+", range:"(120%;+oo)", value:0},
-	};
+export class ZonesMap {
+	public static getBikeZoneMap() : any {
+		return {
+			1: {name: "z1", low: 0.00, high: 0.55},
+			2: {name: "z2", low: 0.55, high: 0.75},
+			3: {name: "z3", low: 0.75, high: 0.90},
+			4: {name: "z4", low: 0.90, high: 1.05},
+			5: {name: "z5", low: 1.05, high: 1.2},
+		};
+	}
 
-	private static getZone(intensity: number) : number {
-		if (intensity < 0.55) {
-			return 1;
-		} else if (intensity <= 0.75) {
-			return 2;
-		} else if (intensity <= 0.90) {
-			return 3;
-		} else if (intensity <= 1.05) {
-			return 4;
-		} else if (intensity <= 1.2) {
-			return 5;
-		} else {
-			return 6;
+	public static getRunZoneMap() {
+		return {
+			1: {name: "z1", low: 0.00, high: 0.76},
+			2: {name: "z2", low: 0.76, high: 0.87},
+			3: {name: "z3", low: 0.87, high: 0.94},
+			4: {name: "z4", low: 0.94, high: 1.01},
+			5: {name: "z5", low: 1.01, high: 1.10},
+		};
+	}
+}
+
+export class ZonesVisitor extends BaseVisitor {
+	private zones = {};
+
+	public static getZone(intensity: number) : number {
+		var zone_map = ZonesMap.getBikeZoneMap();
+		for (var zone = 1 ; zone <= 5; zone++) {
+			var zone_obj = zone_map[zone];
+			if (intensity >= zone_obj.low && intensity < zone_obj.high) {
+				return zone;
+			}
+		}
+		return 6;
+	}
+
+	constructor() {
+		super();
+		this.zones = {};
+	
+		// Create the zones manually. Something like the following
+		// 1 : {name:"Z1", range:"(0,55%]", value:0},
+		// 2 : {name:"Z2", range:"(55%;75%]", value:0},
+		// 3 : {name:"Z3", range:"(75%;90%]", value:0},
+		// 4 : {name:"Z4", range:"(90%;105%]", value:0},
+		// 5 : {name:"Z5", range:"(105%;120%]", value:0},
+		// 6 : {name:"Z6+", range:"(120%;+oo)", value:0},
+		var zone_map = ZonesMap.getBikeZoneMap();
+		for (var zone = 1 ; zone <= 5; zone++) {
+			var zone_obj = zone_map[zone];
+			this.zones[zone] = {
+				name: zone_obj.name,
+				range: "(" + Math.floor(zone_obj.low*100) + "%;" + Math.floor(zone_obj.high*100) + "%]",
+				value: 0,
+			};
 		}
 	}
 

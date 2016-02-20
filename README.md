@@ -41,18 +41,10 @@ git push heroku master
 * [P3] Extract speed estimation (consider weight, altitude and drag coefficient)
 * [P3] Refactor getMRCFile into a visitor
 * [P3] Refactor ZwiftDataVisitor to move finalize() into the base
-* [P3] Fix running training zones
-
-```
-Z2 (77-87)
-Z3 (88-94)
-Z4 (95-101)
-
-```
 * [P3] Add free ride do zwift
         <FreeRide Duration="600" FlatRoad="1"/>
 * [P3] Add react for generating emails
-
+* [P3] Fix running training zones (Still missing zone chart)
 
 # Where to find type definition files:
 ** https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/node/node.d.ts

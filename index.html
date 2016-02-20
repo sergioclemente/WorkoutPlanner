@@ -10,6 +10,7 @@
   <script src="ui.js"></script>
   <script src="model.js"></script>
   <script src="rx.all.js"></script>
+  <script src="canvasjs.min.js"></script>
   <script type="text/javascript">
 
   function _onKeyChanged(e) {
@@ -128,6 +129,45 @@
     sltOutputUnitElement.options[3].style.display = isBike ? styleHide : styleShow;
     sltOutputUnitElement.options[4].style.display = isBike ? styleHide : styleShow;
     sltOutputUnitElement.value = isBike ? "1" : "2";
+
+	var z = {};
+	if (isBike) {
+		z = Model.ZonesMap.getBikeZoneMap();
+	} else {
+		z = Model.ZonesMap.getRunZoneMap();
+	}
+
+	var chart = new CanvasJS.Chart("chartContainer",
+	{
+		title:{
+			text: "Bike Zones",
+		},
+		axisY: {
+			includeZero:false,
+			title: "Zones",
+			interval: 5,
+		}, 
+		axisX: {
+			interval:1,
+			title: "Percentage",
+		},
+		data: [
+		{
+			type: "rangeBar",
+			showInLegend: false,
+			yValueFormatString: "#0.##%",
+			indexLabel: "{y[#index]}",
+			dataPoints: [   // Y: [Low, High]
+				{x: 1, y:[z[1].low, z[1].high], label: z[1].name},
+				{x: 2, y:[z[2].low, z[2].high], label: z[2].name},
+				{x: 3, y:[z[3].low, z[3].high], label: z[3].name},
+				{x: 4, y:[z[4].low, z[4].high], label: z[4].name},
+				{x: 5, y:[z[5].low, z[5].high], label: z[5].name},
+			]
+		}
+		]
+	});
+	chart.render();
   }
 
   var windowLoads = Rx.Observable.fromEvent(window, "DOMContentLoaded");
@@ -174,7 +214,9 @@
       <option value="0">IF</option>
     </select>
     <br/>
-    <textarea id="workout" style="height: auto; width: 100%;">
+  	<div id="chartContainer" style="height: 400px; width: 100%;" >
+	</div>
+    <textarea id="workout" style="height: 200px; width: 100%;">
     </textarea>
     <input id="btnLoadWorkout" type="button" value="Load Workout" class="btn"/>
   </form>

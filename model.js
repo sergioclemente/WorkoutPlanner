@@ -1102,38 +1102,62 @@ var Model;
         return DateHelper;
     })();
     Model.DateHelper = DateHelper;
+    var ZonesMap = (function () {
+        function ZonesMap() {
+        }
+        ZonesMap.getBikeZoneMap = function () {
+            return {
+                1: { name: "z1", low: 0.00, high: 0.55 },
+                2: { name: "z2", low: 0.55, high: 0.75 },
+                3: { name: "z3", low: 0.75, high: 0.90 },
+                4: { name: "z4", low: 0.90, high: 1.05 },
+                5: { name: "z5", low: 1.05, high: 1.2 }
+            };
+        };
+        ZonesMap.getRunZoneMap = function () {
+            return {
+                1: { name: "z1", low: 0.00, high: 0.76 },
+                2: { name: "z2", low: 0.76, high: 0.87 },
+                3: { name: "z3", low: 0.87, high: 0.94 },
+                4: { name: "z4", low: 0.94, high: 1.01 },
+                5: { name: "z5", low: 1.01, high: 1.10 }
+            };
+        };
+        return ZonesMap;
+    })();
+    Model.ZonesMap = ZonesMap;
     var ZonesVisitor = (function (_super) {
         __extends(ZonesVisitor, _super);
         function ZonesVisitor() {
-            _super.apply(this, arguments);
-            this.zones = {
-                1: { name: "Z1", range: "(0,55%]", value: 0 },
-                2: { name: "Z2", range: "(55%;75%]", value: 0 },
-                3: { name: "Z3", range: "(75%;90%]", value: 0 },
-                4: { name: "Z4", range: "(90%;105%]", value: 0 },
-                5: { name: "Z5", range: "(105%;120%]", value: 0 },
-                6: { name: "Z6+", range: "(120%;+oo)", value: 0 }
-            };
+            _super.call(this);
+            this.zones = {};
+            this.zones = {};
+            // Create the zones manually. Something like the following
+            // 1 : {name:"Z1", range:"(0,55%]", value:0},
+            // 2 : {name:"Z2", range:"(55%;75%]", value:0},
+            // 3 : {name:"Z3", range:"(75%;90%]", value:0},
+            // 4 : {name:"Z4", range:"(90%;105%]", value:0},
+            // 5 : {name:"Z5", range:"(105%;120%]", value:0},
+            // 6 : {name:"Z6+", range:"(120%;+oo)", value:0},
+            var zone_map = ZonesMap.getBikeZoneMap();
+            for (var zone = 1; zone <= 5; zone++) {
+                var zone_obj = zone_map[zone];
+                this.zones[zone] = {
+                    name: zone_obj.name,
+                    range: "(" + Math.floor(zone_obj.low * 100) + "%;" + Math.floor(zone_obj.high * 100) + "%]",
+                    value: 0
+                };
+            }
         }
         ZonesVisitor.getZone = function (intensity) {
-            if (intensity < 0.55) {
-                return 1;
+            var zone_map = ZonesMap.getBikeZoneMap();
+            for (var zone = 1; zone <= 5; zone++) {
+                var zone_obj = zone_map[zone];
+                if (intensity >= zone_obj.low && intensity < zone_obj.high) {
+                    return zone;
+                }
             }
-            else if (intensity <= 0.75) {
-                return 2;
-            }
-            else if (intensity <= 0.90) {
-                return 3;
-            }
-            else if (intensity <= 1.05) {
-                return 4;
-            }
-            else if (intensity <= 1.2) {
-                return 5;
-            }
-            else {
-                return 6;
-            }
+            return 6;
         };
         ZonesVisitor.prototype.incrementZoneTime = function (intensity, numberOfSeconds) {
             var zone = ZonesVisitor.getZone(intensity);
