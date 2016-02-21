@@ -975,6 +975,7 @@ export class IntervalParser {
 						} else {
 							IntervalParser.throwParserError(i, "Cannot have less than 1 intensity");
 						}
+
 						
 						stack[stack.length-1].getIntervals().push(interval);
 						break;
@@ -1040,6 +1041,10 @@ export class IntervalParser {
 					i++;
 				}
 			}
+		}
+
+		if (result.getIntervals().length == 0) {
+			IntervalParser.throwParserError(0, "Invalid interval");
 		}
 
 		return result;

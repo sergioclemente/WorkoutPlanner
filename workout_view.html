@@ -90,7 +90,9 @@
     var params = new UI.QueryParams();
     if (params.validate()) {
       _loadWorkoutWithData(params);
-    }
+    } else {
+		throw new Error("Could not load configuration, please type ftp, t-pace, email and the workout in the fields");
+	}
   }
 
   var windowLoads = Rx.Observable.fromEvent(window, "DOMContentLoaded");
@@ -100,6 +102,11 @@
       windowLoadsSubscription.dispose();
     }
   );
+
+	window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
+		_setInnerText("error_container", errorMsg);
+		return false;
+	}
 
   </script>
   <style>
@@ -115,6 +122,8 @@
   </style>
   </head>
   <body class="font">
+  <div id="error_container" style="color:red;font-size:120%;">
+  </div>
   <div id="chartTimelineContainer" style="height: 300px; width: 100%;">
   </div>
   <div id="chartZonesContainer" style="height: 200px; width: 100%;">

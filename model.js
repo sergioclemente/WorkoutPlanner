@@ -1020,6 +1020,9 @@ var Model;
                     }
                 }
             }
+            if (result.getIntervals().length == 0) {
+                IntervalParser.throwParserError(0, "Invalid interval");
+            }
             return result;
         };
         return IntervalParser;
