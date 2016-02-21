@@ -1,14 +1,4 @@
-/// <reference path="nodemailer.d.ts" />
-export declare module Model {
-    class MailSender {
-        host: string;
-        port: number;
-        use_ssl: boolean;
-        user: string;
-        password: string;
-        constructor(host: string, port: number, use_ssl: boolean, user: string, password: string);
-        send(to: string, subject: string, body: string, attachments: any): void;
-    }
+declare module Model {
     class MyMath {
         /**
          * Decimal adjustment of a number.
@@ -362,3 +352,4 @@ export declare module Model {
         getMRCFileName(): string;
     }
 }
+export = Model;

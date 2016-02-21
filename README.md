@@ -12,6 +12,8 @@ First of all install node js. Then install the following dependencies:
 ```
 npm install -g typescript
 npm install nodemailer
+npm install browserify
+npm install minifier
 ```
 
 # Compiling and running

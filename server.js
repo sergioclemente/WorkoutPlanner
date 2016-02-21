@@ -3,7 +3,8 @@ var path = require("path");
 var fs = require("fs");
 var url = require("url");
 
-var model = require("./model").Model;
+var model = require("./model");
+var model_server = require("./model_server");
 var config = require('./config');
 
 var port = (process.env.PORT || config.port);
@@ -86,7 +87,7 @@ http.createServer(function (req, res) {
               logRequest(req, 200);
 
               // sending email
-              var ms = new model.MailSender(config.smtp.server_host, config.smtp.server_port, config.smtp.use_ssl, config.smtp.login, config.smtp.password);
+              var ms = new model_server.MailSender(config.smtp.server_host, config.smtp.server_port, config.smtp.use_ssl, config.smtp.login, config.smtp.password);
 
               var attachments = [];
 

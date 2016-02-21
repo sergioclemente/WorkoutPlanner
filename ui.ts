@@ -1,8 +1,7 @@
 /// <reference path="type_definitions/node.d.ts" />
-
 module UI {
 
-	export class PersistedItem {
+export class PersistedItem {
 	id: string;
 	constructor(id: string) {
 		this.id = id;
@@ -32,11 +31,11 @@ export class QueryParams {
 	email: string;
 
 	constructor(workout_text: string = "",
-				ftp_watts: string = "",
-				t_pace: string = "",
-				workout_type: string = "",
-				output_unit: string = "",
-				email: string = "") {
+		ftp_watts: string = "",
+		t_pace: string = "",
+		workout_type: string = "",
+		output_unit: string = "",
+		email: string = "") {
 
 		this.workout_text = workout_text;
 		this.ftp_watts = ftp_watts;
@@ -52,7 +51,7 @@ export class QueryParams {
 		}
 	}
 
-	loadFromURL() : boolean {
+	loadFromURL(): boolean {
 		var params = getQueryParams();
 		this.workout_text = params.w;
 		this.ftp_watts = params.ftp;
@@ -63,7 +62,7 @@ export class QueryParams {
 		return this.validate();
 	}
 
-	loadFromStorage() : boolean {
+	loadFromStorage(): boolean {
 		this.workout_text = new PersistedItem("workout").load();
 		this.ftp_watts = new PersistedItem("ftp_watts").load();
 		this.t_pace = new PersistedItem("t_pace").load();
@@ -73,7 +72,7 @@ export class QueryParams {
 		return this.validate();
 	}
 
-	saveToStorage() : void {
+	saveToStorage(): void {
 		new PersistedItem("workout").save(this.workout_text);
 		new PersistedItem("ftp_watts").save(this.ftp_watts);
 		new PersistedItem("t_pace").save(this.t_pace);
@@ -83,12 +82,12 @@ export class QueryParams {
 	}
 
 	validate(): boolean {
-		return typeof (this.workout_text) != 'undefined' && this.workout_text != "" &&
-			typeof (this.ftp_watts) != 'undefined' && this.ftp_watts != "" &&
-			typeof (this.t_pace) != 'undefined' && this.t_pace != "" &&
-			typeof (this.workout_type) != 'undefined' && this.workout_type != "" &&
-			typeof (this.output_unit) != 'undefined' && this.output_unit != "" &&
-			typeof (this.email) != 'undefined' && this.email != "";
+		return typeof(this.workout_text) != 'undefined' && this.workout_text != "" &&
+			typeof(this.ftp_watts) != 'undefined' && this.ftp_watts != "" &&
+			typeof(this.t_pace) != 'undefined' && this.t_pace != "" &&
+			typeof(this.workout_type) != 'undefined' && this.workout_type != "" &&
+			typeof(this.output_unit) != 'undefined' && this.output_unit != "" &&
+			typeof(this.email) != 'undefined' && this.email != "";
 	}
 
 	getURL(): string {
@@ -101,19 +100,20 @@ export class QueryParams {
 	}
 }
 
-function getQueryParams() : any {
-  var qs = document.location.search;
-  qs = qs.split("+").join(" ");
+function getQueryParams(): any {
+	var qs = document.location.search;
+	qs = qs.split("+").join(" ");
 
-  var params = {}, tokens,
-      re = /[?&]?([^=]+)=([^&]*)/g;
+	var params = {},
+		tokens,
+		re = /[?&]?([^=]+)=([^&]*)/g;
 
-  while (tokens = re.exec(qs)) {
-      params[decodeURIComponent(tokens[1])]
-          = decodeURIComponent(tokens[2]);
-  }
+	while (tokens = re.exec(qs)) {
+		params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+	}
 
-  return params;
+	return params;
+}
 }
 
-}
+export = UI;
