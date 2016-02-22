@@ -23,12 +23,14 @@ export class PersistedItem {
 }
 
 export class QueryParams {
-	workout_text: string;
-	ftp_watts: string;
-	t_pace: string;
-	workout_type: string;
-	output_unit: string;
-	email: string;
+	public ftp_watts: string;
+	public t_pace: string;
+	public email: string;
+
+	public workout_text: string;
+	public workout_type: string;
+	public output_unit: string;
+	
 
 	constructor(workout_text: string = "",
 		ftp_watts: string = "",

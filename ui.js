@@ -1,3 +1,4 @@
+/// <reference path="type_definitions/node.d.ts" />
 var UI;
 (function (UI) {
     var PersistedItem = (function () {

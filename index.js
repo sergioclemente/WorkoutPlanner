@@ -1,9 +1,15 @@
 var Model = require("./model");
 var UI = require("./ui");
+var UserSettings = require("./app/user_settings");
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+var user_react_instance = null;
 
 function _onKeyChanged(e) {
 	var ch = String.fromCharCode(e.keyCode);
-	if (!IntervalParser.shouldParse(ch)) {
+	if (!Model.IntervalParser.shouldParse(ch)) {
 		return;
 	}
 	_loadWorkout(ch);
@@ -16,12 +22,7 @@ function _onButtonPressed(e) {
 function _loadWorkout(ch) {
 	// TODO: this is incorrect (specially if you type in the middle of the text)
 	var workoutText = _getValue("workout") + ch;
-
 	var sportType = _getValue("sltSportType");
-
-	var email = _getValue("txtEmail");
-	var tPace = _getValue("txtTPace");
-	var ftp = _getValue("txtFtp");
 	var outputUnit = _getValue("sltOutputUnit");
 
 	var iframe = document.getElementById("workout_frame");
@@ -29,7 +30,14 @@ function _loadWorkout(ch) {
 	var download_anchor_zwo = document.getElementById("download_zwo");
 	var email_send_workout_anchor = document.getElementById("email_send_workout");
 
-	var qp = new UI.QueryParams(workoutText, ftp, tPace, sportType, outputUnit, email);
+	var qp = new UI.QueryParams();
+	qp.ftp_watts = user_react_instance.getFTP();
+	qp.email = user_react_instance.getEmail();
+	qp.t_pace = user_react_instance.getTPace();
+	qp.sportType = sportType;
+	qp.outputUnit = outputUnit;
+	qp.workout_text = workoutText;
+
 	var params = qp.getURL();
 
 	var url = "workout_view.html" + params;
@@ -71,10 +79,7 @@ function _init() {
 	var qp = new UI.QueryParams();
 	_setValue("workout", qp.workout_text);
 	_setValue("sltSportType", qp.workout_type);
-	_setValue("txtFtp", qp.ftp_watts);
-	_setValue("txtTPace", qp.t_pace);
 	_setValue("sltOutputUnit", qp.output_unit)
-	_setValue("txtEmail", qp.email);
 
 	// Load workouts
 	var btnLoadWorkout = document.getElementById("btnLoadWorkout");
@@ -89,6 +94,12 @@ function _init() {
 	workout.addEventListener("keypress", _onKeyChanged);
 
 	_initOutputUnit();
+
+	var user_react_type = React.createElement(UserSettings.UserPropertyElement, qp);
+	user_react_instance = ReactDOM.render(
+	  user_react_type,
+	  document.getElementById('user_prop')
+	);
 }
 
 function _initOutputUnit() {
