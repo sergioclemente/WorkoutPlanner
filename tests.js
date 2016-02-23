@@ -1,6 +1,8 @@
 /// <reference path="./type_definitions/node.d.ts" />
 var Model = require("./model");
-function assert(condition, message) {
+var UI = require("./ui");
+function expect_true(condition, message) {
+    if (message === void 0) { message = ""; }
     if (!condition) {
         console.log(message);
         console.trace();
@@ -10,7 +12,7 @@ function expect_eq_str(expected, actual) {
     if (expected !== actual) {
         console.log("expected=", JSON.stringify(expected));
         console.log("actual=", JSON.stringify(actual));
-        assert(false, "expect_eq_str failed");
+        expect_true(false, "expect_eq_str failed");
     }
 }
 function expect_eq_nbr(expected, actual, error) {
@@ -19,7 +21,7 @@ function expect_eq_nbr(expected, actual, error) {
     if (delta > error) {
         console.log("expected=", JSON.stringify(expected));
         console.log("actual=", JSON.stringify(actual));
-        assert(false, "expect_eq_nbr failed");
+        expect_true(false, "expect_eq_nbr failed");
     }
 }
 function createSimpleInterval(if_value, secs) {
@@ -121,3 +123,10 @@ expect_eq_nbr(2, Model.ZonesVisitor.getZone(Model.SportType.Bike, 0.55));
 expect_eq_nbr(3, Model.ZonesVisitor.getZone(Model.SportType.Bike, 0.75));
 expect_eq_nbr(4, Model.ZonesVisitor.getZone(Model.SportType.Bike, 0.90));
 expect_eq_nbr(5, Model.ZonesVisitor.getZone(Model.SportType.Bike, 1.05));
+expect_true(!UI.FieldValidator.validateEmail(""));
+expect_true(!UI.FieldValidator.validateEmail("invalid"));
+expect_true(!UI.FieldValidator.validateEmail("@bar.com"));
+expect_true(UI.FieldValidator.validateEmail("foo@bar.com"));
+expect_true(!UI.FieldValidator.validateNumber(""));
+expect_true(!UI.FieldValidator.validateNumber("asd123asd"));
+expect_true(UI.FieldValidator.validateNumber("123"));

@@ -116,6 +116,23 @@ function getQueryParams(): any {
 
 	return params;
 }
+
+export class FieldValidator {
+	static validateEmail(email: string) : boolean {
+    	var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    	return re.test(email);
+	}
+
+	static validateNumber(num: string) : boolean {
+		if (num == null || num.trim().length == 0) {
+			return false;
+		} else {
+			var num_val = parseFloat(num);
+			return !isNaN(num_val);
+		}
+	}
+}
+
 }
 
 export = UI;

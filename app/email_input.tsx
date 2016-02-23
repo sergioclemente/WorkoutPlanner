@@ -4,11 +4,6 @@ import * as React from 'react';
 import * as UI from '../ui';
 import ErrorLabel from './error_label';
 
-function validateEmail(email) {
-    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email);
-}
-
 export default class EmailInput extends React.Component <any, any> {
   constructor(props: any) {
      super(props);
@@ -42,9 +37,7 @@ export default class EmailInput extends React.Component <any, any> {
   }
 
   _blur(e){
-    var email = e.target.value;
-
-    if (email == null || email.trim() === '' || !validateEmail(email)) {
+    if (UI.FieldValidator.validateEmail(e.target.value)) {
 		this.setError("Enter a valid email");
 	} else {
 	  this.setError("");

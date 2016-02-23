@@ -46,12 +46,8 @@ export default class NumberInput extends React.Component <any, any> {
   }
 
   _blur(e){
-    var val = e.target.value
-      , current = this.props.value
-      , number = parseFloat(val)
-
-    if (val == null || val.trim() === '' || !isValid(number)) {
-		this.props.onChange(null);
+    if (UI.FieldValidator.validateNumber(e.target.value)) {
+	  this.props.onChange(null);
 	} else {     
       this.props.onChange(number);
 	}

@@ -1,17 +1,38 @@
 tsc --module commonjs ./model.ts -d
+if [[ "$?" != 0 ]]; then
+	echo "Build error." 1>&2
+	exit 1
+fi
+
 mv model.d.ts type_definitions/model.d.ts
 perl -pi -e 's/type_definitions\///g' type_definitions/model.d.ts
 
 # Build regular Typescript files
-tsc --moduleResolution node --m commonjs --target ES5 --removeComments model.ts
-tsc --moduleResolution node --m commonjs --target ES5 --removeComments ui.ts
-tsc --moduleResolution node --m commonjs --target ES5 --removeComments model_server.ts
+tsc --moduleResolution node --m commonjs --target ES5 --removeComments model.ts ui.ts model_server.ts
+if [[ "$?" != 0 ]]; then
+	echo "Build error." 1>&2
+	exit 1
+fi
 
 # Build JSX files
 tsc --moduleResolution node --m commonjs --target ES5 --jsx react app/error_label.tsx app/user_settings.tsx app/number_input.tsx app/email_input.tsx
+if [[ "$?" != 0 ]]; then
+	echo "Build error." 1>&2
+	exit 1
+fi
 
 browserify model.js ui.js index.js app/user_settings.js app/error_label.js app/number_input.js app/email_input.js -o index.min.js
+if [[ "$?" != 0 ]]; then
+	echo "Build error." 1>&2
+	exit 1
+fi
+
 browserify model.js ui.js workout_view.js -o workout_view.min.js
 
 tsc --module commonjs ./tests.ts
+if [[ "$?" != 0 ]]; then
+	echo "Build error." 1>&2
+	exit 1
+fi
+
 node tests.js
