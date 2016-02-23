@@ -6,6 +6,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var React = require('react');
 var number_input_1 = require('./number_input');
+var email_input_1 = require('./email_input');
 var UserSettings;
 (function (UserSettings) {
     var UserPropertyElement = (function (_super) {
@@ -13,10 +14,10 @@ var UserSettings;
         function UserPropertyElement(params) {
             _super.call(this, params);
             this.state = {
-                email: params.email,
                 t_pace: params.t_pace,
             };
             this.ftp = parseFloat(params.ftp_watts);
+            this.email = params.email;
         }
         UserPropertyElement.prototype.onFtpChange = function (ftp) {
             var errorLabel = this.refs['ftp'];
@@ -31,8 +32,8 @@ var UserSettings;
         UserPropertyElement.prototype.onTPaceChange = function (e) {
             this.setState({ t_pace: e.target.value });
         };
-        UserPropertyElement.prototype.onEmailChange = function (e) {
-            this.setState({ email: e.target.value });
+        UserPropertyElement.prototype.onEmailChange = function (email) {
+            this.email = email;
         };
         UserPropertyElement.prototype.getFTP = function () {
             return this.ftp;
@@ -41,10 +42,10 @@ var UserSettings;
             return this.state.t_pace;
         };
         UserPropertyElement.prototype.getEmail = function () {
-            return this.state.email;
+            return this.email;
         };
         UserPropertyElement.prototype.render = function () {
-            return (React.createElement("div", null, React.createElement("h1", null, " User Settings "), "Bike FTP: ", React.createElement(number_input_1.default, {"ref": "ftp", "width": "20", "placeholder": "245", "value": this.ftp, "onChange": this.onFtpChange.bind(this)}), React.createElement("br", null), "Run T-Pace: ", React.createElement("input", {"id": "txtTPace", "width": "20", "placeholder": "7:30 min/mi", "value": this.state.t_pace, "onChange": this.onTPaceChange.bind(this)}), " ", React.createElement("br", null), "Email: ", React.createElement("input", {"id": "txtEmail", "width": "20", "placeholder": "foo@gmail.com", "value": this.state.email, "onChange": this.onEmailChange.bind(this)}), " ", React.createElement("br", null), React.createElement("br", null)));
+            return (React.createElement("div", null, React.createElement("h1", null, " User Settings "), "Bike FTP: ", React.createElement(number_input_1.default, {"ref": "ftp", "width": "20", "placeholder": "245", "value": this.ftp, "onChange": this.onFtpChange.bind(this)}), React.createElement("br", null), "Run T-Pace: ", React.createElement("input", {"id": "txtTPace", "width": "20", "placeholder": "7:30 min/mi", "value": this.state.t_pace, "onChange": this.onTPaceChange.bind(this)}), " ", React.createElement("br", null), "Email: ", React.createElement(email_input_1.default, {"ref": "email", "width": "20", "placeholder": "foo@gmail.com", "value": this.email, "onChange": this.onEmailChange.bind(this)}), " ", React.createElement("br", null), React.createElement("br", null)));
         };
         return UserPropertyElement;
     })(React.Component);
