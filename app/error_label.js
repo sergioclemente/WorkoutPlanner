@@ -17,8 +17,7 @@ var ErrorLabel = (function (_super) {
         this.setState({ value: '' + nextProps.value });
     };
     ErrorLabel.prototype.render = function () {
-        var props = this.props, value = this.state.value || props.value;
-        return (React.createElement("span", React.__spread({}, props, {"style": { marginLeft: "10px", color: "#a94442" }}), this.state.message));
+        return (React.createElement("span", React.__spread({}, this.props, {"style": { marginLeft: "10px", color: "#a94442" }}), this.state.message));
     };
     ErrorLabel.prototype.setError = function (msg) {
         this.setState({ message: msg });

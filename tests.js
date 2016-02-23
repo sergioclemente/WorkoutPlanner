@@ -130,3 +130,6 @@ expect_true(UI.FieldValidator.validateEmail("foo@bar.com"));
 expect_true(!UI.FieldValidator.validateNumber(""));
 expect_true(!UI.FieldValidator.validateNumber("asd123asd"));
 expect_true(UI.FieldValidator.validateNumber("123"));
+expect_eq_nbr(8, Model.SpeedParser.getSpeedInMph("7:30min/mi"));
+expect_eq_nbr(8, Model.SpeedParser.getSpeedInMph("8mi/h"));
+expect_eq_nbr(8.44, Model.SpeedParser.getSpeedInMph("4:25min/km"));

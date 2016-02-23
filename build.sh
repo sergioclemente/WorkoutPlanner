@@ -15,13 +15,13 @@ if [[ "$?" != 0 ]]; then
 fi
 
 # Build JSX files
-tsc --moduleResolution node --m commonjs --target ES5 --jsx react app/error_label.tsx app/user_settings.tsx app/number_input.tsx app/email_input.tsx
+tsc --moduleResolution node --m commonjs --target ES5 --jsx react app/*.tsx
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
 fi
 
-browserify model.js ui.js index.js app/user_settings.js app/error_label.js app/number_input.js app/email_input.js -o index.min.js
+browserify model.js ui.js index.js app/user_settings.js app/*.js -o index.min.js
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1

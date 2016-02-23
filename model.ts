@@ -1543,6 +1543,46 @@ export class RunningPaceHelper {
 	}	
 };
 
+export class SpeedParser {
+	static getSpeedInMph(speed: string): number {
+		var res = null;
+		try {
+			if (speed.indexOf("min/mi") != -1) {
+				res = 60 / this._extractNumber(speed, 60, ":", "min/mi");
+			} else if (speed.indexOf("km/h") != -1) {
+				res = this._extractNumber(speed, 100, ".", "km/h") / 1.609344;
+			} else if (speed.indexOf("mi/h") != -1) {
+				res = this._extractNumber(speed, 100, ".", "mi/h");
+			} else if (speed.indexOf("min/km") != -1) {
+				res = (60 / (this._extractNumber(speed, 60, ":", "min/km") * 1.609344));
+			} else if (speed.indexOf("min/400m") != -1) {
+				res = (60 / (this._extractNumber(speed, 60, ":", "min/400m") * 2.5 * 1.609344));
+			}
+		} catch (e) {
+		}
+
+		return res;
+	}
+
+	static _extractNumber(numberString, decimalMultiplier, strSeparator, strSuffix) {
+		var indexSuffix = numberString.indexOf(strSuffix);
+		var indexSeparator = numberString.indexOf(strSeparator);
+		if (indexSuffix < 0) {
+			return null;
+		}
+		var fractionPart: number;
+		if (indexSeparator < 0) {
+			indexSeparator = indexSuffix;
+			fractionPart = 0;
+		} else {
+			fractionPart = parseInt(numberString.substr(indexSeparator + 1, indexSuffix - indexSeparator - 1));
+		}
+		var integerPart = parseInt(numberString.substr(0, indexSeparator));
+
+		return integerPart + fractionPart / decimalMultiplier;
+	}
+}
+
 export class UserProfile {
 	private bikeFTP: number;
 	private runningTPaceMinMi: number;
@@ -1550,8 +1590,11 @@ export class UserProfile {
 	
 	constructor(bikeFTP: number, runningTPace: string, email: string = "") {
 		this.bikeFTP = bikeFTP;
-		// TODO: not working with other units
-		this.runningTPaceMinMi = this._extractNumber(runningTPace, 60, ":", "min/mi");
+		var speed_mph = SpeedParser.getSpeedInMph(runningTPace);
+		this.runningTPaceMinMi = IntensityUnitHelper.convertTo(
+			speed_mph,
+			IntensityUnit.Mph,
+			IntensityUnit.MinMi);
 		this.email = email;
 	}
 	
@@ -1565,27 +1608,6 @@ export class UserProfile {
 
 	getEmail() : string {
 		return this.email;
-	}
-
-	_extractNumber(numberString, decimalMultiplier, strSeparator, strSuffix) {
-		var indexSuffix = numberString.indexOf(strSuffix);
-		var indexSeparator = numberString.indexOf(strSeparator);
-		// Lets be forgiving if the user didn't specify the separators
-		// 6:00 => 6:00 min/mi
-		// 6 min/mi => 6:00 min/mi
-		// 6 => 6:00 min/mi
-		if (indexSuffix < 0) {
-			indexSuffix = numberString.length;
-		}
-		if (indexSeparator < 0) {
-			indexSeparator = numberString.length;
-		}
-		var integerPart = parseInt(numberString.substr(0, indexSeparator));
-		var fractionPart = parseInt(numberString.substr(indexSeparator+1, indexSuffix - indexSeparator));
-		if (isNaN(fractionPart)) {
-			fractionPart = 0;
-		}
-		return integerPart + fractionPart/decimalMultiplier;
 	}
 
 	getPaceMinMi(intensity: Intensity) {

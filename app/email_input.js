@@ -5,11 +5,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var React = require('react');
+var UI = require('../ui');
 var error_label_1 = require('./error_label');
-function validateEmail(email) {
-    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email);
-}
 var EmailInput = (function (_super) {
     __extends(EmailInput, _super);
     function EmailInput(props) {
@@ -23,21 +20,18 @@ var EmailInput = (function (_super) {
     };
     EmailInput.prototype.render = function () {
         var _this = this;
-        var props = this.props, value = this.state.value || props.value;
-        return (React.createElement("span", null, React.createElement("input", React.__spread({}, props, {"type": 'string', "value": this.state.value, "onChange": function (e) { return _this._change(e); }, "onBlur": function (e) { return _this._blur(e); }})), React.createElement(error_label_1.default, {"ref": 'errorLabel', "message": ''})));
+        return (React.createElement("span", null, React.createElement("input", React.__spread({}, this.props, {"type": 'string', "value": this.state.value, "onChange": function (e) { return _this._change(e); }, "onBlur": function (e) { return _this._blur(e); }})), React.createElement(error_label_1.default, {"ref": 'errorLabel', "message": ''})));
     };
     EmailInput.prototype._change = function (e) {
-        var val = e.target.value, current = this.props.value, number = parseFloat(val);
-        this.setState({ value: val });
+        this.setState({ value: e.target.value });
     };
     EmailInput.prototype._blur = function (e) {
-        var email = e.target.value;
-        if (email == null || email.trim() === '' || !validateEmail(email)) {
+        if (!UI.FieldValidator.validateEmail(e.target.value)) {
             this.setError("Enter a valid email");
         }
         else {
             this.setError("");
-            this.props.onChange(email);
+            this.props.onChange(e.target.value);
         }
     };
     EmailInput.prototype.setError = function (msg) {

@@ -293,6 +293,10 @@ declare module Model {
     class RunningPaceHelper {
         static convertToMph(value: number, unit: RunningPaceUnit): number;
     }
+    class SpeedParser {
+        static getSpeedInMph(speed: string): number;
+        static _extractNumber(numberString: any, decimalMultiplier: any, strSeparator: any, strSuffix: any): number;
+    }
     class UserProfile {
         private bikeFTP;
         private runningTPaceMinMi;
@@ -301,7 +305,6 @@ declare module Model {
         getBikeFTP(): number;
         getRunningTPaceMinMi(): number;
         getEmail(): string;
-        _extractNumber(numberString: any, decimalMultiplier: any, strSeparator: any, strSuffix: any): number;
         getPaceMinMi(intensity: Intensity): number;
     }
     class ObjectFactory {
