@@ -48,7 +48,6 @@ export default class WorkoutView extends React.Component<any, any> {
 				time_series_data: builder.getInterval().getTimeSeries(),
 				time_in_zones_data: time_in_zones_data,
 				workout_steps: workout_steps,
-				workout_text: params.workout_text
 			}
 		);
 	}
@@ -141,8 +140,8 @@ export default class WorkoutView extends React.Component<any, any> {
 					<table>
 						<tbody>
 							<tr>
-								<td>Metric</td>
-								<td>Value</td>
+								<td><b>Metric</b></td>
+								<td><b>Value</b></td>
 								</tr>
 							<tr>
 								<td>TSS</td>
@@ -159,8 +158,6 @@ export default class WorkoutView extends React.Component<any, any> {
 							{ this.renderPower() }
 						</tbody>
 					</table>
-					Workout Text:
-					<div>{this.state.workout_text}</div>
 				</div>);
 	}
 }

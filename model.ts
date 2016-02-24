@@ -1030,9 +1030,10 @@ export class BaseVisitor implements Visitor {
 		// Generic implementation
 		for (var i = 0; i < interval.getRepeatCount() ; i++) {
 			// step interval
-			this.visitSimpleInterval(<SimpleInterval>(interval.getStepInterval(i)));
+			VisitorHelper.visit(this, interval.getStepInterval(i));
+
 			// rest interval
-			this.visitSimpleInterval(<SimpleInterval>(interval.getRestInterval()));
+			VisitorHelper.visit(this, interval.getRestInterval());
 		}
 	}
 	visitRampBuildInterval(interval: RampBuildInterval) : void {
