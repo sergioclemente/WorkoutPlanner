@@ -21,13 +21,11 @@ if [[ "$?" != 0 ]]; then
 	exit 1
 fi
 
-browserify model.js ui.js index.js app/user_settings.js app/*.js -o index.min.js
+browserify model.js ui.js index.js app/*.js -o index.min.js
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
 fi
-
-browserify model.js ui.js workout_view.js -o workout_view.min.js
 
 tsc --module commonjs ./tests.ts
 if [[ "$?" != 0 ]]; then

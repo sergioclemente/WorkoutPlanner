@@ -1506,7 +1506,11 @@ export class Formatter implements Visitor {
 			return intensity.toString();
 		}
 		if (this.sportType == SportType.Bike) {
-			return intensity.toString() + "(" + Math.round(this.userProfile.getBikeFTP() * intensity.getValue()) + "w)";
+			if (this.outputUnit == IntensityUnit.Watts) {
+				return Math.round(this.userProfile.getBikeFTP() * intensity.getValue()) + "w";
+			} else {
+				intensity.toString() + "(" + Math.round(this.userProfile.getBikeFTP() * intensity.getValue()) + "w)";
+			}			
 		} else if (this.sportType == SportType.Run) {
 			var minMi = this.userProfile.getPaceMinMi(intensity);
 			var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, this.outputUnit); 
@@ -1816,6 +1820,26 @@ export class WorkoutBuilder {
 		var f = new Formatter(this.userProfile, this.sportType, this.outputUnit);
 		return f.getIntensityPretty(intensity);
 	}
+
+	getTSS() : number {
+		return MyMath.round10(this.intervals.getTSS(), -1);
+	}
+
+	getTimePretty() : string {
+		return this.intervals.getDuration().toStringTime();
+	}
+
+	getIF() : number {
+		return MyMath.round10(this.intervals.getIntensity().getValue() * 100, -1);
+	}
+
+	getAveragePower() : number {
+		return MyMath.round10(this.userProfile.getBikeFTP() * this.intervals.getIntensity().getValue(), -1);
+	}
+
+	getIntervalPretty(interval: Interval) {
+		return Formatter.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit);
+	}
 	
 	getPrettyPrint(new_line : string = "\n") : string {
 		var intensities = this.intervals.getIntensities();
@@ -1823,7 +1847,7 @@ export class WorkoutBuilder {
 		var distanceInMiles = 0;
 		var result = new_line;
         this.intervals.getIntervals().forEach(function(interval) {
-            result += ("* " + Formatter.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit) + new_line);
+            result += ("* " + this.getIntervalPretty(interval) + new_line);
             if (interval.getDuration().getDistanceInMiles() > 0) {
                 distanceInMiles += interval.getDuration().getDistanceInMiles();
             }
@@ -1832,13 +1856,13 @@ export class WorkoutBuilder {
 		result += (new_line);
 		result += ("Stats:");
 		result += (new_line);
-		result += ("TSS: " + MyMath.round10(this.intervals.getTSS(), -1));
+		result += ("TSS: " + this.getTSS());
 		result += (new_line);
-		result += ("\t* Time: " + this.intervals.getDuration().toStringTime());
+		result += ("\t* Time: " + this.getTimePretty());
 		result += (new_line);
 		result += ("\t* Distance: " + this.intervals.getDuration().toStringDistance());
 		result += (new_line);		
-		result += ("\t* IF: " + MyMath.round10(this.intervals.getIntensity().getValue()*100, -1));
+		result += ("\t* IF: " + this.getIF());
 		result += (new_line);
 
 		result += ("Zones:");
@@ -1850,7 +1874,7 @@ export class WorkoutBuilder {
         });
 
 		if (this.sportType == SportType.Bike) {
-			result += ("\t* Avg Pwr: " + MyMath.round10(this.userProfile.getBikeFTP()*this.intervals.getIntensity().getValue(), -1) + "w");
+			result += ("\t* Avg Pwr: " + this.getAveragePower() + "w");
 			result += (new_line);
 		}
 

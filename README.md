@@ -13,7 +13,6 @@ First of all install node js. Then install the following dependencies:
 npm install -g typescript
 npm install nodemailer
 npm install browserify
-npm install minifier
 npm install react
 npm install react-dom
 ```
@@ -40,12 +39,8 @@ git push heroku master
 
 # Bugs/Feature requests
 * Form validation
-* Graphs as react
-* Workoutview as react
 * Add Url shortener
 * [P3] server should log status and error more cleanly. this includes emails as well
-* [P3] Remove distance estimation	
-* [P3] Extract speed estimation (consider weight, altitude and drag coefficient)
 * [P3] Refactor getMRCFile into a visitor
 * [P3] Refactor ZwiftDataVisitor to move finalize() into the base
 * [P3] Add free ride do zwift

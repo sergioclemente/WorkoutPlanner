@@ -353,6 +353,11 @@ declare module Model {
         getSportType(): SportType;
         withDefinition(workoutDefinition: string): WorkoutBuilder;
         getIntensityFriendly(intensity: Intensity): string;
+        getTSS(): number;
+        getTimePretty(): string;
+        getIF(): number;
+        getAveragePower(): number;
+        getIntervalPretty(interval: Interval): string;
         getPrettyPrint(new_line?: string): string;
         getMRCFile(): string;
         getZWOFile(): string;
