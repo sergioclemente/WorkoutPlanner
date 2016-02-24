@@ -214,6 +214,11 @@ declare module Model {
                 low: number;
                 high: number;
             };
+            6: {
+                name: string;
+                low: number;
+                high: number;
+            };
         };
     }
     class ZonesVisitor extends BaseVisitor {

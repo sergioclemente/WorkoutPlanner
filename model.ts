@@ -1077,6 +1077,7 @@ export class ZonesMap {
 				3: {name: "z3", low: 0.75, high: 0.90},
 				4: {name: "z4", low: 0.90, high: 1.05},
 				5: {name: "z5", low: 1.05, high: 1.2},
+				6: { name: "z6", low: 1.20, high: 10 },
 			};
 		} else if (sportType == SportType.Run) {
 			return {
@@ -1085,6 +1086,7 @@ export class ZonesMap {
 				3: {name: "z3", low: 0.87, high: 0.94},
 				4: {name: "z4", low: 0.94, high: 1.01},
 				5: {name: "z5", low: 1.01, high: 1.10},
+				6: { name: "z6", low: 1.10, high: 10 },
 			};
 		}
 	}
@@ -1107,7 +1109,7 @@ export class ZonesVisitor extends BaseVisitor {
 		// 5 : {name:"Z5", range:"(105%;120%]", value:0},
 		// 6 : {name:"Z6+", range:"(120%;+oo)", value:0},
 		var zone_map = ZonesMap.getZoneMap(this.sportType);
-		for (var zone = 1 ; zone <= 5; zone++) {
+		for (var zone = 1 ; zone <= 6; zone++) {
 			var zone_obj = zone_map[zone];
 			this.zones[zone] = {
 				name: zone_obj.name,
