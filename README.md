@@ -39,15 +39,10 @@ git push heroku master
 ```
 
 # Bugs/Feature requests
-* [P2] Be more forgiving in the UI and show validation errors
-** Pace validation
-** Form validation
+* Form validation
 * Graphs as react
-* Workoutimput as react
 * Workoutview as react
 * Add Url shortener
-
-
 * [P3] server should log status and error more cleanly. this includes emails as well
 * [P3] Remove distance estimation	
 * [P3] Extract speed estimation (consider weight, altitude and drag coefficient)

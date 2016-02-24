@@ -1,56 +1,43 @@
 <html>
-  <head>
-    <title>
-      Workout Planner
-    </title>
-  <script type="text/javascript">
-    // make the commonjs happy
-    window.exports = {}
-  </script>
-  <script src="index.min.js"></script>
-  <script src="canvasjs.min.js"></script>
-  <style>
-  .font {
-    font-family:"Calibri",Arial;
-    font-size: 100%;
-  }
+	<head>
+		<title>
+			Workout Planner
+		</title>
+	<script type="text/javascript">
+		// make the commonjs happy
+		window.exports = {}
+	</script>
+	<script src="index.min.js"></script>
+	<script src="canvasjs.min.js"></script>
+	<style>
+	.font {
+		font-family:"Calibri",Arial;
+		font-size: 100%;
+	}
 
-  .selected {
-    background: yellow;
-  }
+	.selected {
+		background: yellow;
+	}
 
-  </style>
-  </head>
-  <body class="font">
-  <form>
-    <div id="user_prop">
+	</style>
+	</head>
+	<body class="font">
+	<form>
+		<div id="user_prop">
+		</div>
+		<div id="workout_settings">
+		</div>
+		<textarea id="workout" style="height: 200px; width: 100%;">
+		</textarea>
+		<input id="btnLoadWorkout" type="button" value="Load Workout" class="btn"/>
+		<br/>
+		<div id="chartContainer" style="height: 400px; width: 100%;" >
 	</div>
-    <h1> Workout Settings </h1>
-    Workout Type:
-    <select id="sltSportType">
-      <option value="1">Bike</option>
-      <option value="2">Run</option>
-    </select> <br />
-    Output Unit:
-    <select id="sltOutputUnit">
-      <option value="1">Watts</option>
-      <option value="2">Min/Mile</option>
-      <option value="3">Mph</option>
-      <option value="4">Min/Km</option>
-      <option value="5">Km/h</option>
-      <option value="0">IF</option>
-    </select>
-    <br/>
-  	<div id="chartContainer" style="height: 400px; width: 100%;" >
-	</div>
-    <textarea id="workout" style="height: 200px; width: 100%;">
-    </textarea>
-    <input id="btnLoadWorkout" type="button" value="Load Workout" class="btn"/>
-  </form>
-  <a id="download_mrc" >Download MRC</a>
-  <a id="download_zwo" >Download ZWO</a>
-  <a id="email_send_workout" >Email Workout</a>
-  <iframe id="workout_frame" style="height: 100%; width: 100%"/>
-  <hr />
-  </body>
+	</form>
+	<a id="download_mrc" >Download MRC</a>
+	<a id="download_zwo" >Download ZWO</a>
+	<a id="email_send_workout" >Email Workout</a>
+	<iframe id="workout_frame" style="height: 100%; width: 100%"/>
+	<hr />
+	</body>
 </html>

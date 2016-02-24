@@ -3,7 +3,7 @@ var UI = require("./ui");
 
   function _loadWorkoutWithData(params) {
   	var userProfile = new Model.UserProfile(params.ftp_watts, params.t_pace, params.email);
-  	var builder = new Model.WorkoutBuilder(userProfile, params.workout_type, params.output_unit).withDefinition(params.workout_text);
+  	var builder = new Model.WorkoutBuilder(userProfile, params.sport_type, params.output_unit).withDefinition(params.workout_text);
   	var workout_pretty = builder.getPrettyPrint();
   	_setInnerText("workout_pretty", workout_pretty);
 
