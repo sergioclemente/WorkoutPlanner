@@ -15,6 +15,7 @@ npm install nodemailer
 npm install browserify
 npm install react
 npm install react-dom
+npm install minifier
 ```
 
 # Compiling and running
