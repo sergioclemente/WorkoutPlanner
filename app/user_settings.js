@@ -15,7 +15,7 @@ var UserSettings;
         __extends(UserPropertyElement, _super);
         function UserPropertyElement(params) {
             _super.call(this, params);
-            this.ftp = parseFloat(params.ftp_watts);
+            this.ftp = parseInt(params.ftp_watts);
             this.email = params.email;
             this.t_pace = params.t_pace;
         }

@@ -18,7 +18,7 @@ export class UserPropertyElement extends React.Component<UI.QueryParams, any> {
 	constructor(params: UI.QueryParams) {
 		super(params);
 
-		this.ftp = parseFloat(params.ftp_watts);
+		this.ftp = parseInt(params.ftp_watts);
 		this.email = params.email;
 		this.t_pace = params.t_pace;
 	}

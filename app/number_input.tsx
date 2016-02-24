@@ -20,9 +20,9 @@ export default class NumberInput extends React.Component <any, any> {
 
 	render() {
 		return (<span>
-							<input {...this.props} type='number' value={this.state.value} onChange={e => this._change(e)} onBlur={e => this._blur(e)} />
-							<ErrorLabel ref='errorLabel' message=''></ErrorLabel>
-						</span>);
+					<input {...this.props} type='number' value={this.state.value} onChange={e => this._change(e)} onBlur={e => this._blur(e)} />
+					<ErrorLabel ref='errorLabel' message=''></ErrorLabel>
+				</span>);
 	}
 
 	_change(e){
@@ -30,7 +30,7 @@ export default class NumberInput extends React.Component <any, any> {
 	}
 
 	_blur(e){
-		if (UI.FieldValidator.validateNumber(e.target.value)) {
+		if (!UI.FieldValidator.validateNumber(e.target.value)) {
 			this.props.onChange(null);
 		} else {     
 			this.props.onChange(e.target.value);

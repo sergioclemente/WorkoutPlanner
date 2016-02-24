@@ -27,7 +27,7 @@ var NumberInput = (function (_super) {
         this.setState({ value: e.target.value });
     };
     NumberInput.prototype._blur = function (e) {
-        if (UI.FieldValidator.validateNumber(e.target.value)) {
+        if (!UI.FieldValidator.validateNumber(e.target.value)) {
             this.props.onChange(null);
         }
         else {
