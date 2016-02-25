@@ -6,7 +6,7 @@ import * as UI from '../ui';
 import * as Model from '../model';
 
 export default class WorkoutView extends React.Component<any, any> {
-	constructor(params: UI.QueryParams) {
+	constructor(params: any) {
 		super(params);
 
 		this.state = this.getState(params);
@@ -37,7 +37,6 @@ export default class WorkoutView extends React.Component<any, any> {
 			return builder.getIntervalPretty(value);
 		}.bind(this));
 
-
 		return (
 			{
 				tss: builder.getTSS(),
@@ -53,12 +52,14 @@ export default class WorkoutView extends React.Component<any, any> {
 	}
 
 	refresh(params: UI.QueryParams) {
+		var new_state = this.getState(params);
+
 		this.setState(
-			this.getState(params)
+			new_state
 		);
 
-		// charts is outside react world
-		this.renderCharts();
+		// charts is outside react world, lets pass in the state as the update is done asynchronously
+		this.renderCharts(new_state);
 	}
 
 	renderPower() {
@@ -80,10 +81,10 @@ export default class WorkoutView extends React.Component<any, any> {
 
 	componentDidMount() {
 		// Put here which is guaranteed for the DOM tree to be created
-		this.renderCharts();
+		this.renderCharts(this.state);
 	}
 
-	renderCharts() {
+	renderCharts(state: any) {
 		// Timeline chart
 		var chartTimeline = new CanvasJS.Chart("chartTimeline", {
 			title: {
@@ -106,7 +107,7 @@ export default class WorkoutView extends React.Component<any, any> {
 				type: "area",
 				fillOpacity: 0.3,
 				markerType: "none",
-				dataPoints: this.state.time_series_data
+				dataPoints: state.time_series_data
 			}]
 		});
 
@@ -120,7 +121,7 @@ export default class WorkoutView extends React.Component<any, any> {
 			data: [{
 				type: "pie",
 				showInLegend: true,
-				dataPoints: this.state.time_in_zones_data
+				dataPoints: state.time_in_zones_data
 			}]
 		});
 		chartZones.render();
@@ -132,10 +133,6 @@ export default class WorkoutView extends React.Component<any, any> {
 					<ul>
 						{this.renderWorkoutSteps()}
 					</ul>
-					<div id="chartTimeline" style={{ height: "300px", width: "100%" }}>
-					</div>
-					<div id="chartZones" style={{ height: "200px", width: "100%" }}>
-					</div>
 					<h2>Summary</h2>
 					<table>
 						<tbody>
@@ -158,6 +155,10 @@ export default class WorkoutView extends React.Component<any, any> {
 							{ this.renderPower() }
 						</tbody>
 					</table>
+					<div id="chartTimeline" style={{ height: "300px", width: "100%" }}>
+					</div>
+					<div id="chartZones" style={{ height: "200px", width: "100%" }}>
+					</div>
 				</div>);
 	}
 }

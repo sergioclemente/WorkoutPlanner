@@ -8,12 +8,12 @@ import NumberInput from './number_input';
 import EmailInput from './email_input';
 import TextInput from './text_input';
 
-export default class UserProperty extends React.Component<UI.QueryParams, any> {
+export default class UserProperty extends React.Component<any, any> {
 	private ftp: number;
 	private t_pace: string;
 	private email: string;
 
-	constructor(params: UI.QueryParams) {
+	constructor(params: any) {
 		super(params);
 
 		this.ftp = parseInt(params.ftp_watts);
@@ -29,6 +29,10 @@ export default class UserProperty extends React.Component<UI.QueryParams, any> {
 			ftpInput.setError("");
 		}
 		this.ftp = ftp;
+
+		if (this.props.onChange) {
+			this.props.onChange(this.ftp, this.t_pace, this.email);
+		}
 	}
 	onTPaceChange(t_pace) {
 		var tPaceInput: NumberInput = this.refs['t_pace'] as NumberInput;
@@ -39,18 +43,17 @@ export default class UserProperty extends React.Component<UI.QueryParams, any> {
 			tPaceInput.setError("Enter a value speed for your running t-pace. Allowed units are: min/mi, km/h, mi/h, min/km");
 		}
 		this.t_pace = t_pace;
+
+		if (this.props.onChange) {
+			this.props.onChange(this.ftp, this.t_pace, this.email);
+		}
 	}
 	onEmailChange(email) {
 		this.email = email;
-	}
-	public getFTP(): number {
-		return this.ftp;
-	}
-	public getTPace(): string {
-		return this.t_pace;
-	}
-	public getEmail(): string {
-		return this.email;
+
+		if (this.props.onChange) {
+			this.props.onChange(this.ftp, this.t_pace, this.email);
+		}
 	}
 	render() {
 		return (

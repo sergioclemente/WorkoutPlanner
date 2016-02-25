@@ -53,6 +53,17 @@ export class QueryParams {
 		}
 	}
 
+	static createCopy(params: QueryParams) : QueryParams {
+		var ret = new QueryParams();
+		ret.workout_text = params.workout_text;
+		ret.ftp_watts = params.ftp_watts;
+		ret.t_pace = params.t_pace;
+		ret.sport_type = params.sport_type;
+		ret.output_unit = params.output_unit;
+		ret.email = params.email;
+		return ret;
+	}
+
 	loadFromURL(): boolean {
 		var params = getQueryParams();
 		this.workout_text = params.w;
