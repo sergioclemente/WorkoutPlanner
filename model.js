@@ -1772,6 +1772,19 @@ var Model;
         WorkoutBuilder.prototype.getIntervalPretty = function (interval) {
             return Formatter.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit);
         };
+        WorkoutBuilder.prototype.getEstimatedDistancePretty = function () {
+            return this.intervals.getDuration().toStringDistance();
+        };
+        WorkoutBuilder.prototype.getAveragePace = function () {
+            var minMi = this.userProfile.getPaceMinMi(this.intervals.getIntensity());
+            var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, this.outputUnit);
+            if (this.outputUnit == IntensityUnit.Kmh || this.outputUnit == IntensityUnit.Mph) {
+                return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
+            }
+            else {
+                return Formatter.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
+            }
+        };
         WorkoutBuilder.prototype.getPrettyPrint = function (new_line) {
             if (new_line === void 0) { new_line = "\n"; }
             var intensities = this.intervals.getIntensities();
@@ -1790,7 +1803,7 @@ var Model;
             result += (new_line);
             result += ("\t* Time: " + this.getTimePretty());
             result += (new_line);
-            result += ("\t* Distance: " + this.intervals.getDuration().toStringDistance());
+            result += ("\t* Distance: " + this.getEstimatedDistancePretty());
             result += (new_line);
             result += ("\t* IF: " + this.getIF());
             result += (new_line);

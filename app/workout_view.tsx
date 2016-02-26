@@ -43,6 +43,8 @@ export default class WorkoutView extends React.Component<any, any> {
 				time: builder.getTimePretty(),
 				intensity: builder.getIF(),
 				avg_power: builder.getAveragePower(),
+				distance: builder.getEstimatedDistancePretty(),
+				avg_pace: builder.getAveragePace(),
 				sport_type: builder.getSportType(),
 				time_series_data: builder.getInterval().getTimeSeries(),
 				time_in_zones_data: time_in_zones_data,
@@ -66,7 +68,29 @@ export default class WorkoutView extends React.Component<any, any> {
 		if (this.state.sport_type == Model.SportType.Bike) {
 			return (<tr>
 						<td>Average Power</td>
-						<td>{this.state.avg_power}w</td>
+						<td>{this.state.avg_power}</td>
+					</tr>);
+		} else {
+			return;
+		}
+	}
+
+	renderDistance() {
+		if (this.state.sport_type == Model.SportType.Run) {
+			return (<tr>
+						<td>Distance</td>
+						<td>{this.state.distance}</td>
+					</tr>);
+		} else {
+			return;
+		}
+	}
+
+	renderPace() {
+		if (this.state.sport_type == Model.SportType.Run) {
+			return (<tr>
+						<td>Pace</td>
+						<td>{this.state.avg_pace}</td>
 					</tr>);
 		} else {
 			return;
@@ -153,6 +177,8 @@ export default class WorkoutView extends React.Component<any, any> {
 								<td>{this.state.intensity }</td>
 							</tr>
 							{ this.renderPower() }
+							{ this.renderDistance() }
+							{ this.renderPace() }
 						</tbody>
 					</table>
 					<div id="chartTimeline" style={{ height: "300px", width: "100%" }}>

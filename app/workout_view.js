@@ -35,6 +35,8 @@ var WorkoutView = (function (_super) {
             time: builder.getTimePretty(),
             intensity: builder.getIF(),
             avg_power: builder.getAveragePower(),
+            distance: builder.getEstimatedDistancePretty(),
+            avg_pace: builder.getAveragePace(),
             sport_type: builder.getSportType(),
             time_series_data: builder.getInterval().getTimeSeries(),
             time_in_zones_data: time_in_zones_data,
@@ -49,7 +51,23 @@ var WorkoutView = (function (_super) {
     };
     WorkoutView.prototype.renderPower = function () {
         if (this.state.sport_type == Model.SportType.Bike) {
-            return (React.createElement("tr", null, React.createElement("td", null, "Average Power"), React.createElement("td", null, this.state.avg_power, "w")));
+            return (React.createElement("tr", null, React.createElement("td", null, "Average Power"), React.createElement("td", null, this.state.avg_power)));
+        }
+        else {
+            return;
+        }
+    };
+    WorkoutView.prototype.renderDistance = function () {
+        if (this.state.sport_type == Model.SportType.Run) {
+            return (React.createElement("tr", null, React.createElement("td", null, "Distance"), React.createElement("td", null, this.state.distance)));
+        }
+        else {
+            return;
+        }
+    };
+    WorkoutView.prototype.renderPace = function () {
+        if (this.state.sport_type == Model.SportType.Run) {
+            return (React.createElement("tr", null, React.createElement("td", null, "Pace"), React.createElement("td", null, this.state.avg_pace)));
         }
         else {
             return;
@@ -105,7 +123,7 @@ var WorkoutView = (function (_super) {
         chartZones.render();
     };
     WorkoutView.prototype.render = function () {
-        return (React.createElement("div", null, React.createElement("h2", null, "Steps"), React.createElement("ul", null, this.renderWorkoutSteps()), React.createElement("h2", null, "Summary"), React.createElement("table", null, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("b", null, "Metric")), React.createElement("td", null, React.createElement("b", null, "Value"))), React.createElement("tr", null, React.createElement("td", null, "TSS"), React.createElement("td", null, this.state.tss)), React.createElement("tr", null, React.createElement("td", null, "Time"), React.createElement("td", null, this.state.time)), React.createElement("tr", null, React.createElement("td", null, "IF"), React.createElement("td", null, this.state.intensity)), this.renderPower())), React.createElement("div", {"id": "chartTimeline", "style": { height: "300px", width: "100%" }}), React.createElement("div", {"id": "chartZones", "style": { height: "200px", width: "100%" }})));
+        return (React.createElement("div", null, React.createElement("h2", null, "Steps"), React.createElement("ul", null, this.renderWorkoutSteps()), React.createElement("h2", null, "Summary"), React.createElement("table", null, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("b", null, "Metric")), React.createElement("td", null, React.createElement("b", null, "Value"))), React.createElement("tr", null, React.createElement("td", null, "TSS"), React.createElement("td", null, this.state.tss)), React.createElement("tr", null, React.createElement("td", null, "Time"), React.createElement("td", null, this.state.time)), React.createElement("tr", null, React.createElement("td", null, "IF"), React.createElement("td", null, this.state.intensity)), this.renderPower(), this.renderDistance(), this.renderPace())), React.createElement("div", {"id": "chartTimeline", "style": { height: "300px", width: "100%" }}), React.createElement("div", {"id": "chartZones", "style": { height: "200px", width: "100%" }})));
     };
     return WorkoutView;
 })(React.Component);

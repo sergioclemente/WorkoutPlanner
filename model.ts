@@ -1841,6 +1841,20 @@ export class WorkoutBuilder {
 	getIntervalPretty(interval: Interval) {
 		return Formatter.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit);
 	}
+
+	getEstimatedDistancePretty() : string {
+		return this.intervals.getDuration().toStringDistance();
+	}
+
+	getAveragePace() : string {
+		var minMi = this.userProfile.getPaceMinMi(this.intervals.getIntensity());
+		var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, this.outputUnit); 
+		if (this.outputUnit == IntensityUnit.Kmh || this.outputUnit == IntensityUnit.Mph) {
+			return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
+		} else {
+			return Formatter.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
+		}
+	}
 	
 	getPrettyPrint(new_line : string = "\n") : string {
 		var intensities = this.intervals.getIntensities();
@@ -1861,7 +1875,7 @@ export class WorkoutBuilder {
 		result += (new_line);
 		result += ("\t* Time: " + this.getTimePretty());
 		result += (new_line);
-		result += ("\t* Distance: " + this.intervals.getDuration().toStringDistance());
+		result += ("\t* Distance: " + this.getEstimatedDistancePretty());
 		result += (new_line);		
 		result += ("\t* IF: " + this.getIF());
 		result += (new_line);

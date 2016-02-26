@@ -358,6 +358,8 @@ declare module Model {
         getIF(): number;
         getAveragePower(): number;
         getIntervalPretty(interval: Interval): string;
+        getEstimatedDistancePretty(): string;
+        getAveragePace(): string;
         getPrettyPrint(new_line?: string): string;
         getMRCFile(): string;
         getZWOFile(): string;
