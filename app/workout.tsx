@@ -29,16 +29,25 @@ export default class Workout extends React.Component<any, any> {
 		this.refresh();
 	}
 
+	componentDidMount() {
+		// Put here which is guaranteed for the DOM tree to be created
+		this.refreshUrls();
+	}	
+
 	refresh() {
 		var view: WorkoutView = this.refs['view'] as WorkoutView;
 		view.refresh(this.params);
 
+		this.refreshUrls();
+
+		this.params.saveToStorage();
+	}
+
+	refreshUrls() {
 		var url_parameters = this.params.getURL();
 		this._setHref("download_mrc", "workout.mrc" + url_parameters);
 		this._setHref("download_zwo", "workout.zwo" + url_parameters);
-		this._setHref("email_send_workout", "send_mail.html" + url_parameters);
-
-		this.params.saveToStorage();
+		this._setHref("email_send_workout", "send_mail" + url_parameters);
 	}
 
 	_setHref(element_ref: string, url: string) {

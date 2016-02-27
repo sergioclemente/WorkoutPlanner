@@ -27,14 +27,21 @@ var Workout = (function (_super) {
         this.params.email = email;
         this.refresh();
     };
+    Workout.prototype.componentDidMount = function () {
+        // Put here which is guaranteed for the DOM tree to be created
+        this.refreshUrls();
+    };
     Workout.prototype.refresh = function () {
         var view = this.refs['view'];
         view.refresh(this.params);
+        this.refreshUrls();
+        this.params.saveToStorage();
+    };
+    Workout.prototype.refreshUrls = function () {
         var url_parameters = this.params.getURL();
         this._setHref("download_mrc", "workout.mrc" + url_parameters);
         this._setHref("download_zwo", "workout.zwo" + url_parameters);
-        this._setHref("email_send_workout", "send_mail.html" + url_parameters);
-        this.params.saveToStorage();
+        this._setHref("email_send_workout", "send_mail" + url_parameters);
     };
     Workout.prototype._setHref = function (element_ref, url) {
         var anchor = this.refs[element_ref];
