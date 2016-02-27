@@ -16,41 +16,62 @@ export default class WorkoutView extends React.Component<any, any> {
 		this.setState({ value: '' + nextProps.value })
 	}
 
-	getState(params: UI.QueryParams) {
-		// TODO: Fix this clowny parseInt()
-		var userProfile = new Model.UserProfile(parseInt(params.ftp_watts), params.t_pace, params.email);
-		var builder = new Model.WorkoutBuilder(
-			userProfile, parseInt(params.sport_type), parseInt(params.output_unit)).withDefinition(params.workout_text);
+	getState(params: UI.QueryParams) : any {
+		try {
+			// TODO: Fix this clowny parseInt()
+			var userProfile = new Model.UserProfile(parseInt(params.ftp_watts), params.t_pace, params.email);
+			var builder = new Model.WorkoutBuilder(
+				userProfile, parseInt(params.sport_type), parseInt(params.output_unit)).withDefinition(params.workout_text);
 
 
-		var time_in_zones_data = builder.getInterval().getTimeInZones(builder.getSportType()).map(
-			function(zone) {
-				return {
-					y: zone.duration.getSeconds(),
-					legendText: zone.name + "(" + zone.duration.toString() + ")",
-					indexLabel: zone.name
+			var time_in_zones_data = builder.getInterval().getTimeInZones(builder.getSportType()).map(
+				function(zone) {
+					return {
+						y: zone.duration.getSeconds(),
+						legendText: zone.name + "(" + zone.duration.toString() + ")",
+						indexLabel: zone.name
+					}
 				}
-			}
-		);
+			);
 
-		var workout_steps = builder.getInterval().getIntervals().map(function(value: Model.Interval, index: number) {
-			return builder.getIntervalPretty(value);
-		}.bind(this));
+			var workout_steps = builder.getInterval().getIntervals().map(function(value: Model.Interval, index: number) {
+				return builder.getIntervalPretty(value);
+			}.bind(this));
 
-		return (
-			{
-				tss: builder.getTSS(),
-				time: builder.getTimePretty(),
-				intensity: builder.getIF(),
-				avg_power: builder.getAveragePower(),
-				distance: builder.getEstimatedDistancePretty(),
-				avg_pace: builder.getAveragePace(),
-				sport_type: builder.getSportType(),
-				time_series_data: builder.getInterval().getTimeSeries(),
-				time_in_zones_data: time_in_zones_data,
-				workout_steps: workout_steps,
-			}
-		);
+			var avg_pace = builder.getSportType() == Model.SportType.Run ?
+				builder.getAveragePace() : "";
+
+			return (
+				{
+					tss: builder.getTSS(),
+					time: builder.getTimePretty(),
+					intensity: builder.getIF(),
+					avg_power: builder.getAveragePower(),
+					distance: builder.getEstimatedDistancePretty(),
+					avg_pace: avg_pace,
+					sport_type: builder.getSportType(),
+					time_series_data: builder.getInterval().getTimeSeries(),
+					time_in_zones_data: time_in_zones_data,
+					workout_steps: workout_steps,
+				}
+			);
+		} catch (err) {
+			console.log("error:" + err.message);
+			return (
+				{
+					tss: 0,
+					time: "",
+					intensity: 0,
+					avg_power: 0,
+					distance: "",
+					avg_pace: "",
+					sport_type: Model.SportType.Bike,
+					time_series_data: [],
+					time_in_zones_data: [],
+					workout_steps: [],
+				}
+			);
+		}
 	}
 
 	refresh(params: UI.QueryParams) {
@@ -110,45 +131,49 @@ export default class WorkoutView extends React.Component<any, any> {
 
 	renderCharts(state: any) {
 		// Timeline chart
-		var chartTimeline = new CanvasJS.Chart("chartTimeline", {
-			title: {
-				text: ""
-			},
-			axisX: {
-				title: "time",
-				suffix: "min",
-				gridColor: "lightgray",
-				gridThickness: 1,
-			},
-			axisY: {
-				title: "intensity",
-				labelAngle: 45,
-				minimum: 45,
-				suffix: "%",
-				gridThickness: 0,
-			},
-			data: [{
-				type: "area",
-				fillOpacity: 0.3,
-				markerType: "none",
-				dataPoints: state.time_series_data
-			}]
-		});
+		if (state.time_series_data.length != 0) {
+			var chartTimeline = new CanvasJS.Chart("chartTimeline", {
+				title: {
+					text: ""
+				},
+				axisX: {
+					title: "time",
+					suffix: "min",
+					gridColor: "lightgray",
+					gridThickness: 1,
+				},
+				axisY: {
+					title: "intensity",
+					labelAngle: 45,
+					minimum: 45,
+					suffix: "%",
+					gridThickness: 0,
+				},
+				data: [{
+					type: "area",
+					fillOpacity: 0.3,
+					markerType: "none",
+					dataPoints: state.time_series_data
+				}]
+			});
 
-		chartTimeline.render();
+			chartTimeline.render();
+		}
 
 		// Zones chart
-		var chartZones = new CanvasJS.Chart("chartZones", {
-			title: {
-				text: "Time in zones"
-			},
-			data: [{
-				type: "pie",
-				showInLegend: true,
-				dataPoints: state.time_in_zones_data
-			}]
-		});
-		chartZones.render();
+		if (state.time_in_zones_data.length != 0) {
+			var chartZones = new CanvasJS.Chart("chartZones", {
+				title: {
+					text: "Time in zones"
+				},
+				data: [{
+					type: "pie",
+					showInLegend: true,
+					dataPoints: state.time_in_zones_data
+				}]
+			});
+			chartZones.render();
+		}
 	}
 
 	render() {
