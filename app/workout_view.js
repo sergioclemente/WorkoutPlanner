@@ -6,6 +6,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var React = require('react');
+var UI = require('../ui');
 var Model = require('../model');
 var WorkoutView = (function (_super) {
     __extends(WorkoutView, _super);
@@ -44,6 +45,7 @@ var WorkoutView = (function (_super) {
                 time_series_data: builder.getInterval().getTimeSeries(),
                 time_in_zones_data: time_in_zones_data,
                 workout_steps: workout_steps,
+                workout_pretty: builder.getPrettyPrint(),
             });
         }
         catch (err) {
@@ -59,6 +61,7 @@ var WorkoutView = (function (_super) {
                 time_series_data: [],
                 time_in_zones_data: [],
                 workout_steps: [],
+                workout_pretty: "",
             });
         }
     };
@@ -100,6 +103,9 @@ var WorkoutView = (function (_super) {
     WorkoutView.prototype.componentDidMount = function () {
         // Put here which is guaranteed for the DOM tree to be created
         this.renderCharts(this.state);
+        document.getElementById("id_clipboard").addEventListener('click', function () {
+            UI.ClipboardHelper.copyText(this.state.workout_pretty);
+        }.bind(this));
     };
     WorkoutView.prototype.renderCharts = function (state) {
         // Timeline chart
@@ -146,7 +152,7 @@ var WorkoutView = (function (_super) {
         }
     };
     WorkoutView.prototype.render = function () {
-        return (React.createElement("div", null, React.createElement("h2", null, "Steps"), React.createElement("ul", null, this.renderWorkoutSteps()), React.createElement("h2", null, "Summary"), React.createElement("table", null, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("b", null, "Metric")), React.createElement("td", null, React.createElement("b", null, "Value"))), React.createElement("tr", null, React.createElement("td", null, "TSS"), React.createElement("td", null, this.state.tss)), React.createElement("tr", null, React.createElement("td", null, "Time"), React.createElement("td", null, this.state.time)), React.createElement("tr", null, React.createElement("td", null, "IF"), React.createElement("td", null, this.state.intensity)), this.renderPower(), this.renderDistance(), this.renderPace())), React.createElement("div", {"id": "chartTimeline", "style": { height: "300px", width: "100%" }}), React.createElement("div", {"id": "chartZones", "style": { height: "200px", width: "100%" }})));
+        return (React.createElement("div", null, React.createElement("h2", null, "Steps"), React.createElement("ul", null, this.renderWorkoutSteps()), React.createElement("h2", null, "Summary"), React.createElement("button", {"id": "id_clipboard"}, "Copy to clipboard"), React.createElement("table", null, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("b", null, "Metric")), React.createElement("td", null, React.createElement("b", null, "Value"))), React.createElement("tr", null, React.createElement("td", null, "TSS"), React.createElement("td", null, this.state.tss)), React.createElement("tr", null, React.createElement("td", null, "Time"), React.createElement("td", null, this.state.time)), React.createElement("tr", null, React.createElement("td", null, "IF"), React.createElement("td", null, this.state.intensity)), this.renderPower(), this.renderDistance(), this.renderPace())), React.createElement("div", {"id": "chartTimeline", "style": { height: "300px", width: "100%" }}), React.createElement("div", {"id": "chartZones", "style": { height: "200px", width: "100%" }})));
     };
     return WorkoutView;
 })(React.Component);

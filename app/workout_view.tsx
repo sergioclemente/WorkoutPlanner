@@ -53,6 +53,7 @@ export default class WorkoutView extends React.Component<any, any> {
 					time_series_data: builder.getInterval().getTimeSeries(),
 					time_in_zones_data: time_in_zones_data,
 					workout_steps: workout_steps,
+					workout_pretty: builder.getPrettyPrint(),
 				}
 			);
 		} catch (err) {
@@ -69,6 +70,7 @@ export default class WorkoutView extends React.Component<any, any> {
 					time_series_data: [],
 					time_in_zones_data: [],
 					workout_steps: [],
+					workout_pretty: "",
 				}
 			);
 		}
@@ -127,6 +129,10 @@ export default class WorkoutView extends React.Component<any, any> {
 	componentDidMount() {
 		// Put here which is guaranteed for the DOM tree to be created
 		this.renderCharts(this.state);
+
+		document.getElementById("id_clipboard").addEventListener('click',function() {
+			UI.ClipboardHelper.copyText(this.state.workout_pretty);
+		}.bind(this));
 	}
 
 	renderCharts(state: any) {
@@ -183,6 +189,7 @@ export default class WorkoutView extends React.Component<any, any> {
 						{this.renderWorkoutSteps()}
 					</ul>
 					<h2>Summary</h2>
+					<button id="id_clipboard">Copy to clipboard</button>
 					<table>
 						<tbody>
 							<tr>
