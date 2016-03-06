@@ -184,3 +184,8 @@ expect_true(UI.FieldValidator.validateNumber("123"));
 expect_eq_nbr(8, Model.SpeedParser.getSpeedInMph("7:30min/mi"))
 expect_eq_nbr(8, Model.SpeedParser.getSpeedInMph("8mi/h"))
 expect_eq_nbr(8.44, Model.SpeedParser.getSpeedInMph("4:25min/km"))
+
+var repeat_main_interval = Model.IntervalParser.parse(of_bike, `4[(45s, 75, 100), (15s, 55)]`);
+expect_eq_nbr(1, repeat_main_interval.getIntervals().length);
+var repeat_interval = repeat_main_interval.getIntervals()[0];
+expect_eq_nbr(4, repeat_interval.getRepeatCount());

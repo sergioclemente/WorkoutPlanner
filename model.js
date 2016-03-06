@@ -874,7 +874,15 @@ var Model;
                             }
                             // Take a peek at the top of the stack
                             if (stack[stack.length - 1] instanceof RepeatInterval) {
-                                if (intensities.length >= 2) {
+                                var repeatInterval = (stack[stack.length - 1]);
+                                // TODO: There is ambiguity in the following interval:
+                                // 2[(45s, 75, 100), (15s, 55)]
+                                // It could be two types of intervals:
+                                // 1) 2x (Ramp from 75% to 100% with 15s rest)
+                                // or
+                                // 2) 2x (45s @ 75% and 100% w/ 15s rest)
+                                // Will assume the former, since the latter is less common.
+                                if (intensities.length == repeatInterval.getRepeatCount()) {
                                     // OK this should not be a RepeatInterval, it should be
                                     // a StepBuildInterval instead
                                     // Remove the ArrayInterval from the top and from the parent
