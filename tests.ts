@@ -3,7 +3,7 @@
 var Model = require("./model");
 var UI = require("./ui");
 
-function expect_true(condition : boolean, message : string = "") {
+function expect_true(condition : boolean, message : string = "Expect true failed") {
     if (!condition) {
 		console.log(message);
 		console.trace();
@@ -165,6 +165,11 @@ var step_build_85_100 = Model.IntervalParser.parse(of_bike, `3[(1min, 80, 90, 10
 expect_eq_nbr(5.8, step_build_85_100.getTSS(), 0.1);
 expect_eq_nbr(3*60+3*30, step_build_85_100.getDuration().getSeconds());
 expect_eq_nbr(0.88, step_build_85_100.getIntensity().getValue());
+expect_true(!step_build_85_100.getIntervals()[0].areAllIntensitiesSame());
+
+var step_build_equal_intensity = Model.IntervalParser.parse(of_bike, `3[(2min, 1min, 1min, 75), (1min, 55)]`);
+expect_eq_nbr((2 + 1 + 1) *60 + 3*60, step_build_equal_intensity.getDuration().getSeconds());
+expect_true(step_build_equal_intensity.getIntervals()[0].areAllIntensitiesSame());
 
 expect_eq_nbr(1, Model.ZonesVisitor.getZone(Model.SportType.Bike, 0.50));
 expect_eq_nbr(2, Model.ZonesVisitor.getZone(Model.SportType.Bike, 0.55));

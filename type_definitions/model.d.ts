@@ -152,6 +152,7 @@ declare module Model {
         getRepeatCount(): number;
         getStepInterval(idx: number): Interval;
         getRestInterval(): Interval;
+        areAllIntensitiesSame(): boolean;
         getDuration(): Duration;
     }
     class IntervalParser {

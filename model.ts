@@ -726,6 +726,17 @@ export class StepBuildInterval extends ArrayInterval {
 	getRestInterval() : Interval {
 		return this.intervals[this.intervals.length - 1];
 	}
+	areAllIntensitiesSame() : boolean {
+		var prev_intensity = this.intervals[0].getIntensity().getValue();
+		for (var i = 1; i < this.intervals.length - 1; i++) {
+			var cur_intensity = this.intervals[i].getIntensity().getValue();
+			if (cur_intensity != prev_intensity) {
+				return false;
+			}
+			prev_intensity = cur_intensity;
+		}
+		return true;
+	}
 	getDuration(): Duration {
 		var durations = [];
 		for (var i = 0; i < this.intervals.length; i++) {
@@ -832,8 +843,8 @@ export class IntervalParser {
 					if (ch == ")") {
 						// simple workout completed, pop element from stack and create
 						var interval : Interval;
-						var durationValue : number;
-						var durationUnit : DurationUnit;
+						var durationValues : number[] = [];
+						var durationUnits : DurationUnit[] = [];
 						var intensities : Intensity[] = [];
 						
 						// Do we have the units?
@@ -867,8 +878,8 @@ export class IntervalParser {
 						// Handle properly the duration unit
 						for (var k = 0; k < Object.keys(units).length; k++) {
 							if (isDurationUnit(units[k])) {
-								durationUnit = getDurationUnitFromString(units[k]);
-								durationValue = nums[k];
+								durationUnits.push(getDurationUnitFromString(units[k]));
+								durationValues.push(nums[k]);
 							} else if (nums[k] != 0) {
 								var intensityUnit = IntensityUnit.IF;
 								if (isIntensityUnit(units[k])) {
@@ -888,7 +899,8 @@ export class IntervalParser {
 							// or
 							// 2) 2x (45s @ 75% and 100% w/ 15s rest)
 							// Will assume the former, since the latter is less common.
-							if (intensities.length == repeatInterval.getRepeatCount()) {
+							if (intensities.length == repeatInterval.getRepeatCount()
+								|| durationValues.length == repeatInterval.getRepeatCount()) {
 								// OK this should not be a RepeatInterval, it should be
 								// a StepBuildInterval instead
 
@@ -898,9 +910,12 @@ export class IntervalParser {
 
 								// add the new intervals
 								var step_intervals = [];
-								for (var k = 0 ; k < intensities.length; k++) {
-									var step_duration = factory.createDuration(intensities[k], durationUnit, durationValue);
-									step_intervals.push(new SimpleInterval("", intensities[k], step_duration));
+								for (var k = 0 ; k < repeatInterval.getRepeatCount(); k++) {
+									var durationUnit = k < durationUnits.length ? durationUnits[k] : durationUnits[0];
+									var durationValue = k < durationValues.length ? durationValues[k] : durationValues[0];
+									var intensity = k < intensities.length ? intensities[k] : intensities[0];
+									var step_duration = factory.createDuration(intensity, durationUnit, durationValue);
+									step_intervals.push(new SimpleInterval("", intensity, step_duration));
 								}
 
 								var bsi = new StepBuildInterval("", step_intervals);
@@ -917,11 +932,11 @@ export class IntervalParser {
 							var startIntensity = intensities[0];
 							var endIntensity = intensities[1]
 							var intensity = RampBuildInterval.computeAverageIntensity(startIntensity, endIntensity);
-							var duration = factory.createDuration(intensity, durationUnit, durationValue);
+							var duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
 							interval = new RampBuildInterval(title.trim(), startIntensity, endIntensity, duration);
 						} else if (intensities.length == 1) {
 							var intensity = intensities[0];
-							var duration = factory.createDuration(intensity, durationUnit, durationValue);
+							var duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
 							interval = new SimpleInterval(title.trim(), intensity, duration);
 						} else {
 							IntervalParser.throwParserError(i, "Cannot have less than 1 intensity");
@@ -1487,16 +1502,32 @@ export class Formatter implements Visitor {
 		// visitStepBuildInterval knows that all durations of the step are the same.
 		this.result += interval.getRepeatCount() + "x (";
 		
-		this.result += interval.getStepInterval(0).getDuration().toString() + " at ";
-
-		for (var i = 0 ; i < interval.getRepeatCount(); i++) {
+		// There are two types of step build interval
+		// 1) Same duration - different intensities
+		// 2) Different duration - same intensities
+		// case 1
+		if (interval.areAllIntensitiesSame()) {
+			for (var i = 0; i < interval.getRepeatCount(); i++) {
+				this.result += interval.getStepInterval(i).getDuration().toString();
+				this.result += ", ";
+			}
+				
+			// remove extra ", "
+			this.result = this.result.slice(0, this.result.length - 2);
+			this.result += " at ";
 			this.result += this.getIntensityPretty(interval.getStepInterval(i).getIntensity());
-			this.result += ", ";			
+
+		} else {
+			this.result += interval.getStepInterval(0).getDuration().toString() + " at ";
+			for (var i = 0; i < interval.getRepeatCount(); i++) {
+				this.result += this.getIntensityPretty(interval.getStepInterval(i).getIntensity());
+				this.result += ", ";
+			}
+			// remove extra ", "
+			this.result = this.result.slice(0, this.result.length - 2);
 		}
-		// remove extra ", "
-		this.result = this.result.slice(0, this.result.length - 2);
-		
-		this.visitRestInterval(interval.getRestInterval());		
+
+		this.visitRestInterval(interval.getRestInterval());
 
 		this.result += ")";
 	}
