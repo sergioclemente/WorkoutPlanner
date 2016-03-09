@@ -136,6 +136,7 @@ declare module Model {
         getTitle(): string;
         getIntervals(): Interval[];
         getTSS(): number;
+        getTSSFromIF(): number;
         getIntensities(): Intensity[];
         getTimeSeries(): any;
         getTimeInZones(sportType: SportType): any[];
@@ -184,6 +185,12 @@ declare module Model {
         visitRampBuildInterval(interval: RampBuildInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
         visitArrayInterval(interval: ArrayInterval): void;
+    }
+    class TSSVisitor extends BaseVisitor {
+        private tss;
+        visitSimpleInterval(interval: SimpleInterval): void;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
+        getTSS(): number;
     }
     class DateHelper {
         static getDayOfWeek(): string;
@@ -355,6 +362,7 @@ declare module Model {
         withDefinition(workoutDefinition: string): WorkoutBuilder;
         getIntensityFriendly(intensity: Intensity): string;
         getTSS(): number;
+        getTSSFromIF(): number;
         getTimePretty(): string;
         getIF(): number;
         getAveragePower(): number;

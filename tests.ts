@@ -50,27 +50,30 @@ var i80 = new Model.Intensity(0.80, 0.80);
 res = Model.Intensity.combine([i90, i80], [1, 1]).getValue();
 expect_eq_nbr(0.85, res);
 
+var up = new Model.UserProfile(310, "6:00min/mi");
+var of_bike = new Model.ObjectFactory(up, Model.SportType.Bike);
+var of_run = new Model.ObjectFactory(up, Model.SportType.Run);
+
 // TSS tests
 var int1hri75 = new Model.ArrayInterval("", [createSimpleInterval(0.75, 3600)]);
-expect_eq_nbr(56.25, int1hri75.getTSS());
+expect_eq_nbr(56.3, int1hri75.getTSS());
 
 var int1hri85 = new Model.ArrayInterval("", [createSimpleInterval(0.85, 3600)]);
-expect_eq_nbr(72.25, int1hri85.getTSS());
+expect_eq_nbr(72.2, int1hri85.getTSS());
+
+var buildInterval = Model.IntervalParser.parse(of_bike, "(1min, 55, 75)");
+expect_eq_nbr(0.7, buildInterval.getTSS());
 
 // IntervalParser
 expect_eq_nbr(123, Model.IntervalParser.parseDouble("123", 0).value);
 expect_eq_nbr(123.456, Model.IntervalParser.parseDouble("123.456", 0).value);
 
 // Parser tests
-var up = new Model.UserProfile(310, "6:00min/mi");
-var of_bike = new Model.ObjectFactory(up, Model.SportType.Bike);
-var of_run = new Model.ObjectFactory(up, Model.SportType.Run);
-
 var int_par_1hr_75 = Model.IntervalParser.parse(of_bike, "(1hr, 75)");
-expect_eq_nbr(56.25, int_par_1hr_75.getTSS());
+expect_eq_nbr(56.3, int_par_1hr_75.getTSS());
 
 var int_par_2hr_75_85 = Model.IntervalParser.parse(of_bike, "(1hr, 75), (1hr, 85)");
-expect_eq_nbr(129.5, int_par_2hr_75_85.getTSS());
+expect_eq_nbr(128.5, int_par_2hr_75_85.getTSS());
 
 var simple1min85 = Model.IntervalParser.parse(of_bike, "(1, 85)");
 expect_eq_nbr(0.85, simple1min85.getIntensities()[0].getValue());
@@ -138,16 +141,30 @@ expect_eq_str(expected_content, zwift.getContent());
 var repeat_85_1 = Model.IntervalParser.parse(of_bike, `1[(1hr, 85)]`);
 var repeat_85_2 = Model.IntervalParser.parse(of_bike, `2[(1hr, 85)]`);
 
-expect_eq_nbr(72.25, repeat_85_1.getTSS());
+expect_true(repeat_85_1.getIntervals()[0] instanceof Model.RepeatInterval);
+expect_eq_nbr(72.2, repeat_85_1.getTSS());
+expect_eq_nbr(3600, repeat_85_1.getDuration().getSeconds());
 expect_eq_nbr(0.85, repeat_85_1.getIntensity().getValue());
 
 expect_eq_nbr(144.5, repeat_85_2.getTSS());
+expect_eq_nbr(2*3600, repeat_85_2.getDuration().getSeconds());
 expect_eq_nbr(0.85, repeat_85_2.getIntensity().getValue());
 
 var baseLinePlusRepeat = Model.IntervalParser.parse(of_bike, `(1hr, 75) 2[(1hr, 85)]`);
-expect_eq_nbr(202, baseLinePlusRepeat.getTSS(), 0.1);
+expect_eq_nbr(200.8, baseLinePlusRepeat.getTSS(), 0.1);
 expect_eq_nbr(3 * 3600, baseLinePlusRepeat.getDuration().getSeconds());
 expect_eq_nbr(0.816, baseLinePlusRepeat.getIntensity().getValue());
+
+// TSS accumulation over the second not average if
+var onehr85 = Model.IntervalParser.parse(of_bike, `(1hr, 86)`);
+expect_eq_nbr(74, onehr85.getTSS(), 0.1);
+expect_eq_nbr(0.86, onehr85.getIntensity().getValue());
+expect_eq_nbr(3600, onehr85.getDuration().getSeconds());
+
+var onehr85ButHighTSS = Model.IntervalParser.parse(of_bike, `(30min, 60), (30min, 100)`);
+expect_eq_nbr(68, onehr85ButHighTSS.getTSS(), 0.1);
+expect_eq_nbr(0.82, onehr85ButHighTSS.getIntensity().getValue());
+expect_eq_nbr(3600, onehr85ButHighTSS.getDuration().getSeconds());
 
 // StepBuildInterval basic tests
 var duration1min = new Model.Duration(Model.DurationUnit.Seconds, 60, 60, 0);
@@ -162,9 +179,9 @@ expect_eq_nbr(3, sbi.getRepeatCount());
 expect_eq_nbr(3*60 + 3*30, sbi.getDuration().getSeconds());
 
 var step_build_85_100 = Model.IntervalParser.parse(of_bike, `3[(1min, 80, 90, 100), (30s, 50)]`);
-expect_eq_nbr(5.8, step_build_85_100.getTSS(), 0.1);
+expect_eq_nbr(4.7, step_build_85_100.getTSS(), 0.1);
 expect_eq_nbr(3*60+3*30, step_build_85_100.getDuration().getSeconds());
-expect_eq_nbr(0.88, step_build_85_100.getIntensity().getValue());
+expect_eq_nbr(0.85, step_build_85_100.getIntensity().getValue());
 expect_true(!step_build_85_100.getIntervals()[0].areAllIntensitiesSame());
 
 var step_build_equal_intensity = Model.IntervalParser.parse(of_bike, `3[(2min, 1min, 1min, 75), (1min, 55)]`);

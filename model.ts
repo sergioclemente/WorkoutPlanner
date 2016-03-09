@@ -496,11 +496,11 @@ export class Intensity {
 		var sum2 = 0;
 
 		for (var i = 0; i < intensities.length; i++) {
-			sum1 += Math.pow(intensities[i].ifValue, 4) * weights[i];
+			sum1 += Math.pow(intensities[i].ifValue, 2) * weights[i];
 			sum2 += weights[i];
 		}
 		
-		return new Intensity(Math.sqrt(Math.sqrt(sum1/sum2)));
+		return new Intensity(Math.sqrt(sum1/sum2));
 	}
 }
 
@@ -633,7 +633,14 @@ export class ArrayInterval implements Interval {
 	}
 	
 	getTSS() : number {
-		return (this.getIntensity().getValue() * this.getIntensity().getValue() * this.getDuration().getSeconds()) / 36;
+		var tssVisitor = new TSSVisitor();
+		VisitorHelper.visit(tssVisitor, this);
+		return tssVisitor.getTSS();
+	}
+	
+	getTSSFromIF() : number {
+		var tss_from_if = (this.getIntensity().getValue() * this.getIntensity().getValue() * this.getDuration().getSeconds()) / 36;
+		return MyMath.round10(tss_from_if, -1);
 	}
 
 	getIntensities(): Intensity[] {
@@ -899,8 +906,9 @@ export class IntervalParser {
 							// or
 							// 2) 2x (45s @ 75% and 100% w/ 15s rest)
 							// Will assume the former, since the latter is less common.
-							if (intensities.length == repeatInterval.getRepeatCount()
-								|| durationValues.length == repeatInterval.getRepeatCount()) {
+							if (repeatInterval.getRepeatCount() > 1 &&
+								(intensities.length == repeatInterval.getRepeatCount()
+									|| durationValues.length == repeatInterval.getRepeatCount())) {
 								// OK this should not be a RepeatInterval, it should be
 								// a StepBuildInterval instead
 
@@ -1073,6 +1081,37 @@ export class BaseVisitor implements Visitor {
 		for (var i = 0; i < interval.getIntervals().length; i++) {
 			VisitorHelper.visit(this, interval.getIntervals()[i]);
 		}
+	}
+}
+
+// TSS = [(s x NP x IF) / (FTP x 3600)] x 100
+// IF = NP / FTP
+// TSS = [(s x NP x NP/FTP) / (FTP x 3600)] x 100
+// TSS = [s x (NP / FTP) ^ 2] / 36
+export class TSSVisitor extends BaseVisitor {
+	private tss : number = 0;
+	
+	visitSimpleInterval(interval: SimpleInterval) : void {
+		var duration = interval.getDuration().getSeconds();
+		var intensity = interval.getIntensity().getValue();
+		var val = duration * Math.pow(intensity, 2);
+		this.tss += val;
+	}
+	visitRampBuildInterval(interval: RampBuildInterval) : void {
+		var startIntensity = interval.getStartIntensity().getValue();
+		var endIntensity = interval.getEndIntensity().getValue();
+		var duration = interval.getDuration().getSeconds();
+		
+		// Right way to estimate the intensity is by doing incremental of 1 sec
+		for (var t = 0; t < duration; t++) {
+			var intensity = startIntensity + (endIntensity-startIntensity)*(t/duration);
+			var val = 1 * Math.pow(intensity, 2);
+			this.tss += val;
+		}
+	}
+	
+	getTSS(): number {
+		return MyMath.round10(this.tss / 36, -1);
 	}
 }
 
@@ -1862,7 +1901,11 @@ export class WorkoutBuilder {
 	}
 
 	getTSS() : number {
-		return MyMath.round10(this.intervals.getTSS(), -1);
+		return this.intervals.getTSS();
+	}
+
+	getTSSFromIF() : number {
+		return this.intervals.getTSSFromIF();
 	}
 
 	getTimePretty() : string {

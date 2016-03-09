@@ -36,6 +36,7 @@ var WorkoutView = (function (_super) {
                 builder.getAveragePace() : "";
             return ({
                 tss: builder.getTSS(),
+                tss_from_if: builder.getTSSFromIF(),
                 time: builder.getTimePretty(),
                 intensity: builder.getIF(),
                 avg_power: builder.getAveragePower(),
@@ -52,6 +53,7 @@ var WorkoutView = (function (_super) {
             console.log("error:" + err.message);
             return ({
                 tss: 0,
+                tss_from_if: 0,
                 time: "",
                 intensity: 0,
                 avg_power: 0,
@@ -152,7 +154,7 @@ var WorkoutView = (function (_super) {
         }
     };
     WorkoutView.prototype.render = function () {
-        return (React.createElement("div", null, React.createElement("h2", null, "Steps"), React.createElement("ul", null, this.renderWorkoutSteps()), React.createElement("h2", null, "Summary"), React.createElement("button", {"id": "id_clipboard"}, "Copy to clipboard"), React.createElement("table", null, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("b", null, "Metric")), React.createElement("td", null, React.createElement("b", null, "Value"))), React.createElement("tr", null, React.createElement("td", null, "TSS"), React.createElement("td", null, this.state.tss)), React.createElement("tr", null, React.createElement("td", null, "Time"), React.createElement("td", null, this.state.time)), React.createElement("tr", null, React.createElement("td", null, "IF"), React.createElement("td", null, this.state.intensity)), this.renderPower(), this.renderDistance(), this.renderPace())), React.createElement("div", {"id": "chartTimeline", "style": { height: "300px", width: "100%" }}), React.createElement("div", {"id": "chartZones", "style": { height: "200px", width: "100%" }})));
+        return (React.createElement("div", null, React.createElement("h2", null, "Steps"), React.createElement("ul", null, this.renderWorkoutSteps()), React.createElement("h2", null, "Summary"), React.createElement("button", {"id": "id_clipboard"}, "Copy to clipboard"), React.createElement("table", null, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("b", null, "Metric")), React.createElement("td", null, React.createElement("b", null, "Value"))), React.createElement("tr", null, React.createElement("td", null, "TSS"), React.createElement("td", null, this.state.tss)), React.createElement("tr", null, React.createElement("td", null, "TSS From IF"), React.createElement("td", null, this.state.tss_from_if)), React.createElement("tr", null, React.createElement("td", null, "Time"), React.createElement("td", null, this.state.time)), React.createElement("tr", null, React.createElement("td", null, "IF"), React.createElement("td", null, this.state.intensity)), this.renderPower(), this.renderDistance(), this.renderPace())), React.createElement("div", {"id": "chartTimeline", "style": { height: "300px", width: "100%" }}), React.createElement("div", {"id": "chartZones", "style": { height: "200px", width: "100%" }})));
     };
     return WorkoutView;
 })(React.Component);

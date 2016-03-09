@@ -44,6 +44,7 @@ export default class WorkoutView extends React.Component<any, any> {
 			return (
 				{
 					tss: builder.getTSS(),
+					tss_from_if: builder.getTSSFromIF(),
 					time: builder.getTimePretty(),
 					intensity: builder.getIF(),
 					avg_power: builder.getAveragePower(),
@@ -61,6 +62,7 @@ export default class WorkoutView extends React.Component<any, any> {
 			return (
 				{
 					tss: 0,
+					tss_from_if: 0,
 					time: "",
 					intensity: 0,
 					avg_power: 0,
@@ -199,6 +201,10 @@ export default class WorkoutView extends React.Component<any, any> {
 							<tr>
 								<td>TSS</td>
 								<td>{this.state.tss }</td>
+							</tr>
+							<tr>
+								<td>TSS From IF</td>
+								<td>{this.state.tss_from_if }</td>
 							</tr>
 							<tr>
 								<td>Time</td>
