@@ -7,8 +7,6 @@ var model = require("./model");
 var model_server = require("./model_server");
 var config = require('./config');
 
-var port = (process.env.PORT || config.port);
-
 function logRequest(req, code) {
   var user_agent = req.headers['user-agent'];
   console.log(new Date().toTimeString() + " " + req.connection.remoteAddress + " " + req.method + " " + req.url + " " + code + " " + user_agent);
@@ -137,5 +135,5 @@ http.createServer(function (req, res) {
     console.log(err2.stack);
     return;
   }
-}).listen(port, '0.0.0.0');
-console.log('Server running at http://127.0.0.1:' + port);
+}).listen(config.port, '0.0.0.0');
+console.log('Server running at http://0.0.0.0:' + config.port);
