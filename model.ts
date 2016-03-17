@@ -961,7 +961,15 @@ export class IntervalParser {
 							var res = IntervalParser.parseDouble(input, i);
 							i = res.i;
 							nums[numIndex] = res.value;
-							
+
+							// Check for :
+							if (i+1 < input.length && input[i+1]==":") {
+								i = i + 2; // skip : and go to the next char
+								var res_temp = IntervalParser.parseDouble(input, i);
+								i = res_temp.i;
+								nums[numIndex] = nums[numIndex] + res_temp.value / 60;
+							}
+								
 							// look for a unit
 							var unitStr = "";
 							for (var j = i+1; j < input.length; j++) {
