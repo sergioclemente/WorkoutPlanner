@@ -219,3 +219,7 @@ expect_eq_nbr(1, units_on_workout.getIntensity().getValue());
 var units_on_workout_spc = Model.IntervalParser.parse(of_run, `(60min, 6:00 min/mi)`);
 expect_eq_nbr(3600, units_on_workout_spc.getDuration().getSeconds());
 expect_eq_nbr(1, units_on_workout_spc.getIntensity().getValue());
+
+var units_on_workout_2 = Model.IntervalParser.parse(of_run, `(45min, 3:44min/km)`);
+expect_eq_nbr(45*60, units_on_workout_2.getDuration().getSeconds());
+expect_eq_nbr(1, units_on_workout_2.getIntensity().getValue());

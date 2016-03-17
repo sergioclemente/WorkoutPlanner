@@ -411,7 +411,7 @@ export class IntensityUnitHelper {
 		} else if (unitFrom == IntensityUnit.Kmh) {
 			speedMph = DistanceUnitHelper.convertTo(value, DistanceUnit.Kilometers, DistanceUnit.Miles);
 		} else if (unitFrom == IntensityUnit.MinKm) {
-			speedMph = 60 / DistanceUnitHelper.convertTo(value, DistanceUnit.Kilometers, DistanceUnit.Miles);
+			speedMph = DistanceUnitHelper.convertTo(60 / value, DistanceUnit.Kilometers, DistanceUnit.Miles);
 		} else {
 			throw new Error("Unknown IntensityUnit!");
 		}
@@ -1774,6 +1774,12 @@ export class ObjectFactory {
 				ifValue = running_mph / running_tpace_mph;
 			} else if (unit == IntensityUnit.Mph) {
 				ifValue = value / running_tpace_mph;
+			} else if (unit == IntensityUnit.MinKm) {
+				var running_mph = IntensityUnitHelper.convertTo(
+					value,
+					IntensityUnit.MinKm,
+					IntensityUnit.Mph);
+				ifValue = running_mph / running_tpace_mph;
 			} else {
 				throw new Error("Not implemented");
 			}
