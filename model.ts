@@ -968,6 +968,15 @@ export class IntervalParser {
 								var res_temp = IntervalParser.parseDouble(input, i);
 								i = res_temp.i;
 								nums[numIndex] = nums[numIndex] + res_temp.value / 60;
+			
+								// consume any whitespaces
+								// i points to the current digit, so let's advance one
+								// than reverse one
+								i++;
+								while (i < input.length && input[i] == ' ') {
+									i++;
+								}
+								i--;
 							}
 								
 							// look for a unit
