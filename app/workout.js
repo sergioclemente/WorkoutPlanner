@@ -42,6 +42,7 @@ var Workout = (function (_super) {
         this._setHref("download_mrc", "workout.mrc" + url_parameters);
         this._setHref("download_zwo", "workout.zwo" + url_parameters);
         this._setHref("email_send_workout", "send_mail" + url_parameters);
+        window.history.pushState('Object', 'Title', url_parameters);
     };
     Workout.prototype._setHref = function (element_ref, url) {
         var anchor = this.refs[element_ref];
