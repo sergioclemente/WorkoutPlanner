@@ -279,7 +279,7 @@ declare module Model {
         constructor(intervals: ArrayInterval);
         getFileName(): string;
     }
-    class Formatter implements Visitor {
+    class WorkoutTextVisitor implements Visitor {
         result: string;
         userProfile: UserProfile;
         sportType: SportType;

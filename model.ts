@@ -473,7 +473,7 @@ export class Intensity {
 			return MyMath.round10(100*this.originalValue, -1) + "%";
 		} else {
 			if (this.originalUnit == IntensityUnit.MinMi) {
-				return Formatter.formatNumber(this.originalValue, 60, ":", "min/mi");
+				return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", "min/mi");
 			} else {
 				return MyMath.round10(this.originalValue, -1) + getStringFromIntensityUnit(this.originalUnit);
 			}
@@ -1287,14 +1287,14 @@ export class DataPointVisitor extends BaseVisitor {
 	}
 
 	visitSimpleInterval(interval: SimpleInterval) {
-		var title = Formatter.getIntervalTitle(interval);
+		var title = WorkoutTextVisitor.getIntervalTitle(interval);
 		this.initX(interval.getDuration());
 		this.data.push(new Point(this.x, interval.getIntensity(), title));
 		this.incrementX(interval.getDuration());
 		this.data.push(new Point(this.x, interval.getIntensity(), title));
 	}
 	visitRampBuildInterval(interval: RampBuildInterval) {
-		var title = Formatter.getIntervalTitle(interval);
+		var title = WorkoutTextVisitor.getIntervalTitle(interval);
 		this.initX(interval.getDuration());
 		this.data.push(new Point(this.x, interval.getStartIntensity(), title));
 		this.incrementX(interval.getDuration());
@@ -1323,7 +1323,7 @@ export class ZwiftDataVisitor extends BaseVisitor {
 	getIntervalTitle(interval: Interval) {
 		var title = interval.getTitle();
 		if (title.length == 0) {
-			title = Formatter.getIntervalTitle(interval);
+			title = WorkoutTextVisitor.getIntervalTitle(interval);
 		}
 		return title;
 	}
@@ -1365,7 +1365,7 @@ export class MRCCourseDataVisitor extends BaseVisitor {
 	processTitle(interval: Interval) {
 		var title = interval.getTitle();
 		if (title.length == 0) {
-			title = Formatter.getIntervalTitle(interval);
+			title = WorkoutTextVisitor.getIntervalTitle(interval);
 		}
 		this.perfPRODescription += "Desc" + this.idx++ + "=" + title + "\n";
 	}
@@ -1410,7 +1410,7 @@ export class FileNameHelper {
         });
 
 		if (mainInterval != null) {
-			var filename = intensity_string + Formatter.getIntervalTitle(mainInterval);
+			var filename = intensity_string + WorkoutTextVisitor.getIntervalTitle(mainInterval);
 
 			// Avoid really long filenames since its not very helpful
 			if (filename.length < 50) {
@@ -1443,7 +1443,15 @@ export class FileNameHelper {
 	}
 }
 
-export class Formatter implements Visitor {
+// TODO
+// Change the WorkoutTextVisitor in the following ways:
+// 1) Use more succint units (' and '' for instance)
+// 2) Warmup intervals it should just show the final wattage 'Build to 225w' (as long as begining wattage is like  <= 60%)
+// 3) Use caps lock
+// 4) It should understand symbolic paces (E pace, T Pace, T Pace, ...)
+// 5) Intervals at 55% should be just written as Easy (Make it configurable later)
+// 6) Paces should round to ranges: 6:13 min/mi should round to something like 6:10-6:15 min/mi, similarly with wattage. 
+export class WorkoutTextVisitor implements Visitor {
 	result : string = "";
 	userProfile: UserProfile = null;
 	sportType: SportType = SportType.Unknown;
@@ -1460,7 +1468,7 @@ export class Formatter implements Visitor {
 	static formatNumber(value: number, decimalMultiplier : number, separator : string, unit : string) {
 	    var integerPart = Math.floor(value);
 	    var fractionPart = Math.round(decimalMultiplier * (value - integerPart));
-	    return Formatter.enforceDigits(integerPart, 2) + separator + Formatter.enforceDigits(fractionPart, 2) + unit;
+	    return WorkoutTextVisitor.enforceDigits(integerPart, 2) + separator + WorkoutTextVisitor.enforceDigits(fractionPart, 2) + unit;
 	}
 	
 	private static enforceDigits(value: number, digits: number) {
@@ -1480,7 +1488,7 @@ export class Formatter implements Visitor {
 							sportType: SportType = SportType.Unknown,
 							outputUnit: IntensityUnit = IntensityUnit.Unknown) : string {
 		// TODO: instantiating visitor is a bit clowny
-		var f = new Formatter(userProfile, sportType, outputUnit);
+		var f = new WorkoutTextVisitor(userProfile, sportType, outputUnit);
 		VisitorHelper.visit(f, interval);
 
 		return f.result;
@@ -1532,7 +1540,7 @@ export class Formatter implements Visitor {
 				this.result = this.result.slice(0, this.result.length - 2);
 				this.visitRestInterval(subInterval);
 			} else {
-				this.result += Formatter.getIntervalTitle(subInterval, this.userProfile, this.sportType, this.outputUnit);
+				this.result += WorkoutTextVisitor.getIntervalTitle(subInterval, this.userProfile, this.sportType, this.outputUnit);
 			}
 			this.result += ", ";
 		}
@@ -1613,7 +1621,7 @@ export class Formatter implements Visitor {
 			if (this.outputUnit == IntensityUnit.Kmh || this.outputUnit == IntensityUnit.Mph) {
 				return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
 			} else {
-				return Formatter.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
+				return WorkoutTextVisitor.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
 			}
 		} else {
 			return "Unknown";
@@ -1919,7 +1927,7 @@ export class WorkoutBuilder {
 	}
 	
 	getIntensityFriendly(intensity: Intensity) {
-		var f = new Formatter(this.userProfile, this.sportType, this.outputUnit);
+		var f = new WorkoutTextVisitor(this.userProfile, this.sportType, this.outputUnit);
 		return f.getIntensityPretty(intensity);
 	}
 
@@ -1944,7 +1952,7 @@ export class WorkoutBuilder {
 	}
 
 	getIntervalPretty(interval: Interval) {
-		return Formatter.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit);
+		return WorkoutTextVisitor.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit);
 	}
 
 	getEstimatedDistancePretty() : string {
@@ -1957,7 +1965,7 @@ export class WorkoutBuilder {
 		if (this.outputUnit == IntensityUnit.Kmh || this.outputUnit == IntensityUnit.Mph) {
 			return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
 		} else {
-			return Formatter.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
+			return WorkoutTextVisitor.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
 		}
 	}
 	

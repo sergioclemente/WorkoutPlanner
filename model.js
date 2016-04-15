@@ -500,7 +500,7 @@ var Model;
             }
             else {
                 if (this.originalUnit == IntensityUnit.MinMi) {
-                    return Formatter.formatNumber(this.originalValue, 60, ":", "min/mi");
+                    return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", "min/mi");
                 }
                 else {
                     return MyMath.round10(this.originalValue, -1) + getStringFromIntensityUnit(this.originalUnit);
@@ -1278,14 +1278,14 @@ var Model;
             this.x = Duration.combine(this.x, duration);
         };
         DataPointVisitor.prototype.visitSimpleInterval = function (interval) {
-            var title = Formatter.getIntervalTitle(interval);
+            var title = WorkoutTextVisitor.getIntervalTitle(interval);
             this.initX(interval.getDuration());
             this.data.push(new Point(this.x, interval.getIntensity(), title));
             this.incrementX(interval.getDuration());
             this.data.push(new Point(this.x, interval.getIntensity(), title));
         };
         DataPointVisitor.prototype.visitRampBuildInterval = function (interval) {
-            var title = Formatter.getIntervalTitle(interval);
+            var title = WorkoutTextVisitor.getIntervalTitle(interval);
             this.initX(interval.getDuration());
             this.data.push(new Point(this.x, interval.getStartIntensity(), title));
             this.incrementX(interval.getDuration());
@@ -1307,7 +1307,7 @@ var Model;
         ZwiftDataVisitor.prototype.getIntervalTitle = function (interval) {
             var title = interval.getTitle();
             if (title.length == 0) {
-                title = Formatter.getIntervalTitle(interval);
+                title = WorkoutTextVisitor.getIntervalTitle(interval);
             }
             return title;
         };
@@ -1353,7 +1353,7 @@ var Model;
         MRCCourseDataVisitor.prototype.processTitle = function (interval) {
             var title = interval.getTitle();
             if (title.length == 0) {
-                title = Formatter.getIntervalTitle(interval);
+                title = WorkoutTextVisitor.getIntervalTitle(interval);
             }
             this.perfPRODescription += "Desc" + this.idx++ + "=" + title + "\n";
         };
@@ -1390,7 +1390,7 @@ var Model;
                 }
             });
             if (mainInterval != null) {
-                var filename = intensity_string + Formatter.getIntervalTitle(mainInterval);
+                var filename = intensity_string + WorkoutTextVisitor.getIntervalTitle(mainInterval);
                 // Avoid really long filenames since its not very helpful
                 if (filename.length < 50) {
                     return filename;
@@ -1420,8 +1420,16 @@ var Model;
         return FileNameHelper;
     })();
     Model.FileNameHelper = FileNameHelper;
-    var Formatter = (function () {
-        function Formatter(userProfile, sportType, outputUnit) {
+    // TODO
+    // Change the WorkoutTextVisitor in the following ways:
+    // 1) Use more succint units (' and '' for instance)
+    // 2) Warmup intervals it should just show the final wattage 'Build to 225w' (as long as begining wattage is like  <= 60%)
+    // 3) Use caps lock
+    // 4) It should understand symbolic paces (E pace, T Pace, T Pace, ...)
+    // 5) Intervals at 55% should be just written as Easy (Make it configurable later)
+    // 6) Paces should round to ranges: 6:13 min/mi should round to something like 6:10-6:15 min/mi, similarly with wattage. 
+    var WorkoutTextVisitor = (function () {
+        function WorkoutTextVisitor(userProfile, sportType, outputUnit) {
             if (userProfile === void 0) { userProfile = null; }
             if (sportType === void 0) { sportType = SportType.Unknown; }
             if (outputUnit === void 0) { outputUnit = IntensityUnit.Unknown; }
@@ -1433,12 +1441,12 @@ var Model;
             this.sportType = sportType;
             this.outputUnit = outputUnit;
         }
-        Formatter.formatNumber = function (value, decimalMultiplier, separator, unit) {
+        WorkoutTextVisitor.formatNumber = function (value, decimalMultiplier, separator, unit) {
             var integerPart = Math.floor(value);
             var fractionPart = Math.round(decimalMultiplier * (value - integerPart));
-            return Formatter.enforceDigits(integerPart, 2) + separator + Formatter.enforceDigits(fractionPart, 2) + unit;
+            return WorkoutTextVisitor.enforceDigits(integerPart, 2) + separator + WorkoutTextVisitor.enforceDigits(fractionPart, 2) + unit;
         };
-        Formatter.enforceDigits = function (value, digits) {
+        WorkoutTextVisitor.enforceDigits = function (value, digits) {
             var result = value + "";
             if (result.length > digits) {
                 return result.substring(0, digits);
@@ -1450,20 +1458,20 @@ var Model;
                 return result;
             }
         };
-        Formatter.getIntervalTitle = function (interval, userProfile, sportType, outputUnit) {
+        WorkoutTextVisitor.getIntervalTitle = function (interval, userProfile, sportType, outputUnit) {
             if (userProfile === void 0) { userProfile = null; }
             if (sportType === void 0) { sportType = SportType.Unknown; }
             if (outputUnit === void 0) { outputUnit = IntensityUnit.Unknown; }
             // TODO: instantiating visitor is a bit clowny
-            var f = new Formatter(userProfile, sportType, outputUnit);
+            var f = new WorkoutTextVisitor(userProfile, sportType, outputUnit);
             VisitorHelper.visit(f, interval);
             return f.result;
         };
-        Formatter.prototype.visitRestInterval = function (interval) {
+        WorkoutTextVisitor.prototype.visitRestInterval = function (interval) {
             this.result += " w/ " + interval.getDuration().toString() + " rest at " + this.getIntensityPretty(interval.getIntensity());
         };
         // ArrayInterval
-        Formatter.prototype.visitArrayInterval = function (interval) {
+        WorkoutTextVisitor.prototype.visitArrayInterval = function (interval) {
             // Detect which subtype is. Couple of possibilities:
             // * Last interval is the minimum (rest interval)
             // * A combination with both
@@ -1501,7 +1509,7 @@ var Model;
                     this.visitRestInterval(subInterval);
                 }
                 else {
-                    this.result += Formatter.getIntervalTitle(subInterval, this.userProfile, this.sportType, this.outputUnit);
+                    this.result += WorkoutTextVisitor.getIntervalTitle(subInterval, this.userProfile, this.sportType, this.outputUnit);
                 }
                 this.result += ", ";
             }
@@ -1509,16 +1517,16 @@ var Model;
             this.result = this.result.slice(0, this.result.length - 2);
         };
         // RepeatInterval
-        Formatter.prototype.visitRepeatInterval = function (interval) {
+        WorkoutTextVisitor.prototype.visitRepeatInterval = function (interval) {
             this.result += interval.getRepeatCount() + "x (";
             this.visitArrayInterval(interval);
             this.result += ")";
         };
         // RampBuildInterval
-        Formatter.prototype.visitRampBuildInterval = function (interval) {
+        WorkoutTextVisitor.prototype.visitRampBuildInterval = function (interval) {
             this.result += "Build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity()) + " for " + interval.getDuration().toString();
         };
-        Formatter.prototype.visitStepBuildInterval = function (interval) {
+        WorkoutTextVisitor.prototype.visitStepBuildInterval = function (interval) {
             // TODO: There is a bit of semantic coupling here.
             // visitStepBuildInterval knows that all durations of the step are the same.
             this.result += interval.getRepeatCount() + "x (";
@@ -1549,14 +1557,14 @@ var Model;
             this.result += ")";
         };
         // SimpleInterval
-        Formatter.prototype.visitSimpleInterval = function (interval) {
+        WorkoutTextVisitor.prototype.visitSimpleInterval = function (interval) {
             this.result += this.getIntensityPretty(interval.getIntensity()) + " for " + interval.getDuration().toString();
             var title = interval.getTitle();
             if (title.length > 0) {
                 this.result += " (" + title + ")";
             }
         };
-        Formatter.prototype.getIntensityPretty = function (intensity) {
+        WorkoutTextVisitor.prototype.getIntensityPretty = function (intensity) {
             if (this.outputUnit == IntensityUnit.Unknown || this.sportType == SportType.Unknown) {
                 return intensity.toString();
             }
@@ -1575,16 +1583,16 @@ var Model;
                     return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
                 }
                 else {
-                    return Formatter.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
+                    return WorkoutTextVisitor.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
                 }
             }
             else {
                 return "Unknown";
             }
         };
-        return Formatter;
+        return WorkoutTextVisitor;
     })();
-    Model.Formatter = Formatter;
+    Model.WorkoutTextVisitor = WorkoutTextVisitor;
     (function (RunningPaceUnit) {
         RunningPaceUnit[RunningPaceUnit["Unknown"] = 0] = "Unknown";
         RunningPaceUnit[RunningPaceUnit["MinMi"] = 1] = "MinMi";
@@ -1852,7 +1860,7 @@ var Model;
             return this;
         };
         WorkoutBuilder.prototype.getIntensityFriendly = function (intensity) {
-            var f = new Formatter(this.userProfile, this.sportType, this.outputUnit);
+            var f = new WorkoutTextVisitor(this.userProfile, this.sportType, this.outputUnit);
             return f.getIntensityPretty(intensity);
         };
         WorkoutBuilder.prototype.getTSS = function () {
@@ -1871,7 +1879,7 @@ var Model;
             return MyMath.round10(this.userProfile.getBikeFTP() * this.intervals.getIntensity().getValue(), -1);
         };
         WorkoutBuilder.prototype.getIntervalPretty = function (interval) {
-            return Formatter.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit);
+            return WorkoutTextVisitor.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit);
         };
         WorkoutBuilder.prototype.getEstimatedDistancePretty = function () {
             return this.intervals.getDuration().toStringDistance();
@@ -1883,7 +1891,7 @@ var Model;
                 return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
             }
             else {
-                return Formatter.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
+                return WorkoutTextVisitor.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
             }
         };
         WorkoutBuilder.prototype.getPrettyPrint = function (new_line) {
