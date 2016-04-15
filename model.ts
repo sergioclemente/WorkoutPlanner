@@ -766,6 +766,45 @@ export class StepBuildInterval extends ArrayInterval {
 	}
 }
 
+export interface Parser {
+	evaluate(input: string, pos: number) : number;
+}
+
+export class NumberParser implements Parser {
+	private value: number;
+
+	evaluate(input: string, i: number) : number {
+		this.value = 0;
+
+		for (; i < input.length; i++) {
+			var ch = input[i];
+			if (IntervalParser.isDigit(ch)) {
+				this.value = this.value * 10 + IntervalParser.getCharVal(ch) - IntervalParser.getCharVal("0"); 
+			} else if (ch == ".") {
+				i++;
+				var base = 10;
+				for (; i < input.length; i++) {
+					var ch = input[i];
+					if (IntervalParser.isDigit(ch)) {
+						this.value = this.value + (IntervalParser.getCharVal(ch) - IntervalParser.getCharVal("0")) / base; 
+						base = base * 10;
+					} else {
+						break;
+					}
+				}
+				break;
+			} else {
+				break;
+			}
+		}
+		// Points to the last valid char
+		return i - 1;
+	}
+	getValue() : number {
+		return this.value;
+	}
+}
+
 export class IntervalParser {
 	static getCharVal(ch: string) : number {
 		if (ch.length == 1) {
@@ -786,46 +825,18 @@ export class IntervalParser {
 	}
 
 	static parseDouble(input: string, i: number) {
-		var value = 0;
-		for (; i < input.length; i++) {
-			var ch = input[i];
-			if (IntervalParser.isDigit(ch)) {
-				value = value * 10 + IntervalParser.getCharVal(ch) - IntervalParser.getCharVal("0"); 
-			} else if (ch == ".") {
-				i++;
-				var base = 10;
-				for (; i < input.length; i++) {
-					var ch = input[i];
-					if (IntervalParser.isDigit(ch)) {
-						value = value + (IntervalParser.getCharVal(ch) - IntervalParser.getCharVal("0")) / base; 
-						base = base * 10;
-					} else {
-						break;
-					}
-				}
-				break;
-			} else {
-				break;
-			}
-		}
-		
-		// points to the last valid char
-		return {i: i - 1, value: value} ;
+		var p = new NumberParser();
+		var pos = p.evaluate(input, i)
+		return {i: pos, value: p.getValue()} ;
 	}
+
 	static isWhitespace(ch: string) : boolean {
 		return ch.length == 1 && (ch == " " || ch == "\t" || ch == "\n");
 	}
 	static throwParserError(column : number, msg : string) : void {
 		throw Error("Error while parsing input on column " + column + "-  Error: " + msg);
 	}
-	static shouldParse(input: string) {
-		if (input.length > 0) {
-			var lastChar = input[input.length-1];
-			return lastChar == "," || lastChar == ")" || lastChar == "]" || lastChar == "\n";
-		} else {
-			return false;
-		}
-	}
+
 	static parse(factory: ObjectFactory, input: string) : ArrayInterval{
 		var result = new ArrayInterval("Workout", []);
 		

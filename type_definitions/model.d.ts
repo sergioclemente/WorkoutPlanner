@@ -156,6 +156,14 @@ declare module Model {
         areAllIntensitiesSame(): boolean;
         getDuration(): Duration;
     }
+    interface Parser {
+        evaluate(input: string, pos: number): number;
+    }
+    class NumberParser implements Parser {
+        private value;
+        evaluate(input: string, i: number): number;
+        getValue(): number;
+    }
     class IntervalParser {
         static getCharVal(ch: string): number;
         static isDigit(ch: string): boolean;
@@ -166,7 +174,6 @@ declare module Model {
         };
         static isWhitespace(ch: string): boolean;
         static throwParserError(column: number, msg: string): void;
-        static shouldParse(input: string): boolean;
         static parse(factory: ObjectFactory, input: string): ArrayInterval;
     }
     class VisitorHelper {

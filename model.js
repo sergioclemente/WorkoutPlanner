@@ -762,6 +762,44 @@ var Model;
         return StepBuildInterval;
     })(ArrayInterval);
     Model.StepBuildInterval = StepBuildInterval;
+    var NumberParser = (function () {
+        function NumberParser() {
+        }
+        NumberParser.prototype.evaluate = function (input, i) {
+            this.value = 0;
+            for (; i < input.length; i++) {
+                var ch = input[i];
+                if (IntervalParser.isDigit(ch)) {
+                    this.value = this.value * 10 + IntervalParser.getCharVal(ch) - IntervalParser.getCharVal("0");
+                }
+                else if (ch == ".") {
+                    i++;
+                    var base = 10;
+                    for (; i < input.length; i++) {
+                        var ch = input[i];
+                        if (IntervalParser.isDigit(ch)) {
+                            this.value = this.value + (IntervalParser.getCharVal(ch) - IntervalParser.getCharVal("0")) / base;
+                            base = base * 10;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    break;
+                }
+                else {
+                    break;
+                }
+            }
+            // Points to the last valid char
+            return i - 1;
+        };
+        NumberParser.prototype.getValue = function () {
+            return this.value;
+        };
+        return NumberParser;
+    })();
+    Model.NumberParser = NumberParser;
     var IntervalParser = (function () {
         function IntervalParser() {
         }
@@ -784,48 +822,15 @@ var Model;
                 IntervalParser.getCharVal(ch) <= IntervalParser.getCharVal("z");
         };
         IntervalParser.parseDouble = function (input, i) {
-            var value = 0;
-            for (; i < input.length; i++) {
-                var ch = input[i];
-                if (IntervalParser.isDigit(ch)) {
-                    value = value * 10 + IntervalParser.getCharVal(ch) - IntervalParser.getCharVal("0");
-                }
-                else if (ch == ".") {
-                    i++;
-                    var base = 10;
-                    for (; i < input.length; i++) {
-                        var ch = input[i];
-                        if (IntervalParser.isDigit(ch)) {
-                            value = value + (IntervalParser.getCharVal(ch) - IntervalParser.getCharVal("0")) / base;
-                            base = base * 10;
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                    break;
-                }
-                else {
-                    break;
-                }
-            }
-            // points to the last valid char
-            return { i: i - 1, value: value };
+            var p = new NumberParser();
+            var pos = p.evaluate(input, i);
+            return { i: pos, value: p.getValue() };
         };
         IntervalParser.isWhitespace = function (ch) {
             return ch.length == 1 && (ch == " " || ch == "\t" || ch == "\n");
         };
         IntervalParser.throwParserError = function (column, msg) {
             throw Error("Error while parsing input on column " + column + "-  Error: " + msg);
-        };
-        IntervalParser.shouldParse = function (input) {
-            if (input.length > 0) {
-                var lastChar = input[input.length - 1];
-                return lastChar == "," || lastChar == ")" || lastChar == "]" || lastChar == "\n";
-            }
-            else {
-                return false;
-            }
         };
         IntervalParser.parse = function (factory, input) {
             var result = new ArrayInterval("Workout", []);
