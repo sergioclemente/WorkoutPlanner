@@ -503,6 +503,9 @@ export class Intensity {
 		}
 	}
 
+	/**
+	 * A value between 0 and 1 that represents the intensity of the interval
+	 */
 	getValue(): number {
 		return this.ifValue;
 	}
@@ -1561,7 +1564,11 @@ export class WorkoutTextVisitor implements Visitor {
 	}
 	
 	visitRestInterval(interval: Interval) : void {
-		this.result += interval.getDuration().toStringShorten() + " rest @ " + this.getIntensityPretty(interval.getIntensity());
+		if (interval.getIntensity().getValue() <= 55) {
+			this.result += interval.getDuration().toStringShorten() + " easy";
+		} else {
+			this.result += interval.getDuration().toStringShorten() + " rest @ " + this.getIntensityPretty(interval.getIntensity());
+		}
 	}
 
 	// ArrayInterval

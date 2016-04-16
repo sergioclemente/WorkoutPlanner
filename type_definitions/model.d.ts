@@ -87,6 +87,9 @@ declare module Model {
         private originalValue;
         private originalUnit;
         constructor(ifValue?: number, value?: number, unit?: IntensityUnit);
+        /**
+         * A value between 0 and 1 that represents the intensity of the interval
+         */
         getValue(): number;
         toString(): string;
         getOriginalUnit(): number;

@@ -523,6 +523,9 @@ var Model;
                 this.originalValue = value;
             }
         }
+        /**
+         * A value between 0 and 1 that represents the intensity of the interval
+         */
         Intensity.prototype.getValue = function () {
             return this.ifValue;
         };
@@ -1522,7 +1525,12 @@ var Model;
             return f.result;
         };
         WorkoutTextVisitor.prototype.visitRestInterval = function (interval) {
-            this.result += interval.getDuration().toStringShorten() + " rest @ " + this.getIntensityPretty(interval.getIntensity());
+            if (interval.getIntensity().getValue() <= 55) {
+                this.result += interval.getDuration().toStringShorten() + " easy";
+            }
+            else {
+                this.result += interval.getDuration().toStringShorten() + " rest @ " + this.getIntensityPretty(interval.getIntensity());
+            }
         };
         // ArrayInterval
         WorkoutTextVisitor.prototype.visitArrayInterval = function (interval) {
