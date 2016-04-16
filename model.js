@@ -1460,10 +1460,10 @@ var Model;
         return FileNameHelper;
     })();
     Model.FileNameHelper = FileNameHelper;
+    var EASY_THRESHOLD = 0.60;
     // TODO
     // Change the WorkoutTextVisitor in the following ways:
-    // 4) It should understand symbolic paces (E pace, T Pace, T Pace, ...)
-    // 5) Intervals at 55% should be just written as Easy (Make it configurable later) 
+    // 4) It should understand symbolic paces (E pace, T Pace, T Pace, ...) 
     var WorkoutTextVisitor = (function () {
         function WorkoutTextVisitor(userProfile, sportType, outputUnit) {
             if (userProfile === void 0) { userProfile = null; }
@@ -1525,7 +1525,7 @@ var Model;
             return f.result;
         };
         WorkoutTextVisitor.prototype.visitRestInterval = function (interval) {
-            if (interval.getIntensity().getValue() <= 55) {
+            if (interval.getIntensity().getValue() <= EASY_THRESHOLD) {
                 this.result += interval.getDuration().toStringShorten() + " easy";
             }
             else {
@@ -1597,7 +1597,7 @@ var Model;
         };
         // RampBuildInterval
         WorkoutTextVisitor.prototype.visitRampBuildInterval = function (interval) {
-            if (interval.getStartIntensity().getValue() <= 0.60) {
+            if (interval.getStartIntensity().getValue() <= EASY_THRESHOLD) {
                 this.result += interval.getDuration().toStringShorten() + " build to " + this.getIntensityPretty(interval.getEndIntensity());
             }
             else {
@@ -1646,7 +1646,12 @@ var Model;
             if (title.length > 0) {
                 this.result += " " + title;
             }
-            this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
+            if (interval.getIntensity().getValue() <= EASY_THRESHOLD) {
+                this.result += " easy";
+            }
+            else {
+                this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
+            }
         };
         WorkoutTextVisitor.prototype.getIntensityPretty = function (intensity) {
             if (this.outputUnit == IntensityUnit.Unknown || this.sportType == SportType.Unknown) {
