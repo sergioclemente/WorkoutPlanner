@@ -1532,65 +1532,75 @@ export class WorkoutTextVisitor implements Visitor {
 	}
 	
 	visitRestInterval(interval: Interval) : void {
-		this.result += ", w/ " + interval.getDuration().toStringShorten() + " rest @ " + this.getIntensityPretty(interval.getIntensity());
+		this.result += interval.getDuration().toStringShorten() + " rest @ " + this.getIntensityPretty(interval.getIntensity());
 	}
 
 	// ArrayInterval
 	visitArrayInterval(interval: ArrayInterval) {
-		// Detect which subtype is. Couple of possibilities:
-		// * Last interval is the minimum (rest interval)
-		// * A combination with both
+		this.visitArrayIntervalInternal(interval, false);
+	}
+	visitArrayIntervalInternal(interval: ArrayInterval, always_add_parenthesis : boolean) {
+		var length = interval.getIntervals().length;
+				
+		var firstInterval = interval.getIntervals()[0];
+		var lastInterval = interval.getIntervals()[length - 1];
 		
-		var prevIntensity = interval.getIntervals()[0].getIntensity();
-		var prevDuration = interval.getIntervals()[0].getDuration();
-		var isIncreasing = true;
-		var isEqualDuration = true;
-		var isRestIncluded = false;
-		for (var i = 1 ; i < interval.getIntervals().length; i++) {
-			var curIntensity = interval.getIntervals()[i].getIntensity();
-			var curDuration = interval.getIntervals()[i].getDuration();
-			
-			if (prevIntensity.getValue() > curIntensity.getValue()) {
-				// Ignore the last interval
-				if (i != interval.getIntervals().length - 1) {
-					isIncreasing = false;
-				} else {
-					isRestIncluded = true;
+		var isRestIncluded = lastInterval.getIntensity().getValue() <
+			firstInterval.getIntensity().getValue();				
+				
+		if (length == 2) {			
+			if (isRestIncluded) {
+				VisitorHelper.visit(this, firstInterval);
+				this.result += " - ";
+				this.visitRestInterval(lastInterval);
+			} else {
+				if (always_add_parenthesis) {
+					this.result += "(";
+				}
+				VisitorHelper.visit(this, firstInterval);
+				this.result += " - ";
+				VisitorHelper.visit(this, lastInterval);
+				if (always_add_parenthesis) {
+					this.result += ")";
 				}
 			}
-			prevIntensity = curIntensity;
-			
-			if (prevDuration.getSeconds() == curDuration.getSeconds() ||
-				prevDuration.getDistanceInMiles() == curDuration.getDistanceInMiles()) {
-				if (i != interval.getIntervals().length - 1 || !isRestIncluded) {
-					isEqualDuration = false;
+		} else {
+			if (isRestIncluded) {
+				this.result += "(";
+				for (var i = 0 ; i < length - 1; i++) {
+					var subInterval = interval.getIntervals()[i];
+					
+					VisitorHelper.visit(this, subInterval);
+					this.result += ", ";
 				}
-			}
-			prevDuration = curDuration;
-		}
-
-		for (var i = 0 ; i < interval.getIntervals().length; i++) {
-			var subInterval = interval.getIntervals()[i];
-			
-			if (i == interval.getIntervals().length - 1 && isRestIncluded) {
 				// remove extra ", "
 				this.result = this.result.slice(0, this.result.length - 2);
-				this.visitRestInterval(subInterval);
+				this.result += ") - w/ ";
+				this.visitRestInterval(lastInterval);
 			} else {
-				this.result += WorkoutTextVisitor.getIntervalTitle(subInterval, this.userProfile, this.sportType, this.outputUnit);
+				if (length >= 2) {
+					this.result += "(";	
+				}
+				for (var i = 0 ; i < length; i++) {
+					var subInterval = interval.getIntervals()[i];
+					
+					VisitorHelper.visit(this, subInterval);
+					this.result += ", ";
+				}
+				
+				// remove extra ", "
+				this.result = this.result.slice(0, this.result.length - 2);
+				if (length >= 2) {
+					this.result += ")";
+				}	
 			}
-			this.result += ", ";
 		}
-		
-		// remove extra ", "
-		this.result = this.result.slice(0, this.result.length - 2);
 	}
 	
 	// RepeatInterval
 	visitRepeatInterval(interval: RepeatInterval) {
-		this.result += interval.getRepeatCount() + "x (";
-		this.visitArrayInterval(interval);
-		this.result += ")";
+		this.result += interval.getRepeatCount() + " x ";
+		this.visitArrayIntervalInternal(interval, true);
 	}
 	
 	// RampBuildInterval
@@ -1605,7 +1615,7 @@ export class WorkoutTextVisitor implements Visitor {
 	visitStepBuildInterval(interval: StepBuildInterval) : void {
 		// TODO: There is a bit of semantic coupling here.
 		// visitStepBuildInterval knows that all durations of the step are the same.
-		this.result += interval.getRepeatCount() + "x (";
+		this.result += interval.getRepeatCount() + " x ";
 		
 		// There are two types of step build interval
 		// 1) Same duration - different intensities
@@ -1613,6 +1623,7 @@ export class WorkoutTextVisitor implements Visitor {
 		// case 1
 		if (interval.areAllIntensitiesSame()) {
 			this.result += this.getIntensityPretty(interval.getStepInterval(0).getIntensity());
+			this.result += " - w/ ";
 			this.visitRestInterval(interval.getRestInterval());
 			
 			this.result += " (";
@@ -1623,9 +1634,11 @@ export class WorkoutTextVisitor implements Visitor {
 				
 			// remove extra ", "
 			this.result = this.result.slice(0, this.result.length - 2);
+			this.result += ")";
 		} else {
 			this.result += interval.getStepInterval(0).getDuration().toStringShorten();
 
+			this.result += " - w/ ";
 			this.visitRestInterval(interval.getRestInterval());
 			
 			this.result += " (";
@@ -1637,17 +1650,16 @@ export class WorkoutTextVisitor implements Visitor {
 			this.result = this.result.slice(0, this.result.length - 2);
 			this.result += ")";			
 		}
-
-		this.result += ")";
 	}
 
 	// SimpleInterval
 	visitSimpleInterval(interval: SimpleInterval) : any {
-		this.result += interval.getDuration().toStringShorten() + " @ " + this.getIntensityPretty(interval.getIntensity()); 
+		this.result += interval.getDuration().toStringShorten(); 
 		var title = interval.getTitle();
 		if (title.length > 0) {
-			this.result += " (" + title + ")";
+			this.result += " " + title;
 		}
+		this.result += " @ " + this.getIntensityPretty(interval.getIntensity())		
 	}
 
 	getIntensityPretty(intensity: Intensity): string {
@@ -1666,6 +1678,7 @@ export class WorkoutTextVisitor implements Visitor {
 			if (this.outputUnit == IntensityUnit.Kmh || this.outputUnit == IntensityUnit.Mph) {
 				return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
 			} else {
+				// TODO: remove extra 0's
 				return WorkoutTextVisitor.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
 			}
 		} else {

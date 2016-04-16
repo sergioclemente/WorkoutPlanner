@@ -299,6 +299,7 @@ declare module Model {
         static getIntervalTitle(interval: Interval, userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit): string;
         visitRestInterval(interval: Interval): void;
         visitArrayInterval(interval: ArrayInterval): void;
+        visitArrayIntervalInternal(interval: ArrayInterval, always_add_parenthesis: boolean): void;
         visitRepeatInterval(interval: RepeatInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): any;
         visitStepBuildInterval(interval: StepBuildInterval): void;

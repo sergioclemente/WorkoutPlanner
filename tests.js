@@ -167,11 +167,14 @@ expect_eq_nbr(1, units_on_workout_2.getIntensity().getValue());
 // formatting tests
 // simple interval
 expect_eq_str("10' @ 171w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(10min, 55)"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
+expect_eq_str("10' LC @ 233w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(10min, 75, LC)"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 // ramp build interval
 expect_eq_str("10' build to 233w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(55, 75, 10min)"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 expect_eq_str("10' build from 233w to 310w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(75, 100, 10min)"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
-// repeat interval
-expect_eq_str("2x (5' @ 233w, 2' @ 310w, w/ 1' rest @ 171w)", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "2[(5min, 75), (2min, 100), (1min, 55)]"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
+// repeat interval w/ 2 and 3 elements
+expect_eq_str("2 x (5' @ 233w - 2' @ 310w)", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "2[(5min, 75), (2min, 100)]"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
+expect_eq_str("2 x 5' @ 233w - 1' rest @ 171w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "2[(5min, 75), (1min, 55)]"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
+expect_eq_str("2 x (5' @ 233w, 2' @ 310w) - w/ 1' rest @ 171w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "2[(5min, 75), (2min, 100), (1min, 55)]"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 // step build (same intensities and same duration)
-expect_eq_str("2x (2', w/ 1' rest @ 171w (233w, 264w))", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "2[(75, 85, 2min), (1min, 55)]"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
-expect_eq_str("2x (233w, w/ 1' rest @ 171w (1', 3')", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "2[(75, 1min, 3min), (1min, 55)]"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
+expect_eq_str("2 x 2' - w/ 1' rest @ 171w (233w, 264w)", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "2[(75, 85, 2min), (1min, 55)]"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
+expect_eq_str("2 x 233w - w/ 1' rest @ 171w (1', 3')", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "2[(75, 1min, 3min), (1min, 55)]"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
