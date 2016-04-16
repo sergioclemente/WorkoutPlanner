@@ -228,24 +228,53 @@ export class Duration {
 		}
 	}
 	
+	getTimeComponents() : any {
+		var hours = (this.estimatedDurationInSeconds / 3600) | 0;
+		return {
+			hours: hours,
+			minutes: ((this.estimatedDurationInSeconds - hours*3600) / 60) | 0,
+			seconds: (this.estimatedDurationInSeconds % 60) | 0	
+		};
+	}
+	
 	toStringTime() : string {
 		var result = "";
 		
-		var hours = (this.estimatedDurationInSeconds / 3600) | 0;
-		var minutes = ((this.estimatedDurationInSeconds - hours*3600) / 60) | 0;
-		var seconds = (this.estimatedDurationInSeconds % 60) | 0;
+		var time = this.getTimeComponents();
 		
-		if (hours != 0) {
-			result += hours + "hr";
+		if (time.hours != 0) {
+			result += time.hours + "hr";
 		}
 		
-		if (minutes != 0) {
-			result += minutes + "min";
+		if (time.minutes != 0) {
+			result += time.minutes + "min";
 		}
 		
-		if (seconds != 0) {
-			result += seconds + "sec";
+		if (time.seconds != 0) {
+			result += time.seconds + "sec";
 		}
+		
+		return result;
+	}
+	
+	toStringShorten() : string {
+		var result = "";
+		
+		var time = this.getTimeComponents();
+		
+		if (time.hours != 0) {
+			result += time.hours + "hr ";
+		}
+		
+		if (time.minutes != 0) {
+			result += time.minutes + "' ";
+		}
+		
+		if (time.seconds != 0) {
+			result += time.seconds + "'' ";
+		}
+		
+		result = result.slice(0, result.length - 1);
 		
 		return result;
 	}
@@ -1456,9 +1485,6 @@ export class FileNameHelper {
 
 // TODO
 // Change the WorkoutTextVisitor in the following ways:
-// 1) Use more succint units (' and '' for instance)
-// 2) Warmup intervals it should just show the final wattage 'Build to 225w' (as long as begining wattage is like  <= 60%)
-// 3) Use caps lock
 // 4) It should understand symbolic paces (E pace, T Pace, T Pace, ...)
 // 5) Intervals at 55% should be just written as Easy (Make it configurable later)
 // 6) Paces should round to ranges: 6:13 min/mi should round to something like 6:10-6:15 min/mi, similarly with wattage. 
@@ -1506,7 +1532,7 @@ export class WorkoutTextVisitor implements Visitor {
 	}
 	
 	visitRestInterval(interval: Interval) : void {
-		this.result += " w/ " + interval.getDuration().toString() + " rest at " + this.getIntensityPretty(interval.getIntensity());
+		this.result += ", w/ " + interval.getDuration().toStringShorten() + " rest @ " + this.getIntensityPretty(interval.getIntensity());
 	}
 
 	// ArrayInterval
@@ -1569,7 +1595,11 @@ export class WorkoutTextVisitor implements Visitor {
 	
 	// RampBuildInterval
 	visitRampBuildInterval(interval: RampBuildInterval) : any {
-		this.result += "Build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity()) + " for " + interval.getDuration().toString();
+		if (interval.getStartIntensity().getValue() <= 0.60) {
+			this.result += interval.getDuration().toStringShorten() + " build to " + this.getIntensityPretty(interval.getEndIntensity());	
+		} else {
+			this.result += interval.getDuration().toStringShorten() + " build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());	
+		}		
 	}
 	
 	visitStepBuildInterval(interval: StepBuildInterval) : void {
@@ -1582,34 +1612,38 @@ export class WorkoutTextVisitor implements Visitor {
 		// 2) Different duration - same intensities
 		// case 1
 		if (interval.areAllIntensitiesSame()) {
+			this.result += this.getIntensityPretty(interval.getStepInterval(0).getIntensity());
+			this.visitRestInterval(interval.getRestInterval());
+			
+			this.result += " (";
 			for (var i = 0; i < interval.getRepeatCount(); i++) {
-				this.result += interval.getStepInterval(i).getDuration().toString();
+				this.result += interval.getStepInterval(i).getDuration().toStringShorten();
 				this.result += ", ";
 			}
 				
 			// remove extra ", "
 			this.result = this.result.slice(0, this.result.length - 2);
-			this.result += " at ";
-			this.result += this.getIntensityPretty(interval.getStepInterval(i).getIntensity());
-
 		} else {
-			this.result += interval.getStepInterval(0).getDuration().toString() + " at ";
+			this.result += interval.getStepInterval(0).getDuration().toStringShorten();
+
+			this.visitRestInterval(interval.getRestInterval());
+			
+			this.result += " (";
 			for (var i = 0; i < interval.getRepeatCount(); i++) {
 				this.result += this.getIntensityPretty(interval.getStepInterval(i).getIntensity());
 				this.result += ", ";
 			}
 			// remove extra ", "
 			this.result = this.result.slice(0, this.result.length - 2);
+			this.result += ")";			
 		}
-
-		this.visitRestInterval(interval.getRestInterval());
 
 		this.result += ")";
 	}
 
 	// SimpleInterval
 	visitSimpleInterval(interval: SimpleInterval) : any {
-		this.result += this.getIntensityPretty(interval.getIntensity()) + " for " + interval.getDuration().toString(); 
+		this.result += interval.getDuration().toStringShorten() + " @ " + this.getIntensityPretty(interval.getIntensity()); 
 		var title = interval.getTitle();
 		if (title.length > 0) {
 			this.result += " (" + title + ")";

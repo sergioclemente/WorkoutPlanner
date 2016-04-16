@@ -55,7 +55,9 @@ declare module Model {
         getSeconds(): number;
         getDistanceInMiles(): number;
         toStringDistance(): string;
+        getTimeComponents(): any;
         toStringTime(): string;
+        toStringShorten(): string;
         toString(): string;
         static combine(dur1: Duration, dur2: Duration): Duration;
     }
