@@ -420,6 +420,15 @@ export enum IntensityUnit {
 	MinKm=5
 }
 
+function stringFormat(format : string, ...args: any[]) {
+    return format.replace(/{(\d+)}/g, function(match, number) { 
+      return typeof args[number] != 'undefined'
+        ? args[number]
+        : match
+      ;
+    });
+}
+
 export class IntensityUnitHelper {
 	static convertTo(value: number, unitFrom: IntensityUnit, unitTo: IntensityUnit) : number {
 		var invalidUnitsForConversion = [
@@ -429,7 +438,8 @@ export class IntensityUnitHelper {
 		];
 		if (invalidUnitsForConversion.indexOf(unitFrom) != -1
 			|| invalidUnitsForConversion.indexOf(unitTo) != -1) {
-				throw new Error("Invalid unitFrom or unitTo for conversion");
+				throw new Error(
+					stringFormat("Invalid unitFrom({0}) or unitTo({1}) for conversion", unitFrom, unitTo));
 			}
 			
 		var speedMph = 0;
@@ -1670,7 +1680,7 @@ export class WorkoutTextVisitor implements Visitor {
 			if (this.outputUnit == IntensityUnit.Watts) {
 				return Math.round(this.userProfile.getBikeFTP() * intensity.getValue()) + "w";
 			} else {
-				intensity.toString() + "(" + Math.round(this.userProfile.getBikeFTP() * intensity.getValue()) + "w)";
+				return intensity.toString();
 			}			
 		} else if (this.sportType == SportType.Run) {
 			var minMi = this.userProfile.getPaceMinMi(intensity);

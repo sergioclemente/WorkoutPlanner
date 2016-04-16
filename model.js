@@ -434,6 +434,17 @@ var Model;
         IntensityUnit[IntensityUnit["MinKm"] = 5] = "MinKm";
     })(Model.IntensityUnit || (Model.IntensityUnit = {}));
     var IntensityUnit = Model.IntensityUnit;
+    function stringFormat(format) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        return format.replace(/{(\d+)}/g, function (match, number) {
+            return typeof args[number] != 'undefined'
+                ? args[number]
+                : match;
+        });
+    }
     var IntensityUnitHelper = (function () {
         function IntensityUnitHelper() {
         }
@@ -445,7 +456,7 @@ var Model;
             ];
             if (invalidUnitsForConversion.indexOf(unitFrom) != -1
                 || invalidUnitsForConversion.indexOf(unitTo) != -1) {
-                throw new Error("Invalid unitFrom or unitTo for conversion");
+                throw new Error(stringFormat("Invalid unitFrom({0}) or unitTo({1}) for conversion", unitFrom, unitTo));
             }
             var speedMph = 0;
             if (unitFrom == IntensityUnit.Mph) {
@@ -1618,7 +1629,7 @@ var Model;
                     return Math.round(this.userProfile.getBikeFTP() * intensity.getValue()) + "w";
                 }
                 else {
-                    intensity.toString() + "(" + Math.round(this.userProfile.getBikeFTP() * intensity.getValue()) + "w)";
+                    return intensity.toString();
                 }
             }
             else if (this.sportType == SportType.Run) {

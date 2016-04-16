@@ -68,6 +68,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 						<SelectOption value={Model.IntensityUnit.Mph}>mi/h</SelectOption>
 						<SelectOption value={Model.IntensityUnit.MinKm}>min/km</SelectOption>
 						<SelectOption value={Model.IntensityUnit.Kmh}>km/h</SelectOption>
+						<SelectOption value={Model.IntensityUnit.IF}>IF</SelectOption>
 					</Select>
 					<br />	
 					<textarea ref="workout_text" defaultValue={this.props.workout_text} style={{ height: "200px", width: "100%" }} onChange={e => this._onWorkoutTextChange(e) }>

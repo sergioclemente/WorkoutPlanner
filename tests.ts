@@ -230,6 +230,7 @@ expect_eq_nbr(1, units_on_workout_2.getIntensity().getValue());
 // simple interval
 expect_eq_str("10' @ 171w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 55)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 expect_eq_str("10' LC @ 233w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 75, LC)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
+expect_eq_str("10' @ 55%", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 55)`), up, Model.SportType.Bike, Model.IntensityUnit.IF));
 
 // ramp build interval
 expect_eq_str("10' build to 233w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(55, 75, 10min)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
