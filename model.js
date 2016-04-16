@@ -1460,8 +1460,7 @@ var Model;
     // TODO
     // Change the WorkoutTextVisitor in the following ways:
     // 4) It should understand symbolic paces (E pace, T Pace, T Pace, ...)
-    // 5) Intervals at 55% should be just written as Easy (Make it configurable later)
-    // 6) Paces should round to ranges: 6:13 min/mi should round to something like 6:10-6:15 min/mi, similarly with wattage. 
+    // 5) Intervals at 55% should be just written as Easy (Make it configurable later) 
     var WorkoutTextVisitor = (function () {
         function WorkoutTextVisitor(userProfile, sportType, outputUnit) {
             if (userProfile === void 0) { userProfile = null; }
@@ -1475,10 +1474,31 @@ var Model;
             this.sportType = sportType;
             this.outputUnit = outputUnit;
         }
-        WorkoutTextVisitor.formatNumber = function (value, decimalMultiplier, separator, unit) {
+        WorkoutTextVisitor.roundNumberUp = function (value, round_val) {
+            if (round_val === void 0) { round_val = 0; }
+            if (round_val != 0) {
+                var mod = value % round_val;
+                if (mod != 0) {
+                    value += round_val - mod;
+                }
+            }
+            return value;
+        };
+        WorkoutTextVisitor.roundNumberDown = function (value, round_val) {
+            if (round_val === void 0) { round_val = 0; }
+            if (round_val != 0) {
+                var mod = value % round_val;
+                if (mod != 0) {
+                    value -= mod;
+                }
+            }
+            return value;
+        };
+        WorkoutTextVisitor.formatNumber = function (value, decimalMultiplier, separator, unit, round_val) {
+            if (round_val === void 0) { round_val = 0; }
             var integerPart = Math.floor(value);
-            var fractionPart = Math.round(decimalMultiplier * (value - integerPart));
-            return WorkoutTextVisitor.enforceDigits(integerPart, 2) + separator + WorkoutTextVisitor.enforceDigits(fractionPart, 2) + unit;
+            var fractionPart = WorkoutTextVisitor.roundNumberDown(Math.round(decimalMultiplier * (value - integerPart)), round_val);
+            return integerPart + separator + WorkoutTextVisitor.enforceDigits(fractionPart, 2) + unit;
         };
         WorkoutTextVisitor.enforceDigits = function (value, digits) {
             var result = value + "";
@@ -1626,7 +1646,7 @@ var Model;
             }
             if (this.sportType == SportType.Bike) {
                 if (this.outputUnit == IntensityUnit.Watts) {
-                    return Math.round(this.userProfile.getBikeFTP() * intensity.getValue()) + "w";
+                    return WorkoutTextVisitor.roundNumberUp(Math.round(this.userProfile.getBikeFTP() * intensity.getValue()), 5) + "w";
                 }
                 else {
                     return intensity.toString();
@@ -1639,8 +1659,7 @@ var Model;
                     return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
                 }
                 else {
-                    // TODO: remove extra 0's
-                    return WorkoutTextVisitor.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
+                    return WorkoutTextVisitor.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit), 5);
                 }
             }
             else {

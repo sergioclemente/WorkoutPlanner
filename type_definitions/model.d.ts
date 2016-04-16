@@ -294,7 +294,9 @@ declare module Model {
         sportType: SportType;
         outputUnit: IntensityUnit;
         constructor(userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit);
-        static formatNumber(value: number, decimalMultiplier: number, separator: string, unit: string): string;
+        static roundNumberUp(value: number, round_val?: number): number;
+        static roundNumberDown(value: number, round_val?: number): number;
+        static formatNumber(value: number, decimalMultiplier: number, separator: string, unit: string, round_val?: number): string;
         private static enforceDigits(value, digits);
         static getIntervalTitle(interval: Interval, userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit): string;
         visitRestInterval(interval: Interval): void;
