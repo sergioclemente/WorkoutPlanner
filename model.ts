@@ -263,7 +263,7 @@ export class Duration {
 		var time = this.getTimeComponents();
 		
 		if (time.hours != 0) {
-			result += time.hours + "hr ";
+			return this.toStringTime();
 		}
 		
 		if (time.minutes != 0) {
@@ -952,7 +952,7 @@ export class IntervalParser {
 						// Take a peek at the top of the stack
 						if (stack[stack.length-1] instanceof RepeatInterval) {
 							var repeatInterval = <RepeatInterval>(stack[stack.length - 1]);
-							// TODO: There is ambiguity in the following interval:
+							// There is ambiguity in the following interval:
 							// 2[(45s, 75, 100), (15s, 55)]
 							// It could be two types of intervals:
 							// 1) 2x (Ramp from 75% to 100% with 15s rest)
@@ -1497,10 +1497,7 @@ export class FileNameHelper {
 }
 
 const EASY_THRESHOLD = 0.60;
-
-// TODO
-// Change the WorkoutTextVisitor in the following ways:
-// 4) It should understand symbolic paces (E pace, T Pace, T Pace, ...) 
+ 
 export class WorkoutTextVisitor implements Visitor {
 	result : string = "";
 	userProfile: UserProfile = null;
@@ -1650,8 +1647,6 @@ export class WorkoutTextVisitor implements Visitor {
 	}
 	
 	visitStepBuildInterval(interval: StepBuildInterval) : void {
-		// TODO: There is a bit of semantic coupling here.
-		// visitStepBuildInterval knows that all durations of the step are the same.
 		this.result += interval.getRepeatCount() + " x ";
 		
 		// There are two types of step build interval
@@ -2128,6 +2123,7 @@ export class WorkoutBuilder {
 		result += "[COURSE HEADER]\n";
 		result += "VERSION=2\n";
 		result += "UNITS=ENGLISH\n";
+		result += "DESCRIPTION=Auto generated with WorkoutPlanner - https://github.com/sergioclemente/WorkoutPlanner\n";
 		result += "MINUTES\tPERCENT\n";
 		result += "[END COURSE HEADER]\n";
 
