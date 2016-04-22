@@ -290,5 +290,6 @@ expect_eq_nbr(2.40, Model.SpeedParser.getSpeedInMph("1:25/100yards"));
 expect_eq_nbr(/* 1:25 */ 60 + 25, new Model.ObjectFactory(up, Model.SportType.Swim).createDuration(intensity_100_pct, Model.DurationUnit.Yards, 100).getSeconds());
 
 expect_eq_nbr(425, Model.IntervalParser.parse(of_swim, `(500yards, 100, warmup)`).getDuration().getSeconds());
+expect_eq_nbr(425, Model.IntervalParser.parse(of_swim, `(500yards, warmup, 100)`).getDuration().getSeconds());
 expect_eq_nbr(11.8, Model.IntervalParser.parse(of_swim, `(500yards, 100, warmup)`).getTSS());
 expect_eq_nbr(15.6, Model.IntervalParser.parse(of_swim, `(500yards, 100, warmup), (200yards, 80, easy)`).getTSS());

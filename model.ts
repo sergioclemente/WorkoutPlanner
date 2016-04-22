@@ -234,7 +234,7 @@ export class Duration {
 					return MyMath.round10(yards, -1) + getStringFromDurationUnit(DurationUnit.Yards);
 				} else {
 					// Not implemented yet
-					console.assert(false);
+					console.assert(false, stringFormat("Not implemted distance unit {0}", unitTo));
 				}
 			}
 		} else {
@@ -408,7 +408,7 @@ function getIntensityUnit(unit: IntensityUnit) {
 	} else if (unit == IntensityUnit.Per100Yards) {
 		return "/100yards";
 	} else {
-		console.assert(false);
+		console.assert(false, stringFormat("Invalid intensity unit {0}", unit));
 	}
 }
 
@@ -510,7 +510,7 @@ export class Intensity {
 			ifValue = ifValue / 100;
 		}
 		
-		console.assert(ifValue <= 1 && ifValue >= 0);
+		console.assert(ifValue <= 1 && ifValue >= 0, stringFormat("Invalid if {0}", ifValue));
 
 		if (unit == IntensityUnit.IF) {
 			// HACK: Find a better way of doing this
@@ -970,7 +970,7 @@ export class IntervalParser {
 							if (isDurationUnit(units[k])) {
 								durationUnits.push(getDurationUnitFromString(units[k]));
 								durationValues.push(nums[k]);
-							} else if (nums[k] != 0) {
+							} else if (nums[k] > 0) {
 								var intensityUnit = IntensityUnit.IF;
 								if (isIntensityUnit(units[k])) {
 									intensityUnit = getIntensityUnitFromString(units[k]);
@@ -1087,6 +1087,8 @@ export class IntervalParser {
 							// just enter in title mode if its not a whitespace
 							if (!isInTitle && !IntervalParser.isWhitespace(ch)) {
 								isInTitle = true;
+								// Put a dummy value in the units
+								units[numIndex] = "";
 							}
 
 							if (isInTitle) {
@@ -1755,12 +1757,10 @@ export class WorkoutTextVisitor implements Visitor {
 				var swim_pace_per_100 = this.userProfile.getSwimPacePer100Yards(intensity);
 				return WorkoutTextVisitor.formatNumber(swim_pace_per_100, 60, ":", getIntensityUnit(IntensityUnit.Per100Yards));	
 			} else {
-				console.assert(false);
-				return "Unknown";
+				console.assert(false, stringFormat("Invalid output unit {0}", this.outputUnit));
 			}
 		} else {
-			console.assert(false);
-			return "Unknown";
+			console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
 		}
 	}
 }
@@ -1963,10 +1963,10 @@ export class ObjectFactory {
 			} else if (unit == IntensityUnit.Mph) {
 				ifValue = value / this.userProfile.getSwimCSSMph();
 			} else {
-				console.assert(false);
+				console.assert(false, stringFormat("Invalid intensity unit {0}", unit));
 			}
 		} else {
-			console.assert(false);
+			console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
 		}
 		return new Intensity(ifValue, value, unit);
 	}
@@ -1983,7 +1983,7 @@ export class ObjectFactory {
 		} else if (this.sportType == SportType.Swim) {
 			estimatedSpeedMph = this.userProfile.getSwimPaceMph(intensity);
 		} else {
-			console.assert(false);
+			console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
 		}
 		
 		if (DurationUnitHelper.isTime(unit)) {

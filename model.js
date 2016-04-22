@@ -262,7 +262,7 @@ var Model;
                     }
                     else {
                         // Not implemented yet
-                        console.assert(false);
+                        console.assert(false, stringFormat("Not implemted distance unit {0}", unitTo));
                     }
                 }
             }
@@ -431,7 +431,7 @@ var Model;
             return "/100yards";
         }
         else {
-            console.assert(false);
+            console.assert(false, stringFormat("Invalid intensity unit {0}", unit));
         }
     }
     function isDurationUnit(value) {
@@ -539,7 +539,7 @@ var Model;
             if (ifValue > 10) {
                 ifValue = ifValue / 100;
             }
-            console.assert(ifValue <= 1 && ifValue >= 0);
+            console.assert(ifValue <= 1 && ifValue >= 0, stringFormat("Invalid if {0}", ifValue));
             if (unit == IntensityUnit.IF) {
                 // HACK: Find a better way of doing this
                 if (value > 10) {
@@ -959,7 +959,7 @@ var Model;
                                     durationUnits.push(getDurationUnitFromString(units[k]));
                                     durationValues.push(nums[k]);
                                 }
-                                else if (nums[k] != 0) {
+                                else if (nums[k] > 0) {
                                     var intensityUnit = IntensityUnit.IF;
                                     if (isIntensityUnit(units[k])) {
                                         intensityUnit = getIntensityUnitFromString(units[k]);
@@ -1071,6 +1071,8 @@ var Model;
                                 // just enter in title mode if its not a whitespace
                                 if (!isInTitle && !IntervalParser.isWhitespace(ch)) {
                                     isInTitle = true;
+                                    // Put a dummy value in the units
+                                    units[numIndex] = "";
                                 }
                                 if (isInTitle) {
                                     title += ch;
@@ -1721,13 +1723,11 @@ var Model;
                     return WorkoutTextVisitor.formatNumber(swim_pace_per_100, 60, ":", getIntensityUnit(IntensityUnit.Per100Yards));
                 }
                 else {
-                    console.assert(false);
-                    return "Unknown";
+                    console.assert(false, stringFormat("Invalid output unit {0}", this.outputUnit));
                 }
             }
             else {
-                console.assert(false);
-                return "Unknown";
+                console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
             }
         };
         return WorkoutTextVisitor;
@@ -1919,11 +1919,11 @@ var Model;
                     ifValue = value / this.userProfile.getSwimCSSMph();
                 }
                 else {
-                    console.assert(false);
+                    console.assert(false, stringFormat("Invalid intensity unit {0}", unit));
                 }
             }
             else {
-                console.assert(false);
+                console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
             }
             return new Intensity(ifValue, value, unit);
         };
@@ -1941,7 +1941,7 @@ var Model;
                 estimatedSpeedMph = this.userProfile.getSwimPaceMph(intensity);
             }
             else {
-                console.assert(false);
+                console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
             }
             if (DurationUnitHelper.isTime(unit)) {
                 estimatedTimeInSeconds = DurationUnitHelper.getDurationSeconds(unit, value);
