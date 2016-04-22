@@ -54,10 +54,10 @@ declare module Model {
         getValue(): number;
         getSeconds(): number;
         getDistanceInMiles(): number;
-        toStringDistance(): string;
+        toStringDistance(unitTo?: DistanceUnit): string;
         getTimeComponents(): any;
-        toStringTime(): string;
-        toStringShorten(): string;
+        toTimeStringLong(): string;
+        toStringShort(): string;
         toString(): string;
         static combine(dur1: Duration, dur2: Duration): Duration;
     }
@@ -69,6 +69,7 @@ declare module Model {
         Meters = 3,
         Miles = 4,
         Kilometers = 5,
+        Yards = 6,
     }
     enum IntensityUnit {
         Unknown = -1,
@@ -78,6 +79,7 @@ declare module Model {
         Mph = 3,
         Kmh = 4,
         MinKm = 5,
+        Per100Yards = 6,
     }
     class IntensityUnitHelper {
         static convertTo(value: number, unitFrom: IntensityUnit, unitTo: IntensityUnit): number;
@@ -328,19 +330,23 @@ declare module Model {
     class UserProfile {
         private bikeFTP;
         private runningTPaceMinMi;
+        private swimmingCSSMinPer100Yards;
         private email;
-        constructor(bikeFTP: number, runningTPace: string, email?: string);
+        constructor(bikeFTPWatts: number, renameTPace: string, swimCSS: string, email: string);
         getBikeFTP(): number;
         getRunningTPaceMinMi(): number;
         getEmail(): string;
+        getPaceMph(intensity: Intensity): number;
         getPaceMinMi(intensity: Intensity): number;
+        getSwimCSSMph(): number;
+        getSwimPaceMph(intensity: Intensity): number;
+        getSwimPacePer100Yards(intensity: Intensity): number;
     }
     class ObjectFactory {
         private userProfile;
         private sportType;
         constructor(userProfile: UserProfile, sportType: SportType);
         getBikeSpeedMphForIntensity(intensity: Intensity): number;
-        getRunPaceMphForIntensity(intensity: Intensity): number;
         createIntensity(value: number, unit: IntensityUnit): Intensity;
         createDuration(intensity: Intensity, unit: DurationUnit, value: number): Duration;
     }

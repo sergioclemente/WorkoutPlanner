@@ -19,7 +19,7 @@ export default class WorkoutView extends React.Component<any, any> {
 	getState(params: UI.QueryParams) : any {
 		try {
 			// TODO: Fix this clowny parseInt()
-			var userProfile = new Model.UserProfile(parseInt(params.ftp_watts), params.t_pace, params.email);
+			var userProfile = new Model.UserProfile(parseInt(params.ftp_watts), params.t_pace, params.swim_css, params.email);
 			var builder = new Model.WorkoutBuilder(
 				userProfile, parseInt(params.sport_type), parseInt(params.output_unit)).withDefinition(params.workout_text);
 
@@ -101,7 +101,7 @@ export default class WorkoutView extends React.Component<any, any> {
 	}
 
 	renderDistance() {
-		if (this.state.sport_type == Model.SportType.Run) {
+		if (this.state.sport_type == Model.SportType.Run || this.state.sport_type == Model.SportType.Swim) {
 			return (<tr>
 						<td>Distance</td>
 						<td>{this.state.distance}</td>

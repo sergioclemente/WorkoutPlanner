@@ -23,16 +23,18 @@ var UI;
     })();
     UI.PersistedItem = PersistedItem;
     var QueryParams = (function () {
-        function QueryParams(workout_text, ftp_watts, t_pace, sport_type, output_unit, email) {
+        function QueryParams(workout_text, ftp_watts, t_pace, swim_css, sport_type, output_unit, email) {
             if (workout_text === void 0) { workout_text = ""; }
             if (ftp_watts === void 0) { ftp_watts = ""; }
             if (t_pace === void 0) { t_pace = ""; }
+            if (swim_css === void 0) { swim_css = ""; }
             if (sport_type === void 0) { sport_type = ""; }
             if (output_unit === void 0) { output_unit = ""; }
             if (email === void 0) { email = ""; }
             this.workout_text = workout_text;
             this.ftp_watts = ftp_watts;
             this.t_pace = t_pace;
+            this.swim_css = swim_css;
             this.sport_type = sport_type;
             this.output_unit = output_unit;
             this.email = email;
@@ -47,6 +49,7 @@ var UI;
             ret.workout_text = params.workout_text;
             ret.ftp_watts = params.ftp_watts;
             ret.t_pace = params.t_pace;
+            ret.swim_css = params.swim_css;
             ret.sport_type = params.sport_type;
             ret.output_unit = params.output_unit;
             ret.email = params.email;
@@ -57,6 +60,7 @@ var UI;
             this.workout_text = params.w;
             this.ftp_watts = params.ftp;
             this.t_pace = params.tpace;
+            this.swim_css = params.css;
             this.sport_type = params.st;
             this.output_unit = params.ou;
             this.email = params.email;
@@ -66,6 +70,7 @@ var UI;
             this.workout_text = new PersistedItem("workout").load();
             this.ftp_watts = new PersistedItem("ftp_watts").load();
             this.t_pace = new PersistedItem("t_pace").load();
+            this.swim_css = new PersistedItem("css").load();
             this.sport_type = new PersistedItem("sport_type").load();
             this.output_unit = new PersistedItem("output_unit").load();
             this.email = new PersistedItem("email").load();
@@ -75,6 +80,7 @@ var UI;
             new PersistedItem("workout").save(this.workout_text);
             new PersistedItem("ftp_watts").save(this.ftp_watts);
             new PersistedItem("t_pace").save(this.t_pace);
+            new PersistedItem("css").save(this.swim_css);
             new PersistedItem("sport_type").save(this.sport_type);
             new PersistedItem("output_unit").save(this.output_unit);
             new PersistedItem("email").save(this.email);
@@ -83,6 +89,7 @@ var UI;
             return typeof (this.workout_text) != 'undefined' && this.workout_text != "" &&
                 typeof (this.ftp_watts) != 'undefined' && this.ftp_watts != "" &&
                 typeof (this.t_pace) != 'undefined' && this.t_pace != "" &&
+                typeof (this.swim_css) != 'undefined' && this.swim_css != "" &&
                 typeof (this.sport_type) != 'undefined' && this.sport_type != "" &&
                 typeof (this.output_unit) != 'undefined' && this.output_unit != "" &&
                 typeof (this.email) != 'undefined' && this.email != "";
@@ -92,6 +99,7 @@ var UI;
                 "&st=" + encodeURIComponent(this.sport_type) +
                 "&ftp=" + encodeURIComponent(this.ftp_watts) +
                 "&tpace=" + encodeURIComponent(this.t_pace) +
+                "&css=" + encodeURIComponent(this.swim_css) +
                 "&ou=" + encodeURIComponent(this.output_unit) +
                 "&email=" + encodeURIComponent(this.email);
         };

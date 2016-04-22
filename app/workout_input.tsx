@@ -33,6 +33,8 @@ export default class WorkoutInput extends React.Component<any, any> {
 			sltUnit.setSelectedValue(Model.IntensityUnit.MinMi.toString());
 		} else if (sport_type == Model.SportType.Bike) {
 			sltUnit.setSelectedValue(Model.IntensityUnit.Watts.toString());
+		} else if (sport_type == Model.SportType.Swim) {
+			sltUnit.setSelectedValue(Model.IntensityUnit.IF.toString());
 		}
 		this._loadWorkout();
 	}
@@ -57,6 +59,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 					<form>
 					Sport type:
 					<Select ref="sportType" defaultValue={this.props.sport_type} onChange={e => this._onSportTypeChange(e) }>
+						<SelectOption value={Model.SportType.Swim}>Swim</SelectOption>
 						<SelectOption value={Model.SportType.Bike}>Bike</SelectOption>
 						<SelectOption value={Model.SportType.Run}>Run</SelectOption>
 					</Select>
@@ -69,6 +72,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 						<SelectOption value={Model.IntensityUnit.MinKm}>min/km</SelectOption>
 						<SelectOption value={Model.IntensityUnit.Kmh}>km/h</SelectOption>
 						<SelectOption value={Model.IntensityUnit.IF}>IF</SelectOption>
+						<SelectOption value={Model.IntensityUnit.Per100Yards}>/100yards</SelectOption>
 					</Select>
 					<br />	
 					<textarea ref="workout_text" defaultValue={this.props.workout_text} style={{ height: "200px", width: "100%" }} onChange={e => this._onWorkoutTextChange(e) }>

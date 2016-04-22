@@ -20,7 +20,7 @@ var WorkoutView = (function (_super) {
     WorkoutView.prototype.getState = function (params) {
         try {
             // TODO: Fix this clowny parseInt()
-            var userProfile = new Model.UserProfile(parseInt(params.ftp_watts), params.t_pace, params.email);
+            var userProfile = new Model.UserProfile(parseInt(params.ftp_watts), params.t_pace, params.swim_css, params.email);
             var builder = new Model.WorkoutBuilder(userProfile, parseInt(params.sport_type), parseInt(params.output_unit)).withDefinition(params.workout_text);
             var time_in_zones_data = builder.getInterval().getTimeInZones(builder.getSportType()).map(function (zone) {
                 return {
@@ -82,7 +82,7 @@ var WorkoutView = (function (_super) {
         }
     };
     WorkoutView.prototype.renderDistance = function () {
-        if (this.state.sport_type == Model.SportType.Run) {
+        if (this.state.sport_type == Model.SportType.Run || this.state.sport_type == Model.SportType.Swim) {
             return (React.createElement("tr", null, React.createElement("td", null, "Distance"), React.createElement("td", null, this.state.distance)));
         }
         else {

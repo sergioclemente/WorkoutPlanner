@@ -157,6 +157,8 @@ var Model;
                 return "min";
             case DurationUnit.Seconds:
                 return "s";
+            case DurationUnit.Yards:
+                return "yards";
             default:
                 return "unknown";
         }
@@ -183,6 +185,9 @@ var Model;
                 }
                 else if (unit == DurationUnit.Kilometers) {
                     return DistanceUnitHelper.convertTo(value, DistanceUnit.Kilometers, DistanceUnit.Miles);
+                }
+                else if (unit == DurationUnit.Yards) {
+                    return DistanceUnitHelper.convertTo(value, DistanceUnit.Yards, DistanceUnit.Miles);
                 }
                 else if (unit == DurationUnit.Miles) {
                     return distance;
@@ -244,9 +249,22 @@ var Model;
         Duration.prototype.getDistanceInMiles = function () {
             return this.estimatedDistanceInMiles;
         };
-        Duration.prototype.toStringDistance = function () {
+        Duration.prototype.toStringDistance = function (unitTo) {
+            if (unitTo === void 0) { unitTo = DistanceUnit.Unknown; }
             if (DurationUnitHelper.isDistance(this.unit)) {
-                return MyMath.round10(this.value, -1) + getStringFromDurationUnit(this.unit);
+                if (unitTo == DistanceUnit.Unknown) {
+                    return MyMath.round10(this.value, -1) + getStringFromDurationUnit(this.unit);
+                }
+                else {
+                    if (unitTo == DistanceUnit.Yards) {
+                        var yards = DistanceUnitHelper.convertTo(this.getDistanceInMiles(), DistanceUnit.Miles, DistanceUnit.Yards);
+                        return MyMath.round10(yards, -1) + getStringFromDurationUnit(DurationUnit.Yards);
+                    }
+                    else {
+                        // Not implemented yet
+                        console.assert(false);
+                    }
+                }
             }
             else {
                 return MyMath.round10(this.estimatedDistanceInMiles, -1) + getStringFromDurationUnit(DurationUnit.Miles);
@@ -260,7 +278,7 @@ var Model;
                 seconds: (this.estimatedDurationInSeconds % 60) | 0
             };
         };
-        Duration.prototype.toStringTime = function () {
+        Duration.prototype.toTimeStringLong = function () {
             var result = "";
             var time = this.getTimeComponents();
             if (time.hours != 0) {
@@ -274,24 +292,26 @@ var Model;
             }
             return result;
         };
-        Duration.prototype.toStringShorten = function () {
+        Duration.prototype.toStringShort = function () {
+            if (!DurationUnitHelper.isTime(this.unit)) {
+                return this.toStringDistance();
+            }
             var result = "";
             var time = this.getTimeComponents();
             if (time.hours != 0) {
-                result += time.hours + "hr ";
+                return this.toTimeStringLong();
             }
             if (time.minutes != 0) {
-                result += time.minutes + "' ";
+                result += time.minutes + "'";
             }
             if (time.seconds != 0) {
-                result += time.seconds + "'' ";
+                result += time.seconds + "''";
             }
-            result = result.slice(0, result.length - 1);
             return result;
         };
         Duration.prototype.toString = function () {
             if (DurationUnitHelper.isTime(this.unit)) {
-                return this.toStringTime();
+                return this.toTimeStringLong();
             }
             else {
                 return this.toStringDistance();
@@ -342,6 +362,8 @@ var Model;
                 return "km/hr";
             case IntensityUnit.MinKm:
                 return "min/km";
+            case IntensityUnit.Per100Yards:
+                return "/100yards";
             default:
                 return "unknown";
         }
@@ -358,6 +380,7 @@ var Model;
             "min": DurationUnit.Minutes,
             "sec": DurationUnit.Seconds,
             "s": DurationUnit.Seconds,
+            "yards": DurationUnit.Yards,
         };
         if (unit in conversionMap) {
             return conversionMap[unit];
@@ -376,6 +399,7 @@ var Model;
             "mph": IntensityUnit.Mph,
             "km/hr": IntensityUnit.Kmh,
             "min/km": IntensityUnit.MinKm,
+            "/100yards": IntensityUnit.Per100Yards,
         };
         if (unit in conversionMap) {
             return conversionMap[unit];
@@ -403,9 +427,11 @@ var Model;
         else if (unit == IntensityUnit.Kmh) {
             return "km/h";
         }
+        else if (unit == IntensityUnit.Per100Yards) {
+            return "/100yards";
+        }
         else {
-            throw new Error("Invalid IntensityUnit");
-            return "";
+            console.assert(false);
         }
     }
     function isDurationUnit(value) {
@@ -422,6 +448,7 @@ var Model;
         DurationUnit[DurationUnit["Meters"] = 3] = "Meters";
         DurationUnit[DurationUnit["Miles"] = 4] = "Miles";
         DurationUnit[DurationUnit["Kilometers"] = 5] = "Kilometers";
+        DurationUnit[DurationUnit["Yards"] = 6] = "Yards";
     })(Model.DurationUnit || (Model.DurationUnit = {}));
     var DurationUnit = Model.DurationUnit;
     (function (IntensityUnit) {
@@ -432,6 +459,7 @@ var Model;
         IntensityUnit[IntensityUnit["Mph"] = 3] = "Mph";
         IntensityUnit[IntensityUnit["Kmh"] = 4] = "Kmh";
         IntensityUnit[IntensityUnit["MinKm"] = 5] = "MinKm";
+        IntensityUnit[IntensityUnit["Per100Yards"] = 6] = "Per100Yards";
     })(Model.IntensityUnit || (Model.IntensityUnit = {}));
     var IntensityUnit = Model.IntensityUnit;
     function stringFormat(format) {
@@ -471,6 +499,9 @@ var Model;
             else if (unitFrom == IntensityUnit.MinKm) {
                 speedMph = DistanceUnitHelper.convertTo(60 / value, DistanceUnit.Kilometers, DistanceUnit.Miles);
             }
+            else if (unitFrom == IntensityUnit.Per100Yards) {
+                speedMph = DistanceUnitHelper.convertTo(6000 / value, DistanceUnit.Yards, DistanceUnit.Miles);
+            }
             else {
                 throw new Error("Unknown IntensityUnit!");
             }
@@ -486,6 +517,9 @@ var Model;
             }
             else if (unitTo == IntensityUnit.MinKm) {
                 result = 60 / DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Kilometers);
+            }
+            else if (unitTo == IntensityUnit.Per100Yards) {
+                result = 6000 / DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Yards);
             }
             else {
                 throw new Error("Unknown IntensityUnit!");
@@ -505,8 +539,9 @@ var Model;
             if (ifValue > 10) {
                 ifValue = ifValue / 100;
             }
+            console.assert(ifValue <= 1 && ifValue >= 0);
             if (unit == IntensityUnit.IF) {
-                // HACK: Find a vetter way of doing this
+                // HACK: Find a better way of doing this
                 if (value > 10) {
                     value = value / 100;
                 }
@@ -535,7 +570,10 @@ var Model;
             }
             else {
                 if (this.originalUnit == IntensityUnit.MinMi) {
-                    return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", "min/mi");
+                    return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", getIntensityUnit(IntensityUnit.MinMi));
+                }
+                else if (this.originalUnit == IntensityUnit.Per100Yards) {
+                    return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", getIntensityUnit(IntensityUnit.Per100Yards));
                 }
                 else {
                     return MyMath.round10(this.originalValue, -1) + getStringFromIntensityUnit(this.originalUnit);
@@ -976,7 +1014,10 @@ var Model;
                                 interval = new SimpleInterval(title.trim(), intensity, duration);
                             }
                             else {
-                                IntervalParser.throwParserError(i, "Cannot have less than 1 intensity");
+                                // assume a default intensity of 55%
+                                var intensity = factory.createIntensity(55, IntensityUnit.IF);
+                                var duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
+                                interval = new SimpleInterval("", intensity, duration);
                             }
                             stack[stack.length - 1].getIntervals().push(interval);
                             break;
@@ -1182,7 +1223,8 @@ var Model;
         function ZonesMap() {
         }
         ZonesMap.getZoneMap = function (sportType) {
-            if (sportType == SportType.Bike) {
+            // TODO: Use same zones as bike for now
+            if (sportType == SportType.Bike || sportType == SportType.Swim) {
                 return {
                     1: { name: "z1", low: 0.00, high: 0.55 },
                     2: { name: "z2", low: 0.55, high: 0.75 },
@@ -1225,7 +1267,7 @@ var Model;
                 var zone_obj = zone_map[zone];
                 this.zones[zone] = {
                     name: zone_obj.name,
-                    range: "(" + Math.floor(zone_obj.low * 100) + "%;" + Math.floor(zone_obj.high * 100) + "%]",
+                    range: "[" + Math.floor(zone_obj.low * 100) + "%;" + Math.floor(zone_obj.high * 100) + "%)",
                     value: 0,
                 };
             }
@@ -1523,10 +1565,10 @@ var Model;
         };
         WorkoutTextVisitor.prototype.visitRestInterval = function (interval) {
             if (interval.getIntensity().getValue() <= EASY_THRESHOLD) {
-                this.result += interval.getDuration().toStringShorten() + " easy";
+                this.result += interval.getDuration().toStringShort() + " easy";
             }
             else {
-                this.result += interval.getDuration().toStringShorten() + " rest @ " + this.getIntensityPretty(interval.getIntensity());
+                this.result += interval.getDuration().toStringShort() + " rest @ " + this.getIntensityPretty(interval.getIntensity());
             }
         };
         // ArrayInterval
@@ -1595,10 +1637,10 @@ var Model;
         // RampBuildInterval
         WorkoutTextVisitor.prototype.visitRampBuildInterval = function (interval) {
             if (interval.getStartIntensity().getValue() <= EASY_THRESHOLD) {
-                this.result += interval.getDuration().toStringShorten() + " build to " + this.getIntensityPretty(interval.getEndIntensity());
+                this.result += interval.getDuration().toStringShort() + " build to " + this.getIntensityPretty(interval.getEndIntensity());
             }
             else {
-                this.result += interval.getDuration().toStringShorten() + " build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());
+                this.result += interval.getDuration().toStringShort() + " build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());
             }
         };
         WorkoutTextVisitor.prototype.visitStepBuildInterval = function (interval) {
@@ -1613,7 +1655,7 @@ var Model;
                 this.visitRestInterval(interval.getRestInterval());
                 this.result += " (";
                 for (var i = 0; i < interval.getRepeatCount(); i++) {
-                    this.result += interval.getStepInterval(i).getDuration().toStringShorten();
+                    this.result += interval.getStepInterval(i).getDuration().toStringShort();
                     this.result += ", ";
                 }
                 // remove extra ", "
@@ -1621,7 +1663,7 @@ var Model;
                 this.result += ")";
             }
             else {
-                this.result += interval.getStepInterval(0).getDuration().toStringShorten();
+                this.result += interval.getStepInterval(0).getDuration().toStringShort();
                 this.result += " - w/ ";
                 this.visitRestInterval(interval.getRestInterval());
                 this.result += " (";
@@ -1636,7 +1678,7 @@ var Model;
         };
         // SimpleInterval
         WorkoutTextVisitor.prototype.visitSimpleInterval = function (interval) {
-            this.result += interval.getDuration().toStringShorten();
+            this.result += interval.getDuration().toStringShort();
             var title = interval.getTitle();
             if (title.length > 0) {
                 this.result += " " + title;
@@ -1670,7 +1712,21 @@ var Model;
                     return WorkoutTextVisitor.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit), 5);
                 }
             }
+            else if (this.sportType == SportType.Swim) {
+                if (this.outputUnit == IntensityUnit.Mph) {
+                    return MyMath.round10(this.userProfile.getSwimPaceMph(intensity), -1) + getIntensityUnit(this.outputUnit);
+                }
+                else if (this.outputUnit == IntensityUnit.Per100Yards) {
+                    var swim_pace_per_100 = this.userProfile.getSwimPacePer100Yards(intensity);
+                    return WorkoutTextVisitor.formatNumber(swim_pace_per_100, 60, ":", getIntensityUnit(IntensityUnit.Per100Yards));
+                }
+                else {
+                    console.assert(false);
+                    return "Unknown";
+                }
+            }
             else {
+                console.assert(false);
                 return "Unknown";
             }
         };
@@ -1730,6 +1786,10 @@ var Model;
                 else if (speed.indexOf("min/400m") != -1) {
                     res = (60 / (this._extractNumber(speed, 60, ":", "min/400m") * 2.5 * 1.609344));
                 }
+                else if (speed.indexOf("/100yards") != -1) {
+                    var pace_per_100_yards = this._extractNumber(speed, 60, ":", "/100yards");
+                    res = IntensityUnitHelper.convertTo(pace_per_100_yards, IntensityUnit.Per100Yards, IntensityUnit.Mph);
+                }
             }
             catch (e) {
             }
@@ -1756,11 +1816,12 @@ var Model;
     })();
     Model.SpeedParser = SpeedParser;
     var UserProfile = (function () {
-        function UserProfile(bikeFTP, runningTPace, email) {
-            if (email === void 0) { email = ""; }
-            this.bikeFTP = bikeFTP;
-            var speed_mph = SpeedParser.getSpeedInMph(runningTPace);
+        function UserProfile(bikeFTPWatts, renameTPace, swimCSS, email) {
+            this.bikeFTP = bikeFTPWatts;
+            var speed_mph = SpeedParser.getSpeedInMph(renameTPace);
             this.runningTPaceMinMi = IntensityUnitHelper.convertTo(speed_mph, IntensityUnit.Mph, IntensityUnit.MinMi);
+            var swim_css_mph = SpeedParser.getSpeedInMph(swimCSS);
+            this.swimmingCSSMinPer100Yards = IntensityUnitHelper.convertTo(swim_css_mph, IntensityUnit.Mph, IntensityUnit.Per100Yards);
             this.email = email;
         }
         UserProfile.prototype.getBikeFTP = function () {
@@ -1772,9 +1833,25 @@ var Model;
         UserProfile.prototype.getEmail = function () {
             return this.email;
         };
+        UserProfile.prototype.getPaceMph = function (intensity) {
+            var estPaceMinMi = this.getPaceMinMi(intensity);
+            return 60 / estPaceMinMi;
+        };
         UserProfile.prototype.getPaceMinMi = function (intensity) {
             var pace_mph = IntensityUnitHelper.convertTo(this.getRunningTPaceMinMi(), IntensityUnit.MinMi, IntensityUnit.Mph) * intensity.getValue();
             return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, IntensityUnit.MinMi);
+        };
+        UserProfile.prototype.getSwimCSSMph = function () {
+            var css_mph = IntensityUnitHelper.convertTo(this.swimmingCSSMinPer100Yards, IntensityUnit.Per100Yards, IntensityUnit.Mph);
+            return css_mph;
+        };
+        UserProfile.prototype.getSwimPaceMph = function (intensity) {
+            var css_mph = IntensityUnitHelper.convertTo(this.swimmingCSSMinPer100Yards, IntensityUnit.Per100Yards, IntensityUnit.Mph);
+            return css_mph * intensity.getValue();
+        };
+        UserProfile.prototype.getSwimPacePer100Yards = function (intensity) {
+            var pace_mph = this.getSwimCSSMph() * intensity.getValue();
+            return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, IntensityUnit.Per100Yards);
         };
         return UserProfile;
     })();
@@ -1795,10 +1872,6 @@ var Model;
             }
             return actualSpeedMph;
         };
-        ObjectFactory.prototype.getRunPaceMphForIntensity = function (intensity) {
-            var estPaceMinMi = this.userProfile.getPaceMinMi(intensity);
-            return 60 / estPaceMinMi;
-        };
         ObjectFactory.prototype.createIntensity = function (value, unit) {
             var ifValue = 0;
             if (this.sportType == SportType.Bike) {
@@ -1812,7 +1885,7 @@ var Model;
                     throw new Error("Invalid unit : " + unit);
                 }
             }
-            else {
+            else if (this.sportType == SportType.Run) {
                 var running_tpace_mph = IntensityUnitHelper.convertTo(this.userProfile.getRunningTPaceMinMi(), IntensityUnit.MinMi, IntensityUnit.Mph);
                 if (unit == IntensityUnit.IF) {
                     ifValue = value;
@@ -1832,6 +1905,26 @@ var Model;
                     throw new Error("Not implemented");
                 }
             }
+            else if (this.sportType == SportType.Swim) {
+                // For swimming we support 3 IntensityUnits
+                if (unit == IntensityUnit.IF) {
+                    ifValue = value;
+                }
+                else if (unit == IntensityUnit.Per100Yards) {
+                    var swimming_mph = IntensityUnitHelper.convertTo(value, IntensityUnit.Per100Yards, IntensityUnit.Mph);
+                    var swimming_mph_css = this.userProfile.getSwimCSSMph();
+                    ifValue = swimming_mph / swimming_mph_css;
+                }
+                else if (unit == IntensityUnit.Mph) {
+                    ifValue = value / this.userProfile.getSwimCSSMph();
+                }
+                else {
+                    console.assert(false);
+                }
+            }
+            else {
+                console.assert(false);
+            }
             return new Intensity(ifValue, value, unit);
         };
         ObjectFactory.prototype.createDuration = function (intensity, unit, value) {
@@ -1841,8 +1934,14 @@ var Model;
             if (this.sportType == SportType.Bike) {
                 estimatedSpeedMph = this.getBikeSpeedMphForIntensity(intensity);
             }
+            else if (this.sportType == SportType.Run) {
+                estimatedSpeedMph = this.userProfile.getPaceMph(intensity);
+            }
+            else if (this.sportType == SportType.Swim) {
+                estimatedSpeedMph = this.userProfile.getSwimPaceMph(intensity);
+            }
             else {
-                estimatedSpeedMph = this.getRunPaceMphForIntensity(intensity);
+                console.assert(false);
             }
             if (DurationUnitHelper.isTime(unit)) {
                 estimatedTimeInSeconds = DurationUnitHelper.getDurationSeconds(unit, value);
@@ -1954,7 +2053,7 @@ var Model;
             return this.intervals.getTSSFromIF();
         };
         WorkoutBuilder.prototype.getTimePretty = function () {
-            return this.intervals.getDuration().toStringTime();
+            return this.intervals.getDuration().toTimeStringLong();
         };
         WorkoutBuilder.prototype.getIF = function () {
             return MyMath.round10(this.intervals.getIntensity().getValue() * 100, -1);
@@ -1966,7 +2065,12 @@ var Model;
             return WorkoutTextVisitor.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit);
         };
         WorkoutBuilder.prototype.getEstimatedDistancePretty = function () {
-            return this.intervals.getDuration().toStringDistance();
+            if (this.sportType == SportType.Swim) {
+                return this.intervals.getDuration().toStringDistance(DistanceUnit.Yards);
+            }
+            else {
+                return this.intervals.getDuration().toStringDistance(DistanceUnit.Miles);
+            }
         };
         WorkoutBuilder.prototype.getAveragePace = function () {
             var minMi = this.userProfile.getPaceMinMi(this.intervals.getIntensity());
@@ -1996,7 +2100,12 @@ var Model;
             result += (new_line);
             result += ("\t* Time: " + this.getTimePretty());
             result += (new_line);
-            result += ("\t* Distance: " + this.getEstimatedDistancePretty());
+            if (this.sportType == SportType.Swim) {
+                result += ("\t* Distance: " + this.getEstimatedDistancePretty());
+            }
+            else {
+                result += ("\t* Distance: " + this.getEstimatedDistancePretty());
+            }
             result += (new_line);
             result += ("\t* IF: " + this.getIF());
             result += (new_line);

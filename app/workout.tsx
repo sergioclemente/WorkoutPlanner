@@ -22,9 +22,10 @@ export default class Workout extends React.Component<any, any> {
 		this.refresh();
 	}
 
-	_onUserSettingsChanged(ftp: number, t_pace: string, email: string) {
+	_onUserSettingsChanged(ftp: number, t_pace: string, swim_css: string, email: string) {
 		this.params.ftp_watts = ftp.toString();
 		this.params.t_pace = t_pace;
+		this.params.swim_css = swim_css;
 		this.params.email = email;
 		this.refresh();
 	}
@@ -59,7 +60,7 @@ export default class Workout extends React.Component<any, any> {
 
 	render() {
 		return (<div>
-					<UserSettings {...this.props} ref='settings' onChange={ (f,t,e) => this._onUserSettingsChanged(f,t,e) }></UserSettings>
+					<UserSettings {...this.props} ref='settings' onChange={ (f,t,c,e) => this._onUserSettingsChanged(f,t,c,e) }></UserSettings>
 					<WorkoutInput {...this.props} ref='input' onChange={ (s, o, w) => this._onWorkoutInputChanged(s,o,w) }></WorkoutInput>
 					<table>
 						<tbody>
