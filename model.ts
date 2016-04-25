@@ -346,6 +346,8 @@ function getStringFromIntensityUnit(unit: IntensityUnit) {
 			return "min/km";
 		case IntensityUnit.Per100Yards:
 			return "/100yards";
+		case IntensityUnit.Per100Meters:
+			return "/100meters";			
 		default:
 			return "unknown";
 	}
@@ -356,6 +358,8 @@ function getDurationUnitFromString(unit: string) : DurationUnit {
 		"mi": DurationUnit.Miles,
 		"km": DurationUnit.Kilometers,
 		"m": DurationUnit.Meters,
+		"meter": DurationUnit.Meters,
+		"meters": DurationUnit.Meters,
 		"h" : DurationUnit.Hours,
 		"hr" : DurationUnit.Hours,
 		"hour" : DurationUnit.Hours,
@@ -383,6 +387,7 @@ function getIntensityUnitFromString(unit: string) : IntensityUnit {
 		"km/hr": IntensityUnit.Kmh,
 		"min/km": IntensityUnit.MinKm,
 		"/100yards": IntensityUnit.Per100Yards,
+		"/100meters": IntensityUnit.Per100Meters,		
 	};
 	if (unit in conversionMap) {
 		return conversionMap[unit];	
@@ -407,6 +412,8 @@ function getIntensityUnit(unit: IntensityUnit) {
 		return "km/h";
 	} else if (unit == IntensityUnit.Per100Yards) {
 		return "/100yards";
+	} else if (unit == IntensityUnit.Per100Meters) {
+		return "/100m";
 	} else {
 		console.assert(false, stringFormat("Invalid intensity unit {0}", unit));
 	}
@@ -439,7 +446,8 @@ export enum IntensityUnit {
 	Mph=3,
 	Kmh=4,
 	MinKm=5,
-	Per100Yards,
+	Per100Yards=6,
+	Per100Meters=7,
 }
 
 function stringFormat(format : string, ...args: any[]) {
@@ -475,6 +483,8 @@ export class IntensityUnitHelper {
 			speedMph = DistanceUnitHelper.convertTo(60 / value, DistanceUnit.Kilometers, DistanceUnit.Miles);
 		} else if (unitFrom == IntensityUnit.Per100Yards) {
 			speedMph = DistanceUnitHelper.convertTo(6000/value, DistanceUnit.Yards, DistanceUnit.Miles);
+		} else if (unitFrom == IntensityUnit.Per100Meters) {
+			speedMph = DistanceUnitHelper.convertTo(6000/value, DistanceUnit.Meters, DistanceUnit.Miles);	
 		} else {
 			throw new Error("Unknown IntensityUnit!");
 		}
@@ -490,6 +500,8 @@ export class IntensityUnitHelper {
 			result = 60 / DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Kilometers);
 		} else if (unitTo == IntensityUnit.Per100Yards) {
 			result = 6000 / DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Yards);
+		} else if (unitTo == IntensityUnit.Per100Meters) {
+			result = 6000 / DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Meters);	
 		} else {
 			throw new Error("Unknown IntensityUnit!");
 		}
@@ -544,8 +556,8 @@ export class Intensity {
 		} else {
 			if (this.originalUnit == IntensityUnit.MinMi) {
 				return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", getIntensityUnit(IntensityUnit.MinMi));
-			} else if (this.originalUnit == IntensityUnit.Per100Yards) {
-				return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", getIntensityUnit(IntensityUnit.Per100Yards));
+			} else if (this.originalUnit == IntensityUnit.Per100Yards || this.originalUnit == IntensityUnit.Per100Meters) {
+				return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", getIntensityUnit(this.originalUnit));
 			} else {
 				return MyMath.round10(this.originalValue, -1) + getStringFromIntensityUnit(this.originalUnit);
 			}
@@ -1736,6 +1748,9 @@ export class WorkoutTextVisitor implements Visitor {
 		if (this.outputUnit == IntensityUnit.Unknown || this.sportType == SportType.Unknown) {
 			return intensity.toString();
 		}
+		if (this.outputUnit == IntensityUnit.IF) {
+			return intensity.toString();
+		}
 		if (this.sportType == SportType.Bike) {
 			if (this.outputUnit == IntensityUnit.Watts) {
 				return WorkoutTextVisitor.roundNumberUp(Math.round(this.userProfile.getBikeFTP() * intensity.getValue()), 5) + "w";
@@ -1753,9 +1768,9 @@ export class WorkoutTextVisitor implements Visitor {
 		} else if (this.sportType == SportType.Swim) {
 			if (this.outputUnit == IntensityUnit.Mph) {
 				return MyMath.round10(this.userProfile.getSwimPaceMph(intensity), -1) + getIntensityUnit(this.outputUnit);	
-			} else if (this.outputUnit == IntensityUnit.Per100Yards) {
-				var swim_pace_per_100 = this.userProfile.getSwimPacePer100Yards(intensity);
-				return WorkoutTextVisitor.formatNumber(swim_pace_per_100, 60, ":", getIntensityUnit(IntensityUnit.Per100Yards));	
+			} else if (this.outputUnit == IntensityUnit.Per100Yards || this.outputUnit == IntensityUnit.Per100Meters) {
+				var swim_pace_per_100 = this.userProfile.getSwimPace(this.outputUnit, intensity);
+				return WorkoutTextVisitor.formatNumber(swim_pace_per_100, 60, ":", getIntensityUnit(this.outputUnit));	
 			} else {
 				console.assert(false, stringFormat("Invalid output unit {0}", this.outputUnit));
 			}
@@ -1806,6 +1821,9 @@ export class SpeedParser {
 			} else if (speed.indexOf("/100yards") != -1) {
 				var pace_per_100_yards = this._extractNumber(speed, 60, ":", "/100yards");
 				res = IntensityUnitHelper.convertTo(pace_per_100_yards, IntensityUnit.Per100Yards, IntensityUnit.Mph);
+			} else if (speed.indexOf("/100meters") != -1) {
+				var pace_per_100_meters = this._extractNumber(speed, 60, ":", "/100meters");
+				res = IntensityUnitHelper.convertTo(pace_per_100_meters, IntensityUnit.Per100Meters, IntensityUnit.Mph);
 			}
 		} catch (e) {
 		}
@@ -1891,9 +1909,9 @@ export class UserProfile {
 		return css_mph * intensity.getValue();
 	}
 	
-	getSwimPacePer100Yards(intensity: Intensity) : number {
+	getSwimPace(intensity_unit_result: IntensityUnit, intensity: Intensity) : number {
 		var pace_mph = this.getSwimCSSMph() * intensity.getValue();
-		return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, IntensityUnit.Per100Yards)
+		return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, intensity_unit_result)
 	}
 }
 
@@ -1956,8 +1974,8 @@ export class ObjectFactory {
 			// For swimming we support 3 IntensityUnits
 			if (unit == IntensityUnit.IF) {
 				ifValue = value;
-			} else if (unit == IntensityUnit.Per100Yards) {
-				var swimming_mph = IntensityUnitHelper.convertTo(value, IntensityUnit.Per100Yards, IntensityUnit.Mph);
+			} else if (unit == IntensityUnit.Per100Yards || unit == IntensityUnit.Per100Meters) {
+				var swimming_mph = IntensityUnitHelper.convertTo(value, unit, IntensityUnit.Mph);
 				var swimming_mph_css = this.userProfile.getSwimCSSMph();
 				ifValue = swimming_mph / swimming_mph_css;
 			} else if (unit == IntensityUnit.Mph) {

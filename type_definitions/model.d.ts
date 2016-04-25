@@ -80,6 +80,7 @@ declare module Model {
         Kmh = 4,
         MinKm = 5,
         Per100Yards = 6,
+        Per100Meters = 7,
     }
     class IntensityUnitHelper {
         static convertTo(value: number, unitFrom: IntensityUnit, unitTo: IntensityUnit): number;
@@ -340,7 +341,7 @@ declare module Model {
         getPaceMinMi(intensity: Intensity): number;
         getSwimCSSMph(): number;
         getSwimPaceMph(intensity: Intensity): number;
-        getSwimPacePer100Yards(intensity: Intensity): number;
+        getSwimPace(intensity_unit_result: IntensityUnit, intensity: Intensity): number;
     }
     class ObjectFactory {
         private userProfile;
