@@ -73,7 +73,7 @@ export class QueryParams {
 		this.workout_text = params.w;
 		this.ftp_watts = params.ftp;
 		this.t_pace = params.tpace;
-		this.swim_css = params.css;
+		this.swim_css = params.swim_css;
 		this.sport_type = params.st;
 		this.output_unit = params.ou;
 		this.email = params.email;
@@ -84,7 +84,7 @@ export class QueryParams {
 		this.workout_text = new PersistedItem("workout").load();
 		this.ftp_watts = new PersistedItem("ftp_watts").load();
 		this.t_pace = new PersistedItem("t_pace").load();
-		this.swim_css = new PersistedItem("css").load();
+		this.swim_css = new PersistedItem("swim_css").load();
 		this.sport_type = new PersistedItem("sport_type").load();
 		this.output_unit = new PersistedItem("output_unit").load();
 		this.email = new PersistedItem("email").load();
@@ -95,7 +95,7 @@ export class QueryParams {
 		new PersistedItem("workout").save(this.workout_text);
 		new PersistedItem("ftp_watts").save(this.ftp_watts);
 		new PersistedItem("t_pace").save(this.t_pace);
-		new PersistedItem("css").save(this.swim_css);
+		new PersistedItem("swim_css").save(this.swim_css);
 		new PersistedItem("sport_type").save(this.sport_type);
 		new PersistedItem("output_unit").save(this.output_unit);
 		new PersistedItem("email").save(this.email);

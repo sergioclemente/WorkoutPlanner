@@ -53,7 +53,7 @@ http.createServer(function (req, res) {
           if (uri === "/workout.mrc" || uri === "/workout.zwo") {
             var params = parsed_url.query;
             if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
-              var userProfile = new model.UserProfile(params.ftp, params.tpace, params.email);
+              var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
               var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
               logRequest(req, 200);
 
@@ -80,7 +80,7 @@ http.createServer(function (req, res) {
           } else if (uri == "/send_mail") {
             var params = parsed_url.query;
             if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
-              var userProfile = new model.UserProfile(params.ftp, params.tpace, params.email);
+              var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
               var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
               logRequest(req, 200);
 

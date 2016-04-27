@@ -385,6 +385,8 @@ var Model;
             "sec": DurationUnit.Seconds,
             "s": DurationUnit.Seconds,
             "yards": DurationUnit.Yards,
+            "y": DurationUnit.Yards,
+            "yrd": DurationUnit.Yards,
         };
         if (unit in conversionMap) {
             return conversionMap[unit];

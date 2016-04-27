@@ -49,9 +49,9 @@ if [[ "$DEV" == "true" ]]; then
 	exit 0
 fi
 
-# /usr/local/bin/minify --output index.min.js index.min.js
-# if [[ "$?" != 0 ]]; then
-# 	echo "Build error." 1>&2
-# 	exit 1
-# fi
+/usr/local/bin/minify --output index.min.js index.min.js
+if [[ "$?" != 0 ]]; then
+	echo "Build error." 1>&2
+	exit 1
+fi
 
