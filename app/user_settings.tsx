@@ -68,7 +68,7 @@ export default class UserProperty extends React.Component<any, any> {
 		this.email = email;
 
 		if (this.props.onChange) {
-			this.props.onChange(this.ftp, this.t_pace, this.email);
+			this.props.onChange(this.ftp, this.t_pace, this.swim_css, this.email);
 		}
 	}
 	render() {
