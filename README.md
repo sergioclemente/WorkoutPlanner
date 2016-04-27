@@ -39,14 +39,19 @@ git push heroku master
 ```
 
 # Bugs/Feature requests
-* Form validation
 * Add Url shortener
 * [P3] server should log status and error more cleanly. this includes emails as well
+** Block io (email and file) 
 * [P3] Refactor getMRCFile into a visitor
 * [P3] Refactor ZwiftDataVisitor to move finalize() into the base
 * [P3] Add free ride do zwift
         <FreeRide Duration="600" FlatRoad="1"/>
 * [P3] Add react for generating emails
+* Change output units on sport type
+* Suggestion for learning
+* More logging on usage
+* Refactor validation of parameters on server.js
+* Ability to save workouts
 
 
 # Where to find type definition files:

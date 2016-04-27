@@ -1,4 +1,3 @@
-/// <reference path="type_definitions/node.d.ts" />
 var UI;
 (function (UI) {
     var PersistedItem = (function () {
@@ -139,7 +138,6 @@ var UI;
         }
         ClipboardHelper.copyText = function (text) {
             var textArea = document.createElement("textarea");
-            // Place in top-left corner of screen regardless of scroll position.
             textArea.style.position = 'fixed';
             textArea.style.top = "0";
             textArea.style.left = "0";

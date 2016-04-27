@@ -524,7 +524,7 @@ export class Intensity {
 			ifValue = ifValue / 100;
 		}
 		
-		console.assert(ifValue <= 1 && ifValue >= 0, stringFormat("Invalid if {0}", ifValue));
+		console.assert(ifValue <= 2 && ifValue >= 0, stringFormat("Invalid if {0}", ifValue));
 
 		if (unit == IntensityUnit.IF) {
 			// HACK: Find a better way of doing this
