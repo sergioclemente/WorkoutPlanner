@@ -103,11 +103,16 @@ http.createServer(function (req, res) {
                 attachments.push(attachment_mrc);
               }
 
-              ms.send(userProfile.getEmail(), builder.getMRCFileName(), builder.getPrettyPrint("<br />"), attachments);
-              //
-
-              res.write("Email sent");
-              res.end();
+              res.write("Sending email...\n");
+              ms.send(userProfile.getEmail(), builder.getMRCFileName(), builder.getPrettyPrint("<br />"), attachments, 
+                function(status, message) {
+                    if (status) {
+                      res.write("Email successfully sent.\n");
+                    } else {
+                      res.write("Error while sending email.\n");
+                    }
+                    res.end();
+                });
             }
           } else {
             logRequest(req, 404);

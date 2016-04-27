@@ -386,7 +386,7 @@ var Model;
             "s": DurationUnit.Seconds,
             "yards": DurationUnit.Yards,
             "y": DurationUnit.Yards,
-            "yrd": DurationUnit.Yards
+            "yrd": DurationUnit.Yards,
         };
         if (unit in conversionMap) {
             return conversionMap[unit];
@@ -406,7 +406,7 @@ var Model;
             "km/hr": IntensityUnit.Kmh,
             "min/km": IntensityUnit.MinKm,
             "/100yards": IntensityUnit.Per100Yards,
-            "/100meters": IntensityUnit.Per100Meters
+            "/100meters": IntensityUnit.Per100Meters,
         };
         if (unit in conversionMap) {
             return conversionMap[unit];
@@ -744,7 +744,7 @@ var Model;
             return pv.data.map(function (item) {
                 return {
                     x: item.x.getSeconds() / 60,
-                    y: Math.round(item.y.getValue() * 100)
+                    y: Math.round(item.y.getValue() * 100),
                 };
             });
         };
@@ -1250,7 +1250,7 @@ var Model;
                     3: { name: "z3", low: 0.75, high: 0.90 },
                     4: { name: "z4", low: 0.90, high: 1.05 },
                     5: { name: "z5", low: 1.05, high: 1.2 },
-                    6: { name: "z6", low: 1.20, high: 10 }
+                    6: { name: "z6", low: 1.20, high: 10 },
                 };
             }
             else if (sportType == SportType.Run) {
@@ -1260,7 +1260,7 @@ var Model;
                     3: { name: "z3", low: 0.87, high: 0.94 },
                     4: { name: "z4", low: 0.94, high: 1.01 },
                     5: { name: "z5", low: 1.01, high: 1.10 },
-                    6: { name: "z6", low: 1.10, high: 10 }
+                    6: { name: "z6", low: 1.10, high: 10 },
                 };
             }
         };
@@ -1287,7 +1287,7 @@ var Model;
                 this.zones[zone] = {
                     name: zone_obj.name,
                     range: "[" + Math.floor(zone_obj.low * 100) + "%;" + Math.floor(zone_obj.high * 100) + "%)",
-                    value: 0
+                    value: 0,
                 };
             }
         }

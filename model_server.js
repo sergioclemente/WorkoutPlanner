@@ -8,7 +8,7 @@ var ModelServer;
             this.user = user;
             this.password = password;
         }
-        MailSender.prototype.send = function (to, subject, body, attachments) {
+        MailSender.prototype.send = function (to, subject, body, attachments, callback) {
             var smtpConfig = {
                 host: this.host,
                 port: this.port,
@@ -34,10 +34,14 @@ var ModelServer;
             var nodemailer = require('nodemailer');
             var transporter = nodemailer.createTransport(smtpConfig);
             transporter.sendMail(mailOptions, function (error, info) {
+                console.log(JSON.stringify(error));
+                console.log(JSON.stringify(info));
                 if (error) {
-                    return console.log(error);
+                    callback(false, error);
                 }
-                console.log('Message sent: ' + info.response);
+                else {
+                    callback(true, "");
+                }
             });
         };
         return MailSender;
