@@ -5,6 +5,60 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var Model;
 (function (Model) {
+    // TODO: Add other
+    (function (SportType) {
+        SportType[SportType["Unknown"] = -1] = "Unknown";
+        SportType[SportType["Swim"] = 0] = "Swim";
+        SportType[SportType["Bike"] = 1] = "Bike";
+        SportType[SportType["Run"] = 2] = "Run";
+    })(Model.SportType || (Model.SportType = {}));
+    var SportType = Model.SportType;
+    (function (DistanceUnit) {
+        DistanceUnit[DistanceUnit["Unknown"] = 0] = "Unknown";
+        DistanceUnit[DistanceUnit["Miles"] = 1] = "Miles";
+        DistanceUnit[DistanceUnit["Kilometers"] = 2] = "Kilometers";
+        DistanceUnit[DistanceUnit["Meters"] = 3] = "Meters";
+        DistanceUnit[DistanceUnit["Yards"] = 4] = "Yards";
+    })(Model.DistanceUnit || (Model.DistanceUnit = {}));
+    var DistanceUnit = Model.DistanceUnit;
+    (function (TimeUnit) {
+        TimeUnit[TimeUnit["Unknown"] = 0] = "Unknown";
+        TimeUnit[TimeUnit["Seconds"] = 1] = "Seconds";
+        TimeUnit[TimeUnit["Minutes"] = 2] = "Minutes";
+        TimeUnit[TimeUnit["Hours"] = 3] = "Hours";
+    })(Model.TimeUnit || (Model.TimeUnit = {}));
+    var TimeUnit = Model.TimeUnit;
+    (function (DurationUnit) {
+        DurationUnit[DurationUnit["Unknown"] = -1] = "Unknown";
+        DurationUnit[DurationUnit["Seconds"] = 0] = "Seconds";
+        DurationUnit[DurationUnit["Minutes"] = 1] = "Minutes";
+        DurationUnit[DurationUnit["Hours"] = 2] = "Hours";
+        DurationUnit[DurationUnit["Meters"] = 3] = "Meters";
+        DurationUnit[DurationUnit["Miles"] = 4] = "Miles";
+        DurationUnit[DurationUnit["Kilometers"] = 5] = "Kilometers";
+        DurationUnit[DurationUnit["Yards"] = 6] = "Yards";
+    })(Model.DurationUnit || (Model.DurationUnit = {}));
+    var DurationUnit = Model.DurationUnit;
+    (function (IntensityUnit) {
+        IntensityUnit[IntensityUnit["Unknown"] = -1] = "Unknown";
+        IntensityUnit[IntensityUnit["IF"] = 0] = "IF";
+        IntensityUnit[IntensityUnit["Watts"] = 1] = "Watts";
+        IntensityUnit[IntensityUnit["MinMi"] = 2] = "MinMi";
+        IntensityUnit[IntensityUnit["Mph"] = 3] = "Mph";
+        IntensityUnit[IntensityUnit["Kmh"] = 4] = "Kmh";
+        IntensityUnit[IntensityUnit["MinKm"] = 5] = "MinKm";
+        IntensityUnit[IntensityUnit["Per100Yards"] = 6] = "Per100Yards";
+        IntensityUnit[IntensityUnit["Per100Meters"] = 7] = "Per100Meters";
+    })(Model.IntensityUnit || (Model.IntensityUnit = {}));
+    var IntensityUnit = Model.IntensityUnit;
+    (function (RunningPaceUnit) {
+        RunningPaceUnit[RunningPaceUnit["Unknown"] = 0] = "Unknown";
+        RunningPaceUnit[RunningPaceUnit["MinMi"] = 1] = "MinMi";
+        RunningPaceUnit[RunningPaceUnit["Mph"] = 2] = "Mph";
+        RunningPaceUnit[RunningPaceUnit["MinKm"] = 3] = "MinKm";
+        RunningPaceUnit[RunningPaceUnit["KmHr"] = 4] = "KmHr";
+    })(Model.RunningPaceUnit || (Model.RunningPaceUnit = {}));
+    var RunningPaceUnit = Model.RunningPaceUnit;
     var MyMath = (function () {
         function MyMath() {
         }
@@ -46,21 +100,6 @@ var Model;
         return MyMath;
     })();
     Model.MyMath = MyMath;
-    (function (SportType) {
-        SportType[SportType["Unknown"] = -1] = "Unknown";
-        SportType[SportType["Swim"] = 0] = "Swim";
-        SportType[SportType["Bike"] = 1] = "Bike";
-        SportType[SportType["Run"] = 2] = "Run";
-    })(Model.SportType || (Model.SportType = {}));
-    var SportType = Model.SportType;
-    (function (DistanceUnit) {
-        DistanceUnit[DistanceUnit["Unknown"] = 0] = "Unknown";
-        DistanceUnit[DistanceUnit["Miles"] = 1] = "Miles";
-        DistanceUnit[DistanceUnit["Kilometers"] = 2] = "Kilometers";
-        DistanceUnit[DistanceUnit["Meters"] = 3] = "Meters";
-        DistanceUnit[DistanceUnit["Yards"] = 4] = "Yards";
-    })(Model.DistanceUnit || (Model.DistanceUnit = {}));
-    var DistanceUnit = Model.DistanceUnit;
     var DistanceUnitHelper = (function () {
         function DistanceUnitHelper() {
         }
@@ -102,13 +141,6 @@ var Model;
         return DistanceUnitHelper;
     })();
     Model.DistanceUnitHelper = DistanceUnitHelper;
-    (function (TimeUnit) {
-        TimeUnit[TimeUnit["Unknown"] = 0] = "Unknown";
-        TimeUnit[TimeUnit["Seconds"] = 1] = "Seconds";
-        TimeUnit[TimeUnit["Minutes"] = 2] = "Minutes";
-        TimeUnit[TimeUnit["Hours"] = 3] = "Hours";
-    })(Model.TimeUnit || (Model.TimeUnit = {}));
-    var TimeUnit = Model.TimeUnit;
     var TimeUnitHelper = (function () {
         function TimeUnitHelper() {
         }
@@ -450,29 +482,6 @@ var Model;
     function isIntensityUnit(value) {
         return getIntensityUnitFromString(value) != IntensityUnit.Unknown;
     }
-    (function (DurationUnit) {
-        DurationUnit[DurationUnit["Unknown"] = -1] = "Unknown";
-        DurationUnit[DurationUnit["Seconds"] = 0] = "Seconds";
-        DurationUnit[DurationUnit["Minutes"] = 1] = "Minutes";
-        DurationUnit[DurationUnit["Hours"] = 2] = "Hours";
-        DurationUnit[DurationUnit["Meters"] = 3] = "Meters";
-        DurationUnit[DurationUnit["Miles"] = 4] = "Miles";
-        DurationUnit[DurationUnit["Kilometers"] = 5] = "Kilometers";
-        DurationUnit[DurationUnit["Yards"] = 6] = "Yards";
-    })(Model.DurationUnit || (Model.DurationUnit = {}));
-    var DurationUnit = Model.DurationUnit;
-    (function (IntensityUnit) {
-        IntensityUnit[IntensityUnit["Unknown"] = -1] = "Unknown";
-        IntensityUnit[IntensityUnit["IF"] = 0] = "IF";
-        IntensityUnit[IntensityUnit["Watts"] = 1] = "Watts";
-        IntensityUnit[IntensityUnit["MinMi"] = 2] = "MinMi";
-        IntensityUnit[IntensityUnit["Mph"] = 3] = "Mph";
-        IntensityUnit[IntensityUnit["Kmh"] = 4] = "Kmh";
-        IntensityUnit[IntensityUnit["MinKm"] = 5] = "MinKm";
-        IntensityUnit[IntensityUnit["Per100Yards"] = 6] = "Per100Yards";
-        IntensityUnit[IntensityUnit["Per100Meters"] = 7] = "Per100Meters";
-    })(Model.IntensityUnit || (Model.IntensityUnit = {}));
-    var IntensityUnit = Model.IntensityUnit;
     function stringFormat(format) {
         var args = [];
         for (var _i = 1; _i < arguments.length; _i++) {
@@ -1702,7 +1711,9 @@ var Model;
             if (title.length > 0) {
                 this.result += " " + title;
             }
-            if (interval.getIntensity().getValue() <= EASY_THRESHOLD) {
+            // Lets write the intensity as easy if its lower than a threshold, but it didn't have a title
+            // Otherwise it might be something like single leg drills
+            if (interval.getIntensity().getValue() <= EASY_THRESHOLD && title.length == 0) {
                 this.result += " easy";
             }
             else {
@@ -1753,14 +1764,6 @@ var Model;
         return WorkoutTextVisitor;
     })();
     Model.WorkoutTextVisitor = WorkoutTextVisitor;
-    (function (RunningPaceUnit) {
-        RunningPaceUnit[RunningPaceUnit["Unknown"] = 0] = "Unknown";
-        RunningPaceUnit[RunningPaceUnit["MinMi"] = 1] = "MinMi";
-        RunningPaceUnit[RunningPaceUnit["Mph"] = 2] = "Mph";
-        RunningPaceUnit[RunningPaceUnit["MinKm"] = 3] = "MinKm";
-        RunningPaceUnit[RunningPaceUnit["KmHr"] = 4] = "KmHr";
-    })(Model.RunningPaceUnit || (Model.RunningPaceUnit = {}));
-    var RunningPaceUnit = Model.RunningPaceUnit;
     var RunningPaceHelper = (function () {
         function RunningPaceHelper() {
         }

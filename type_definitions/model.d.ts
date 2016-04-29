@@ -1,4 +1,51 @@
 declare module Model {
+    enum SportType {
+        Unknown = -1,
+        Swim = 0,
+        Bike = 1,
+        Run = 2,
+    }
+    enum DistanceUnit {
+        Unknown = 0,
+        Miles = 1,
+        Kilometers = 2,
+        Meters = 3,
+        Yards = 4,
+    }
+    enum TimeUnit {
+        Unknown = 0,
+        Seconds = 1,
+        Minutes = 2,
+        Hours = 3,
+    }
+    enum DurationUnit {
+        Unknown = -1,
+        Seconds = 0,
+        Minutes = 1,
+        Hours = 2,
+        Meters = 3,
+        Miles = 4,
+        Kilometers = 5,
+        Yards = 6,
+    }
+    enum IntensityUnit {
+        Unknown = -1,
+        IF = 0,
+        Watts = 1,
+        MinMi = 2,
+        Mph = 3,
+        Kmh = 4,
+        MinKm = 5,
+        Per100Yards = 6,
+        Per100Meters = 7,
+    }
+    enum RunningPaceUnit {
+        Unknown = 0,
+        MinMi = 1,
+        Mph = 2,
+        MinKm = 3,
+        KmHr = 4,
+    }
     class MyMath {
         /**
          * Decimal adjustment of a number.
@@ -13,27 +60,8 @@ declare module Model {
         static floor10(value: number, exp: number): number;
         static ceil10(value: number, exp: number): number;
     }
-    enum SportType {
-        Unknown = -1,
-        Swim = 0,
-        Bike = 1,
-        Run = 2,
-    }
-    enum DistanceUnit {
-        Unknown = 0,
-        Miles = 1,
-        Kilometers = 2,
-        Meters = 3,
-        Yards = 4,
-    }
     class DistanceUnitHelper {
         static convertTo(value: number, unitFrom: DistanceUnit, unitTo: DistanceUnit): number;
-    }
-    enum TimeUnit {
-        Unknown = 0,
-        Seconds = 1,
-        Minutes = 2,
-        Hours = 3,
     }
     class TimeUnitHelper {
         static convertTo(value: number, unitFrom: TimeUnit, unitTo: TimeUnit): number;
@@ -60,27 +88,6 @@ declare module Model {
         toStringShort(): string;
         toString(): string;
         static combine(dur1: Duration, dur2: Duration): Duration;
-    }
-    enum DurationUnit {
-        Unknown = -1,
-        Seconds = 0,
-        Minutes = 1,
-        Hours = 2,
-        Meters = 3,
-        Miles = 4,
-        Kilometers = 5,
-        Yards = 6,
-    }
-    enum IntensityUnit {
-        Unknown = -1,
-        IF = 0,
-        Watts = 1,
-        MinMi = 2,
-        Mph = 3,
-        Kmh = 4,
-        MinKm = 5,
-        Per100Yards = 6,
-        Per100Meters = 7,
     }
     class IntensityUnitHelper {
         static convertTo(value: number, unitFrom: IntensityUnit, unitTo: IntensityUnit): number;
@@ -313,13 +320,6 @@ declare module Model {
         visitStepBuildInterval(interval: StepBuildInterval): void;
         visitSimpleInterval(interval: SimpleInterval): any;
         getIntensityPretty(intensity: Intensity): string;
-    }
-    enum RunningPaceUnit {
-        Unknown = 0,
-        MinMi = 1,
-        Mph = 2,
-        MinKm = 3,
-        KmHr = 4,
     }
     class RunningPaceHelper {
         static convertToMph(value: number, unit: RunningPaceUnit): number;

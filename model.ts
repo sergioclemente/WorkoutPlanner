@@ -1,5 +1,59 @@
 module Model {
 
+// TODO: Add other
+export enum SportType {
+	Unknown=-1,
+	Swim=0,
+	Bike=1,
+	Run=2
+}
+
+export enum DistanceUnit {
+	Unknown,
+	Miles,
+	Kilometers,
+	Meters,
+	Yards
+}
+
+export enum TimeUnit {
+	Unknown,
+	Seconds,
+	Minutes,
+	Hours
+}
+
+export enum DurationUnit {
+	Unknown=-1,
+	Seconds=0,
+	Minutes=1,
+	Hours=2,
+	Meters=3,
+	Miles=4,
+	Kilometers=5,
+	Yards = 6
+}
+
+export enum IntensityUnit {
+	Unknown=-1,
+	IF=0,
+	Watts=1,
+	MinMi=2,
+	Mph=3,
+	Kmh=4,
+	MinKm=5,
+	Per100Yards=6,
+	Per100Meters=7,
+}
+
+export enum RunningPaceUnit {
+	Unknown,
+	MinMi,
+	Mph,
+	MinKm,
+	KmHr,
+}
+
 export class MyMath {
     /**
      * Decimal adjustment of a number.
@@ -39,21 +93,6 @@ export class MyMath {
     }
 }
 
-export enum SportType {
-	Unknown=-1,
-	Swim=0,
-	Bike=1,
-	Run=2
-}
-
-export enum DistanceUnit {
-	Unknown,
-	Miles,
-	Kilometers,
-	Meters,
-	Yards
-}
-
 export class DistanceUnitHelper {
 	static convertTo(value: number, unitFrom: DistanceUnit, unitTo: DistanceUnit) : number {
 		// convert first to meters
@@ -83,13 +122,6 @@ export class DistanceUnitHelper {
 			return -1;
 		}
 	}
-}
-
-export enum TimeUnit {
-	Unknown,
-	Seconds,
-	Minutes,
-	Hours
 }
 
 export class TimeUnitHelper {
@@ -427,29 +459,6 @@ function isDurationUnit(value: string) {
 
 function isIntensityUnit(value: string) {
 	return getIntensityUnitFromString(value) != IntensityUnit.Unknown;
-}
-
-export enum DurationUnit {
-	Unknown=-1,
-	Seconds=0,
-	Minutes=1,
-	Hours=2,
-	Meters=3,
-	Miles=4,
-	Kilometers=5,
-	Yards = 6
-}
-
-export enum IntensityUnit {
-	Unknown=-1,
-	IF=0,
-	Watts=1,
-	MinMi=2,
-	Mph=3,
-	Kmh=4,
-	MinKm=5,
-	Per100Yards=6,
-	Per100Meters=7,
 }
 
 function stringFormat(format : string, ...args: any[]) {
@@ -1739,7 +1748,9 @@ export class WorkoutTextVisitor implements Visitor {
 		if (title.length > 0) {
 			this.result += " " + title;
 		}
-		if (interval.getIntensity().getValue() <= EASY_THRESHOLD) {
+		// Lets write the intensity as easy if its lower than a threshold, but it didn't have a title
+		// Otherwise it might be something like single leg drills
+		if (interval.getIntensity().getValue() <= EASY_THRESHOLD && title.length == 0) {
 			this.result += " easy";
 		} else {
 			this.result += " @ " + this.getIntensityPretty(interval.getIntensity())	
@@ -1780,14 +1791,6 @@ export class WorkoutTextVisitor implements Visitor {
 			console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
 		}
 	}
-}
-
-export enum RunningPaceUnit {
-	Unknown,
-	MinMi,
-	Mph,
-	MinKm,
-	KmHr,
 }
 
 export class RunningPaceHelper {

@@ -50,6 +50,7 @@ git push heroku master
 * More logging on usage
 * Refactor validation of parameters on server.js
 * Ability to save workouts
+* Add player
 
 
 # Where to find type definition files:
