@@ -321,9 +321,6 @@ declare module Model {
         visitSimpleInterval(interval: SimpleInterval): any;
         getIntensityPretty(intensity: Intensity): string;
     }
-    class RunningPaceHelper {
-        static convertToMph(value: number, unit: RunningPaceUnit): number;
-    }
     class SpeedParser {
         static getSpeedInMph(speed: string): number;
         static _extractNumber(numberString: any, decimalMultiplier: any, strSeparator: any, strSuffix: any): number;

@@ -119,6 +119,7 @@ var Model;
                 distanceInMeters = value * 0.9144;
             }
             else {
+                console.assert(false, stringFormat("Unknown unitFrom {0}", unitFrom));
                 throw new Error("Unknown distance unit");
             }
             // convert to final unit
@@ -156,6 +157,7 @@ var Model;
                 timeInSeconds = value * 3600;
             }
             else {
+                console.assert(false, "Unknown unitFrom {0}", unitFrom);
                 throw new Error("Unknown time unit");
             }
             // convert to final unit
@@ -192,6 +194,7 @@ var Model;
             case DurationUnit.Yards:
                 return "yards";
             default:
+                console.assert(false, stringFormat("unkown duration {0}", unit));
                 return "unknown";
         }
     }
@@ -399,6 +402,7 @@ var Model;
             case IntensityUnit.Per100Meters:
                 return "/100meters";
             default:
+                console.assert(false, stringFormat("Unknown intensity unit {0}", unit));
                 return "unknown";
         }
     }
@@ -504,7 +508,9 @@ var Model;
             ];
             if (invalidUnitsForConversion.indexOf(unitFrom) != -1
                 || invalidUnitsForConversion.indexOf(unitTo) != -1) {
-                throw new Error(stringFormat("Invalid unitFrom({0}) or unitTo({1}) for conversion", unitFrom, unitTo));
+                var msg = stringFormat("Invalid unitFrom({0}) or unitTo({1}) for conversion", unitFrom, unitTo);
+                console.assert(false, msg);
+                throw new Error(msg);
             }
             var speedMph = 0;
             if (unitFrom == IntensityUnit.Mph) {
@@ -526,6 +532,7 @@ var Model;
                 speedMph = DistanceUnitHelper.convertTo(6000 / value, DistanceUnit.Meters, DistanceUnit.Miles);
             }
             else {
+                console.assert(false, stringFormat("Unknown intensity unit {0}", unitFrom));
                 throw new Error("Unknown IntensityUnit!");
             }
             var result = 0;
@@ -548,6 +555,7 @@ var Model;
                 result = 6000 / DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Meters);
             }
             else {
+                console.assert(false, stringFormat("Unknown intensity unit {0}", unitTo));
                 throw new Error("Unknown IntensityUnit!");
             }
             return result;
@@ -614,6 +622,7 @@ var Model;
         };
         Intensity.combine = function (intensities, weights) {
             if (weights.length != intensities.length) {
+                console.assert(false, "The size of intensities and weights should be the same");
                 throw new Error("The size of intensities and weights should be the same");
             }
             // do a weighed sum
@@ -1764,30 +1773,6 @@ var Model;
         return WorkoutTextVisitor;
     })();
     Model.WorkoutTextVisitor = WorkoutTextVisitor;
-    var RunningPaceHelper = (function () {
-        function RunningPaceHelper() {
-        }
-        RunningPaceHelper.convertToMph = function (value, unit) {
-            if (unit == RunningPaceUnit.Mph) {
-                return value;
-            }
-            else if (unit == RunningPaceUnit.MinMi) {
-                return 60 / unit;
-            }
-            else if (unit == RunningPaceUnit.KmHr) {
-                return value / 1.609344;
-            }
-            else if (unit == RunningPaceUnit.MinKm) {
-                return (60 / value) / 1.609344;
-            }
-            else {
-                throw new Error("Unknown running pace unit");
-            }
-        };
-        return RunningPaceHelper;
-    })();
-    Model.RunningPaceHelper = RunningPaceHelper;
-    ;
     var SpeedParser = (function () {
         function SpeedParser() {
         }
@@ -1909,6 +1894,7 @@ var Model;
                     ifValue = value;
                 }
                 else {
+                    console.assert(false, stringFormat("Invalid unit {0}", unit));
                     throw new Error("Invalid unit : " + unit);
                 }
             }
@@ -1929,6 +1915,7 @@ var Model;
                     ifValue = running_mph / running_tpace_mph;
                 }
                 else {
+                    console.assert(false, stringFormat("Unit {0} is not implemented"));
                     throw new Error("Not implemented");
                 }
             }

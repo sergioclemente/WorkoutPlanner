@@ -106,6 +106,7 @@ export class DistanceUnitHelper {
 		} else if (unitFrom == DistanceUnit.Yards) {
 			distanceInMeters = value * 0.9144;
 		} else {
+			console.assert(false, stringFormat("Unknown unitFrom {0}", unitFrom));
 			throw new Error("Unknown distance unit");
 		}
 		
@@ -134,6 +135,7 @@ export class TimeUnitHelper {
 		} else if (unitFrom == TimeUnit.Hours) {
 			timeInSeconds = value * 3600;
 		} else {
+			console.assert(false, "Unknown unitFrom {0}", unitFrom);
 			throw new Error("Unknown time unit");
 		}
 		
@@ -167,6 +169,7 @@ function getStringFromDurationUnit(unit: DurationUnit) {
 		case DurationUnit.Yards:
 			return "yards";
 		default:
+			console.assert(false, stringFormat("unkown duration {0}", unit));
 			return "unknown";
 	}
 }
@@ -381,6 +384,7 @@ function getStringFromIntensityUnit(unit: IntensityUnit) {
 		case IntensityUnit.Per100Meters:
 			return "/100meters";			
 		default:
+			console.assert(false, stringFormat("Unknown intensity unit {0}", unit));
 			return "unknown";
 	}
 }
@@ -479,8 +483,9 @@ export class IntensityUnitHelper {
 		];
 		if (invalidUnitsForConversion.indexOf(unitFrom) != -1
 			|| invalidUnitsForConversion.indexOf(unitTo) != -1) {
-				throw new Error(
-					stringFormat("Invalid unitFrom({0}) or unitTo({1}) for conversion", unitFrom, unitTo));
+				var msg = stringFormat("Invalid unitFrom({0}) or unitTo({1}) for conversion", unitFrom, unitTo);
+				console.assert(false, msg);
+				throw new Error(msg);
 			}
 			
 		var speedMph = 0;
@@ -497,6 +502,7 @@ export class IntensityUnitHelper {
 		} else if (unitFrom == IntensityUnit.Per100Meters) {
 			speedMph = DistanceUnitHelper.convertTo(6000/value, DistanceUnit.Meters, DistanceUnit.Miles);	
 		} else {
+			console.assert(false, stringFormat("Unknown intensity unit {0}", unitFrom));
 			throw new Error("Unknown IntensityUnit!");
 		}
 		
@@ -514,6 +520,7 @@ export class IntensityUnitHelper {
 		} else if (unitTo == IntensityUnit.Per100Meters) {
 			result = 6000 / DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Meters);	
 		} else {
+			console.assert(false, stringFormat("Unknown intensity unit {0}", unitTo));
 			throw new Error("Unknown IntensityUnit!");
 		}
 		
@@ -584,6 +591,7 @@ export class Intensity {
 	
 	static combine(intensities: Intensity[], weights: number[]) : Intensity {
 		if (weights.length != intensities.length) {
+			console.assert(false, "The size of intensities and weights should be the same");
 			throw new Error("The size of intensities and weights should be the same");
 		}
 		// do a weighed sum
@@ -1793,22 +1801,6 @@ export class WorkoutTextVisitor implements Visitor {
 	}
 }
 
-export class RunningPaceHelper {
-	static convertToMph(value: number, unit: RunningPaceUnit) {
-		if (unit == RunningPaceUnit.Mph) {
-			return value;
-		} else if (unit == RunningPaceUnit.MinMi) {
-			return 60 / unit;
-		} else if (unit == RunningPaceUnit.KmHr) {
-			return value / 1.609344;
-		} else if (unit == RunningPaceUnit.MinKm) {
-			return (60 / value) / 1.609344;
-		} else {
-			throw new Error("Unknown running pace unit");
-		}
-	}	
-};
-
 export class SpeedParser {
 	static getSpeedInMph(speed: string): number {
 		var res = null;
@@ -1948,6 +1940,7 @@ export class ObjectFactory {
 			} else if (unit == IntensityUnit.IF) {
 				ifValue = value;
 			} else {
+				console.assert(false, stringFormat("Invalid unit {0}", unit));
 				throw new Error("Invalid unit : " + unit);
 			}
 		} else if (this.sportType == SportType.Run) {
@@ -1973,6 +1966,7 @@ export class ObjectFactory {
 					IntensityUnit.Mph);
 				ifValue = running_mph / running_tpace_mph;
 			} else {
+				console.assert(false, stringFormat("Unit {0} is not implemented"));
 				throw new Error("Not implemented");
 			}
 		} else if (this.sportType == SportType.Swim) {
