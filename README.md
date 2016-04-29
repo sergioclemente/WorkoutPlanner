@@ -40,7 +40,6 @@ git push heroku master
 
 # Bugs/Feature requests
 * Add Url shortener
-* [P3] server should log status and error more cleanly. (email is fixed)
 * [P3] Refactor getMRCFile into a visitor
 * [P3] Refactor ZwiftDataVisitor to move finalize() into the base
 * [P3] Add free ride do zwift

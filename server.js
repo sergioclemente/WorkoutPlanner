@@ -12,6 +12,92 @@ function logRequest(req, code) {
   console.log(new Date().toTimeString() + " " + req.connection.remoteAddress + " " + req.method + " " + req.url + " " + code + " " + user_agent);
 }
 
+function handleExistentFile(req, res, fs, filename) {
+  if (fs.statSync(filename).isDirectory()) {
+    filename += '/index.html';
+  }
+  fs.readFile(filename, "binary", function(err, file) {
+    if(err) {
+      logRequest(req, 500);
+      res.writeHead(500, {"Content-Type": "text/plain"});
+      res.write(err + "\n");
+      res.end();
+      return;
+    }
+
+    logRequest(req, 200);
+    res.writeHead(200);
+    res.write(file, "binary");
+    res.end();
+  });
+}
+
+function handleDownloadWorkout(req, res, uri, params) {
+  if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
+    var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
+    var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
+    logRequest(req, 200);
+
+    var workout_filename = "";
+    var workout_content = "";
+
+    if (uri === "/workout.mrc") {
+      workout_filename = builder.getMRCFileName();
+      workout_content = builder.getMRCFile();
+    } else {
+      workout_filename = builder.getZWOFileName();
+      workout_content = builder.getZWOFile();
+    }
+
+    res.writeHead(200,
+      {
+        "Content-Type": "application/octet-stream",
+        "Content-Disposition": "attachment; filename=\"" + workout_filename + "\";"
+      }
+    );
+    res.write(workout_content);
+    res.end();
+  }   
+}
+
+function handleSendEmail(req, res, uri, params) {
+  if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
+    var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
+    var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
+    logRequest(req, 200);
+
+    // sending email
+    var ms = new model_server.MailSender(config.smtp.server_host, config.smtp.server_port, config.smtp.use_ssl, config.smtp.login, config.smtp.password);
+
+    var attachments = [];
+
+    // Just send the attachment if its a bike workout
+    if (builder.getSportType() == model.SportType.Bike) {
+      var attachment_mrc = {
+        name : builder.getMRCFileName(),
+        data : builder.getMRCFile()
+      };
+      var attachment_zwo = {
+        name : builder.getZWOFileName(),
+        data : builder.getZWOFile()
+      };                
+      attachments.push(attachment_zwo);
+      attachments.push(attachment_mrc);
+    }
+
+    res.write("Sending email...\n");
+    ms.send(userProfile.getEmail(), builder.getMRCFileName(), builder.getPrettyPrint("<br />"), attachments, 
+      function(status, message) {
+          if (status) {
+            res.write("Email successfully sent.\n");
+          } else {
+            res.write("Error while sending email.\n");
+          }
+          res.end();
+      });
+  }
+}
+
 http.createServer(function (req, res) {
   try {
     var parsed_url = url.parse(req.url, true);
@@ -31,89 +117,15 @@ http.createServer(function (req, res) {
     fs.exists(filename, function(exists) {
       try {
         if (exists) {
-          if (fs.statSync(filename).isDirectory()) {
-            filename += '/index.html';
-          }
-          fs.readFile(filename, "binary", function(err, file) {
-            if(err) {
-              logRequest(req, 500);
-              res.writeHead(500, {"Content-Type": "text/plain"});
-              res.write(err + "\n");
-              res.end();
-              return;
-            }
-
-            logRequest(req, 200);
-            res.writeHead(200);
-            res.write(file, "binary");
-            res.end();
-          });
+          handleExistentFile(req, res, fs, filename);
         } else {
           // make this more generic
           if (uri === "/workout.mrc" || uri === "/workout.zwo") {
             var params = parsed_url.query;
-            if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
-              var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
-              var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
-              logRequest(req, 200);
-
-              var workout_filename = "";
-              var workout_content = "";
-
-              if (uri === "/workout.mrc") {
-                workout_filename = builder.getMRCFileName();
-                workout_content = builder.getMRCFile();
-              } else {
-                workout_filename = builder.getZWOFileName();
-                workout_content = builder.getZWOFile();
-              }
-
-              res.writeHead(200,
-                {
-                  "Content-Type": "application/octet-stream",
-                  "Content-Disposition": "attachment; filename=\"" + workout_filename + "\";"
-                }
-              );
-              res.write(workout_content);
-              res.end();
-            }        
+            handleDownloadWorkout(req, res, uri, params);     
           } else if (uri == "/send_mail") {
             var params = parsed_url.query;
-            if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
-              var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
-              var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
-              logRequest(req, 200);
-
-              // sending email
-              var ms = new model_server.MailSender(config.smtp.server_host, config.smtp.server_port, config.smtp.use_ssl, config.smtp.login, config.smtp.password);
-
-              var attachments = [];
-
-              // Just send the attachment if its a bike workout
-              if (builder.getSportType() == model.SportType.Bike) {
-                var attachment_mrc = {
-                  name : builder.getMRCFileName(),
-                  data : builder.getMRCFile()
-                };
-                var attachment_zwo = {
-                  name : builder.getZWOFileName(),
-                  data : builder.getZWOFile()
-                };                
-                attachments.push(attachment_zwo);
-                attachments.push(attachment_mrc);
-              }
-
-              res.write("Sending email...\n");
-              ms.send(userProfile.getEmail(), builder.getMRCFileName(), builder.getPrettyPrint("<br />"), attachments, 
-                function(status, message) {
-                    if (status) {
-                      res.write("Email successfully sent.\n");
-                    } else {
-                      res.write("Error while sending email.\n");
-                    }
-                    res.end();
-                });
-            }
+            handleSendEmail(req, res, uri, params);
           } else {
             logRequest(req, 404);
             res.writeHead(404, {"Content-Type": "text/plain"});
