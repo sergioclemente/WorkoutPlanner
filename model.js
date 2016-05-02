@@ -908,6 +908,83 @@ var Model;
         return NumberParser;
     })();
     Model.NumberParser = NumberParser;
+    var StringChunkParser = (function () {
+        function StringChunkParser() {
+        }
+        StringChunkParser.prototype.evaluate = function (input, i) {
+            this.value = "";
+            var old_i = i;
+            while (input[i] == ',' || input[i] == ' ') {
+                i++;
+            }
+            for (; i < input.length; i++) {
+                var ch = input[i];
+                if (ch == ',' || ch == ')') {
+                    break;
+                }
+                this.value += ch;
+            }
+            // Points to the last valid char
+            return i - 1;
+        };
+        StringChunkParser.prototype.getValue = function () {
+            return this.value;
+        };
+        return StringChunkParser;
+    })();
+    Model.StringChunkParser = StringChunkParser;
+    var IntensityParser = (function () {
+        function IntensityParser() {
+        }
+        IntensityParser.prototype.evaluate = function (input, i) {
+            var num_parser = new NumberParser();
+            i = num_parser.evaluate(input, i);
+            this.value = num_parser.getValue();
+            // Parse the unit
+            // Check for :
+            if (i + 1 < input.length && input[i + 1] == ":") {
+                i = i + 2; // skip : and go to the next char
+                var res_temp = IntervalParser.parseDouble(input, i);
+                i = res_temp.i;
+                this.value = this.value + res_temp.value / 60;
+                // consume any whitespaces
+                // i points to the current digit, so let's advance one
+                // than reverse one
+                i++;
+                while (i < input.length && input[i] == ' ') {
+                    i++;
+                }
+                i--;
+            }
+            // look for a unit
+            this.unit = "";
+            for (var j = i + 1; j < input.length; j++) {
+                // check for letters or (slashes/percent)
+                // this will cover for example: 
+                // 210w
+                // 75w
+                // 10mph
+                // 6min/mi
+                if (IntervalParser.isLetter(input[j])
+                    || input[j] == "%"
+                    || input[j] == "/") {
+                    this.unit += input[j];
+                }
+                else {
+                    break;
+                }
+            }
+            return i + this.unit.length;
+        };
+        IntensityParser.prototype.getValue = function () {
+            return this.value;
+        };
+        IntensityParser.prototype.getUnit = function () {
+            return this.unit;
+        };
+        return IntensityParser;
+    })();
+    Model.IntensityParser = IntensityParser;
     var IntervalParser = (function () {
         function IntervalParser() {
         }
@@ -952,7 +1029,6 @@ var Model;
                     var units = {};
                     var title = "";
                     var numIndex = 0;
-                    var isInTitle = false;
                     for (; i < input.length; i++) {
                         ch = input[i];
                         if (ch == ")") {
@@ -1059,59 +1135,22 @@ var Model;
                         }
                         else if (ch == ",") {
                             numIndex++;
-                            isInTitle = false;
                         }
                         else {
-                            if (IntervalParser.isDigit(ch) && !isInTitle) {
-                                var res = IntervalParser.parseDouble(input, i);
-                                i = res.i;
-                                nums[numIndex] = res.value;
-                                // Check for :
-                                if (i + 1 < input.length && input[i + 1] == ":") {
-                                    i = i + 2; // skip : and go to the next char
-                                    var res_temp = IntervalParser.parseDouble(input, i);
-                                    i = res_temp.i;
-                                    nums[numIndex] = nums[numIndex] + res_temp.value / 60;
-                                    // consume any whitespaces
-                                    // i points to the current digit, so let's advance one
-                                    // than reverse one
-                                    i++;
-                                    while (i < input.length && input[i] == ' ') {
-                                        i++;
-                                    }
-                                    i--;
-                                }
-                                // look for a unit
-                                var unitStr = "";
-                                for (var j = i + 1; j < input.length; j++) {
-                                    // check for letters or (slashes/percent)
-                                    // this will cover for example: 
-                                    // 210w
-                                    // 75w
-                                    // 10mph
-                                    // 6min/mi
-                                    if (IntervalParser.isLetter(input[j])
-                                        || input[j] == "%"
-                                        || input[j] == "/") {
-                                        unitStr += input[j];
-                                    }
-                                    else {
-                                        break;
-                                    }
-                                }
-                                units[numIndex] = unitStr;
-                                i += unitStr.length;
+                            var string_parser = new StringChunkParser();
+                            i = string_parser.evaluate(input, i);
+                            var value = string_parser.getValue();
+                            // We have to distinguish between title and intensity
+                            if (IntervalParser.isDigit(value[0])) {
+                                var intensity_parser = new IntensityParser();
+                                intensity_parser.evaluate(string_parser.getValue(), 0);
+                                nums[numIndex] = intensity_parser.getValue();
+                                units[numIndex] = intensity_parser.getUnit();
                             }
                             else {
-                                // just enter in title mode if its not a whitespace
-                                if (!isInTitle && !IntervalParser.isWhitespace(ch)) {
-                                    isInTitle = true;
-                                    // Put a dummy value in the units
-                                    units[numIndex] = "";
-                                }
-                                if (isInTitle) {
-                                    title += ch;
-                                }
+                                // Set the value for the title and a dummy value in the units
+                                title = string_parser.getValue();
+                                units[numIndex] = "";
                             }
                         }
                     }

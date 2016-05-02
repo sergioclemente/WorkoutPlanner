@@ -179,6 +179,18 @@ declare module Model {
         evaluate(input: string, i: number): number;
         getValue(): number;
     }
+    class StringChunkParser implements Parser {
+        private value;
+        evaluate(input: string, i: number): number;
+        getValue(): string;
+    }
+    class IntensityParser implements Parser {
+        private value;
+        private unit;
+        evaluate(input: string, i: number): number;
+        getValue(): number;
+        getUnit(): string;
+    }
     class IntervalParser {
         static getCharVal(ch: string): number;
         static isDigit(ch: string): boolean;
