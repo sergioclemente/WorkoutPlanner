@@ -913,7 +913,6 @@ var Model;
         }
         StringChunkParser.prototype.evaluate = function (input, i) {
             this.value = "";
-            var old_i = i;
             while (input[i] == ',' || input[i] == ' ') {
                 i++;
             }
@@ -1077,6 +1076,10 @@ var Model;
                                     }
                                     intensities.push(factory.createIntensity(nums[k], intensityUnit));
                                 }
+                                else if (nums[k] == -1) {
+                                    // Rest interval. Lets assume as intensity = 0 
+                                    intensities.push(factory.createIntensity(0, IntensityUnit.IF));
+                                }
                             }
                             // Take a peek at the top of the stack
                             if (stack[stack.length - 1] instanceof RepeatInterval) {
@@ -1141,7 +1144,13 @@ var Model;
                             i = string_parser.evaluate(input, i);
                             var value = string_parser.getValue();
                             // We have to distinguish between title and intensity
-                            if (IntervalParser.isDigit(value[0])) {
+                            // TODO: Add rest and +10 support for swimming
+                            // The way this is going to be implemented will be
+                            if (value == "rest") {
+                                nums[numIndex] = -1; // HACK!
+                                units[numIndex] = "";
+                            }
+                            else if (IntervalParser.isDigit(value[0])) {
                                 var intensity_parser = new IntensityParser();
                                 intensity_parser.evaluate(string_parser.getValue(), 0);
                                 nums[numIndex] = intensity_parser.getValue();
@@ -1762,7 +1771,12 @@ var Model;
             // Lets write the intensity as easy if its lower than a threshold, but it didn't have a title
             // Otherwise it might be something like single leg drills
             if (interval.getIntensity().getValue() <= EASY_THRESHOLD && title.length == 0) {
-                this.result += " easy";
+                if (interval.getIntensity().getValue() == 0) {
+                    this.result += " rest";
+                }
+                else {
+                    this.result += " easy";
+                }
             }
             else {
                 this.result += " @ " + this.getIntensityPretty(interval.getIntensity());

@@ -914,8 +914,6 @@ export class StringChunkParser implements Parser {
 	evaluate(input: string, i: number) : number {
 		this.value = "";
 
-		var old_i = i;
-
 		while (input[i] == ',' || input[i] == ' ') {
 			i++;
 		}
@@ -930,7 +928,7 @@ export class StringChunkParser implements Parser {
 		}
 
 		// Points to the last valid char
-		return i-1;
+		return i - 1;
 	}
 
 	getValue() : string {
@@ -1093,6 +1091,9 @@ export class IntervalParser {
 									intensityUnit = getIntensityUnitFromString(units[k]);
 								}
 								intensities.push(factory.createIntensity(nums[k], intensityUnit));
+							} else if (nums[k] == -1) {
+								// Rest interval. Lets assume as intensity = 0 
+								intensities.push(factory.createIntensity(0, IntensityUnit.IF));
 							}
 						}
 						
@@ -1162,7 +1163,11 @@ export class IntervalParser {
 						var value = string_parser.getValue();
 						
 						// We have to distinguish between title and intensity
-						if (IntervalParser.isDigit(value[0])) {
+						// TODO: +10 support for swimming
+						if (value == "rest") {
+							nums[numIndex] = -1; // HACK!
+							units[numIndex] = "";
+						} else if (IntervalParser.isDigit(value[0])) {
 							var intensity_parser = new IntensityParser();
 							intensity_parser.evaluate(string_parser.getValue(), 0);
 							nums[numIndex] = intensity_parser.getValue();
@@ -1804,7 +1809,11 @@ export class WorkoutTextVisitor implements Visitor {
 		// Lets write the intensity as easy if its lower than a threshold, but it didn't have a title
 		// Otherwise it might be something like single leg drills
 		if (interval.getIntensity().getValue() <= EASY_THRESHOLD && title.length == 0) {
-			this.result += " easy";
+			if (interval.getIntensity().getValue() == 0) {
+				this.result += " rest";
+			} else {
+				this.result += " easy";	
+			}
 		} else {
 			this.result += " @ " + this.getIntensityPretty(interval.getIntensity())	
 		}		

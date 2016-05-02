@@ -100,6 +100,8 @@ var expected_content = "<workout_file>\n\t<author>Workout Planner Author</author
 expect_eq_str(expected_content, zwift.getContent());
 // No intensity specified
 expect_eq_nbr(0.55, Model.IntervalParser.parse(of_bike, "(10min, easy)").getIntensity().getValue());
+// rest interval
+expect_eq_nbr(0.0, Model.IntervalParser.parse(of_bike, "(10s, rest)").getIntensity().getValue());
 // Repeat interval bug
 var repeat_85_1 = Model.IntervalParser.parse(of_bike, "1[(1hr, 85)]");
 var repeat_85_2 = Model.IntervalParser.parse(of_bike, "2[(1hr, 85)]");
@@ -172,6 +174,7 @@ expect_eq_nbr(1, units_on_workout_2.getIntensity().getValue());
 // formatting tests
 // simple interval
 expect_eq_str("10' easy", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(10min, 55)"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
+expect_eq_str("10'' rest", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(10s, rest)"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 expect_eq_str("10' single leg @ 140w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(10min, 45, single leg)"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 expect_eq_str("10' @ 205w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(10min, 65)"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 expect_eq_str("10' LC @ 235w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(10min, 75, LC)"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
