@@ -44,7 +44,6 @@ git push heroku master
 * Refactor validation of parameters on server.js
 * Ability to save workouts
 * Add player
-* +10 support for swimming
 * Add support for bpm
 
 Nice to have things

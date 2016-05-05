@@ -38,6 +38,7 @@ declare module Model {
         MinKm = 5,
         Per100Yards = 6,
         Per100Meters = 7,
+        OffsetSeconds = 8,
     }
     enum RunningPaceUnit {
         Unknown = 0,

@@ -49,6 +49,7 @@ var Model;
         IntensityUnit[IntensityUnit["MinKm"] = 5] = "MinKm";
         IntensityUnit[IntensityUnit["Per100Yards"] = 6] = "Per100Yards";
         IntensityUnit[IntensityUnit["Per100Meters"] = 7] = "Per100Meters";
+        IntensityUnit[IntensityUnit["OffsetSeconds"] = 8] = "OffsetSeconds";
     })(Model.IntensityUnit || (Model.IntensityUnit = {}));
     var IntensityUnit = Model.IntensityUnit;
     (function (RunningPaceUnit) {
@@ -443,6 +444,7 @@ var Model;
             "min/km": IntensityUnit.MinKm,
             "/100yards": IntensityUnit.Per100Yards,
             "/100meters": IntensityUnit.Per100Meters,
+            "offset": IntensityUnit.OffsetSeconds,
         };
         if (unit in conversionMap) {
             return conversionMap[unit];
@@ -1080,6 +1082,12 @@ var Model;
                                     // Rest interval. Lets assume as intensity = 0 
                                     intensities.push(factory.createIntensity(0, IntensityUnit.IF));
                                 }
+                                else {
+                                    var unit = getIntensityUnitFromString(units[k]);
+                                    if (unit == IntensityUnit.OffsetSeconds) {
+                                        intensities.push(factory.createIntensity(nums[k], IntensityUnit.OffsetSeconds));
+                                    }
+                                }
                             }
                             // Take a peek at the top of the stack
                             if (stack[stack.length - 1] instanceof RepeatInterval) {
@@ -1144,10 +1152,9 @@ var Model;
                             i = string_parser.evaluate(input, i);
                             var value = string_parser.getValue();
                             // We have to distinguish between title and intensity
-                            // TODO: Add rest and +10 support for swimming
-                            // The way this is going to be implemented will be
                             if (value == "rest") {
-                                nums[numIndex] = -1; // HACK!
+                                // HACK! this used
+                                nums[numIndex] = -1;
                                 units[numIndex] = "";
                             }
                             else if (IntervalParser.isDigit(value[0])) {
@@ -1155,6 +1162,17 @@ var Model;
                                 intensity_parser.evaluate(string_parser.getValue(), 0);
                                 nums[numIndex] = intensity_parser.getValue();
                                 units[numIndex] = intensity_parser.getUnit();
+                            }
+                            else if (value[0] == "+" || value[0] == "-") {
+                                var integer_parser = new NumberParser();
+                                integer_parser.evaluate(value, 1);
+                                nums[numIndex] = integer_parser.getValue();
+                                if (value[0] == "-") {
+                                    nums[numIndex] = -1 * nums[numIndex];
+                                }
+                                // HACK: we want to put the final unit here to avoid creating
+                                // imaginary units
+                                units[numIndex] = "offset";
                             }
                             else {
                                 // Set the value for the title and a dummy value in the units
@@ -1984,6 +2002,13 @@ var Model;
                 }
                 else if (unit == IntensityUnit.Mph) {
                     ifValue = value / this.userProfile.getSwimCSSMph();
+                }
+                else if (unit == IntensityUnit.OffsetSeconds) {
+                    // TODO: not handling if user specified speed in profile / meters
+                    var speed_per_100_yards = this.userProfile.getSwimPace(IntensityUnit.Per100Yards, new Intensity(1));
+                    speed_per_100_yards += value / 60;
+                    var speed_mph = IntensityUnitHelper.convertTo(speed_per_100_yards, IntensityUnit.Per100Yards, IntensityUnit.Mph);
+                    ifValue = speed_mph / this.userProfile.getSwimCSSMph();
                 }
                 else {
                     console.assert(false, stringFormat("Invalid intensity unit {0}", unit));

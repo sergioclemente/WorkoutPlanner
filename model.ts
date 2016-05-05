@@ -44,6 +44,7 @@ export enum IntensityUnit {
 	MinKm=5,
 	Per100Yards=6,
 	Per100Meters=7,
+	OffsetSeconds=8,
 }
 
 export enum RunningPaceUnit {
@@ -425,7 +426,8 @@ function getIntensityUnitFromString(unit: string) : IntensityUnit {
 		"km/hr": IntensityUnit.Kmh,
 		"min/km": IntensityUnit.MinKm,
 		"/100yards": IntensityUnit.Per100Yards,
-		"/100meters": IntensityUnit.Per100Meters,		
+		"/100meters": IntensityUnit.Per100Meters,	
+		"offset": IntensityUnit.OffsetSeconds,	
 	};
 	if (unit in conversionMap) {
 		return conversionMap[unit];	
@@ -1094,6 +1096,11 @@ export class IntervalParser {
 							} else if (nums[k] == -1) {
 								// Rest interval. Lets assume as intensity = 0 
 								intensities.push(factory.createIntensity(0, IntensityUnit.IF));
+							} else {
+								var unit = getIntensityUnitFromString(units[k]);
+								if (unit == IntensityUnit.OffsetSeconds) {
+									intensities.push(factory.createIntensity(nums[k], IntensityUnit.OffsetSeconds));
+								}
 							}
 						}
 						
@@ -1164,13 +1171,24 @@ export class IntervalParser {
 						
 						// We have to distinguish between title and intensity
 						if (value == "rest") {
-							nums[numIndex] = -1; // HACK!
+							// HACK! this used
+							nums[numIndex] = -1;
 							units[numIndex] = "";
 						} else if (IntervalParser.isDigit(value[0])) {
 							var intensity_parser = new IntensityParser();
 							intensity_parser.evaluate(string_parser.getValue(), 0);
 							nums[numIndex] = intensity_parser.getValue();
 							units[numIndex] = intensity_parser.getUnit();
+						} else if (value[0] == "+" || value[0] == "-") {
+							var integer_parser = new NumberParser();
+							integer_parser.evaluate(value, 1);
+							nums[numIndex] = integer_parser.getValue();
+							if (value[0] == "-") {
+								nums[numIndex] = -1 * nums[numIndex];
+							}
+							// HACK: we want to put the final unit here to avoid creating
+							// imaginary units
+							units[numIndex] = "offset";
 						} else {
 							// Set the value for the title and a dummy value in the units
 							title = string_parser.getValue();
@@ -1961,7 +1979,7 @@ export class UserProfile {
 	
 	getSwimPace(intensity_unit_result: IntensityUnit, intensity: Intensity) : number {
 		var pace_mph = this.getSwimCSSMph() * intensity.getValue();
-		return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, intensity_unit_result)
+		return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, intensity_unit_result);
 	}
 }
 
@@ -2032,6 +2050,12 @@ export class ObjectFactory {
 				ifValue = swimming_mph / swimming_mph_css;
 			} else if (unit == IntensityUnit.Mph) {
 				ifValue = value / this.userProfile.getSwimCSSMph();
+			} else if (unit == IntensityUnit.OffsetSeconds) {
+				// TODO: not handling if user specified speed in profile / meters
+				var speed_per_100_yards = this.userProfile.getSwimPace(IntensityUnit.Per100Yards, new Intensity(1));						
+				speed_per_100_yards += value/60;
+				var speed_mph = IntensityUnitHelper.convertTo(speed_per_100_yards, IntensityUnit.Per100Yards, IntensityUnit.Mph);
+				ifValue = speed_mph / this.userProfile.getSwimCSSMph();
 			} else {
 				console.assert(false, stringFormat("Invalid intensity unit {0}", unit));
 			}
