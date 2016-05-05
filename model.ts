@@ -579,6 +579,13 @@ export class Intensity {
 			} else if (this.originalUnit == IntensityUnit.Per100Yards || this.originalUnit == IntensityUnit.Per100Meters) {
 				return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", getIntensityUnit(this.originalUnit));
 			} else {
+				if (this.originalUnit == IntensityUnit.OffsetSeconds) {
+					if (this.originalValue > 0) {
+						return "CSS+" + this.originalValue;
+					} else {
+						return "CSS" + this.originalValue;
+					}					
+				}
 				return MyMath.round10(this.originalValue, -1) + getStringFromIntensityUnit(this.originalUnit);
 			}
 		}
