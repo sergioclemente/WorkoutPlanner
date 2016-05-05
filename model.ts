@@ -1163,7 +1163,6 @@ export class IntervalParser {
 						var value = string_parser.getValue();
 						
 						// We have to distinguish between title and intensity
-						// TODO: +10 support for swimming
 						if (value == "rest") {
 							nums[numIndex] = -1; // HACK!
 							units[numIndex] = "";
