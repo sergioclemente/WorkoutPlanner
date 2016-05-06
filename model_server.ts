@@ -24,7 +24,7 @@ export class MailSender {
 		this.password = password;
 	}
 
-	send(to: string, subject: string, body: string, attachments: any) : void {
+	send(to: string, subject: string, body: string, attachments: any, callback: any) : void {
 		var smtpConfig = {
 		  host: this.host,
 			 port: this.port,
@@ -52,10 +52,13 @@ export class MailSender {
 		var nodemailer = require('nodemailer');
 		var transporter = nodemailer.createTransport(smtpConfig);
 		transporter.sendMail(mailOptions, function(error, info) {
+			console.log(JSON.stringify(error));
+			console.log(JSON.stringify(info));
 			if (error) {
-				return console.log(error);
+				callback(false, error);
+			} else {
+				callback(true, "");
 			}
-			console.log('Message sent: ' + info.response);
 		});
 	}
 }

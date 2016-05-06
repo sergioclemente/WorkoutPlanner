@@ -119,11 +119,10 @@ expect_eq_nbr(Model.IntensityUnit.MinMi, int_par_unit_run.getIntervals()[1].getI
 expect_eq_nbr(6, int_par_unit_run.getIntervals()[1].getIntensity().getOriginalValue());
 
 
-// MRC testing
+// Zwift File testing
 var zwift = new Model.ZwiftDataVisitor("untitled_workout");
-var zwift_interval = Model.IntervalParser.parse(of_bike, "(10min, 55, 75), (1hr, 80), (5min, 75, 55)");
-Model.VisitorHelper.visit(zwift, zwift_interval);
-zwift.finalize();
+var file_interval = Model.IntervalParser.parse(of_bike, "(10min, 55, 75), (1hr, 80), (5min, 75, 55)");
+Model.VisitorHelper.visitAndFinalize(zwift, file_interval);
 var expected_content = `<workout_file>
 	<author>Workout Planner Author</author>
 	<name>untitled_workout</name>
@@ -141,8 +140,84 @@ var expected_content = `<workout_file>
 </workout_file>`;
 expect_eq_str(expected_content, zwift.getContent());
 
+// MRC File testing
+var mrc = new Model.MRCCourseDataVisitor("untitled_workout");
+Model.VisitorHelper.visitAndFinalize(mrc, file_interval);
+var expected_content = `[COURSE HEADER]
+VERSION=2
+UNITS=ENGLISH
+FILE NAME=untitled_workout
+MINUTES\tPERCENT
+[END COURSE HEADER]
+[COURSE DATA]
+0\t55
+10\t75
+10\t80
+70\t80
+70\t75
+75\t55
+[END COURSE DATA]
+[PERFPRO DESCRIPTIONS]
+Desc0=10' build to 75%
+Desc1=1hr @ 80%
+Desc2=5' build from 75% to 55%
+[END PERFPRO DESCRIPTIONS]
+`;
+
+expect_eq_str(expected_content, mrc.getContent());
+
+var file_interval = Model.IntervalParser.parse(of_bike, "(10min, 55, 75), 4[(1hr, 80), (5min, 55)], (20min, 75)");
+var mrc = new Model.MRCCourseDataVisitor("untitled_workout");
+Model.VisitorHelper.visitAndFinalize(mrc, file_interval);
+var expected_content = `[COURSE HEADER]
+VERSION=2
+UNITS=ENGLISH
+FILE NAME=untitled_workout
+MINUTES\tPERCENT
+[END COURSE HEADER]
+[COURSE DATA]
+0\t55
+10\t75
+10\t80
+70\t80
+70\t55
+75\t55
+75\t80
+135\t80
+135\t55
+140\t55
+140\t80
+200\t80
+200\t55
+205\t55
+205\t80
+265\t80
+265\t55
+270\t55
+270\t75
+290\t75
+[END COURSE DATA]
+[PERFPRO DESCRIPTIONS]
+Desc0=10' build to 75%
+Desc1=1hr @ 80% | 1 of 4
+Desc2=5' easy | 1 of 4
+Desc3=1hr @ 80% | 2 of 4
+Desc4=5' easy | 2 of 4
+Desc5=1hr @ 80% | 3 of 4
+Desc6=5' easy | 3 of 4
+Desc7=1hr @ 80% | 4 of 4
+Desc8=5' easy | 4 of 4
+Desc9=20' @ 75%
+[END PERFPRO DESCRIPTIONS]
+`;
+
+expect_eq_str(expected_content, mrc.getContent());
+
 // No intensity specified
 expect_eq_nbr(0.55, Model.IntervalParser.parse(of_bike, `(10min, easy)`).getIntensity().getValue());
+
+// rest interval
+expect_eq_nbr(0.0, Model.IntervalParser.parse(of_bike, `(10s, rest)`).getIntensity().getValue());
 
 // Repeat interval bug
 var repeat_85_1 = Model.IntervalParser.parse(of_bike, `1[(1hr, 85)]`);
@@ -236,6 +311,8 @@ expect_eq_nbr(1, units_on_workout_2.getIntensity().getValue());
 
 // simple interval
 expect_eq_str("10' easy", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 55)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
+expect_eq_str("10'' rest", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10s, rest)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
+expect_eq_str("10' single leg @ 140w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 45, single leg)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 expect_eq_str("10' @ 205w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 65)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 expect_eq_str("10' LC @ 235w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 75, LC)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 expect_eq_str("10' @ 65%", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 65)`), up, Model.SportType.Bike, Model.IntensityUnit.IF));
@@ -270,9 +347,13 @@ expect_eq_str("7:45min/mi", Model.WorkoutTextVisitor.formatNumber(7.77, 60, ":",
 expect_eq_str("7:14min/mi", Model.WorkoutTextVisitor.formatNumber(7.23, 60, ":", "min/mi", 0));
 expect_eq_str("7:10min/mi", Model.WorkoutTextVisitor.formatNumber(7.23, 60, ":", "min/mi", 5));
 
-// Swim tests
+// Swim tests (yards)
 expect_eq_str("500yards warmup @ 1:34/100yards", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500yards, 90, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards));
 expect_eq_str("100yards strong @ 1:25/100yards", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(100yards, 100, strong)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards));
+expect_eq_str("500yards warmup @ 1:35/100yards", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500yards, +10, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards));
+expect_eq_str("500yards warmup @ 1:40/100yards", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500yards, +15, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards));
+expect_eq_str("500yards warmup @ 1:20/100yards", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500yards, -5, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards));
+expect_eq_str("500yards warmup @ 1:15/100yards", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500yards, -10, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards));
 
 expect_eq_nbr(2.41, Model.IntensityUnitHelper.convertTo(1.41, Model.IntensityUnit.Per100Yards, Model.IntensityUnit.Mph));
 expect_eq_nbr(1.42, Model.IntensityUnitHelper.convertTo(2.4, Model.IntensityUnit.Mph, Model.IntensityUnit.Per100Yards));
@@ -293,3 +374,27 @@ expect_eq_nbr(425, Model.IntervalParser.parse(of_swim, `(500yards, 100, warmup)`
 expect_eq_nbr(425, Model.IntervalParser.parse(of_swim, `(500yards, warmup, 100)`).getDuration().getSeconds());
 expect_eq_nbr(11.8, Model.IntervalParser.parse(of_swim, `(500yards, 100, warmup)`).getTSS());
 expect_eq_nbr(15.6, Model.IntervalParser.parse(of_swim, `(500yards, 100, warmup), (200yards, 80, easy)`).getTSS());
+
+// Swim tests (meters)
+expect_eq_str("500m warmup @ 1:43/100m", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500m, 90, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Meters));
+expect_eq_str("100m strong @ 1:33/100m", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(100m, 100, strong)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Meters));
+
+expect_eq_nbr(2.48, Model.IntensityUnitHelper.convertTo(1.5, Model.IntensityUnit.Per100Meters, Model.IntensityUnit.Mph));
+expect_eq_nbr(1.5, Model.IntensityUnitHelper.convertTo(2.48, Model.IntensityUnit.Mph, Model.IntensityUnit.Per100Meters));
+
+expect_eq_str("1:30/100m", new Model.Intensity(1, 1.5, Model.IntensityUnit.Per100Meters).toString());
+
+var swim_visitor_mph = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Mph);
+var swim_visitor_per100 = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Per100Meters);
+
+expect_eq_str("2.4mi/h", swim_visitor_mph.getIntensityPretty(intensity_100_pct))
+expect_eq_str("1:33/100m", swim_visitor_per100.getIntensityPretty(intensity_100_pct))
+
+expect_eq_nbr(2.63, Model.SpeedParser.getSpeedInMph("1:25/100meters"));
+
+expect_eq_nbr(/* 1:32 */ 92.95, new Model.ObjectFactory(up, Model.SportType.Swim).createDuration(intensity_100_pct, Model.DurationUnit.Meters, 100).getSeconds());
+
+expect_eq_nbr(464.78, Model.IntervalParser.parse(of_swim, `(500m, 100, warmup)`).getDuration().getSeconds());
+expect_eq_nbr(464.78, Model.IntervalParser.parse(of_swim, `(500m, warmup, 100)`).getDuration().getSeconds());
+expect_eq_nbr(12.9, Model.IntervalParser.parse(of_swim, `(500m, 100, warmup)`).getTSS());
+expect_eq_nbr(17, Model.IntervalParser.parse(of_swim, `(500m, 100, warmup), (200m, 80, easy)`).getTSS());

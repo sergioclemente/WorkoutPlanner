@@ -15,10 +15,11 @@ export default class Workout extends React.Component<any, any> {
 		this.params = UI.QueryParams.createCopy(props);
 	}
 
-	_onWorkoutInputChanged(sportType: Model.SportType, outputUnit: Model.IntensityUnit, workout_text: string) {
+	_onWorkoutInputChanged(sportType: Model.SportType, outputUnit: Model.IntensityUnit, workout_title: string, workout_text: string) {
 		this.params.sport_type = sportType.toString();
 		this.params.output_unit = outputUnit.toString();
 		this.params.workout_text = workout_text;
+		this.params.workout_title = workout_title;
 		this.refresh();
 	}
 
@@ -62,7 +63,7 @@ export default class Workout extends React.Component<any, any> {
 	render() {
 		return (<div>
 					<UserSettings {...this.props} ref='settings' onChange={ (f,t,c,e) => this._onUserSettingsChanged(f,t,c,e) }></UserSettings>
-					<WorkoutInput {...this.props} ref='input' onChange={ (s, o, w) => this._onWorkoutInputChanged(s,o,w) }></WorkoutInput>
+					<WorkoutInput {...this.props} ref='input' onChange={ (s, o, t, w) => this._onWorkoutInputChanged(s,o,t,w) }></WorkoutInput>
 					<table>
 						<tbody>
 							<tr>

@@ -62,7 +62,7 @@ var UserProperty = (function (_super) {
     UserProperty.prototype.onEmailChange = function (email) {
         this.email = email;
         if (this.props.onChange) {
-            this.props.onChange(this.ftp, this.t_pace, this.email);
+            this.props.onChange(this.ftp, this.t_pace, this.swim_css, this.email);
         }
     };
     UserProperty.prototype.render = function () {

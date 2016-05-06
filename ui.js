@@ -23,21 +23,7 @@ var UI;
     })();
     UI.PersistedItem = PersistedItem;
     var QueryParams = (function () {
-        function QueryParams(workout_text, ftp_watts, t_pace, swim_css, sport_type, output_unit, email) {
-            if (workout_text === void 0) { workout_text = ""; }
-            if (ftp_watts === void 0) { ftp_watts = ""; }
-            if (t_pace === void 0) { t_pace = ""; }
-            if (swim_css === void 0) { swim_css = ""; }
-            if (sport_type === void 0) { sport_type = ""; }
-            if (output_unit === void 0) { output_unit = ""; }
-            if (email === void 0) { email = ""; }
-            this.workout_text = workout_text;
-            this.ftp_watts = ftp_watts;
-            this.t_pace = t_pace;
-            this.swim_css = swim_css;
-            this.sport_type = sport_type;
-            this.output_unit = output_unit;
-            this.email = email;
+        function QueryParams() {
             if (!this.validate()) {
                 if (!this.loadFromURL()) {
                     this.loadFromStorage();
@@ -46,6 +32,7 @@ var UI;
         }
         QueryParams.createCopy = function (params) {
             var ret = new QueryParams();
+            ret.workout_title = params.workout_title;
             ret.workout_text = params.workout_text;
             ret.ftp_watts = params.ftp_watts;
             ret.t_pace = params.t_pace;
@@ -57,6 +44,7 @@ var UI;
         };
         QueryParams.prototype.loadFromURL = function () {
             var params = getQueryParams();
+            this.workout_title = params.t;
             this.workout_text = params.w;
             this.ftp_watts = params.ftp;
             this.t_pace = params.tpace;
@@ -67,26 +55,29 @@ var UI;
             return this.validate();
         };
         QueryParams.prototype.loadFromStorage = function () {
+            this.workout_title = new PersistedItem("title").load();
             this.workout_text = new PersistedItem("workout").load();
             this.ftp_watts = new PersistedItem("ftp_watts").load();
             this.t_pace = new PersistedItem("t_pace").load();
-            this.swim_css = new PersistedItem("css").load();
+            this.swim_css = new PersistedItem("swim_css").load();
             this.sport_type = new PersistedItem("sport_type").load();
             this.output_unit = new PersistedItem("output_unit").load();
             this.email = new PersistedItem("email").load();
             return this.validate();
         };
         QueryParams.prototype.saveToStorage = function () {
+            new PersistedItem("title").save(this.workout_title);
             new PersistedItem("workout").save(this.workout_text);
             new PersistedItem("ftp_watts").save(this.ftp_watts);
             new PersistedItem("t_pace").save(this.t_pace);
-            new PersistedItem("css").save(this.swim_css);
+            new PersistedItem("swim_css").save(this.swim_css);
             new PersistedItem("sport_type").save(this.sport_type);
             new PersistedItem("output_unit").save(this.output_unit);
             new PersistedItem("email").save(this.email);
         };
         QueryParams.prototype.validate = function () {
-            return typeof (this.workout_text) != 'undefined' && this.workout_text != "" &&
+            return typeof (this.workout_title) != 'undefined' && this.workout_title != "" &&
+                typeof (this.workout_text) != 'undefined' && this.workout_text != "" &&
                 typeof (this.ftp_watts) != 'undefined' && this.ftp_watts != "" &&
                 typeof (this.t_pace) != 'undefined' && this.t_pace != "" &&
                 typeof (this.swim_css) != 'undefined' && this.swim_css != "" &&
@@ -95,7 +86,8 @@ var UI;
                 typeof (this.email) != 'undefined' && this.email != "";
         };
         QueryParams.prototype.getURL = function () {
-            return "?w=" + encodeURIComponent(this.workout_text) +
+            return "?t=" + encodeURIComponent(this.workout_title) +
+                "&w=" + encodeURIComponent(this.workout_text) +
                 "&st=" + encodeURIComponent(this.sport_type) +
                 "&ftp=" + encodeURIComponent(this.ftp_watts) +
                 "&tpace=" + encodeURIComponent(this.t_pace) +

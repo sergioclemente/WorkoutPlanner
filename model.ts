@@ -1,5 +1,60 @@
 module Model {
 
+// TODO: Add other
+export enum SportType {
+	Unknown=-1,
+	Swim=0,
+	Bike=1,
+	Run=2
+}
+
+export enum DistanceUnit {
+	Unknown,
+	Miles,
+	Kilometers,
+	Meters,
+	Yards
+}
+
+export enum TimeUnit {
+	Unknown,
+	Seconds,
+	Minutes,
+	Hours
+}
+
+export enum DurationUnit {
+	Unknown=-1,
+	Seconds=0,
+	Minutes=1,
+	Hours=2,
+	Meters=3,
+	Miles=4,
+	Kilometers=5,
+	Yards = 6
+}
+
+export enum IntensityUnit {
+	Unknown=-1,
+	IF=0,
+	Watts=1,
+	MinMi=2,
+	Mph=3,
+	Kmh=4,
+	MinKm=5,
+	Per100Yards=6,
+	Per100Meters=7,
+	OffsetSeconds=8,
+}
+
+export enum RunningPaceUnit {
+	Unknown,
+	MinMi,
+	Mph,
+	MinKm,
+	KmHr,
+}
+
 export class MyMath {
     /**
      * Decimal adjustment of a number.
@@ -39,21 +94,6 @@ export class MyMath {
     }
 }
 
-export enum SportType {
-	Unknown=-1,
-	Swim=0,
-	Bike=1,
-	Run=2
-}
-
-export enum DistanceUnit {
-	Unknown,
-	Miles,
-	Kilometers,
-	Meters,
-	Yards
-}
-
 export class DistanceUnitHelper {
 	static convertTo(value: number, unitFrom: DistanceUnit, unitTo: DistanceUnit) : number {
 		// convert first to meters
@@ -67,6 +107,7 @@ export class DistanceUnitHelper {
 		} else if (unitFrom == DistanceUnit.Yards) {
 			distanceInMeters = value * 0.9144;
 		} else {
+			console.assert(false, stringFormat("Unknown unitFrom {0}", unitFrom));
 			throw new Error("Unknown distance unit");
 		}
 		
@@ -85,13 +126,6 @@ export class DistanceUnitHelper {
 	}
 }
 
-export enum TimeUnit {
-	Unknown,
-	Seconds,
-	Minutes,
-	Hours
-}
-
 export class TimeUnitHelper {
 	static convertTo(value: number, unitFrom: TimeUnit, unitTo: TimeUnit) : number {
 		var timeInSeconds = 0;
@@ -102,6 +136,7 @@ export class TimeUnitHelper {
 		} else if (unitFrom == TimeUnit.Hours) {
 			timeInSeconds = value * 3600;
 		} else {
+			console.assert(false, "Unknown unitFrom {0}", unitFrom);
 			throw new Error("Unknown time unit");
 		}
 		
@@ -135,6 +170,7 @@ function getStringFromDurationUnit(unit: DurationUnit) {
 		case DurationUnit.Yards:
 			return "yards";
 		default:
+			console.assert(false, stringFormat("unkown duration {0}", unit));
 			return "unknown";
 	}
 }
@@ -346,7 +382,10 @@ function getStringFromIntensityUnit(unit: IntensityUnit) {
 			return "min/km";
 		case IntensityUnit.Per100Yards:
 			return "/100yards";
+		case IntensityUnit.Per100Meters:
+			return "/100meters";			
 		default:
+			console.assert(false, stringFormat("Unknown intensity unit {0}", unit));
 			return "unknown";
 	}
 }
@@ -356,6 +395,8 @@ function getDurationUnitFromString(unit: string) : DurationUnit {
 		"mi": DurationUnit.Miles,
 		"km": DurationUnit.Kilometers,
 		"m": DurationUnit.Meters,
+		"meter": DurationUnit.Meters,
+		"meters": DurationUnit.Meters,
 		"h" : DurationUnit.Hours,
 		"hr" : DurationUnit.Hours,
 		"hour" : DurationUnit.Hours,
@@ -364,6 +405,8 @@ function getDurationUnitFromString(unit: string) : DurationUnit {
 		"sec" : DurationUnit.Seconds,
 		"s" : DurationUnit.Seconds,
 		"yards": DurationUnit.Yards,
+		"y": DurationUnit.Yards,
+		"yrd": DurationUnit.Yards,
 	};
 	if (unit in conversionMap) {
 		return conversionMap[unit];	
@@ -383,6 +426,8 @@ function getIntensityUnitFromString(unit: string) : IntensityUnit {
 		"km/hr": IntensityUnit.Kmh,
 		"min/km": IntensityUnit.MinKm,
 		"/100yards": IntensityUnit.Per100Yards,
+		"/100meters": IntensityUnit.Per100Meters,	
+		"offset": IntensityUnit.OffsetSeconds,	
 	};
 	if (unit in conversionMap) {
 		return conversionMap[unit];	
@@ -407,6 +452,8 @@ function getIntensityUnit(unit: IntensityUnit) {
 		return "km/h";
 	} else if (unit == IntensityUnit.Per100Yards) {
 		return "/100yards";
+	} else if (unit == IntensityUnit.Per100Meters) {
+		return "/100m";
 	} else {
 		console.assert(false, stringFormat("Invalid intensity unit {0}", unit));
 	}
@@ -418,28 +465,6 @@ function isDurationUnit(value: string) {
 
 function isIntensityUnit(value: string) {
 	return getIntensityUnitFromString(value) != IntensityUnit.Unknown;
-}
-
-export enum DurationUnit {
-	Unknown=-1,
-	Seconds=0,
-	Minutes=1,
-	Hours=2,
-	Meters=3,
-	Miles=4,
-	Kilometers=5,
-	Yards = 6
-}
-
-export enum IntensityUnit {
-	Unknown=-1,
-	IF=0,
-	Watts=1,
-	MinMi=2,
-	Mph=3,
-	Kmh=4,
-	MinKm=5,
-	Per100Yards,
 }
 
 function stringFormat(format : string, ...args: any[]) {
@@ -460,8 +485,9 @@ export class IntensityUnitHelper {
 		];
 		if (invalidUnitsForConversion.indexOf(unitFrom) != -1
 			|| invalidUnitsForConversion.indexOf(unitTo) != -1) {
-				throw new Error(
-					stringFormat("Invalid unitFrom({0}) or unitTo({1}) for conversion", unitFrom, unitTo));
+				var msg = stringFormat("Invalid unitFrom({0}) or unitTo({1}) for conversion", unitFrom, unitTo);
+				console.assert(false, msg);
+				throw new Error(msg);
 			}
 			
 		var speedMph = 0;
@@ -475,7 +501,10 @@ export class IntensityUnitHelper {
 			speedMph = DistanceUnitHelper.convertTo(60 / value, DistanceUnit.Kilometers, DistanceUnit.Miles);
 		} else if (unitFrom == IntensityUnit.Per100Yards) {
 			speedMph = DistanceUnitHelper.convertTo(6000/value, DistanceUnit.Yards, DistanceUnit.Miles);
+		} else if (unitFrom == IntensityUnit.Per100Meters) {
+			speedMph = DistanceUnitHelper.convertTo(6000/value, DistanceUnit.Meters, DistanceUnit.Miles);	
 		} else {
+			console.assert(false, stringFormat("Unknown intensity unit {0}", unitFrom));
 			throw new Error("Unknown IntensityUnit!");
 		}
 		
@@ -490,7 +519,10 @@ export class IntensityUnitHelper {
 			result = 60 / DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Kilometers);
 		} else if (unitTo == IntensityUnit.Per100Yards) {
 			result = 6000 / DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Yards);
+		} else if (unitTo == IntensityUnit.Per100Meters) {
+			result = 6000 / DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Meters);	
 		} else {
+			console.assert(false, stringFormat("Unknown intensity unit {0}", unitTo));
 			throw new Error("Unknown IntensityUnit!");
 		}
 		
@@ -510,7 +542,7 @@ export class Intensity {
 			ifValue = ifValue / 100;
 		}
 		
-		console.assert(ifValue <= 1 && ifValue >= 0, stringFormat("Invalid if {0}", ifValue));
+		console.assert(ifValue <= 2 && ifValue >= 0, stringFormat("Invalid if {0}", ifValue));
 
 		if (unit == IntensityUnit.IF) {
 			// HACK: Find a better way of doing this
@@ -544,9 +576,16 @@ export class Intensity {
 		} else {
 			if (this.originalUnit == IntensityUnit.MinMi) {
 				return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", getIntensityUnit(IntensityUnit.MinMi));
-			} else if (this.originalUnit == IntensityUnit.Per100Yards) {
-				return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", getIntensityUnit(IntensityUnit.Per100Yards));
+			} else if (this.originalUnit == IntensityUnit.Per100Yards || this.originalUnit == IntensityUnit.Per100Meters) {
+				return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", getIntensityUnit(this.originalUnit));
 			} else {
+				if (this.originalUnit == IntensityUnit.OffsetSeconds) {
+					if (this.originalValue > 0) {
+						return "CSS+" + this.originalValue;
+					} else {
+						return "CSS" + this.originalValue;
+					}					
+				}
 				return MyMath.round10(this.originalValue, -1) + getStringFromIntensityUnit(this.originalUnit);
 			}
 		}
@@ -561,6 +600,7 @@ export class Intensity {
 	
 	static combine(intensities: Intensity[], weights: number[]) : Intensity {
 		if (weights.length != intensities.length) {
+			console.assert(false, "The size of intensities and weights should be the same");
 			throw new Error("The size of intensities and weights should be the same");
 		}
 		// do a weighed sum
@@ -706,7 +746,7 @@ export class ArrayInterval implements Interval {
 	
 	getTSS() : number {
 		var tssVisitor = new TSSVisitor();
-		VisitorHelper.visit(tssVisitor, this);
+		VisitorHelper.visitAndFinalize(tssVisitor, this);
 		return tssVisitor.getTSS();
 	}
 	
@@ -717,14 +757,14 @@ export class ArrayInterval implements Interval {
 
 	getIntensities(): Intensity[] {
 		var iv = new IntensitiesVisitor();
-		VisitorHelper.visit(iv, this);
+		VisitorHelper.visitAndFinalize(iv, this);
 		return iv.getIntensities();
 	}
 	
 	getTimeSeries() : any {
 		var pv = new DataPointVisitor();
 		
-		VisitorHelper.visit(pv, this); 
+		VisitorHelper.visitAndFinalize(pv, this); 
 		
 		// TODO: Massaging the data here to show in minutes
 		return pv.data.map(function(item) {
@@ -737,7 +777,7 @@ export class ArrayInterval implements Interval {
 	
 	getTimeInZones(sportType: SportType) {
 		var zv = new ZonesVisitor(sportType);
-		VisitorHelper.visit(zv, this);
+		VisitorHelper.visitAndFinalize(zv, this);
 		return zv.getTimeInZones();
 	}
 }
@@ -877,6 +917,91 @@ export class NumberParser implements Parser {
 	}
 }
 
+export class StringChunkParser implements Parser {
+	private value: string;
+
+	evaluate(input: string, i: number) : number {
+		this.value = "";
+
+		while (input[i] == ',' || input[i] == ' ') {
+			i++;
+		}
+
+		for (; i < input.length; i++) {
+			var ch = input[i];
+
+			if (ch == ',' || ch == ')') {
+				break;
+			}
+			this.value += ch;
+		}
+
+		// Points to the last valid char
+		return i - 1;
+	}
+
+	getValue() : string {
+		return this.value;
+	}
+}
+
+export class IntensityParser implements Parser {
+	private value: number;
+	private unit: string;
+	
+	evaluate(input: string, i: number) : number {
+		var num_parser = new NumberParser();
+		i = num_parser.evaluate(input, i);
+		this.value = num_parser.getValue();
+		
+		// Parse the unit
+		// Check for :
+		if (i+1 < input.length && input[i+1]==":") {
+			i = i + 2; // skip : and go to the next char
+			var res_temp = IntervalParser.parseDouble(input, i);
+			i = res_temp.i;
+			this.value = this.value + res_temp.value / 60;
+
+			// consume any whitespaces
+			// i points to the current digit, so let's advance one
+			// than reverse one
+			i++;
+			while (i < input.length && input[i] == ' ') {
+				i++;
+			}
+			i--;
+		}
+		
+		// look for a unit
+		this.unit = "";
+		for (var j = i+1; j < input.length; j++) {
+			// check for letters or (slashes/percent)
+			// this will cover for example: 
+			// 210w
+			// 75w
+			// 10mph
+			// 6min/mi
+			if (IntervalParser.isLetter(input[j])
+					|| input[j] == "%"
+					|| input[j] == "/") {
+				this.unit += input[j];
+			} else {
+				break;
+			}
+		}	
+		
+		return i + this.unit.length;			
+	}
+	
+	getValue() : number {
+		return this.value;
+	}	
+	
+	getUnit() : string { 
+		return this.unit;
+	}
+}
+
 export class IntervalParser {
 	static getCharVal(ch: string) : number {
 		if (ch.length == 1) {
@@ -926,7 +1051,6 @@ export class IntervalParser {
 				};
 				var title = "";
 				var numIndex = 0;
-				var isInTitle = false;
 
 				for (; i < input.length; i++) {
 					ch = input[i];
@@ -976,6 +1100,14 @@ export class IntervalParser {
 									intensityUnit = getIntensityUnitFromString(units[k]);
 								}
 								intensities.push(factory.createIntensity(nums[k], intensityUnit));
+							} else if (nums[k] == -1) {
+								// Rest interval. Lets assume as intensity = 0 
+								intensities.push(factory.createIntensity(0, IntensityUnit.IF));
+							} else {
+								var unit = getIntensityUnitFromString(units[k]);
+								if (unit == IntensityUnit.OffsetSeconds) {
+									intensities.push(factory.createIntensity(nums[k], IntensityUnit.OffsetSeconds));
+								}
 							}
 						}
 						
@@ -1035,67 +1167,40 @@ export class IntervalParser {
 							interval = new SimpleInterval("", intensity, duration);
 						}
 
-						
 						stack[stack.length-1].getIntervals().push(interval);
 						break;
 					} else if (ch == ",") {
 						numIndex++;
-						isInTitle = false;
 					} else {
-						if (IntervalParser.isDigit(ch) && !isInTitle) {
-							var res = IntervalParser.parseDouble(input, i);
-							i = res.i;
-							nums[numIndex] = res.value;
-
-							// Check for :
-							if (i+1 < input.length && input[i+1]==":") {
-								i = i + 2; // skip : and go to the next char
-								var res_temp = IntervalParser.parseDouble(input, i);
-								i = res_temp.i;
-								nums[numIndex] = nums[numIndex] + res_temp.value / 60;
-			
-								// consume any whitespaces
-								// i points to the current digit, so let's advance one
-								// than reverse one
-								i++;
-								while (i < input.length && input[i] == ' ') {
-									i++;
-								}
-								i--;
+						var string_parser = new StringChunkParser();
+						i = string_parser.evaluate(input, i);
+						var value = string_parser.getValue();
+						
+						// We have to distinguish between title and intensity
+						if (value == "rest") {
+							// HACK! this used
+							nums[numIndex] = -1;
+							units[numIndex] = "";
+						} else if (IntervalParser.isDigit(value[0])) {
+							var intensity_parser = new IntensityParser();
+							intensity_parser.evaluate(string_parser.getValue(), 0);
+							nums[numIndex] = intensity_parser.getValue();
+							units[numIndex] = intensity_parser.getUnit();
+						} else if (value[0] == "+" || value[0] == "-") {
+							var integer_parser = new NumberParser();
+							integer_parser.evaluate(value, 1);
+							nums[numIndex] = integer_parser.getValue();
+							if (value[0] == "-") {
+								nums[numIndex] = -1 * nums[numIndex];
 							}
-								
-							// look for a unit
-							var unitStr = "";
-							for (var j = i+1; j < input.length; j++) {
-								// check for letters or (slashes/percent)
-								// this will cover for example: 
-								// 210w
-								// 75w
-								// 10mph
-								// 6min/mi
-								if (IntervalParser.isLetter(input[j])
-									  || input[j] == "%"
-									  || input[j] == "/") {
-									unitStr += input[j];
-								} else {
-									break;
-								}
-							}
-							units[numIndex] = unitStr;
-							i += unitStr.length;
+							// HACK: we want to put the final unit here to avoid creating
+							// imaginary units
+							units[numIndex] = "offset";
 						} else {
-							// just enter in title mode if its not a whitespace
-							if (!isInTitle && !IntervalParser.isWhitespace(ch)) {
-								isInTitle = true;
-								// Put a dummy value in the units
-								units[numIndex] = "";
-							}
-
-							if (isInTitle) {
-								title += ch;
-							}
+							// Set the value for the title and a dummy value in the units
+							title = string_parser.getValue();
+							units[numIndex] = "";
 						}
-
 					}
 				}
 			// end simple workout
@@ -1130,6 +1235,10 @@ export class IntervalParser {
 }
 
 export class VisitorHelper {
+	static visitAndFinalize(visitor: Visitor, interval:Interval) : any {
+		this.visit(visitor, interval);
+		visitor.finalize();
+	}	
 	static visit(visitor: Visitor, interval:Interval) : any {
 		if (interval instanceof SimpleInterval) {
 			return visitor.visitSimpleInterval(<SimpleInterval>interval);
@@ -1153,6 +1262,7 @@ export interface Visitor {
 	visitRampBuildInterval(interval: RampBuildInterval) : void;
 	visitRepeatInterval(interval: RepeatInterval) : void;
 	visitArrayInterval(interval: ArrayInterval) : void;
+	finalize() : void;
 }
 
 export class BaseVisitor implements Visitor {
@@ -1185,6 +1295,8 @@ export class BaseVisitor implements Visitor {
 		for (var i = 0; i < interval.getIntervals().length; i++) {
 			VisitorHelper.visit(this, interval.getIntervals()[i]);
 		}
+	}
+	finalize() : void {
 	}
 }
 
@@ -1441,7 +1553,16 @@ export class MRCCourseDataVisitor extends BaseVisitor {
 	private courseData : string = "";
 	private time : number = 0;
 	private idx : number = 0;
+	private fileName : string = "";
 	private perfPRODescription : string = "";
+	private content = "";
+	private repeatIntervals : RepeatInterval[] = [];
+	private repeatIteration : number[] = [];
+	
+	constructor(fileName: string) {
+		super();
+		this.fileName = fileName;
+	}
 
 	processCourseData(intensity: Intensity, durationInSeconds: number) {
 		this.time += durationInSeconds;
@@ -1454,15 +1575,14 @@ export class MRCCourseDataVisitor extends BaseVisitor {
 		if (title.length == 0) {
 			title = WorkoutTextVisitor.getIntervalTitle(interval);
 		}
-		this.perfPRODescription += "Desc" + this.idx++ + "=" + title + "\n";
-	}
-
-	getCourseData() : string {
-		return this.courseData;
-	}
-
-	getPerfPRODescription() {
-		return this.perfPRODescription;
+		var suffix = "";
+		if (this.repeatIntervals.length > 0) {
+			console.assert(this.repeatIteration.length > 0);
+			var iteration = 1 + this.repeatIteration[this.repeatIteration.length - 1];
+			var total = this.repeatIntervals[this.repeatIntervals.length - 1].getRepeatCount();
+			suffix = " | " + iteration + " of " + total;
+		}
+		this.perfPRODescription += "Desc" + this.idx++ + "=" + title + suffix + "\n";
 	}
 
 	visitSimpleInterval(interval: SimpleInterval) {
@@ -1474,6 +1594,37 @@ export class MRCCourseDataVisitor extends BaseVisitor {
 		this.processCourseData(interval.getStartIntensity(), 0);
 		this.processCourseData(interval.getEndIntensity(), interval.getDuration().getSeconds());
 		this.processTitle(interval);
+	}
+	
+	visitRepeatInterval(interval: RepeatInterval) {
+		this.repeatIntervals.push(interval);
+		for (var i = 0 ; i < interval.getRepeatCount(); i++) {
+			this.repeatIteration.push(i);
+			this.visitArrayInterval(interval);
+			this.repeatIteration.pop();
+		}
+		this.repeatIntervals.pop();
+	}
+	
+	finalize() {
+		this.content = "";
+		this.content += "[COURSE HEADER]\n";
+		this.content += "VERSION=2\n";
+		this.content += "UNITS=ENGLISH\n";
+		this.content += stringFormat("FILE NAME={0}\n", this.fileName);
+		this.content += "MINUTES\tPERCENT\n";
+		this.content += "[END COURSE HEADER]\n";
+
+		this.content += "[COURSE DATA]\n";
+		this.content += this.courseData;
+		this.content += "[END COURSE DATA]\n";
+		this.content += "[PERFPRO DESCRIPTIONS]\n";
+		this.content += this.perfPRODescription;
+		this.content += "[END PERFPRO DESCRIPTIONS]\n";
+	}
+	
+	getContent() : string {
+		return this.content;
 	}
 }
 
@@ -1590,7 +1741,7 @@ export class WorkoutTextVisitor implements Visitor {
 							outputUnit: IntensityUnit = IntensityUnit.Unknown) : string {
 		// TODO: instantiating visitor is a bit clowny
 		var f = new WorkoutTextVisitor(userProfile, sportType, outputUnit);
-		VisitorHelper.visit(f, interval);
+		VisitorHelper.visitAndFinalize(f, interval);
 
 		return f.result;
 	}
@@ -1725,8 +1876,14 @@ export class WorkoutTextVisitor implements Visitor {
 		if (title.length > 0) {
 			this.result += " " + title;
 		}
-		if (interval.getIntensity().getValue() <= EASY_THRESHOLD) {
-			this.result += " easy";
+		// Lets write the intensity as easy if its lower than a threshold, but it didn't have a title
+		// Otherwise it might be something like single leg drills
+		if (interval.getIntensity().getValue() <= EASY_THRESHOLD && title.length == 0) {
+			if (interval.getIntensity().getValue() == 0) {
+				this.result += " rest";
+			} else {
+				this.result += " easy";	
+			}
 		} else {
 			this.result += " @ " + this.getIntensityPretty(interval.getIntensity())	
 		}		
@@ -1734,6 +1891,9 @@ export class WorkoutTextVisitor implements Visitor {
 
 	getIntensityPretty(intensity: Intensity): string {
 		if (this.outputUnit == IntensityUnit.Unknown || this.sportType == SportType.Unknown) {
+			return intensity.toString();
+		}
+		if (this.outputUnit == IntensityUnit.IF) {
 			return intensity.toString();
 		}
 		if (this.sportType == SportType.Bike) {
@@ -1753,9 +1913,9 @@ export class WorkoutTextVisitor implements Visitor {
 		} else if (this.sportType == SportType.Swim) {
 			if (this.outputUnit == IntensityUnit.Mph) {
 				return MyMath.round10(this.userProfile.getSwimPaceMph(intensity), -1) + getIntensityUnit(this.outputUnit);	
-			} else if (this.outputUnit == IntensityUnit.Per100Yards) {
-				var swim_pace_per_100 = this.userProfile.getSwimPacePer100Yards(intensity);
-				return WorkoutTextVisitor.formatNumber(swim_pace_per_100, 60, ":", getIntensityUnit(IntensityUnit.Per100Yards));	
+			} else if (this.outputUnit == IntensityUnit.Per100Yards || this.outputUnit == IntensityUnit.Per100Meters) {
+				var swim_pace_per_100 = this.userProfile.getSwimPace(this.outputUnit, intensity);
+				return WorkoutTextVisitor.formatNumber(swim_pace_per_100, 60, ":", getIntensityUnit(this.outputUnit));	
 			} else {
 				console.assert(false, stringFormat("Invalid output unit {0}", this.outputUnit));
 			}
@@ -1763,31 +1923,10 @@ export class WorkoutTextVisitor implements Visitor {
 			console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
 		}
 	}
+	
+	finalize() : void {
+	}
 }
-
-export enum RunningPaceUnit {
-	Unknown,
-	MinMi,
-	Mph,
-	MinKm,
-	KmHr,
-}
-
-export class RunningPaceHelper {
-	static convertToMph(value: number, unit: RunningPaceUnit) {
-		if (unit == RunningPaceUnit.Mph) {
-			return value;
-		} else if (unit == RunningPaceUnit.MinMi) {
-			return 60 / unit;
-		} else if (unit == RunningPaceUnit.KmHr) {
-			return value / 1.609344;
-		} else if (unit == RunningPaceUnit.MinKm) {
-			return (60 / value) / 1.609344;
-		} else {
-			throw new Error("Unknown running pace unit");
-		}
-	}	
-};
 
 export class SpeedParser {
 	static getSpeedInMph(speed: string): number {
@@ -1806,6 +1945,9 @@ export class SpeedParser {
 			} else if (speed.indexOf("/100yards") != -1) {
 				var pace_per_100_yards = this._extractNumber(speed, 60, ":", "/100yards");
 				res = IntensityUnitHelper.convertTo(pace_per_100_yards, IntensityUnit.Per100Yards, IntensityUnit.Mph);
+			} else if (speed.indexOf("/100meters") != -1) {
+				var pace_per_100_meters = this._extractNumber(speed, 60, ":", "/100meters");
+				res = IntensityUnitHelper.convertTo(pace_per_100_meters, IntensityUnit.Per100Meters, IntensityUnit.Mph);
 			}
 		} catch (e) {
 		}
@@ -1891,9 +2033,9 @@ export class UserProfile {
 		return css_mph * intensity.getValue();
 	}
 	
-	getSwimPacePer100Yards(intensity: Intensity) : number {
+	getSwimPace(intensity_unit_result: IntensityUnit, intensity: Intensity) : number {
 		var pace_mph = this.getSwimCSSMph() * intensity.getValue();
-		return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, IntensityUnit.Per100Yards)
+		return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, intensity_unit_result);
 	}
 }
 
@@ -1925,6 +2067,7 @@ export class ObjectFactory {
 			} else if (unit == IntensityUnit.IF) {
 				ifValue = value;
 			} else {
+				console.assert(false, stringFormat("Invalid unit {0}", unit));
 				throw new Error("Invalid unit : " + unit);
 			}
 		} else if (this.sportType == SportType.Run) {
@@ -1950,18 +2093,25 @@ export class ObjectFactory {
 					IntensityUnit.Mph);
 				ifValue = running_mph / running_tpace_mph;
 			} else {
+				console.assert(false, stringFormat("Unit {0} is not implemented"));
 				throw new Error("Not implemented");
 			}
 		} else if (this.sportType == SportType.Swim) {
 			// For swimming we support 3 IntensityUnits
 			if (unit == IntensityUnit.IF) {
 				ifValue = value;
-			} else if (unit == IntensityUnit.Per100Yards) {
-				var swimming_mph = IntensityUnitHelper.convertTo(value, IntensityUnit.Per100Yards, IntensityUnit.Mph);
+			} else if (unit == IntensityUnit.Per100Yards || unit == IntensityUnit.Per100Meters) {
+				var swimming_mph = IntensityUnitHelper.convertTo(value, unit, IntensityUnit.Mph);
 				var swimming_mph_css = this.userProfile.getSwimCSSMph();
 				ifValue = swimming_mph / swimming_mph_css;
 			} else if (unit == IntensityUnit.Mph) {
 				ifValue = value / this.userProfile.getSwimCSSMph();
+			} else if (unit == IntensityUnit.OffsetSeconds) {
+				// TODO: not handling if user specified speed in profile / meters
+				var speed_per_100_yards = this.userProfile.getSwimPace(IntensityUnit.Per100Yards, new Intensity(1));						
+				speed_per_100_yards += value/60;
+				var speed_mph = IntensityUnitHelper.convertTo(speed_per_100_yards, IntensityUnit.Per100Yards, IntensityUnit.Mph);
+				ifValue = speed_mph / this.userProfile.getSwimCSSMph();
 			} else {
 				console.assert(false, stringFormat("Invalid intensity unit {0}", unit));
 			}
@@ -2082,6 +2232,7 @@ export class WorkoutBuilder {
 	private outputUnit: IntensityUnit;
 	private intervals: ArrayInterval;
 	private workoutDefinition: string;
+	private workoutTitle: string;
 	
 	constructor(userProfile: UserProfile, sportType: SportType, outputUnit: IntensityUnit) {
 		this.userProfile = userProfile;
@@ -2096,12 +2247,17 @@ export class WorkoutBuilder {
 	getSportType() : SportType {
 		return this.sportType;
 	}
+	
+	getWorkoutTitle() : string {
+		return this.workoutTitle;
+	}
 
-	withDefinition(workoutDefinition: string) : WorkoutBuilder {
+	withDefinition(workoutTitle: string, workoutDefinition: string) : WorkoutBuilder {
 		this.intervals = IntervalParser.parse(
 			new ObjectFactory(this.userProfile, this.sportType),
 			workoutDefinition
 		);
+		this.workoutTitle = workoutTitle;
 		this.workoutDefinition = workoutDefinition;
 		return this;
 	}
@@ -2212,25 +2368,9 @@ export class WorkoutBuilder {
 	}
 
 	getMRCFile() : string {
-		var dataVisitor = new MRCCourseDataVisitor();
-		VisitorHelper.visit(dataVisitor, this.intervals); 
-
-		var result = "";
-		result += "[COURSE HEADER]\n";
-		result += "VERSION=2\n";
-		result += "UNITS=ENGLISH\n";
-		result += "DESCRIPTION=Auto generated with WorkoutPlanner - https://github.com/sergioclemente/WorkoutPlanner\n";
-		result += "MINUTES\tPERCENT\n";
-		result += "[END COURSE HEADER]\n";
-
-		result += "[COURSE DATA]\n";
-		result += dataVisitor.getCourseData();
-		result += "[END COURSE DATA]\n";
-		result += "[PERFPRO DESCRIPTIONS]\n";
-		result += dataVisitor.getPerfPRODescription();
-		result += "[END PERFPRO DESCRIPTIONS]\n";
-
-		return result;
+		var dataVisitor = new MRCCourseDataVisitor(this.getMRCFileName());
+		VisitorHelper.visitAndFinalize(dataVisitor, this.intervals); 
+		return dataVisitor.getContent();
 	}
 
 	getZWOFile() : string {
@@ -2238,16 +2378,21 @@ export class WorkoutBuilder {
 		var workout_name = fileNameHelper.getFileName();
 
 		var zwift = new ZwiftDataVisitor(workout_name);
-		VisitorHelper.visit(zwift, this.intervals);
-		zwift.finalize();
+		VisitorHelper.visitAndFinalize(zwift, this.intervals);
 		return zwift.getContent();
 	}
 
 	getZWOFileName() : string {
+		if (typeof(this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
+			return this.workoutTitle + ".zwo";			
+		}
 		var fileNameHelper = new FileNameHelper(this.intervals);
 		return fileNameHelper.getFileName() + ".zwo";
 	}
 	getMRCFileName(): string {
+		if (typeof(this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
+			return this.workoutTitle + ".mrc";
+		}		
 		var fileNameHelper = new FileNameHelper(this.intervals);
 		return fileNameHelper.getFileName() + ".mrc";
 	}

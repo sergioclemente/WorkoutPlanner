@@ -1,4 +1,52 @@
 declare module Model {
+    enum SportType {
+        Unknown = -1,
+        Swim = 0,
+        Bike = 1,
+        Run = 2,
+    }
+    enum DistanceUnit {
+        Unknown = 0,
+        Miles = 1,
+        Kilometers = 2,
+        Meters = 3,
+        Yards = 4,
+    }
+    enum TimeUnit {
+        Unknown = 0,
+        Seconds = 1,
+        Minutes = 2,
+        Hours = 3,
+    }
+    enum DurationUnit {
+        Unknown = -1,
+        Seconds = 0,
+        Minutes = 1,
+        Hours = 2,
+        Meters = 3,
+        Miles = 4,
+        Kilometers = 5,
+        Yards = 6,
+    }
+    enum IntensityUnit {
+        Unknown = -1,
+        IF = 0,
+        Watts = 1,
+        MinMi = 2,
+        Mph = 3,
+        Kmh = 4,
+        MinKm = 5,
+        Per100Yards = 6,
+        Per100Meters = 7,
+        OffsetSeconds = 8,
+    }
+    enum RunningPaceUnit {
+        Unknown = 0,
+        MinMi = 1,
+        Mph = 2,
+        MinKm = 3,
+        KmHr = 4,
+    }
     class MyMath {
         /**
          * Decimal adjustment of a number.
@@ -13,27 +61,8 @@ declare module Model {
         static floor10(value: number, exp: number): number;
         static ceil10(value: number, exp: number): number;
     }
-    enum SportType {
-        Unknown = -1,
-        Swim = 0,
-        Bike = 1,
-        Run = 2,
-    }
-    enum DistanceUnit {
-        Unknown = 0,
-        Miles = 1,
-        Kilometers = 2,
-        Meters = 3,
-        Yards = 4,
-    }
     class DistanceUnitHelper {
         static convertTo(value: number, unitFrom: DistanceUnit, unitTo: DistanceUnit): number;
-    }
-    enum TimeUnit {
-        Unknown = 0,
-        Seconds = 1,
-        Minutes = 2,
-        Hours = 3,
     }
     class TimeUnitHelper {
         static convertTo(value: number, unitFrom: TimeUnit, unitTo: TimeUnit): number;
@@ -60,26 +89,6 @@ declare module Model {
         toStringShort(): string;
         toString(): string;
         static combine(dur1: Duration, dur2: Duration): Duration;
-    }
-    enum DurationUnit {
-        Unknown = -1,
-        Seconds = 0,
-        Minutes = 1,
-        Hours = 2,
-        Meters = 3,
-        Miles = 4,
-        Kilometers = 5,
-        Yards = 6,
-    }
-    enum IntensityUnit {
-        Unknown = -1,
-        IF = 0,
-        Watts = 1,
-        MinMi = 2,
-        Mph = 3,
-        Kmh = 4,
-        MinKm = 5,
-        Per100Yards = 6,
     }
     class IntensityUnitHelper {
         static convertTo(value: number, unitFrom: IntensityUnit, unitTo: IntensityUnit): number;
@@ -171,6 +180,18 @@ declare module Model {
         evaluate(input: string, i: number): number;
         getValue(): number;
     }
+    class StringChunkParser implements Parser {
+        private value;
+        evaluate(input: string, i: number): number;
+        getValue(): string;
+    }
+    class IntensityParser implements Parser {
+        private value;
+        private unit;
+        evaluate(input: string, i: number): number;
+        getValue(): number;
+        getUnit(): string;
+    }
     class IntervalParser {
         static getCharVal(ch: string): number;
         static isDigit(ch: string): boolean;
@@ -184,6 +205,7 @@ declare module Model {
         static parse(factory: ObjectFactory, input: string): ArrayInterval;
     }
     class VisitorHelper {
+        static visitAndFinalize(visitor: Visitor, interval: Interval): any;
         static visit(visitor: Visitor, interval: Interval): any;
     }
     interface Visitor {
@@ -192,6 +214,7 @@ declare module Model {
         visitRampBuildInterval(interval: RampBuildInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
         visitArrayInterval(interval: ArrayInterval): void;
+        finalize(): void;
     }
     class BaseVisitor implements Visitor {
         visitSimpleInterval(interval: SimpleInterval): void;
@@ -199,6 +222,7 @@ declare module Model {
         visitRampBuildInterval(interval: RampBuildInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
         visitArrayInterval(interval: ArrayInterval): void;
+        finalize(): void;
     }
     class TSSVisitor extends BaseVisitor {
         private tss;
@@ -280,13 +304,19 @@ declare module Model {
         private courseData;
         private time;
         private idx;
+        private fileName;
         private perfPRODescription;
+        private content;
+        private repeatIntervals;
+        private repeatIteration;
+        constructor(fileName: string);
         processCourseData(intensity: Intensity, durationInSeconds: number): void;
         processTitle(interval: Interval): void;
-        getCourseData(): string;
-        getPerfPRODescription(): string;
         visitSimpleInterval(interval: SimpleInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
+        visitRepeatInterval(interval: RepeatInterval): void;
+        finalize(): void;
+        getContent(): string;
     }
     class FileNameHelper {
         private intervals;
@@ -312,16 +342,7 @@ declare module Model {
         visitStepBuildInterval(interval: StepBuildInterval): void;
         visitSimpleInterval(interval: SimpleInterval): any;
         getIntensityPretty(intensity: Intensity): string;
-    }
-    enum RunningPaceUnit {
-        Unknown = 0,
-        MinMi = 1,
-        Mph = 2,
-        MinKm = 3,
-        KmHr = 4,
-    }
-    class RunningPaceHelper {
-        static convertToMph(value: number, unit: RunningPaceUnit): number;
+        finalize(): void;
     }
     class SpeedParser {
         static getSpeedInMph(speed: string): number;
@@ -340,7 +361,7 @@ declare module Model {
         getPaceMinMi(intensity: Intensity): number;
         getSwimCSSMph(): number;
         getSwimPaceMph(intensity: Intensity): number;
-        getSwimPacePer100Yards(intensity: Intensity): number;
+        getSwimPace(intensity_unit_result: IntensityUnit, intensity: Intensity): number;
     }
     class ObjectFactory {
         private userProfile;
@@ -377,10 +398,12 @@ declare module Model {
         private outputUnit;
         private intervals;
         private workoutDefinition;
+        private workoutTitle;
         constructor(userProfile: UserProfile, sportType: SportType, outputUnit: IntensityUnit);
         getInterval(): ArrayInterval;
         getSportType(): SportType;
-        withDefinition(workoutDefinition: string): WorkoutBuilder;
+        getWorkoutTitle(): string;
+        withDefinition(workoutTitle: string, workoutDefinition: string): WorkoutBuilder;
         getIntensityFriendly(intensity: Intensity): string;
         getTSS(): number;
         getTSSFromIF(): number;
