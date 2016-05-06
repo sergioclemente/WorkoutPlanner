@@ -44,6 +44,7 @@ var Workout = (function (_super) {
         this._setHref("download_mrc", "workout.mrc" + url_parameters);
         this._setHref("download_zwo", "workout.zwo" + url_parameters);
         this._setHref("email_send_workout", "send_mail" + url_parameters);
+        this._setHref("save_workout", "save_workout" + url_parameters);
         window.history.pushState('Object', 'Title', url_parameters);
     };
     Workout.prototype._setHref = function (element_ref, url) {
@@ -52,7 +53,7 @@ var Workout = (function (_super) {
     };
     Workout.prototype.render = function () {
         var _this = this;
-        return (React.createElement("div", null, React.createElement(user_settings_1.default, React.__spread({}, this.props, {"ref": 'settings', "onChange": function (f, t, c, e) { return _this._onUserSettingsChanged(f, t, c, e); }})), React.createElement(workout_input_1.default, React.__spread({}, this.props, {"ref": 'input', "onChange": function (s, o, t, w) { return _this._onWorkoutInputChanged(s, o, t, w); }})), React.createElement("table", null, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("a", {"ref": "download_mrc"}, "Download MRC")), React.createElement("td", null, React.createElement("a", {"ref": "download_zwo"}, "Download ZWO")), React.createElement("td", null, React.createElement("a", {"ref": "email_send_workout"}, "Email Workout"))))), React.createElement(workout_view_1.default, React.__spread({}, this.props, {"ref": 'view'}))));
+        return (React.createElement("div", null, React.createElement(user_settings_1.default, React.__spread({}, this.props, {"ref": 'settings', "onChange": function (f, t, c, e) { return _this._onUserSettingsChanged(f, t, c, e); }})), React.createElement(workout_input_1.default, React.__spread({}, this.props, {"ref": 'input', "onChange": function (s, o, t, w) { return _this._onWorkoutInputChanged(s, o, t, w); }})), React.createElement("table", null, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("a", {"ref": "download_mrc"}, "Download MRC")), React.createElement("td", null, React.createElement("a", {"ref": "download_zwo"}, "Download ZWO")), React.createElement("td", null, React.createElement("a", {"ref": "email_send_workout"}, "Email Workout")), React.createElement("td", null, React.createElement("a", {"ref": "save_workout"}, "Save Workout"))))), React.createElement(workout_view_1.default, React.__spread({}, this.props, {"ref": 'view'}))));
     };
     return Workout;
 })(React.Component);

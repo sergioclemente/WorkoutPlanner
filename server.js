@@ -125,7 +125,32 @@ http.createServer(function (req, res) {
             handleDownloadWorkout(req, res, uri, params);     
           } else if (uri == "/send_mail") {
             var params = parsed_url.query;
-            handleSendEmail(req, res, uri, params);
+			handleSendEmail(req, res, uri, params);
+          } else if (uri == "/save_workout") {
+            var params = parsed_url.query;
+            if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email && params.t) {
+              var userProfile = new model.UserProfile(params.ftp, params.tpace, params.email);
+              var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.t, params.w);
+              logRequest(req, 200);
+              
+              var db = new model_server.WorkoutDB(config.mysql);
+              db.connect();
+              var w = new model_server.Workout();
+              w.title = params.t;
+              w.value = params.w;
+              w.tags = "";
+              w.duration_sec = builder.getInterval().getDuration().getSeconds();
+              w.tss = builder.getInterval().getTSS();
+              w.sport_type = params.st;
+
+              db.add(w);               
+              db.close();
+              res.write("Workout saved");
+              res.end();              
+            } else {
+              res.write("Workout NOT saved due to some validation error");
+              res.end();              
+            }
           } else {
             logRequest(req, 404);
             res.writeHead(404, {"Content-Type": "text/plain"});
