@@ -35,7 +35,7 @@ function handleExistentFile(req, res, fs, filename) {
 function handleDownloadWorkout(req, res, uri, params) {
   if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
     var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
-    var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
+    var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.t, params.w);
     logRequest(req, 200);
 
     var workout_filename = "";
@@ -63,7 +63,7 @@ function handleDownloadWorkout(req, res, uri, params) {
 function handleSendEmail(req, res, uri, params) {
   if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
     var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
-    var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.w);
+    var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.t, params.w);
     logRequest(req, 200);
 
     // sending email

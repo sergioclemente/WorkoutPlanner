@@ -26,6 +26,11 @@ export default class WorkoutInput extends React.Component<any, any> {
 		return workoutText.value;
 	}
 
+	getWorkoutTitle() : string {
+		var workoutTitle = this.refs['workout_title'] as HTMLInputElement;
+		return workoutTitle.value;
+	}
+
 	_onSportTypeChange(sport_type_str) {
 		var sport_type: Model.SportType = parseInt(sport_type_str);
 		var sltUnit: Select = this.refs['unit'] as Select;
@@ -47,9 +52,13 @@ export default class WorkoutInput extends React.Component<any, any> {
 		this._loadWorkout();
 	}
 
+	_onWorkoutTitleChange(e) {
+		this._loadWorkout();
+	}
+
 	_loadWorkout() {
 		if (this.props.onChange) {
-			this.props.onChange(this.getSportType(), this.getUnitType(), this.getWorkoutText());
+			this.props.onChange(this.getSportType(), this.getUnitType(), this.getWorkoutTitle(), this.getWorkoutText());
 		}
 	}
 
@@ -57,6 +66,8 @@ export default class WorkoutInput extends React.Component<any, any> {
 		return (<div>
 					<h1> Workout Settings </h1>
 					<form>
+					Title: <input ref="workout_title" defaultValue={this.props.workout_title} onChange={e => this._onWorkoutTitleChange(e)} />
+					<br />
 					Sport type:
 					<Select ref="sportType" defaultValue={this.props.sport_type} onChange={e => this._onSportTypeChange(e) }>
 						<SelectOption value={Model.SportType.Swim}>Swim</SelectOption>

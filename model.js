@@ -614,10 +614,10 @@ var Model;
                 else {
                     if (this.originalUnit == IntensityUnit.OffsetSeconds) {
                         if (this.originalValue > 0) {
-                            return "CSS +" + this.originalValue;
+                            return "CSS+" + this.originalValue;
                         }
                         else {
-                            return "CSS " + this.originalValue;
+                            return "CSS" + this.originalValue;
                         }
                     }
                     return MyMath.round10(this.originalValue, -1) + getStringFromIntensityUnit(this.originalUnit);
@@ -753,7 +753,7 @@ var Model;
         };
         ArrayInterval.prototype.getTSS = function () {
             var tssVisitor = new TSSVisitor();
-            VisitorHelper.visit(tssVisitor, this);
+            VisitorHelper.visitAndFinalize(tssVisitor, this);
             return tssVisitor.getTSS();
         };
         ArrayInterval.prototype.getTSSFromIF = function () {
@@ -762,12 +762,12 @@ var Model;
         };
         ArrayInterval.prototype.getIntensities = function () {
             var iv = new IntensitiesVisitor();
-            VisitorHelper.visit(iv, this);
+            VisitorHelper.visitAndFinalize(iv, this);
             return iv.getIntensities();
         };
         ArrayInterval.prototype.getTimeSeries = function () {
             var pv = new DataPointVisitor();
-            VisitorHelper.visit(pv, this);
+            VisitorHelper.visitAndFinalize(pv, this);
             // TODO: Massaging the data here to show in minutes
             return pv.data.map(function (item) {
                 return {
@@ -778,7 +778,7 @@ var Model;
         };
         ArrayInterval.prototype.getTimeInZones = function (sportType) {
             var zv = new ZonesVisitor(sportType);
-            VisitorHelper.visit(zv, this);
+            VisitorHelper.visitAndFinalize(zv, this);
             return zv.getTimeInZones();
         };
         return ArrayInterval;
@@ -1223,6 +1223,10 @@ var Model;
     var VisitorHelper = (function () {
         function VisitorHelper() {
         }
+        VisitorHelper.visitAndFinalize = function (visitor, interval) {
+            this.visit(visitor, interval);
+            visitor.finalize();
+        };
         VisitorHelper.visit = function (visitor, interval) {
             if (interval instanceof SimpleInterval) {
                 return visitor.visitSimpleInterval(interval);
@@ -1275,6 +1279,8 @@ var Model;
             for (var i = 0; i < interval.getIntervals().length; i++) {
                 VisitorHelper.visit(this, interval.getIntervals()[i]);
             }
+        };
+        BaseVisitor.prototype.finalize = function () {
         };
         return BaseVisitor;
     })();
@@ -1531,12 +1537,17 @@ var Model;
     Model.ZwiftDataVisitor = ZwiftDataVisitor;
     var MRCCourseDataVisitor = (function (_super) {
         __extends(MRCCourseDataVisitor, _super);
-        function MRCCourseDataVisitor() {
-            _super.apply(this, arguments);
+        function MRCCourseDataVisitor(fileName) {
+            _super.call(this);
             this.courseData = "";
             this.time = 0;
             this.idx = 0;
+            this.fileName = "";
             this.perfPRODescription = "";
+            this.content = "";
+            this.repeatIntervals = [];
+            this.repeatIteration = [];
+            this.fileName = fileName;
         }
         MRCCourseDataVisitor.prototype.processCourseData = function (intensity, durationInSeconds) {
             this.time += durationInSeconds;
@@ -1548,13 +1559,14 @@ var Model;
             if (title.length == 0) {
                 title = WorkoutTextVisitor.getIntervalTitle(interval);
             }
-            this.perfPRODescription += "Desc" + this.idx++ + "=" + title + "\n";
-        };
-        MRCCourseDataVisitor.prototype.getCourseData = function () {
-            return this.courseData;
-        };
-        MRCCourseDataVisitor.prototype.getPerfPRODescription = function () {
-            return this.perfPRODescription;
+            var suffix = "";
+            if (this.repeatIntervals.length > 0) {
+                console.assert(this.repeatIteration.length > 0);
+                var iteration = 1 + this.repeatIteration[this.repeatIteration.length - 1];
+                var total = this.repeatIntervals[this.repeatIntervals.length - 1].getRepeatCount();
+                suffix = " | " + iteration + " of " + total;
+            }
+            this.perfPRODescription += "Desc" + this.idx++ + "=" + title + suffix + "\n";
         };
         MRCCourseDataVisitor.prototype.visitSimpleInterval = function (interval) {
             this.processCourseData(interval.getIntensity(), 0);
@@ -1565,6 +1577,33 @@ var Model;
             this.processCourseData(interval.getStartIntensity(), 0);
             this.processCourseData(interval.getEndIntensity(), interval.getDuration().getSeconds());
             this.processTitle(interval);
+        };
+        MRCCourseDataVisitor.prototype.visitRepeatInterval = function (interval) {
+            this.repeatIntervals.push(interval);
+            for (var i = 0; i < interval.getRepeatCount(); i++) {
+                this.repeatIteration.push(i);
+                this.visitArrayInterval(interval);
+                this.repeatIteration.pop();
+            }
+            this.repeatIntervals.pop();
+        };
+        MRCCourseDataVisitor.prototype.finalize = function () {
+            this.content = "";
+            this.content += "[COURSE HEADER]\n";
+            this.content += "VERSION=2\n";
+            this.content += "UNITS=ENGLISH\n";
+            this.content += stringFormat("FILE NAME={0}\n", this.fileName);
+            this.content += "MINUTES\tPERCENT\n";
+            this.content += "[END COURSE HEADER]\n";
+            this.content += "[COURSE DATA]\n";
+            this.content += this.courseData;
+            this.content += "[END COURSE DATA]\n";
+            this.content += "[PERFPRO DESCRIPTIONS]\n";
+            this.content += this.perfPRODescription;
+            this.content += "[END PERFPRO DESCRIPTIONS]\n";
+        };
+        MRCCourseDataVisitor.prototype.getContent = function () {
+            return this.content;
         };
         return MRCCourseDataVisitor;
     })(BaseVisitor);
@@ -1671,7 +1710,7 @@ var Model;
             if (outputUnit === void 0) { outputUnit = IntensityUnit.Unknown; }
             // TODO: instantiating visitor is a bit clowny
             var f = new WorkoutTextVisitor(userProfile, sportType, outputUnit);
-            VisitorHelper.visit(f, interval);
+            VisitorHelper.visitAndFinalize(f, interval);
             return f.result;
         };
         WorkoutTextVisitor.prototype.visitRestInterval = function (interval) {
@@ -1848,6 +1887,8 @@ var Model;
             else {
                 console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
             }
+        };
+        WorkoutTextVisitor.prototype.finalize = function () {
         };
         return WorkoutTextVisitor;
     })();
@@ -2137,8 +2178,12 @@ var Model;
         WorkoutBuilder.prototype.getSportType = function () {
             return this.sportType;
         };
-        WorkoutBuilder.prototype.withDefinition = function (workoutDefinition) {
+        WorkoutBuilder.prototype.getWorkoutTitle = function () {
+            return this.workoutTitle;
+        };
+        WorkoutBuilder.prototype.withDefinition = function (workoutTitle, workoutDefinition) {
             this.intervals = IntervalParser.parse(new ObjectFactory(this.userProfile, this.sportType), workoutDefinition);
+            this.workoutTitle = workoutTitle;
             this.workoutDefinition = workoutDefinition;
             return this;
         };
@@ -2233,36 +2278,28 @@ var Model;
             return result;
         };
         WorkoutBuilder.prototype.getMRCFile = function () {
-            var dataVisitor = new MRCCourseDataVisitor();
-            VisitorHelper.visit(dataVisitor, this.intervals);
-            var result = "";
-            result += "[COURSE HEADER]\n";
-            result += "VERSION=2\n";
-            result += "UNITS=ENGLISH\n";
-            result += "DESCRIPTION=Auto generated with WorkoutPlanner - https://github.com/sergioclemente/WorkoutPlanner\n";
-            result += "MINUTES\tPERCENT\n";
-            result += "[END COURSE HEADER]\n";
-            result += "[COURSE DATA]\n";
-            result += dataVisitor.getCourseData();
-            result += "[END COURSE DATA]\n";
-            result += "[PERFPRO DESCRIPTIONS]\n";
-            result += dataVisitor.getPerfPRODescription();
-            result += "[END PERFPRO DESCRIPTIONS]\n";
-            return result;
+            var dataVisitor = new MRCCourseDataVisitor(this.getMRCFileName());
+            VisitorHelper.visitAndFinalize(dataVisitor, this.intervals);
+            return dataVisitor.getContent();
         };
         WorkoutBuilder.prototype.getZWOFile = function () {
             var fileNameHelper = new FileNameHelper(this.intervals);
             var workout_name = fileNameHelper.getFileName();
             var zwift = new ZwiftDataVisitor(workout_name);
-            VisitorHelper.visit(zwift, this.intervals);
-            zwift.finalize();
+            VisitorHelper.visitAndFinalize(zwift, this.intervals);
             return zwift.getContent();
         };
         WorkoutBuilder.prototype.getZWOFileName = function () {
+            if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
+                return this.workoutTitle + ".zwo";
+            }
             var fileNameHelper = new FileNameHelper(this.intervals);
             return fileNameHelper.getFileName() + ".zwo";
         };
         WorkoutBuilder.prototype.getMRCFileName = function () {
+            if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
+                return this.workoutTitle + ".mrc";
+            }
             var fileNameHelper = new FileNameHelper(this.intervals);
             return fileNameHelper.getFileName() + ".mrc";
         };

@@ -25,6 +25,10 @@ var WorkoutInput = (function (_super) {
         var workoutText = this.refs['workout_text'];
         return workoutText.value;
     };
+    WorkoutInput.prototype.getWorkoutTitle = function () {
+        var workoutTitle = this.refs['workout_title'];
+        return workoutTitle.value;
+    };
     WorkoutInput.prototype._onSportTypeChange = function (sport_type_str) {
         var sport_type = parseInt(sport_type_str);
         var sltUnit = this.refs['unit'];
@@ -45,14 +49,17 @@ var WorkoutInput = (function (_super) {
     WorkoutInput.prototype._onWorkoutTextChange = function (e) {
         this._loadWorkout();
     };
+    WorkoutInput.prototype._onWorkoutTitleChange = function (e) {
+        this._loadWorkout();
+    };
     WorkoutInput.prototype._loadWorkout = function () {
         if (this.props.onChange) {
-            this.props.onChange(this.getSportType(), this.getUnitType(), this.getWorkoutText());
+            this.props.onChange(this.getSportType(), this.getUnitType(), this.getWorkoutTitle(), this.getWorkoutText());
         }
     };
     WorkoutInput.prototype.render = function () {
         var _this = this;
-        return (React.createElement("div", null, React.createElement("h1", null, " Workout Settings "), React.createElement("form", null, "Sport type:", React.createElement(select_1.default, {"ref": "sportType", "defaultValue": this.props.sport_type, "onChange": function (e) { return _this._onSportTypeChange(e); }}, React.createElement(select_option_1.default, {"value": Model.SportType.Swim}, "Swim"), React.createElement(select_option_1.default, {"value": Model.SportType.Bike}, "Bike"), React.createElement(select_option_1.default, {"value": Model.SportType.Run}, "Run")), React.createElement("br", null), "Unit:", React.createElement(select_1.default, {"ref": "unit", "defaultValue": this.props.output_unit, "onChange": function (e) { return _this._onUnitChanged(e); }}, React.createElement(select_option_1.default, {"value": Model.IntensityUnit.Watts}, "Watts"), React.createElement(select_option_1.default, {"value": Model.IntensityUnit.MinMi}, "min/mi"), React.createElement(select_option_1.default, {"value": Model.IntensityUnit.Mph}, "mi/h"), React.createElement(select_option_1.default, {"value": Model.IntensityUnit.MinKm}, "min/km"), React.createElement(select_option_1.default, {"value": Model.IntensityUnit.Kmh}, "km/h"), React.createElement(select_option_1.default, {"value": Model.IntensityUnit.IF}, "IF"), React.createElement(select_option_1.default, {"value": Model.IntensityUnit.Per100Yards}, "/100yards"), React.createElement(select_option_1.default, {"value": Model.IntensityUnit.Per100Meters}, "/100m")), React.createElement("br", null), React.createElement("textarea", {"ref": "workout_text", "defaultValue": this.props.workout_text, "style": { height: "200px", width: "100%" }, "onChange": function (e) { return _this._onWorkoutTextChange(e); }}), React.createElement("br", null))));
+        return (React.createElement("div", null, React.createElement("h1", null, " Workout Settings "), React.createElement("form", null, "Title: ", React.createElement("input", {"ref": "workout_title", "defaultValue": this.props.workout_title, "onChange": function (e) { return _this._onWorkoutTitleChange(e); }}), React.createElement("br", null), "Sport type:", React.createElement(select_1.default, {"ref": "sportType", "defaultValue": this.props.sport_type, "onChange": function (e) { return _this._onSportTypeChange(e); }}, React.createElement(select_option_1.default, {"value": Model.SportType.Swim}, "Swim"), React.createElement(select_option_1.default, {"value": Model.SportType.Bike}, "Bike"), React.createElement(select_option_1.default, {"value": Model.SportType.Run}, "Run")), React.createElement("br", null), "Unit:", React.createElement(select_1.default, {"ref": "unit", "defaultValue": this.props.output_unit, "onChange": function (e) { return _this._onUnitChanged(e); }}, React.createElement(select_option_1.default, {"value": Model.IntensityUnit.Watts}, "Watts"), React.createElement(select_option_1.default, {"value": Model.IntensityUnit.MinMi}, "min/mi"), React.createElement(select_option_1.default, {"value": Model.IntensityUnit.Mph}, "mi/h"), React.createElement(select_option_1.default, {"value": Model.IntensityUnit.MinKm}, "min/km"), React.createElement(select_option_1.default, {"value": Model.IntensityUnit.Kmh}, "km/h"), React.createElement(select_option_1.default, {"value": Model.IntensityUnit.IF}, "IF"), React.createElement(select_option_1.default, {"value": Model.IntensityUnit.Per100Yards}, "/100yards"), React.createElement(select_option_1.default, {"value": Model.IntensityUnit.Per100Meters}, "/100m")), React.createElement("br", null), React.createElement("textarea", {"ref": "workout_text", "defaultValue": this.props.workout_text, "style": { height: "200px", width: "100%" }, "onChange": function (e) { return _this._onWorkoutTextChange(e); }}), React.createElement("br", null))));
     };
     return WorkoutInput;
 })(React.Component);

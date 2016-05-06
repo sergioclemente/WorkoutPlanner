@@ -205,6 +205,7 @@ declare module Model {
         static parse(factory: ObjectFactory, input: string): ArrayInterval;
     }
     class VisitorHelper {
+        static visitAndFinalize(visitor: Visitor, interval: Interval): any;
         static visit(visitor: Visitor, interval: Interval): any;
     }
     interface Visitor {
@@ -213,6 +214,7 @@ declare module Model {
         visitRampBuildInterval(interval: RampBuildInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
         visitArrayInterval(interval: ArrayInterval): void;
+        finalize(): void;
     }
     class BaseVisitor implements Visitor {
         visitSimpleInterval(interval: SimpleInterval): void;
@@ -220,6 +222,7 @@ declare module Model {
         visitRampBuildInterval(interval: RampBuildInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
         visitArrayInterval(interval: ArrayInterval): void;
+        finalize(): void;
     }
     class TSSVisitor extends BaseVisitor {
         private tss;
@@ -301,13 +304,19 @@ declare module Model {
         private courseData;
         private time;
         private idx;
+        private fileName;
         private perfPRODescription;
+        private content;
+        private repeatIntervals;
+        private repeatIteration;
+        constructor(fileName: string);
         processCourseData(intensity: Intensity, durationInSeconds: number): void;
         processTitle(interval: Interval): void;
-        getCourseData(): string;
-        getPerfPRODescription(): string;
         visitSimpleInterval(interval: SimpleInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
+        visitRepeatInterval(interval: RepeatInterval): void;
+        finalize(): void;
+        getContent(): string;
     }
     class FileNameHelper {
         private intervals;
@@ -333,6 +342,7 @@ declare module Model {
         visitStepBuildInterval(interval: StepBuildInterval): void;
         visitSimpleInterval(interval: SimpleInterval): any;
         getIntensityPretty(intensity: Intensity): string;
+        finalize(): void;
     }
     class SpeedParser {
         static getSpeedInMph(speed: string): number;
@@ -388,10 +398,12 @@ declare module Model {
         private outputUnit;
         private intervals;
         private workoutDefinition;
+        private workoutTitle;
         constructor(userProfile: UserProfile, sportType: SportType, outputUnit: IntensityUnit);
         getInterval(): ArrayInterval;
         getSportType(): SportType;
-        withDefinition(workoutDefinition: string): WorkoutBuilder;
+        getWorkoutTitle(): string;
+        withDefinition(workoutTitle: string, workoutDefinition: string): WorkoutBuilder;
         getIntensityFriendly(intensity: Intensity): string;
         getTSS(): number;
         getTSSFromIF(): number;

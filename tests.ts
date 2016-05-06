@@ -119,11 +119,10 @@ expect_eq_nbr(Model.IntensityUnit.MinMi, int_par_unit_run.getIntervals()[1].getI
 expect_eq_nbr(6, int_par_unit_run.getIntervals()[1].getIntensity().getOriginalValue());
 
 
-// MRC testing
+// Zwift File testing
 var zwift = new Model.ZwiftDataVisitor("untitled_workout");
-var zwift_interval = Model.IntervalParser.parse(of_bike, "(10min, 55, 75), (1hr, 80), (5min, 75, 55)");
-Model.VisitorHelper.visit(zwift, zwift_interval);
-zwift.finalize();
+var file_interval = Model.IntervalParser.parse(of_bike, "(10min, 55, 75), (1hr, 80), (5min, 75, 55)");
+Model.VisitorHelper.visitAndFinalize(zwift, file_interval);
 var expected_content = `<workout_file>
 	<author>Workout Planner Author</author>
 	<name>untitled_workout</name>
@@ -140,6 +139,79 @@ var expected_content = `<workout_file>
 	</workout>
 </workout_file>`;
 expect_eq_str(expected_content, zwift.getContent());
+
+// MRC File testing
+var mrc = new Model.MRCCourseDataVisitor("untitled_workout");
+Model.VisitorHelper.visitAndFinalize(mrc, file_interval);
+var expected_content = `[COURSE HEADER]
+VERSION=2
+UNITS=ENGLISH
+FILE NAME=untitled_workout
+MINUTES\tPERCENT
+[END COURSE HEADER]
+[COURSE DATA]
+0\t55
+10\t75
+10\t80
+70\t80
+70\t75
+75\t55
+[END COURSE DATA]
+[PERFPRO DESCRIPTIONS]
+Desc0=10' build to 75%
+Desc1=1hr @ 80%
+Desc2=5' build from 75% to 55%
+[END PERFPRO DESCRIPTIONS]
+`;
+
+expect_eq_str(expected_content, mrc.getContent());
+
+var file_interval = Model.IntervalParser.parse(of_bike, "(10min, 55, 75), 4[(1hr, 80), (5min, 55)], (20min, 75)");
+var mrc = new Model.MRCCourseDataVisitor("untitled_workout");
+Model.VisitorHelper.visitAndFinalize(mrc, file_interval);
+var expected_content = `[COURSE HEADER]
+VERSION=2
+UNITS=ENGLISH
+FILE NAME=untitled_workout
+MINUTES\tPERCENT
+[END COURSE HEADER]
+[COURSE DATA]
+0\t55
+10\t75
+10\t80
+70\t80
+70\t55
+75\t55
+75\t80
+135\t80
+135\t55
+140\t55
+140\t80
+200\t80
+200\t55
+205\t55
+205\t80
+265\t80
+265\t55
+270\t55
+270\t75
+290\t75
+[END COURSE DATA]
+[PERFPRO DESCRIPTIONS]
+Desc0=10' build to 75%
+Desc1=1hr @ 80% | 1 of 4
+Desc2=5' easy | 1 of 4
+Desc3=1hr @ 80% | 2 of 4
+Desc4=5' easy | 2 of 4
+Desc5=1hr @ 80% | 3 of 4
+Desc6=5' easy | 3 of 4
+Desc7=1hr @ 80% | 4 of 4
+Desc8=5' easy | 4 of 4
+Desc9=20' @ 75%
+[END PERFPRO DESCRIPTIONS]
+`;
+
+expect_eq_str(expected_content, mrc.getContent());
 
 // No intensity specified
 expect_eq_nbr(0.55, Model.IntervalParser.parse(of_bike, `(10min, easy)`).getIntensity().getValue());

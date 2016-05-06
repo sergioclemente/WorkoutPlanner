@@ -49,8 +49,6 @@ git push heroku master
 Nice to have things
 * Add Url shortener
 * Suggestion for learning
-* [P3] Refactor getMRCFile into a visitor
-* [P3] Refactor ZwiftDataVisitor to move finalize() into the base
 * [P3] Add free ride do zwift
         <FreeRide Duration="600" FlatRoad="1"/>
 * [P3] Add react for generating emails

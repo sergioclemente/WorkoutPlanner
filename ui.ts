@@ -28,27 +28,13 @@ export class QueryParams {
 	public swim_css: string;
 	public email: string;
 
+	public workout_title: string;
 	public workout_text: string;
 	public sport_type: string;
 	public output_unit: string;
 	
 
-	constructor(workout_text: string = "",
-		ftp_watts: string = "",
-		t_pace: string = "",
-		swim_css: string = "",
-		sport_type: string = "",
-		output_unit: string = "",
-		email: string = "") {
-
-		this.workout_text = workout_text;
-		this.ftp_watts = ftp_watts;
-		this.t_pace = t_pace;
-		this.swim_css = swim_css;
-		this.sport_type = sport_type;
-		this.output_unit = output_unit;
-		this.email = email;
-
+	constructor() {
 		if (!this.validate()) {
 			if (!this.loadFromURL()) {
 				this.loadFromStorage();
@@ -58,6 +44,7 @@ export class QueryParams {
 
 	static createCopy(params: QueryParams) : QueryParams {
 		var ret = new QueryParams();
+		ret.workout_title = params.workout_title;
 		ret.workout_text = params.workout_text;
 		ret.ftp_watts = params.ftp_watts;
 		ret.t_pace = params.t_pace;
@@ -70,10 +57,11 @@ export class QueryParams {
 
 	loadFromURL(): boolean {
 		var params = getQueryParams();
+		this.workout_title = params.t;
 		this.workout_text = params.w;
 		this.ftp_watts = params.ftp;
 		this.t_pace = params.tpace;
-		this.swim_css = params.swim_css;
+		this.swim_css = params.css;
 		this.sport_type = params.st;
 		this.output_unit = params.ou;
 		this.email = params.email;
@@ -81,6 +69,7 @@ export class QueryParams {
 	}
 
 	loadFromStorage(): boolean {
+		this.workout_title = new PersistedItem("title").load(); 
 		this.workout_text = new PersistedItem("workout").load();
 		this.ftp_watts = new PersistedItem("ftp_watts").load();
 		this.t_pace = new PersistedItem("t_pace").load();
@@ -92,6 +81,7 @@ export class QueryParams {
 	}
 
 	saveToStorage(): void {
+		new PersistedItem("title").save(this.workout_title);
 		new PersistedItem("workout").save(this.workout_text);
 		new PersistedItem("ftp_watts").save(this.ftp_watts);
 		new PersistedItem("t_pace").save(this.t_pace);
@@ -102,7 +92,8 @@ export class QueryParams {
 	}
 
 	validate(): boolean {
-		return typeof(this.workout_text) != 'undefined' && this.workout_text != "" &&
+		return typeof(this.workout_title) != 'undefined' && this.workout_title != "" &&  
+			typeof(this.workout_text) != 'undefined' && this.workout_text != "" &&
 			typeof(this.ftp_watts) != 'undefined' && this.ftp_watts != "" &&
 			typeof(this.t_pace) != 'undefined' && this.t_pace != "" &&
 			typeof(this.swim_css) != 'undefined' && this.swim_css != "" &&
@@ -112,7 +103,8 @@ export class QueryParams {
 	}
 
 	getURL(): string {
-		return "?w=" + encodeURIComponent(this.workout_text) +
+		return "?t=" + encodeURIComponent(this.workout_title) + 
+			"&w=" + encodeURIComponent(this.workout_text) +
 			"&st=" + encodeURIComponent(this.sport_type) +
 			"&ftp=" + encodeURIComponent(this.ftp_watts) +
 			"&tpace=" + encodeURIComponent(this.t_pace) +

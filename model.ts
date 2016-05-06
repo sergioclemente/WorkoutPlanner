@@ -746,7 +746,7 @@ export class ArrayInterval implements Interval {
 	
 	getTSS() : number {
 		var tssVisitor = new TSSVisitor();
-		VisitorHelper.visit(tssVisitor, this);
+		VisitorHelper.visitAndFinalize(tssVisitor, this);
 		return tssVisitor.getTSS();
 	}
 	
@@ -757,14 +757,14 @@ export class ArrayInterval implements Interval {
 
 	getIntensities(): Intensity[] {
 		var iv = new IntensitiesVisitor();
-		VisitorHelper.visit(iv, this);
+		VisitorHelper.visitAndFinalize(iv, this);
 		return iv.getIntensities();
 	}
 	
 	getTimeSeries() : any {
 		var pv = new DataPointVisitor();
 		
-		VisitorHelper.visit(pv, this); 
+		VisitorHelper.visitAndFinalize(pv, this); 
 		
 		// TODO: Massaging the data here to show in minutes
 		return pv.data.map(function(item) {
@@ -777,7 +777,7 @@ export class ArrayInterval implements Interval {
 	
 	getTimeInZones(sportType: SportType) {
 		var zv = new ZonesVisitor(sportType);
-		VisitorHelper.visit(zv, this);
+		VisitorHelper.visitAndFinalize(zv, this);
 		return zv.getTimeInZones();
 	}
 }
@@ -1235,6 +1235,10 @@ export class IntervalParser {
 }
 
 export class VisitorHelper {
+	static visitAndFinalize(visitor: Visitor, interval:Interval) : any {
+		this.visit(visitor, interval);
+		visitor.finalize();
+	}	
 	static visit(visitor: Visitor, interval:Interval) : any {
 		if (interval instanceof SimpleInterval) {
 			return visitor.visitSimpleInterval(<SimpleInterval>interval);
@@ -1258,6 +1262,7 @@ export interface Visitor {
 	visitRampBuildInterval(interval: RampBuildInterval) : void;
 	visitRepeatInterval(interval: RepeatInterval) : void;
 	visitArrayInterval(interval: ArrayInterval) : void;
+	finalize() : void;
 }
 
 export class BaseVisitor implements Visitor {
@@ -1290,6 +1295,8 @@ export class BaseVisitor implements Visitor {
 		for (var i = 0; i < interval.getIntervals().length; i++) {
 			VisitorHelper.visit(this, interval.getIntervals()[i]);
 		}
+	}
+	finalize() : void {
 	}
 }
 
@@ -1546,7 +1553,16 @@ export class MRCCourseDataVisitor extends BaseVisitor {
 	private courseData : string = "";
 	private time : number = 0;
 	private idx : number = 0;
+	private fileName : string = "";
 	private perfPRODescription : string = "";
+	private content = "";
+	private repeatIntervals : RepeatInterval[] = [];
+	private repeatIteration : number[] = [];
+	
+	constructor(fileName: string) {
+		super();
+		this.fileName = fileName;
+	}
 
 	processCourseData(intensity: Intensity, durationInSeconds: number) {
 		this.time += durationInSeconds;
@@ -1559,15 +1575,14 @@ export class MRCCourseDataVisitor extends BaseVisitor {
 		if (title.length == 0) {
 			title = WorkoutTextVisitor.getIntervalTitle(interval);
 		}
-		this.perfPRODescription += "Desc" + this.idx++ + "=" + title + "\n";
-	}
-
-	getCourseData() : string {
-		return this.courseData;
-	}
-
-	getPerfPRODescription() {
-		return this.perfPRODescription;
+		var suffix = "";
+		if (this.repeatIntervals.length > 0) {
+			console.assert(this.repeatIteration.length > 0);
+			var iteration = 1 + this.repeatIteration[this.repeatIteration.length - 1];
+			var total = this.repeatIntervals[this.repeatIntervals.length - 1].getRepeatCount();
+			suffix = " | " + iteration + " of " + total;
+		}
+		this.perfPRODescription += "Desc" + this.idx++ + "=" + title + suffix + "\n";
 	}
 
 	visitSimpleInterval(interval: SimpleInterval) {
@@ -1579,6 +1594,37 @@ export class MRCCourseDataVisitor extends BaseVisitor {
 		this.processCourseData(interval.getStartIntensity(), 0);
 		this.processCourseData(interval.getEndIntensity(), interval.getDuration().getSeconds());
 		this.processTitle(interval);
+	}
+	
+	visitRepeatInterval(interval: RepeatInterval) {
+		this.repeatIntervals.push(interval);
+		for (var i = 0 ; i < interval.getRepeatCount(); i++) {
+			this.repeatIteration.push(i);
+			this.visitArrayInterval(interval);
+			this.repeatIteration.pop();
+		}
+		this.repeatIntervals.pop();
+	}
+	
+	finalize() {
+		this.content = "";
+		this.content += "[COURSE HEADER]\n";
+		this.content += "VERSION=2\n";
+		this.content += "UNITS=ENGLISH\n";
+		this.content += stringFormat("FILE NAME={0}\n", this.fileName);
+		this.content += "MINUTES\tPERCENT\n";
+		this.content += "[END COURSE HEADER]\n";
+
+		this.content += "[COURSE DATA]\n";
+		this.content += this.courseData;
+		this.content += "[END COURSE DATA]\n";
+		this.content += "[PERFPRO DESCRIPTIONS]\n";
+		this.content += this.perfPRODescription;
+		this.content += "[END PERFPRO DESCRIPTIONS]\n";
+	}
+	
+	getContent() : string {
+		return this.content;
 	}
 }
 
@@ -1695,7 +1741,7 @@ export class WorkoutTextVisitor implements Visitor {
 							outputUnit: IntensityUnit = IntensityUnit.Unknown) : string {
 		// TODO: instantiating visitor is a bit clowny
 		var f = new WorkoutTextVisitor(userProfile, sportType, outputUnit);
-		VisitorHelper.visit(f, interval);
+		VisitorHelper.visitAndFinalize(f, interval);
 
 		return f.result;
 	}
@@ -1876,6 +1922,9 @@ export class WorkoutTextVisitor implements Visitor {
 		} else {
 			console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
 		}
+	}
+	
+	finalize() : void {
 	}
 }
 
@@ -2183,6 +2232,7 @@ export class WorkoutBuilder {
 	private outputUnit: IntensityUnit;
 	private intervals: ArrayInterval;
 	private workoutDefinition: string;
+	private workoutTitle: string;
 	
 	constructor(userProfile: UserProfile, sportType: SportType, outputUnit: IntensityUnit) {
 		this.userProfile = userProfile;
@@ -2197,12 +2247,17 @@ export class WorkoutBuilder {
 	getSportType() : SportType {
 		return this.sportType;
 	}
+	
+	getWorkoutTitle() : string {
+		return this.workoutTitle;
+	}
 
-	withDefinition(workoutDefinition: string) : WorkoutBuilder {
+	withDefinition(workoutTitle: string, workoutDefinition: string) : WorkoutBuilder {
 		this.intervals = IntervalParser.parse(
 			new ObjectFactory(this.userProfile, this.sportType),
 			workoutDefinition
 		);
+		this.workoutTitle = workoutTitle;
 		this.workoutDefinition = workoutDefinition;
 		return this;
 	}
@@ -2313,25 +2368,9 @@ export class WorkoutBuilder {
 	}
 
 	getMRCFile() : string {
-		var dataVisitor = new MRCCourseDataVisitor();
-		VisitorHelper.visit(dataVisitor, this.intervals); 
-
-		var result = "";
-		result += "[COURSE HEADER]\n";
-		result += "VERSION=2\n";
-		result += "UNITS=ENGLISH\n";
-		result += "DESCRIPTION=Auto generated with WorkoutPlanner - https://github.com/sergioclemente/WorkoutPlanner\n";
-		result += "MINUTES\tPERCENT\n";
-		result += "[END COURSE HEADER]\n";
-
-		result += "[COURSE DATA]\n";
-		result += dataVisitor.getCourseData();
-		result += "[END COURSE DATA]\n";
-		result += "[PERFPRO DESCRIPTIONS]\n";
-		result += dataVisitor.getPerfPRODescription();
-		result += "[END PERFPRO DESCRIPTIONS]\n";
-
-		return result;
+		var dataVisitor = new MRCCourseDataVisitor(this.getMRCFileName());
+		VisitorHelper.visitAndFinalize(dataVisitor, this.intervals); 
+		return dataVisitor.getContent();
 	}
 
 	getZWOFile() : string {
@@ -2339,16 +2378,21 @@ export class WorkoutBuilder {
 		var workout_name = fileNameHelper.getFileName();
 
 		var zwift = new ZwiftDataVisitor(workout_name);
-		VisitorHelper.visit(zwift, this.intervals);
-		zwift.finalize();
+		VisitorHelper.visitAndFinalize(zwift, this.intervals);
 		return zwift.getContent();
 	}
 
 	getZWOFileName() : string {
+		if (typeof(this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
+			return this.workoutTitle + ".zwo";			
+		}
 		var fileNameHelper = new FileNameHelper(this.intervals);
 		return fileNameHelper.getFileName() + ".zwo";
 	}
 	getMRCFileName(): string {
+		if (typeof(this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
+			return this.workoutTitle + ".mrc";
+		}		
 		var fileNameHelper = new FileNameHelper(this.intervals);
 		return fileNameHelper.getFileName() + ".mrc";
 	}
