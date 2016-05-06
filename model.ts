@@ -1350,7 +1350,7 @@ export class DateHelper {
 export class ZonesMap {
 	public static getZoneMap(sportType: SportType) {
 		// TODO: Use same zones as bike for now
-		if (sportType == SportType.Bike || sportType == SportType.Swim) {
+		if (sportType == SportType.Bike) {
 			return {
 				1: {name: "z1", low: 0.00, high: 0.55},
 				2: {name: "z2", low: 0.55, high: 0.75},
@@ -1367,6 +1367,15 @@ export class ZonesMap {
 				4: {name: "z4", low: 0.94, high: 1.01},
 				5: {name: "z5", low: 1.01, high: 1.10},
 				6: { name: "z6", low: 1.10, high: 10 },
+			};
+		} else if (sportType == SportType.Swim) {
+			return {
+				1: {name: "z1", low: 0.00, high: 0.84},
+				2: {name: "z2", low: 0.84, high: 0.89},
+				3: {name: "z3", low: 0.89, high: 0.95},
+				4: {name: "z4", low: 0.95, high: 1.01},
+				5: {name: "z5", low: 1.01, high: 1.05},
+				6: { name: "z6", low: 1.05, high: 10 },
 			};
 		}
 	}
