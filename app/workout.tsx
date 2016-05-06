@@ -49,6 +49,7 @@ export default class Workout extends React.Component<any, any> {
 		this._setHref("download_mrc", "workout.mrc" + url_parameters);
 		this._setHref("download_zwo", "workout.zwo" + url_parameters);
 		this._setHref("email_send_workout", "send_mail" + url_parameters);
+		this._setHref("save_workout", "save_workout" + url_parameters);
 
 		window.history.pushState('Object', 'Title', url_parameters);
 	}
@@ -68,6 +69,7 @@ export default class Workout extends React.Component<any, any> {
 								<td><a ref="download_mrc" >Download MRC</a></td>
 								<td><a ref="download_zwo" >Download ZWO</a></td>
 								<td><a ref="email_send_workout" >Email Workout</a></td>
+								<td><a ref="save_workout" >Save Workout</a></td>
 							</tr>
 							</tbody>
 						</table>
