@@ -37,11 +37,19 @@ if [[ "$?" != 0 ]]; then
 fi
 
 # Combine the files together
+# TODO: be smart so it doesnt have to browserify/minify for each page
 browserify model.js ui.js index.js app/*.js -o index.min.js
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
 fi
+
+browserify model.js ui.js workouts_view.js app/*.js -o workouts_view.min.js
+if [[ "$?" != 0 ]]; then
+	echo "Build error." 1>&2
+	exit 1
+fi
+
 
 # From here on everthing will be skipped if in dev mode
 if [[ "$DEV" == "true" ]]; then
@@ -55,3 +63,8 @@ if [[ "$?" != 0 ]]; then
 	exit 1
 fi
 
+/usr/local/bin/minify --output workouts_view.min.js workouts_view.min.js
+if [[ "$?" != 0 ]]; then
+	echo "Build error." 1>&2
+	exit 1
+fi

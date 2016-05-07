@@ -269,8 +269,7 @@ export class Duration {
 					var yards = DistanceUnitHelper.convertTo(this.getDistanceInMiles(), DistanceUnit.Miles, DistanceUnit.Yards);
 					return MyMath.round10(yards, -1) + getStringFromDurationUnit(DurationUnit.Yards);
 				} else {
-					// Not implemented yet
-					console.assert(false, stringFormat("Not implemted distance unit {0}", unitTo));
+					return MyMath.round10(this.value, -1) + getStringFromDurationUnit(this.unit);
 				}
 			}
 		} else {

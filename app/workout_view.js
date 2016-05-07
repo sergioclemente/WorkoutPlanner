@@ -82,12 +82,7 @@ var WorkoutView = (function (_super) {
         }
     };
     WorkoutView.prototype.renderDistance = function () {
-        if (this.state.sport_type == Model.SportType.Run || this.state.sport_type == Model.SportType.Swim) {
-            return (React.createElement("tr", null, React.createElement("td", null, "Distance"), React.createElement("td", null, this.state.distance)));
-        }
-        else {
-            return;
-        }
+        return (React.createElement("tr", null, React.createElement("td", null, "Distance"), React.createElement("td", null, this.state.distance)));
     };
     WorkoutView.prototype.renderPace = function () {
         if (this.state.sport_type == Model.SportType.Run) {

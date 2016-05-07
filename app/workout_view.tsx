@@ -101,14 +101,10 @@ export default class WorkoutView extends React.Component<any, any> {
 	}
 
 	renderDistance() {
-		if (this.state.sport_type == Model.SportType.Run || this.state.sport_type == Model.SportType.Swim) {
-			return (<tr>
-						<td>Distance</td>
-						<td>{this.state.distance}</td>
-					</tr>);
-		} else {
-			return;
-		}
+		return (<tr>
+					<td>Distance</td>
+					<td>{this.state.distance}</td>
+				</tr>);
 	}
 
 	renderPace() {

@@ -125,11 +125,11 @@ http.createServer(function (req, res) {
             handleDownloadWorkout(req, res, uri, params);     
           } else if (uri == "/send_mail") {
             var params = parsed_url.query;
-			handleSendEmail(req, res, uri, params);
+			      handleSendEmail(req, res, uri, params);
           } else if (uri == "/save_workout") {
             var params = parsed_url.query;
             if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email && params.t) {
-              var userProfile = new model.UserProfile(params.ftp, params.tpace, params.email);
+              var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
               var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.t, params.w);
               logRequest(req, 200);
               
