@@ -578,14 +578,18 @@ export class Intensity {
 			} else if (this.originalUnit == IntensityUnit.Per100Yards || this.originalUnit == IntensityUnit.Per100Meters) {
 				return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", getIntensityUnit(this.originalUnit));
 			} else {
+
 				if (this.originalUnit == IntensityUnit.OffsetSeconds) {
 					if (this.originalValue > 0) {
-						return "CSS+" + this.originalValue;
+						return stringFormat("CSS+{0}", this.originalValue);
+					} else if (this.originalValue < 0) {
+						return stringFormat("CSS{0}", this.originalValue);
 					} else {
-						return "CSS" + this.originalValue;
+						return "CSS";
 					}					
+				} else {
+					return MyMath.round10(this.originalValue, -1) + getStringFromIntensityUnit(this.originalUnit);
 				}
-				return MyMath.round10(this.originalValue, -1) + getStringFromIntensityUnit(this.originalUnit);
 			}
 		}
 	}
@@ -1794,7 +1798,7 @@ export class WorkoutTextVisitor implements Visitor {
 		if (interval.getIntensity().getValue() <= EASY_THRESHOLD) {
 			this.result += interval.getDuration().toStringShort() + " easy";
 		} else {
-			this.result += interval.getDuration().toStringShort() + " rest @ " + this.getIntensityPretty(interval.getIntensity());
+			this.result += interval.getDuration().toStringShort() + " easy @ " + this.getIntensityPretty(interval.getIntensity());
 		}
 	}
 
@@ -1934,10 +1938,9 @@ export class WorkoutTextVisitor implements Visitor {
 	}
 
 	getIntensityPretty(intensity: Intensity): string {
-		if (this.outputUnit == IntensityUnit.Unknown || this.sportType == SportType.Unknown) {
-			return intensity.toString();
-		}
-		if (this.outputUnit == IntensityUnit.IF) {
+		if (this.outputUnit == IntensityUnit.Unknown ||
+			this.sportType == SportType.Unknown ||
+			this.outputUnit == IntensityUnit.IF) {
 			return intensity.toString();
 		}
 		if (this.sportType == SportType.Bike) {
@@ -1959,7 +1962,7 @@ export class WorkoutTextVisitor implements Visitor {
 				return MyMath.round10(this.userProfile.getSwimPaceMph(intensity), -1) + getIntensityUnit(this.outputUnit);	
 			} else if (this.outputUnit == IntensityUnit.Per100Yards || this.outputUnit == IntensityUnit.Per100Meters) {
 				var swim_pace_per_100 = this.userProfile.getSwimPace(this.outputUnit, intensity);
-				return WorkoutTextVisitor.formatNumber(swim_pace_per_100, 60, ":", getIntensityUnit(this.outputUnit));	
+				return WorkoutTextVisitor.formatNumber(swim_pace_per_100, 60, ":", "");	
 			} else {
 				console.assert(false, stringFormat("Invalid output unit {0}", this.outputUnit));
 			}
