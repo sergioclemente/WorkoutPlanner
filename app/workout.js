@@ -45,11 +45,16 @@ var Workout = (function (_super) {
         this._setHref("download_zwo", "workout.zwo" + url_parameters);
         this._setHref("email_send_workout", "send_mail" + url_parameters);
         this._setHref("save_workout", "save_workout" + url_parameters);
+        this._setVisibility("save_workout", this.params.experimental);
         window.history.pushState('Object', 'Title', url_parameters);
     };
     Workout.prototype._setHref = function (element_ref, url) {
         var anchor = this.refs[element_ref];
         anchor.href = url;
+    };
+    Workout.prototype._setVisibility = function (element_ref, visible) {
+        var anchor = this.refs[element_ref];
+        anchor.hidden = !visible;
     };
     Workout.prototype.render = function () {
         var _this = this;

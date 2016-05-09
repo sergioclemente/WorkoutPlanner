@@ -51,6 +51,8 @@ export default class Workout extends React.Component<any, any> {
 		this._setHref("download_zwo", "workout.zwo" + url_parameters);
 		this._setHref("email_send_workout", "send_mail" + url_parameters);
 		this._setHref("save_workout", "save_workout" + url_parameters);
+		
+		this._setVisibility("save_workout", this.params.experimental);
 
 		window.history.pushState('Object', 'Title', url_parameters);
 	}
@@ -58,6 +60,11 @@ export default class Workout extends React.Component<any, any> {
 	_setHref(element_ref: string, url: string) {
 		var anchor = this.refs[element_ref] as HTMLAnchorElement;
 		anchor.href = url;
+	}
+	
+	_setVisibility(element_ref: string, visible: boolean) {
+		var anchor = this.refs[element_ref] as HTMLAnchorElement;
+		anchor.hidden = !visible;
 	}
 
 	render() {

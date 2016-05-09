@@ -40,6 +40,7 @@ var UI;
             ret.sport_type = params.sport_type;
             ret.output_unit = params.output_unit;
             ret.email = params.email;
+            ret.experimental = params.experimental;
             return ret;
         };
         QueryParams.prototype.loadFromURL = function () {
@@ -52,6 +53,7 @@ var UI;
             this.sport_type = params.st;
             this.output_unit = params.ou;
             this.email = params.email;
+            this.experimental = typeof (params.e) != 'undefined' && params.e == "1";
             return this.validate();
         };
         QueryParams.prototype.loadFromStorage = function () {
@@ -63,6 +65,7 @@ var UI;
             this.sport_type = new PersistedItem("sport_type").load();
             this.output_unit = new PersistedItem("output_unit").load();
             this.email = new PersistedItem("email").load();
+            // do not load experimental
             return this.validate();
         };
         QueryParams.prototype.saveToStorage = function () {
@@ -74,6 +77,7 @@ var UI;
             new PersistedItem("sport_type").save(this.sport_type);
             new PersistedItem("output_unit").save(this.output_unit);
             new PersistedItem("email").save(this.email);
+            // do not save experimental
         };
         QueryParams.prototype.validate = function () {
             return typeof (this.workout_title) != 'undefined' && this.workout_title != "" &&
@@ -93,7 +97,8 @@ var UI;
                 "&tpace=" + encodeURIComponent(this.t_pace) +
                 "&css=" + encodeURIComponent(this.swim_css) +
                 "&ou=" + encodeURIComponent(this.output_unit) +
-                "&email=" + encodeURIComponent(this.email);
+                "&email=" + encodeURIComponent(this.email) +
+                "&e=" + encodeURIComponent(this.experimental ? "1" : "0");
         };
         return QueryParams;
     })();
