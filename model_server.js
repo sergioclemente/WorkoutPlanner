@@ -81,7 +81,9 @@ var ModelServer;
             this.connection.query(sql);
         };
         WorkoutDB.prototype.get = function (id, callback) {
-            this.connection.query("SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts where id=" + id, function (err, rows, fields) {
+            var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts where id={0}";
+            sql = stringFormat(this.connection.escape(id));
+            this.connection.query(sql, function (err, rows, fields) {
                 if (!err) {
                     if (rows.length == 0) {
                         callback("", null);
