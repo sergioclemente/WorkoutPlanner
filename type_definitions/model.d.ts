@@ -119,6 +119,11 @@ declare module Model {
         getIntensity(): Intensity;
         getDuration(): Duration;
     }
+    class CommentInterval extends BaseInterval {
+        constructor(title: string);
+        getIntensity(): Intensity;
+        getDuration(): Duration;
+    }
     class SimpleInterval extends BaseInterval {
         private intensity;
         private duration;
@@ -182,6 +187,8 @@ declare module Model {
     }
     class StringChunkParser implements Parser {
         private value;
+        private delimiters;
+        constructor(delimiters: string[]);
         evaluate(input: string, i: number): number;
         getValue(): string;
     }
@@ -209,6 +216,7 @@ declare module Model {
         static visit(visitor: Visitor, interval: Interval): any;
     }
     interface Visitor {
+        visitCommentInterval(interval: CommentInterval): void;
         visitSimpleInterval(interval: SimpleInterval): void;
         visitStepBuildInterval(interval: StepBuildInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
@@ -217,6 +225,7 @@ declare module Model {
         finalize(): void;
     }
     class BaseVisitor implements Visitor {
+        visitCommentInterval(interval: CommentInterval): void;
         visitSimpleInterval(interval: SimpleInterval): void;
         visitStepBuildInterval(interval: StepBuildInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
@@ -334,6 +343,7 @@ declare module Model {
         static formatNumber(value: number, decimalMultiplier: number, separator: string, unit: string, round_val?: number): string;
         private static enforceDigits(value, digits);
         static getIntervalTitle(interval: Interval, userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit): string;
+        visitCommentInterval(interval: CommentInterval): void;
         visitRestInterval(interval: Interval): void;
         visitArrayInterval(interval: ArrayInterval): void;
         visitArrayIntervalInternal(interval: ArrayInterval, always_add_parenthesis: boolean): void;

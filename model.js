@@ -664,6 +664,20 @@ var Model;
         return BaseInterval;
     })();
     Model.BaseInterval = BaseInterval;
+    var CommentInterval = (function (_super) {
+        __extends(CommentInterval, _super);
+        function CommentInterval(title) {
+            _super.call(this, title);
+        }
+        CommentInterval.prototype.getIntensity = function () {
+            return new Intensity(0, 0, IntensityUnit.IF);
+        };
+        CommentInterval.prototype.getDuration = function () {
+            return new Duration(DurationUnit.Seconds, 0, 0, 0);
+        };
+        return CommentInterval;
+    })(BaseInterval);
+    Model.CommentInterval = CommentInterval;
     var SimpleInterval = (function (_super) {
         __extends(SimpleInterval, _super);
         function SimpleInterval(title, intensity, duration) {
@@ -918,7 +932,8 @@ var Model;
     })();
     Model.NumberParser = NumberParser;
     var StringChunkParser = (function () {
-        function StringChunkParser() {
+        function StringChunkParser(delimiters) {
+            this.delimiters = delimiters;
         }
         StringChunkParser.prototype.evaluate = function (input, i) {
             this.value = "";
@@ -927,7 +942,7 @@ var Model;
             }
             for (; i < input.length; i++) {
                 var ch = input[i];
-                if (ch == ',' || ch == ')') {
+                if (this.delimiters.indexOf(ch) != -1) {
                     break;
                 }
                 this.value += ch;
@@ -1155,7 +1170,7 @@ var Model;
                             numIndex++;
                         }
                         else {
-                            var string_parser = new StringChunkParser();
+                            var string_parser = new StringChunkParser([',', ')']);
                             i = string_parser.evaluate(input, i);
                             var value = string_parser.getValue();
                             // We have to distinguish between title and intensity
@@ -1210,6 +1225,12 @@ var Model;
                         i++;
                     }
                 }
+                else if (ch == "\"") {
+                    var scp = new StringChunkParser(["\""]);
+                    // it returns the last valid char, so we want to skip that and the quotes
+                    i = scp.evaluate(input, i + 1) + 2;
+                    stack[stack.length - 1].getIntervals().push(new CommentInterval(scp.getValue()));
+                }
             }
             if (result.getIntervals().length == 0) {
                 IntervalParser.throwParserError(0, "Invalid interval");
@@ -1242,7 +1263,11 @@ var Model;
             else if (interval instanceof ArrayInterval) {
                 return visitor.visitArrayInterval(interval);
             }
+            else if (interval instanceof CommentInterval) {
+                return visitor.visitCommentInterval(interval);
+            }
             else {
+                console.assert(false, "invalid type!");
                 return null;
             }
         };
@@ -1252,6 +1277,9 @@ var Model;
     var BaseVisitor = (function () {
         function BaseVisitor() {
         }
+        BaseVisitor.prototype.visitCommentInterval = function (interval) {
+            // nothing to do
+        };
         BaseVisitor.prototype.visitSimpleInterval = function (interval) {
             // not aware that typescript supports abstract methods
             throw new Error("not implemented");
@@ -1722,6 +1750,9 @@ var Model;
             VisitorHelper.visitAndFinalize(f, interval);
             return f.result;
         };
+        WorkoutTextVisitor.prototype.visitCommentInterval = function (interval) {
+            this.result += interval.getTitle();
+        };
         WorkoutTextVisitor.prototype.visitRestInterval = function (interval) {
             if (interval.getIntensity().getValue() <= EASY_THRESHOLD) {
                 this.result += interval.getDuration().toStringShort() + " easy";
@@ -1739,7 +1770,8 @@ var Model;
             var firstInterval = interval.getIntervals()[0];
             var lastInterval = interval.getIntervals()[length - 1];
             var isRestIncluded = lastInterval.getIntensity().getValue() <
-                firstInterval.getIntensity().getValue();
+                firstInterval.getIntensity().getValue() &&
+                !(lastInterval instanceof CommentInterval); // its not a comment				
             if (length == 2) {
                 if (isRestIncluded) {
                     VisitorHelper.visit(this, firstInterval);

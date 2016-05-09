@@ -640,6 +640,18 @@ export class BaseInterval implements Interval {
 	}
 }
 
+export class CommentInterval extends BaseInterval {
+	constructor(title: string) {
+		super(title);
+	}
+	getIntensity() : Intensity {
+		return new Intensity(0, 0, IntensityUnit.IF);
+	}
+	getDuration(): Duration {
+		return new Duration(DurationUnit.Seconds, 0, 0, 0);
+	}	
+}
+
 export class SimpleInterval extends BaseInterval {
 	private intensity: Intensity;
 	private duration: Duration;
@@ -918,6 +930,12 @@ export class NumberParser implements Parser {
 
 export class StringChunkParser implements Parser {
 	private value: string;
+	private delimiters: string[];
+	
+	constructor(delimiters : string[]) {
+		this.delimiters = delimiters;
+	}
+	
 
 	evaluate(input: string, i: number) : number {
 		this.value = "";
@@ -929,11 +947,11 @@ export class StringChunkParser implements Parser {
 		for (; i < input.length; i++) {
 			var ch = input[i];
 
-			if (ch == ',' || ch == ')') {
+			if (this.delimiters.indexOf(ch) != -1) {
 				break;
 			}
 			this.value += ch;
-		}
+		}		
 
 		// Points to the last valid char
 		return i - 1;
@@ -1171,7 +1189,7 @@ export class IntervalParser {
 					} else if (ch == ",") {
 						numIndex++;
 					} else {
-						var string_parser = new StringChunkParser();
+						var string_parser = new StringChunkParser([',', ')']);
 						i = string_parser.evaluate(input, i);
 						var value = string_parser.getValue();
 						
@@ -1222,6 +1240,12 @@ export class IntervalParser {
 				while (i < input.length && input[i] != "[") {
 					i++;
 				}
+			} else if (ch == "\"") {
+				var scp = new StringChunkParser(["\""]);
+				
+				// it returns the last valid char, so we want to skip that and the quotes
+				i = scp.evaluate(input, i+1) + 2;
+				stack[stack.length-1].getIntervals().push(new CommentInterval(scp.getValue()));			
 			}
 		}
 
@@ -1249,13 +1273,17 @@ export class VisitorHelper {
 	      return visitor.visitRepeatInterval(<RepeatInterval>interval);
 	    } else if (interval instanceof ArrayInterval) {
 	      return visitor.visitArrayInterval(<ArrayInterval>interval);
+		} else if (interval instanceof CommentInterval) {
+		  return visitor.visitCommentInterval(<CommentInterval>interval);
 	    } else {
+		  console.assert(false, "invalid type!");
 	      return null;
 	    }
 	}
 }
 
 export interface Visitor {
+	visitCommentInterval(interval: CommentInterval) : void;
 	visitSimpleInterval(interval: SimpleInterval) : void;
 	visitStepBuildInterval(interval: StepBuildInterval): void;
 	visitRampBuildInterval(interval: RampBuildInterval) : void;
@@ -1265,6 +1293,10 @@ export interface Visitor {
 }
 
 export class BaseVisitor implements Visitor {
+
+	visitCommentInterval(interval: CommentInterval) : void {
+		// nothing to do
+	}
 
 	visitSimpleInterval(interval: SimpleInterval) : void {
 		// not aware that typescript supports abstract methods
@@ -1754,6 +1786,10 @@ export class WorkoutTextVisitor implements Visitor {
 		return f.result;
 	}
 	
+	visitCommentInterval(interval: CommentInterval) : void {
+		this.result += interval.getTitle();
+	}
+	
 	visitRestInterval(interval: Interval) : void {
 		if (interval.getIntensity().getValue() <= EASY_THRESHOLD) {
 			this.result += interval.getDuration().toStringShort() + " easy";
@@ -1768,12 +1804,12 @@ export class WorkoutTextVisitor implements Visitor {
 	}
 	visitArrayIntervalInternal(interval: ArrayInterval, always_add_parenthesis : boolean) {
 		var length = interval.getIntervals().length;
-				
 		var firstInterval = interval.getIntervals()[0];
 		var lastInterval = interval.getIntervals()[length - 1];
 		
 		var isRestIncluded = lastInterval.getIntensity().getValue() <
-			firstInterval.getIntensity().getValue();				
+			firstInterval.getIntensity().getValue() && 
+			! (lastInterval instanceof CommentInterval); // its not a comment				
 				
 		if (length == 2) {			
 			if (isRestIncluded) {

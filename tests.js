@@ -199,6 +199,11 @@ expect_eq_str("2 x (5' @ 235w, 2' @ 310w) - w/ 1' rest @ 205w", Model.WorkoutTex
 // step build (same intensities and same duration)
 expect_eq_str("2 x 2' - w/ 1' easy (235w, 265w)", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "2[(75, 85, 2min), (1min, 55)]"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 expect_eq_str("2 x 235w - w/ 1' easy (1', 3')", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "2[(75, 1min, 3min), (1min, 55)]"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
+// comment
+expect_eq_str("Do this in a flat terrain", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "\"Do this in a flat terrain\""), up, Model.SportType.Bike, Model.IntensityUnit.IF));
+expect_eq_str("Do this in a flat terrain - 10' easy", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "\"Do this in a flat terrain\", (10min, 55)"), up, Model.SportType.Bike, Model.IntensityUnit.IF));
+expect_eq_str("Do this in a flat terrain - 10' easy", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "\"Do this in a flat terrain\",(10min, 55)"), up, Model.SportType.Bike, Model.IntensityUnit.IF));
+expect_eq_str("10' easy - Do this in a flat terrain", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(10min, 55), \"Do this in a flat terrain\""), up, Model.SportType.Bike, Model.IntensityUnit.IF));
 // WorkoutTextVisitor
 expect_eq_str("8:00min/mi", Model.WorkoutTextVisitor.formatNumber(8, 60, ":", "min/mi", 0));
 expect_eq_str("8:00min/mi", Model.WorkoutTextVisitor.formatNumber(8, 60, ":", "min/mi", 5));
