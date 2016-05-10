@@ -108,9 +108,11 @@ var ModelServer;
         };
         WorkoutDB.prototype.connect = function () {
             this.connection.connect();
+            console.log("connected to the db");
         };
         WorkoutDB.prototype.close = function () {
-            this.connection.end();
+            this.connection.end({ timeout: 60000 });
+            console.log("disconnected from the db");
         };
         return WorkoutDB;
     })();

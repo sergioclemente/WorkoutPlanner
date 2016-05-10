@@ -35,7 +35,7 @@ node ./server.js
 * Pushing live
 
 ```
-git push heroku master
+Its automatically pushed on every commit.
 ```
 
 # Bugs/Feature requests

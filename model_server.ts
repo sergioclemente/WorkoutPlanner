@@ -139,10 +139,12 @@ export class WorkoutDB {
 	
 	connect() : void {
 		this.connection.connect();
+		console.log("connected to the db");
 	}
 	
 	close() : void {
-		this.connection.end();
+		this.connection.end({ timeout: 60000 });
+		console.log("disconnected from the db");	
 	}
 }
 
