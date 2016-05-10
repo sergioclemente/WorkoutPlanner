@@ -98,6 +98,42 @@ function handleSendEmail(req, res, uri, params) {
   }
 }
 
+function handleGetWorkouts(req, res, uri, params) {
+  logRequest(req, 200);
+  var db = new model_server.WorkoutDB(config.mysql);
+  db.connect();
+  db.getAll(function(err, workouts) {
+    db.close();    
+    if (err) {
+      res.write("Error");
+    } else {
+      res.write(JSON.stringify(workouts));
+      res.end();            
+    }
+  });
+}
+
+function handleSaveWorkout(req, res, uri, params) {
+  logRequest(req, 200);
+  var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
+  var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.t, params.w);
+
+  var db = new model_server.WorkoutDB(config.mysql);
+  db.connect();
+  var w = new model_server.Workout();
+  w.title = params.t;
+  w.value = params.w;
+  w.tags = "";
+  w.duration_sec = builder.getInterval().getDuration().getSeconds();
+  w.tss = builder.getInterval().getTSS();
+  w.sport_type = params.st;
+
+  db.add(w);               
+  db.close();
+  res.write("Workout saved");
+  res.end();     
+}
+
 http.createServer(function (req, res) {
   try {
     var parsed_url = url.parse(req.url, true);
@@ -129,28 +165,14 @@ http.createServer(function (req, res) {
           } else if (uri == "/save_workout") {
             var params = parsed_url.query;
             if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email && params.t) {
-              var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
-              var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.t, params.w);
-              logRequest(req, 200);
-              
-              var db = new model_server.WorkoutDB(config.mysql);
-              db.connect();
-              var w = new model_server.Workout();
-              w.title = params.t;
-              w.value = params.w;
-              w.tags = "";
-              w.duration_sec = builder.getInterval().getDuration().getSeconds();
-              w.tss = builder.getInterval().getTSS();
-              w.sport_type = params.st;
-
-              db.add(w);               
-              db.close();
-              res.write("Workout saved");
-              res.end();              
+              handleSaveWorkout(req, res, uri, params);         
             } else {
               res.write("Workout NOT saved due to some validation error");
               res.end();              
             }
+          } else if (uri == "/workouts") {
+            var params = parsed_url.query;
+            handleGetWorkouts(req, res, uri, params);
           } else {
             logRequest(req, 404);
             res.writeHead(404, {"Content-Type": "text/plain"});

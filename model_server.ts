@@ -110,6 +110,18 @@ export class WorkoutDB {
 		this.connection.query(sql);
 	}
 	
+	private _createWorkout(row: any) : Workout {
+		var workout = new Workout();
+		workout.id = row.id;
+		workout.title = row.title;
+		workout.value = row.value;
+		workout.tags = row.tags;
+		workout.duration_sec = row.duration_sec;
+		workout.tss = row.tss;
+		workout.sport_type = row.sport_type;
+		return workout;		
+	}
+	
 	get(id: number, callback : (err: string, w: Workout) => void) : void {
 		var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts where id={0}";
 		sql = stringFormat(
@@ -120,21 +132,33 @@ export class WorkoutDB {
 				if (rows.length == 0) {
 					callback("", null);
 				} else {
-					var workout = new Workout();
-					workout.id = rows[0].id;
-					workout.title = rows[0].title;
-					workout.value = rows[0].value;
-					workout.tags = rows[0].tags;
-					workout.duration_sec = rows[0].duration_sec;
-					workout.tss = rows[0].tss;
-					workout.sport_type = rows[0].sport_type;
-					callback("", workout);
+					callback("", this._createWorkout(rows[0]));
 				}				
 			} else {
 				console.log(err);
 				callback("Error while reading from db", null);
 			}
-		});	
+		}.bind(this));	
+	}
+	
+	getAll(callback : (err: string, w:Workout[]) => void) : void {
+		var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id";
+		this.connection.query(sql, function (err, rows, fields) {
+			var workouts = [];
+			if (!err) {
+				if (rows.length == 0) {
+					callback("", workouts);
+				} else {
+					for (var i = 0 ; i < rows.length; i++) {
+						workouts.push(this._createWorkout(rows[i]));
+					}
+					callback("", workouts);
+				}				
+			} else {
+				console.log(err);
+				callback("Error while reading from db", null);
+			}
+		}.bind(this));			
 	}
 	
 	connect() : void {
