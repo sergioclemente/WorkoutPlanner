@@ -158,7 +158,7 @@ MINUTES\tPERCENT
 75\t55
 [END COURSE DATA]
 [PERFPRO DESCRIPTIONS]
-Desc0=10' build to 75%
+Desc0=10' warmup to 75%
 Desc1=1hr @ 80%
 Desc2=5' build from 75% to 55%
 [END PERFPRO DESCRIPTIONS]
@@ -198,7 +198,7 @@ MINUTES\tPERCENT
 290\t75
 [END COURSE DATA]
 [PERFPRO DESCRIPTIONS]
-Desc0=10' build to 75%
+Desc0=10' warmup to 75%
 Desc1=1hr @ 80% | 1 of 4
 Desc2=5' easy | 1 of 4
 Desc3=1hr @ 80% | 2 of 4
@@ -318,7 +318,7 @@ expect_eq_str("10' LC @ 235w", Model.WorkoutTextVisitor.getIntervalTitle(Model.I
 expect_eq_str("10' @ 65%", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 65)`), up, Model.SportType.Bike, Model.IntensityUnit.IF));
 
 // ramp build interval
-expect_eq_str("10' build to 235w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(55, 75, 10min)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
+expect_eq_str("10' warmup to 235w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(55, 75, 10min)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 expect_eq_str("10' build from 235w to 310w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(75, 100, 10min)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 
 // repeat interval w/ 2 and 3 elements

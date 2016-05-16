@@ -1833,7 +1833,7 @@ var Model;
         // RampBuildInterval
         WorkoutTextVisitor.prototype.visitRampBuildInterval = function (interval) {
             if (interval.getStartIntensity().getValue() <= EASY_THRESHOLD) {
-                this.result += interval.getDuration().toStringShort() + " build to " + this.getIntensityPretty(interval.getEndIntensity());
+                this.result += interval.getDuration().toStringShort() + " warmup to " + this.getIntensityPretty(interval.getEndIntensity());
             }
             else {
                 this.result += interval.getDuration().toStringShort() + " build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());

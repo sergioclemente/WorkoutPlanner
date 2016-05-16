@@ -100,12 +100,12 @@ expect_eq_str(expected_content, zwift.getContent());
 // MRC File testing
 var mrc = new Model.MRCCourseDataVisitor("untitled_workout");
 Model.VisitorHelper.visitAndFinalize(mrc, file_interval);
-var expected_content = "[COURSE HEADER]\nVERSION=2\nUNITS=ENGLISH\nFILE NAME=untitled_workout\nMINUTES\tPERCENT\n[END COURSE HEADER]\n[COURSE DATA]\n0\t55\n10\t75\n10\t80\n70\t80\n70\t75\n75\t55\n[END COURSE DATA]\n[PERFPRO DESCRIPTIONS]\nDesc0=10' build to 75%\nDesc1=1hr @ 80%\nDesc2=5' build from 75% to 55%\n[END PERFPRO DESCRIPTIONS]\n";
+var expected_content = "[COURSE HEADER]\nVERSION=2\nUNITS=ENGLISH\nFILE NAME=untitled_workout\nMINUTES\tPERCENT\n[END COURSE HEADER]\n[COURSE DATA]\n0\t55\n10\t75\n10\t80\n70\t80\n70\t75\n75\t55\n[END COURSE DATA]\n[PERFPRO DESCRIPTIONS]\nDesc0=10' warmup to 75%\nDesc1=1hr @ 80%\nDesc2=5' build from 75% to 55%\n[END PERFPRO DESCRIPTIONS]\n";
 expect_eq_str(expected_content, mrc.getContent());
 var file_interval = Model.IntervalParser.parse(of_bike, "(10min, 55, 75), 4[(1hr, 80), (5min, 55)], (20min, 75)");
 var mrc = new Model.MRCCourseDataVisitor("untitled_workout");
 Model.VisitorHelper.visitAndFinalize(mrc, file_interval);
-var expected_content = "[COURSE HEADER]\nVERSION=2\nUNITS=ENGLISH\nFILE NAME=untitled_workout\nMINUTES\tPERCENT\n[END COURSE HEADER]\n[COURSE DATA]\n0\t55\n10\t75\n10\t80\n70\t80\n70\t55\n75\t55\n75\t80\n135\t80\n135\t55\n140\t55\n140\t80\n200\t80\n200\t55\n205\t55\n205\t80\n265\t80\n265\t55\n270\t55\n270\t75\n290\t75\n[END COURSE DATA]\n[PERFPRO DESCRIPTIONS]\nDesc0=10' build to 75%\nDesc1=1hr @ 80% | 1 of 4\nDesc2=5' easy | 1 of 4\nDesc3=1hr @ 80% | 2 of 4\nDesc4=5' easy | 2 of 4\nDesc5=1hr @ 80% | 3 of 4\nDesc6=5' easy | 3 of 4\nDesc7=1hr @ 80% | 4 of 4\nDesc8=5' easy | 4 of 4\nDesc9=20' @ 75%\n[END PERFPRO DESCRIPTIONS]\n";
+var expected_content = "[COURSE HEADER]\nVERSION=2\nUNITS=ENGLISH\nFILE NAME=untitled_workout\nMINUTES\tPERCENT\n[END COURSE HEADER]\n[COURSE DATA]\n0\t55\n10\t75\n10\t80\n70\t80\n70\t55\n75\t55\n75\t80\n135\t80\n135\t55\n140\t55\n140\t80\n200\t80\n200\t55\n205\t55\n205\t80\n265\t80\n265\t55\n270\t55\n270\t75\n290\t75\n[END COURSE DATA]\n[PERFPRO DESCRIPTIONS]\nDesc0=10' warmup to 75%\nDesc1=1hr @ 80% | 1 of 4\nDesc2=5' easy | 1 of 4\nDesc3=1hr @ 80% | 2 of 4\nDesc4=5' easy | 2 of 4\nDesc5=1hr @ 80% | 3 of 4\nDesc6=5' easy | 3 of 4\nDesc7=1hr @ 80% | 4 of 4\nDesc8=5' easy | 4 of 4\nDesc9=20' @ 75%\n[END PERFPRO DESCRIPTIONS]\n";
 expect_eq_str(expected_content, mrc.getContent());
 // No intensity specified
 expect_eq_nbr(0.55, Model.IntervalParser.parse(of_bike, "(10min, easy)").getIntensity().getValue());
@@ -189,7 +189,7 @@ expect_eq_str("10' @ 205w", Model.WorkoutTextVisitor.getIntervalTitle(Model.Inte
 expect_eq_str("10' LC @ 235w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(10min, 75, LC)"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 expect_eq_str("10' @ 65%", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(10min, 65)"), up, Model.SportType.Bike, Model.IntensityUnit.IF));
 // ramp build interval
-expect_eq_str("10' build to 235w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(55, 75, 10min)"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
+expect_eq_str("10' warmup to 235w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(55, 75, 10min)"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 expect_eq_str("10' build from 235w to 310w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "(75, 100, 10min)"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 // repeat interval w/ 2 and 3 elements
 expect_eq_str("2 x (5' @ 235w - 2' @ 310w)", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, "2[(5min, 75), (2min, 100)]"), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
