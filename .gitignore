@@ -3,3 +3,5 @@ node_modules/*
 local.sh
 
 intense-thicket-9526/
+
+.vscode/launch.json
