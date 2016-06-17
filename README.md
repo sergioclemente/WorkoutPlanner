@@ -52,7 +52,11 @@ Nice to have things
 * [P3] Add free ride do zwift
         <FreeRide Duration="600" FlatRoad="1"/>
 * [P3] Add react for generating emails
-
+* Zwift file incorrect quotes '
+* pipe (|) missing in Repeat interval
+* Ajax TS
+* List workouts
+* Units
 
 
 # Where to find type definition files:

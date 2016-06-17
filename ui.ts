@@ -40,6 +40,8 @@ export class QueryParams {
 				this.loadFromStorage();
 			}
 		}
+		// HACK HACK: enable this just for me
+		this.experimental = this.experimental || this.email == 'sergioclemente@gmail.com';		
 	}
 
 	static createCopy(params: QueryParams) : QueryParams {

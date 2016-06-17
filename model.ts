@@ -1795,10 +1795,11 @@ export class WorkoutTextVisitor implements Visitor {
 	}
 	
 	visitRestInterval(interval: Interval) : void {
-		if (interval.getIntensity().getValue() <= EASY_THRESHOLD) {
+		var value = interval.getIntensity().getValue(); 
+		if (value <= EASY_THRESHOLD) {
 			this.result += interval.getDuration().toStringShort() + " easy";
 		} else {
-			this.result += interval.getDuration().toStringShort() + " easy @ " + this.getIntensityPretty(interval.getIntensity());
+			this.result += interval.getDuration().toStringShort() + " @ " + this.getIntensityPretty(interval.getIntensity());
 		}
 	}
 

@@ -29,6 +29,8 @@ var UI;
                     this.loadFromStorage();
                 }
             }
+            // HACK HACK: enable this just for me
+            this.experimental = this.experimental || this.email == 'sergioclemente@gmail.com';
         }
         QueryParams.createCopy = function (params) {
             var ret = new QueryParams();
