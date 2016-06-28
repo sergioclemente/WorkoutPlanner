@@ -1732,6 +1732,7 @@ export class WorkoutTextVisitor implements Visitor {
 	userProfile: UserProfile = null;
 	sportType: SportType = SportType.Unknown;
 	outputUnit: IntensityUnit = IntensityUnit.Unknown;
+	shouldDisplayEasy : boolean = true;
 
 	constructor(userProfile: UserProfile = null,
 				sportType: SportType = SportType.Unknown,
@@ -1818,7 +1819,10 @@ export class WorkoutTextVisitor implements Visitor {
 				
 		if (length == 2) {			
 			if (isRestIncluded) {
+				var oldFlag = this.shouldDisplayEasy;
+				this.shouldDisplayEasy = false;
 				VisitorHelper.visit(this, firstInterval);
+				this.shouldDisplayEasy = oldFlag;
 				this.result += " - ";
 				this.visitRestInterval(lastInterval);
 			} else {
@@ -1925,9 +1929,14 @@ export class WorkoutTextVisitor implements Visitor {
 		if (title.length > 0) {
 			this.result += " " + title;
 		}
-		// Lets write the intensity as easy if its lower than a threshold, but it didn't have a title
-		// Otherwise it might be something like single leg drills
-		if (interval.getIntensity().getValue() <= EASY_THRESHOLD && title.length == 0) {
+
+		// 3 cases to cover:
+		// - warmup (usually IF around 50-60) - no title - easy peasy
+		// - drills with single leg (IF < 60) - title present - check for title
+		// - recovery day, first interval in a repeat rest is something like 60. 
+		// 
+		if (interval.getIntensity().getValue() <= EASY_THRESHOLD && title.length == 0 &&
+			this.shouldDisplayEasy) {
 			if (interval.getIntensity().getValue() == 0) {
 				this.result += " rest";
 			} else {
@@ -2356,61 +2365,34 @@ export class WorkoutBuilder {
 			return WorkoutTextVisitor.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
 		}
 	}
+
+	getStepsList(new_line) : string {
+		var result = "";
+
+        this.intervals.getIntervals().forEach(function(interval) {
+			result += ("* " + this.getIntervalPretty(interval) + new_line); 
+        }.bind(this));
+
+		return result;
+	}
+
+	getDistanceInMiles() : number {
+		var result = 0;
+
+        this.intervals.getIntervals().forEach(function(interval) {
+            if (interval.getDuration().getDistanceInMiles() > 0) {
+                result += interval.getDuration().getDistanceInMiles();
+            }
+        }.bind(this));
+
+		return result;
+	}
 	
 	getPrettyPrint(new_line : string = "\n") : string {
 		var intensities = this.intervals.getIntensities();
 
-		var distanceInMiles = 0;
-		var result = new_line;
-        this.intervals.getIntervals().forEach(function(interval) {
-            result += ("* " + this.getIntervalPretty(interval) + new_line);
-            if (interval.getDuration().getDistanceInMiles() > 0) {
-                distanceInMiles += interval.getDuration().getDistanceInMiles();
-            }
-        }.bind(this));
-		
-		result += (new_line);
-		result += ("Stats:");
-		result += (new_line);
-		result += ("TSS: " + this.getTSS());
-		result += (new_line);
-		result += ("\t* Time: " + this.getTimePretty());
-		result += (new_line);
-		if (this.sportType == SportType.Swim) {
-			result += ("\t* Distance: " + this.getEstimatedDistancePretty());
-		} else {
-			result += ("\t* Distance: " + this.getEstimatedDistancePretty());
-		}
-		
-		result += (new_line);		
-		result += ("\t* IF: " + this.getIF());
-		result += (new_line);
-
-		result += ("Zones:");
-		result += (new_line);
-        var zones = this.intervals.getTimeInZones(this.sportType);
-        zones.forEach(function(zone) {
-            result += ("\t* "+zone.name + " " + zone.range +" : " + zone.duration.toString());
-			result += (new_line);
-        });
-
-		if (this.sportType == SportType.Bike) {
-			result += ("\t* Avg Pwr: " + this.getAveragePower() + "w");
-			result += (new_line);
-		}
-
-		result += (new_line);
-		result += ("Paces:");
-		result += (new_line);
-		intensities.forEach(function(intensity: Intensity) {
-			result += ("\t* " + Math.round(intensity.getValue()*100) + "% (" + this.getIntensityFriendly(intensity) + ")");
-			result += (new_line);
-		}, this);
-
-
-		result += (new_line);
-		result += ("Workout Definition: " + this.workoutDefinition);
-		result += (new_line);
+		var result = "";
+		result += this.getStepsList(new_line);
 
 		return result
 	}

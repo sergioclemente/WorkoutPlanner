@@ -337,6 +337,7 @@ declare module Model {
         userProfile: UserProfile;
         sportType: SportType;
         outputUnit: IntensityUnit;
+        shouldDisplayEasy: boolean;
         constructor(userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit);
         static roundNumberUp(value: number, round_val?: number): number;
         static roundNumberDown(value: number, round_val?: number): number;
@@ -423,6 +424,8 @@ declare module Model {
         getIntervalPretty(interval: Interval): string;
         getEstimatedDistancePretty(): string;
         getAveragePace(): string;
+        getStepsList(new_line: any): string;
+        getDistanceInMiles(): number;
         getPrettyPrint(new_line?: string): string;
         getMRCFile(): string;
         getZWOFile(): string;
