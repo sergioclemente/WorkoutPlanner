@@ -39,10 +39,11 @@ Its automatically pushed on every commit.
 ```
 
 # Bugs/Feature requests
+* Auto merge MRC intervals
+* Zwift files are broken
 * Change output units on sport type
 * More logging on usage
 * Refactor validation of parameters on server.js
-* Ability to save workouts
 * Add player
 * Add support for bpm
 

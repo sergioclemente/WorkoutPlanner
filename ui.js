@@ -1,3 +1,4 @@
+"use strict";
 /// <reference path="type_definitions/node.d.ts" />
 var UI;
 (function (UI) {
@@ -20,7 +21,7 @@ var UI;
             }
         };
         return PersistedItem;
-    })();
+    }());
     UI.PersistedItem = PersistedItem;
     var QueryParams = (function () {
         function QueryParams() {
@@ -103,7 +104,7 @@ var UI;
                 "&e=" + encodeURIComponent(this.experimental ? "1" : "0");
         };
         return QueryParams;
-    })();
+    }());
     UI.QueryParams = QueryParams;
     function getQueryParams() {
         var qs = document.location.search;
@@ -131,7 +132,7 @@ var UI;
             }
         };
         return FieldValidator;
-    })();
+    }());
     UI.FieldValidator = FieldValidator;
     var ClipboardHelper = (function () {
         function ClipboardHelper() {
@@ -163,7 +164,7 @@ var UI;
             document.body.removeChild(textArea);
         };
         return ClipboardHelper;
-    })();
+    }());
     UI.ClipboardHelper = ClipboardHelper;
 })(UI || (UI = {}));
 module.exports = UI;

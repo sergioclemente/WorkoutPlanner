@@ -1,3 +1,4 @@
+"use strict";
 var mysql = require('mysql');
 var ModelServer;
 (function (ModelServer) {
@@ -46,7 +47,7 @@ var ModelServer;
             });
         };
         return MailSender;
-    })();
+    }());
     ModelServer.MailSender = MailSender;
     var Workout = (function () {
         function Workout() {
@@ -56,7 +57,7 @@ var ModelServer;
             return ret;
         };
         return Workout;
-    })();
+    }());
     ModelServer.Workout = Workout;
     function stringFormat(format) {
         var args = [];
@@ -139,7 +140,7 @@ var ModelServer;
             console.log("disconnected from the db");
         };
         return WorkoutDB;
-    })();
+    }());
     ModelServer.WorkoutDB = WorkoutDB;
 })(ModelServer || (ModelServer = {}));
 module.exports = ModelServer;

@@ -1,3 +1,4 @@
+"use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -99,7 +100,7 @@ var Model;
             return MyMath.decimalAdjust('ceil', value, exp);
         };
         return MyMath;
-    })();
+    }());
     Model.MyMath = MyMath;
     var DistanceUnitHelper = (function () {
         function DistanceUnitHelper() {
@@ -141,7 +142,7 @@ var Model;
             }
         };
         return DistanceUnitHelper;
-    })();
+    }());
     Model.DistanceUnitHelper = DistanceUnitHelper;
     var TimeUnitHelper = (function () {
         function TimeUnitHelper() {
@@ -176,7 +177,7 @@ var Model;
             }
         };
         return TimeUnitHelper;
-    })();
+    }());
     Model.TimeUnitHelper = TimeUnitHelper;
     function getStringFromDurationUnit(unit) {
         switch (unit) {
@@ -254,7 +255,7 @@ var Model;
             }
         };
         return DurationUnitHelper;
-    })();
+    }());
     Model.DurationUnitHelper = DurationUnitHelper;
     var Duration = (function () {
         function Duration(unit, value, estimatedDurationInSeconds, estimatedDistanceInMiles) {
@@ -381,7 +382,7 @@ var Model;
             }
         };
         return Duration;
-    })();
+    }());
     Model.Duration = Duration;
     function getStringFromIntensityUnit(unit) {
         switch (unit) {
@@ -562,7 +563,7 @@ var Model;
             return result;
         };
         return IntensityUnitHelper;
-    })();
+    }());
     Model.IntensityUnitHelper = IntensityUnitHelper;
     ;
     var Intensity = (function () {
@@ -649,7 +650,7 @@ var Model;
             return new Intensity(Math.sqrt(sum1 / sum2));
         };
         return Intensity;
-    })();
+    }());
     Model.Intensity = Intensity;
     var BaseInterval = (function () {
         function BaseInterval(title) {
@@ -667,7 +668,7 @@ var Model;
             throw new Error("not implemented");
         };
         return BaseInterval;
-    })();
+    }());
     Model.BaseInterval = BaseInterval;
     var CommentInterval = (function (_super) {
         __extends(CommentInterval, _super);
@@ -681,7 +682,7 @@ var Model;
             return new Duration(DurationUnit.Seconds, 0, 0, 0);
         };
         return CommentInterval;
-    })(BaseInterval);
+    }(BaseInterval));
     Model.CommentInterval = CommentInterval;
     var SimpleInterval = (function (_super) {
         __extends(SimpleInterval, _super);
@@ -697,7 +698,7 @@ var Model;
             return this.duration;
         };
         return SimpleInterval;
-    })(BaseInterval);
+    }(BaseInterval));
     Model.SimpleInterval = SimpleInterval;
     var RampBuildInterval = (function (_super) {
         __extends(RampBuildInterval, _super);
@@ -723,7 +724,7 @@ var Model;
             return Intensity.combine([intensity1, intensity2], [1, 1]);
         };
         return RampBuildInterval;
-    })(BaseInterval);
+    }(BaseInterval));
     Model.RampBuildInterval = RampBuildInterval;
     var Point = (function () {
         function Point(x, y, label) {
@@ -732,7 +733,7 @@ var Model;
             this.label = label;
         }
         return Point;
-    })();
+    }());
     Model.Point = Point;
     var ArrayInterval = (function () {
         function ArrayInterval(title, intervals) {
@@ -800,7 +801,7 @@ var Model;
             return zv.getTimeInZones();
         };
         return ArrayInterval;
-    })();
+    }());
     Model.ArrayInterval = ArrayInterval;
     var RepeatInterval = (function (_super) {
         __extends(RepeatInterval, _super);
@@ -826,7 +827,7 @@ var Model;
             return this.repeatCount;
         };
         return RepeatInterval;
-    })(ArrayInterval);
+    }(ArrayInterval));
     Model.RepeatInterval = RepeatInterval;
     // Step is defined as follows
     // 2[(1min, 85, 95), (30s, 55)]
@@ -896,7 +897,7 @@ var Model;
             }
         };
         return StepBuildInterval;
-    })(ArrayInterval);
+    }(ArrayInterval));
     Model.StepBuildInterval = StepBuildInterval;
     var NumberParser = (function () {
         function NumberParser() {
@@ -934,7 +935,7 @@ var Model;
             return this.value;
         };
         return NumberParser;
-    })();
+    }());
     Model.NumberParser = NumberParser;
     var StringChunkParser = (function () {
         function StringChunkParser(delimiters) {
@@ -959,7 +960,7 @@ var Model;
             return this.value;
         };
         return StringChunkParser;
-    })();
+    }());
     Model.StringChunkParser = StringChunkParser;
     var IntensityParser = (function () {
         function IntensityParser() {
@@ -1011,7 +1012,7 @@ var Model;
             return this.unit;
         };
         return IntensityParser;
-    })();
+    }());
     Model.IntensityParser = IntensityParser;
     var IntervalParser = (function () {
         function IntervalParser() {
@@ -1243,7 +1244,7 @@ var Model;
             return result;
         };
         return IntervalParser;
-    })();
+    }());
     Model.IntervalParser = IntervalParser;
     var VisitorHelper = (function () {
         function VisitorHelper() {
@@ -1277,7 +1278,7 @@ var Model;
             }
         };
         return VisitorHelper;
-    })();
+    }());
     Model.VisitorHelper = VisitorHelper;
     var BaseVisitor = (function () {
         function BaseVisitor() {
@@ -1315,7 +1316,7 @@ var Model;
         BaseVisitor.prototype.finalize = function () {
         };
         return BaseVisitor;
-    })();
+    }());
     Model.BaseVisitor = BaseVisitor;
     // TSS = [(s x NP x IF) / (FTP x 3600)] x 100
     // IF = NP / FTP
@@ -1348,7 +1349,7 @@ var Model;
             return MyMath.round10(this.tss / 36, -1);
         };
         return TSSVisitor;
-    })(BaseVisitor);
+    }(BaseVisitor));
     Model.TSSVisitor = TSSVisitor;
     var DateHelper = (function () {
         function DateHelper() {
@@ -1366,7 +1367,7 @@ var Model;
             return weekday[d.getDay()];
         };
         return DateHelper;
-    })();
+    }());
     Model.DateHelper = DateHelper;
     var ZonesMap = (function () {
         function ZonesMap() {
@@ -1405,7 +1406,7 @@ var Model;
             }
         };
         return ZonesMap;
-    })();
+    }());
     Model.ZonesMap = ZonesMap;
     var ZonesVisitor = (function (_super) {
         __extends(ZonesVisitor, _super);
@@ -1475,7 +1476,7 @@ var Model;
             return result;
         };
         return ZonesVisitor;
-    })(BaseVisitor);
+    }(BaseVisitor));
     Model.ZonesVisitor = ZonesVisitor;
     var IntensitiesVisitor = (function (_super) {
         __extends(IntensitiesVisitor, _super);
@@ -1501,7 +1502,7 @@ var Model;
             return result;
         };
         return IntensitiesVisitor;
-    })(BaseVisitor);
+    }(BaseVisitor));
     Model.IntensitiesVisitor = IntensitiesVisitor;
     var DataPointVisitor = (function (_super) {
         __extends(DataPointVisitor, _super);
@@ -1533,7 +1534,7 @@ var Model;
             this.data.push(new Point(this.x, interval.getEndIntensity(), title));
         };
         return DataPointVisitor;
-    })(BaseVisitor);
+    }(BaseVisitor));
     Model.DataPointVisitor = DataPointVisitor;
     var ZwiftDataVisitor = (function (_super) {
         __extends(ZwiftDataVisitor, _super);
@@ -1575,7 +1576,7 @@ var Model;
             return this.content;
         };
         return ZwiftDataVisitor;
-    })(BaseVisitor);
+    }(BaseVisitor));
     Model.ZwiftDataVisitor = ZwiftDataVisitor;
     var MRCCourseDataVisitor = (function (_super) {
         __extends(MRCCourseDataVisitor, _super);
@@ -1648,7 +1649,7 @@ var Model;
             return this.content;
         };
         return MRCCourseDataVisitor;
-    })(BaseVisitor);
+    }(BaseVisitor));
     Model.MRCCourseDataVisitor = MRCCourseDataVisitor;
     var FileNameHelper = (function () {
         function FileNameHelper(intervals) {
@@ -1692,7 +1693,7 @@ var Model;
             }
         };
         return FileNameHelper;
-    })();
+    }());
     Model.FileNameHelper = FileNameHelper;
     var EASY_THRESHOLD = 0.60;
     var WorkoutTextVisitor = (function () {
@@ -1945,7 +1946,7 @@ var Model;
         WorkoutTextVisitor.prototype.finalize = function () {
         };
         return WorkoutTextVisitor;
-    })();
+    }());
     Model.WorkoutTextVisitor = WorkoutTextVisitor;
     var SpeedParser = (function () {
         function SpeedParser() {
@@ -1999,7 +2000,7 @@ var Model;
             return integerPart + fractionPart / decimalMultiplier;
         };
         return SpeedParser;
-    })();
+    }());
     Model.SpeedParser = SpeedParser;
     var UserProfile = (function () {
         function UserProfile(bikeFTPWatts, renameTPace, swimCSS, email) {
@@ -2040,7 +2041,7 @@ var Model;
             return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, intensity_unit_result);
         };
         return UserProfile;
-    })();
+    }());
     Model.UserProfile = UserProfile;
     var ObjectFactory = (function () {
         function ObjectFactory(userProfile, sportType) {
@@ -2153,7 +2154,7 @@ var Model;
             return new Duration(unit, value, estimatedTimeInSeconds, estimatedDistanceInMiles);
         };
         return ObjectFactory;
-    })();
+    }());
     Model.ObjectFactory = ObjectFactory;
     var StopWatch = (function () {
         function StopWatch() {
@@ -2187,7 +2188,7 @@ var Model;
             this.stoppedTime = 0;
         };
         return StopWatch;
-    })();
+    }());
     Model.StopWatch = StopWatch;
     var ArrayIterator = (function () {
         function ArrayIterator(array) {
@@ -2218,7 +2219,7 @@ var Model;
             return this.getIsValid();
         };
         return ArrayIterator;
-    })();
+    }());
     Model.ArrayIterator = ArrayIterator;
     var WorkoutBuilder = (function () {
         function WorkoutBuilder(userProfile, sportType, outputUnit) {
@@ -2331,7 +2332,7 @@ var Model;
             return fileNameHelper.getFileName() + ".mrc";
         };
         return WorkoutBuilder;
-    })();
+    }());
     Model.WorkoutBuilder = WorkoutBuilder;
     ;
 })(Model || (Model = {}));

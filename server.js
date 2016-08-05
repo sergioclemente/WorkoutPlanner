@@ -57,7 +57,10 @@ function handleDownloadWorkout(req, res, uri, params) {
     );
     res.write(workout_content);
     res.end();
-  }   
+    return true;
+  } else {
+    return false;
+  }
 }
 
 function handleSendEmail(req, res, uri, params) {
@@ -95,6 +98,9 @@ function handleSendEmail(req, res, uri, params) {
           }
           res.end();
       });
+    return true;
+  } else {
+    return false;
   }
 }
 
@@ -111,6 +117,13 @@ function handleGetWorkouts(req, res, uri, params) {
       res.end();            
     }
   });
+}
+
+function show404(req, res) {
+  logRequest(req, 404);
+  res.writeHead(404, {"Content-Type": "text/plain"});
+  res.write("404 Not Found\n");
+  res.end();
 }
 
 function handleSaveWorkout(req, res, uri, params) {
@@ -158,17 +171,20 @@ http.createServer(function (req, res) {
           // make this more generic
           if (uri === "/workout.mrc" || uri === "/workout.zwo") {
             var params = parsed_url.query;
-            handleDownloadWorkout(req, res, uri, params);     
+            if (!handleDownloadWorkout(req, res, uri, params)) {
+              show404(req, res);              
+            }     
           } else if (uri == "/send_mail") {
             var params = parsed_url.query;
-			      handleSendEmail(req, res, uri, params);
+			      if (!handleSendEmail(req, res, uri, params)) {
+              show404(req, res);
+            }
           } else if (uri == "/save_workout") {
             var params = parsed_url.query;
             if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email && params.t) {
               handleSaveWorkout(req, res, uri, params);         
             } else {
-              res.write("Workout NOT saved due to some validation error");
-              res.end();              
+              show404(req, res);          
             }
           } else if (uri == "/workouts") {
             var params = parsed_url.query;

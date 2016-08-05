@@ -1,6 +1,6 @@
 var config = {};
 
-config.port = (process.env.PORT || 5000);
+config.port = (process.env.PORT || 7000);
 config.smtp = {};
 config.smtp.server_host = 'smtp.gmail.com';
 config.smtp.server_port = 465;

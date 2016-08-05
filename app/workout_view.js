@@ -1,5 +1,6 @@
 /// <reference path="../type_definitions/react.d.ts" />
 /// <reference path="../type_definitions/canvasjs.d.ts" />
+"use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -94,7 +95,7 @@ var WorkoutView = (function (_super) {
     };
     WorkoutView.prototype.renderWorkoutSteps = function () {
         return this.state.workout_steps.map(function (step, index) {
-            return React.createElement("li", {"key": index}, step);
+            return React.createElement("li", {key: index}, step);
         }.bind(this));
     };
     WorkoutView.prototype.componentDidMount = function () {
@@ -149,9 +150,9 @@ var WorkoutView = (function (_super) {
         }
     };
     WorkoutView.prototype.render = function () {
-        return (React.createElement("div", null, React.createElement("h2", null, "Steps"), React.createElement("ul", null, this.renderWorkoutSteps()), React.createElement("h2", null, "Summary"), React.createElement("button", {"id": "id_clipboard"}, "Copy to clipboard"), React.createElement("table", null, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("b", null, "Metric")), React.createElement("td", null, React.createElement("b", null, "Value"))), React.createElement("tr", null, React.createElement("td", null, "TSS"), React.createElement("td", null, this.state.tss)), React.createElement("tr", null, React.createElement("td", null, "TSS From IF"), React.createElement("td", null, this.state.tss_from_if)), React.createElement("tr", null, React.createElement("td", null, "Time"), React.createElement("td", null, this.state.time)), React.createElement("tr", null, React.createElement("td", null, "IF"), React.createElement("td", null, this.state.intensity)), this.renderPower(), this.renderDistance(), this.renderPace())), React.createElement("div", {"id": "chartTimeline", "style": { height: "300px", width: "100%" }}), React.createElement("div", {"id": "chartZones", "style": { height: "200px", width: "100%" }})));
+        return (React.createElement("div", null, React.createElement("h2", null, "Steps"), React.createElement("ul", null, this.renderWorkoutSteps()), React.createElement("h2", null, "Summary"), React.createElement("button", {id: "id_clipboard"}, "Copy to clipboard"), React.createElement("table", null, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("b", null, "Metric")), React.createElement("td", null, React.createElement("b", null, "Value"))), React.createElement("tr", null, React.createElement("td", null, "TSS"), React.createElement("td", null, this.state.tss)), React.createElement("tr", null, React.createElement("td", null, "TSS From IF"), React.createElement("td", null, this.state.tss_from_if)), React.createElement("tr", null, React.createElement("td", null, "Time"), React.createElement("td", null, this.state.time)), React.createElement("tr", null, React.createElement("td", null, "IF"), React.createElement("td", null, this.state.intensity)), this.renderPower(), this.renderDistance(), this.renderPace())), React.createElement("div", {id: "chartTimeline", style: { height: "300px", width: "100%" }}), React.createElement("div", {id: "chartZones", style: { height: "200px", width: "100%" }})));
     };
     return WorkoutView;
-})(React.Component);
+}(React.Component));
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = WorkoutView;

@@ -1,5 +1,6 @@
 /// <reference path="../type_definitions/react.d.ts" />
 /// <reference path="../type_definitions/canvasjs.d.ts" />
+"use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -22,6 +23,6 @@ var WorkoutViews = (function (_super) {
         return (React.createElement("div", null, "Workouts"));
     };
     return WorkoutViews;
-})(React.Component);
+}(React.Component));
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = WorkoutViews;
