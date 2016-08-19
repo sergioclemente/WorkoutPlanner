@@ -163,38 +163,26 @@ http.createServer(function (req, res) {
       return;
     }
 
+    var handler_map = {
+      "/workout.mrc": handleDownloadWorkout,
+      "/workout.zwo": handleDownloadWorkout,
+      "/send_mail": handleSendEmail,
+      "/save_workout": handleSaveWorkout,
+      "/workouts": handleGetWorkouts
+    };
+
     fs.exists(filename, function(exists) {
       try {
         if (exists) {
           handleExistentFile(req, res, fs, filename);
         } else {
-          // make this more generic
-          if (uri === "/workout.mrc" || uri === "/workout.zwo") {
+          if (uri in handler_map) {
             var params = parsed_url.query;
-            if (!handleDownloadWorkout(req, res, uri, params)) {
-              show404(req, res);              
-            }     
-          } else if (uri == "/send_mail") {
-            var params = parsed_url.query;
-			      if (!handleSendEmail(req, res, uri, params)) {
+            if (!handler_map[uri](req, res, uri, params)) {
               show404(req, res);
             }
-          } else if (uri == "/save_workout") {
-            var params = parsed_url.query;
-            if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email && params.t) {
-              handleSaveWorkout(req, res, uri, params);         
-            } else {
-              show404(req, res);          
-            }
-          } else if (uri == "/workouts") {
-            var params = parsed_url.query;
-            handleGetWorkouts(req, res, uri, params);
           } else {
-            logRequest(req, 404);
-            res.writeHead(404, {"Content-Type": "text/plain"});
-            res.write("404 Not Found\n");
-            res.end();
-            return;
+            show404(req, res);
           }
         }
       } catch (err1) {
