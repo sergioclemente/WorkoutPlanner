@@ -168,7 +168,7 @@ export class WorkoutDB {
 	
 	close() : void {
 		this.connection.end({ timeout: 60000 });
-		console.log("disconnected from the db");	
+		console.log("closed the db");	
 	}
 }
 

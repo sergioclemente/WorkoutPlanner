@@ -109,14 +109,15 @@ function handleGetWorkouts(req, res, uri, params) {
   var db = new model_server.WorkoutDB(config.mysql);
   db.connect();
   db.getAll(function(err, workouts) {
-    db.close();    
     if (err) {
-      res.write("Error");
+      res.write("Error: " + err);
     } else {
       res.write(JSON.stringify(workouts));
       res.end();            
     }
+    db.close();       
   });
+  return true;
 }
 
 function show404(req, res) {
