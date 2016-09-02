@@ -20,6 +20,8 @@ export default class WorkoutView extends React.Component<any, any> {
 		try {
 			// TODO: Fix this clowny parseInt()
 			var userProfile = new Model.UserProfile(parseInt(params.ftp_watts), params.t_pace, params.swim_css, params.email);
+			userProfile.setEfficiencyFactor(params.efficiency_factor);
+
 			var builder = new Model.WorkoutBuilder(
 				userProfile, parseInt(params.sport_type), parseInt(params.output_unit)).withDefinition(params.workout_title, params.workout_text);
 

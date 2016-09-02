@@ -13,6 +13,7 @@ export default class UserProperty extends React.Component<any, any> {
 	private t_pace: string;
 	private swim_css: string;
 	private email: string;
+	private efficiency_factor: string;
 
 	constructor(params: any) {
 		super(params);
@@ -21,6 +22,7 @@ export default class UserProperty extends React.Component<any, any> {
 		this.email = params.email;
 		this.t_pace = params.t_pace;
 		this.swim_css = params.swim_css;
+		this.efficiency_factor = params.efficiency_factor;
 	}
 
 	onFtpChange(ftp) {
@@ -31,10 +33,7 @@ export default class UserProperty extends React.Component<any, any> {
 			ftpInput.setError("");
 		}
 		this.ftp = ftp;
-
-		if (this.props.onChange) {
-			this.props.onChange(this.ftp, this.t_pace, this.swim_css, this.email);
-		}
+		this.fireOnChange();
 	}
 	onTPaceChange(t_pace) {
 		var tPaceInput: NumberInput = this.refs['t_pace'] as NumberInput;
@@ -45,10 +44,7 @@ export default class UserProperty extends React.Component<any, any> {
 			tPaceInput.setError("Enter a value speed for your running t-pace. Allowed units are: min/mi, km/h, mi/h, min/km");
 		}
 		this.t_pace = t_pace;
-
-		if (this.props.onChange) {
-			this.props.onChange(this.ftp, this.t_pace, this.swim_css, this.email);
-		}
+		this.fireOnChange();
 	}
 	onSwimCSSChange(swim_css) {
 		var tSwimCss: NumberInput = this.refs['swim_css'] as NumberInput;
@@ -59,17 +55,20 @@ export default class UserProperty extends React.Component<any, any> {
 			tSwimCss.setError("Enter a value for the swim css. Allowed units are: mph, /100yards");
 		}
 		this.swim_css = swim_css;
-
-		if (this.props.onChange) {
-			this.props.onChange(this.ftp, this.t_pace, this.swim_css, this.email);
-		}
+		this.fireOnChange();
 	}
 	onEmailChange(email) {
 		this.email = email;
-
+		this.fireOnChange();
+	}
+	onEfficiencyFactorChange(efficiency_factor) {
+		this.efficiency_factor = efficiency_factor;
+		this.fireOnChange();
+	}
+	fireOnChange() {
 		if (this.props.onChange) {
-			this.props.onChange(this.ftp, this.t_pace, this.swim_css, this.email);
-		}
+			this.props.onChange(this.ftp, this.t_pace, this.swim_css, this.email, this.efficiency_factor);
+		}		
 	}
 	render() {
 		return (
@@ -79,6 +78,7 @@ export default class UserProperty extends React.Component<any, any> {
 				Bike FTP: <NumberInput ref="ftp" width="20" placeholder="245" value={this.ftp} onChange={this.onFtpChange.bind(this) }></NumberInput><br />
 				Run T-Pace: <TextInput ref="t_pace" width="20" placeholder="7:30 min/mi" value={this.t_pace} onChange={this.onTPaceChange.bind(this) }></TextInput> <br />
 				Email: <EmailInput ref="email" width="20" placeholder="foo@gmail.com" value={this.email} onChange={this.onEmailChange.bind(this) }></EmailInput> <br />
+				Efficiency Factor: <NumberInput ref="efficiency_factor" width="20" placeholder="1.2" value={this.efficiency_factor} onChange={this.onEfficiencyFactorChange.bind(this) }></NumberInput> <br />
 				<br />
 			</div>);
 	}

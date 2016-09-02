@@ -51,6 +51,7 @@ var Model;
         IntensityUnit[IntensityUnit["Per100Yards"] = 6] = "Per100Yards";
         IntensityUnit[IntensityUnit["Per100Meters"] = 7] = "Per100Meters";
         IntensityUnit[IntensityUnit["OffsetSeconds"] = 8] = "OffsetSeconds";
+        IntensityUnit[IntensityUnit["HeartRate"] = 9] = "HeartRate";
     })(Model.IntensityUnit || (Model.IntensityUnit = {}));
     var IntensityUnit = Model.IntensityUnit;
     (function (RunningPaceUnit) {
@@ -402,6 +403,8 @@ var Model;
                 return "/100yards";
             case IntensityUnit.Per100Meters:
                 return "/100meters";
+            case IntensityUnit.HeartRate:
+                return "hr";
             default:
                 console.assert(false, stringFormat("Unknown intensity unit {0}", unit));
                 return "unknown";
@@ -445,6 +448,9 @@ var Model;
             "/100yards": IntensityUnit.Per100Yards,
             "/100meters": IntensityUnit.Per100Meters,
             "offset": IntensityUnit.OffsetSeconds,
+            "hr": IntensityUnit.HeartRate,
+            "heart rate": IntensityUnit.HeartRate,
+            "bpm": IntensityUnit.HeartRate
         };
         if (unit in conversionMap) {
             return conversionMap[unit];
@@ -477,6 +483,9 @@ var Model;
         }
         else if (unit == IntensityUnit.Per100Meters) {
             return "/100m";
+        }
+        else if (unit == IntensityUnit.HeartRate) {
+            return "hr";
         }
         else {
             console.assert(false, stringFormat("Invalid intensity unit {0}", unit));
@@ -1904,6 +1913,18 @@ var Model;
             }
         };
         WorkoutTextVisitor.prototype.getIntensityPretty = function (intensity) {
+            if (this.outputUnit == IntensityUnit.HeartRate) {
+                var bpm = 0;
+                if (this.sportType == SportType.Bike) {
+                    bpm = this.userProfile.getBikeFTP() / this.userProfile.getEfficiencyFactor();
+                }
+                else if (this.sportType == SportType.Run) {
+                    // 1760 yards
+                    // http://home.trainingpeaks.com/blog/article/the-efficiency-factor-in-running
+                    bpm = (1760 * this.userProfile.getRunnintTPaceMph()) / (60 * this.userProfile.getEfficiencyFactor());
+                }
+                return (intensity.getValue() * bpm) + "bpm";
+            }
             if (this.outputUnit == IntensityUnit.Unknown ||
                 this.sportType == SportType.Unknown ||
                 this.outputUnit == IntensityUnit.IF) {
@@ -2011,11 +2032,20 @@ var Model;
             this.swimmingCSSMinPer100Yards = IntensityUnitHelper.convertTo(swim_css_mph, IntensityUnit.Mph, IntensityUnit.Per100Yards);
             this.email = email;
         }
+        UserProfile.prototype.setEfficiencyFactor = function (ef) {
+            this.effiency_factor = parseFloat(ef);
+        };
+        UserProfile.prototype.getEfficiencyFactor = function () {
+            return this.effiency_factor;
+        };
         UserProfile.prototype.getBikeFTP = function () {
             return this.bikeFTP;
         };
         UserProfile.prototype.getRunningTPaceMinMi = function () {
             return this.runningTPaceMinMi;
+        };
+        UserProfile.prototype.getRunnintTPaceMph = function () {
+            return IntensityUnitHelper.convertTo(this.getRunningTPaceMinMi(), IntensityUnit.MinMi, IntensityUnit.Mph);
         };
         UserProfile.prototype.getEmail = function () {
             return this.email;

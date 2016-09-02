@@ -31,11 +31,12 @@ var Workout = (function (_super) {
         this.params.workout_title = workout_title;
         this.refresh();
     };
-    Workout.prototype._onUserSettingsChanged = function (ftp, t_pace, swim_css, email) {
+    Workout.prototype._onUserSettingsChanged = function (ftp, t_pace, swim_css, email, efficiency_factor) {
         this.params.ftp_watts = ftp.toString();
         this.params.t_pace = t_pace;
         this.params.swim_css = swim_css;
         this.params.email = email;
+        this.params.efficiency_factor = efficiency_factor;
         this.refresh();
     };
     Workout.prototype.componentDidMount = function () {
@@ -67,7 +68,7 @@ var Workout = (function (_super) {
     };
     Workout.prototype.render = function () {
         var _this = this;
-        return (React.createElement("div", null, React.createElement(user_settings_1.default, __assign({}, this.props, {ref: 'settings', onChange: function (f, t, c, e) { return _this._onUserSettingsChanged(f, t, c, e); }})), React.createElement(workout_input_1.default, __assign({}, this.props, {ref: 'input', onChange: function (s, o, t, w) { return _this._onWorkoutInputChanged(s, o, t, w); }})), React.createElement("table", null, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("a", {ref: "download_mrc"}, "Download MRC")), React.createElement("td", null, React.createElement("a", {ref: "download_zwo"}, "Download ZWO")), React.createElement("td", null, React.createElement("a", {ref: "email_send_workout"}, "Email Workout")), React.createElement("td", null, React.createElement("a", {ref: "save_workout"}, "Save Workout"))))), React.createElement(workout_view_1.default, __assign({}, this.props, {ref: 'view'}))));
+        return (React.createElement("div", null, React.createElement(user_settings_1.default, __assign({}, this.props, {ref: 'settings', onChange: function (f, t, c, e, ef) { return _this._onUserSettingsChanged(f, t, c, e, ef); }})), React.createElement(workout_input_1.default, __assign({}, this.props, {ref: 'input', onChange: function (s, o, t, w) { return _this._onWorkoutInputChanged(s, o, t, w); }})), React.createElement("table", null, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("a", {ref: "download_mrc"}, "Download MRC")), React.createElement("td", null, React.createElement("a", {ref: "download_zwo"}, "Download ZWO")), React.createElement("td", null, React.createElement("a", {ref: "email_send_workout"}, "Email Workout")), React.createElement("td", null, React.createElement("a", {ref: "save_workout"}, "Save Workout"))))), React.createElement(workout_view_1.default, __assign({}, this.props, {ref: 'view'}))));
     };
     return Workout;
 }(React.Component));

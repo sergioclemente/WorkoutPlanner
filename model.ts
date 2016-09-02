@@ -45,6 +45,7 @@ export enum IntensityUnit {
 	Per100Yards=6,
 	Per100Meters=7,
 	OffsetSeconds=8,
+	HeartRate=9,
 }
 
 export enum RunningPaceUnit {
@@ -382,7 +383,9 @@ function getStringFromIntensityUnit(unit: IntensityUnit) {
 		case IntensityUnit.Per100Yards:
 			return "/100yards";
 		case IntensityUnit.Per100Meters:
-			return "/100meters";			
+			return "/100meters";		
+		case IntensityUnit.HeartRate:
+			return "hr";	
 		default:
 			console.assert(false, stringFormat("Unknown intensity unit {0}", unit));
 			return "unknown";
@@ -426,7 +429,10 @@ function getIntensityUnitFromString(unit: string) : IntensityUnit {
 		"min/km": IntensityUnit.MinKm,
 		"/100yards": IntensityUnit.Per100Yards,
 		"/100meters": IntensityUnit.Per100Meters,	
-		"offset": IntensityUnit.OffsetSeconds,	
+		"offset": IntensityUnit.OffsetSeconds,
+		"hr": IntensityUnit.HeartRate,
+		"heart rate": IntensityUnit.HeartRate,
+		"bpm": IntensityUnit.HeartRate
 	};
 	if (unit in conversionMap) {
 		return conversionMap[unit];	
@@ -453,7 +459,9 @@ function getIntensityUnit(unit: IntensityUnit) {
 		return "/100yards";
 	} else if (unit == IntensityUnit.Per100Meters) {
 		return "/100m";
-	} else {
+	} else if (unit == IntensityUnit.HeartRate) {
+		return "hr";
+	}else {
 		console.assert(false, stringFormat("Invalid intensity unit {0}", unit));
 	}
 }
@@ -1948,6 +1956,18 @@ export class WorkoutTextVisitor implements Visitor {
 	}
 
 	getIntensityPretty(intensity: Intensity): string {
+		if (this.outputUnit == IntensityUnit.HeartRate) {
+			var bpm = 0;
+			if (this.sportType == SportType.Bike) {
+				bpm = this.userProfile.getBikeFTP() / this.userProfile.getEfficiencyFactor();
+			} else if (this.sportType == SportType.Run) {
+				// 1760 yards
+				// http://home.trainingpeaks.com/blog/article/the-efficiency-factor-in-running
+				bpm = (1760 * this.userProfile.getRunnintTPaceMph()) / (60 * this.userProfile.getEfficiencyFactor());
+			}
+			return (intensity.getValue() * bpm) + "bpm";
+		}
+
 		if (this.outputUnit == IntensityUnit.Unknown ||
 			this.sportType == SportType.Unknown ||
 			this.outputUnit == IntensityUnit.IF) {
@@ -2036,6 +2056,7 @@ export class UserProfile {
 	private runningTPaceMinMi: number;
 	private swimmingCSSMinPer100Yards: number;
 	private email: string;
+	private effiency_factor : number;
 	
 	constructor(bikeFTPWatts: number, renameTPace: string, swimCSS: string, email: string) {
 		this.bikeFTP = bikeFTPWatts;
@@ -2052,6 +2073,13 @@ export class UserProfile {
 		);
 		this.email = email;
 	}
+
+	setEfficiencyFactor(ef) {
+		this.effiency_factor = parseFloat(ef);
+	}
+	getEfficiencyFactor() {
+		return this.effiency_factor;
+	}
 	
 	getBikeFTP() {
 		return this.bikeFTP;
@@ -2059,6 +2087,13 @@ export class UserProfile {
 	
 	getRunningTPaceMinMi() {
 		return this.runningTPaceMinMi;
+	}
+
+	getRunnintTPaceMph() {
+		return IntensityUnitHelper.convertTo(
+			this.getRunningTPaceMinMi(),
+			IntensityUnit.MinMi,
+			IntensityUnit.Mph);
 	}
 
 	getEmail() : string {

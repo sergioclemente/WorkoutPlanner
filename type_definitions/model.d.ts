@@ -39,6 +39,7 @@ declare module Model {
         Per100Yards = 6,
         Per100Meters = 7,
         OffsetSeconds = 8,
+        HeartRate = 9,
     }
     enum RunningPaceUnit {
         Unknown = 0,
@@ -364,9 +365,13 @@ declare module Model {
         private runningTPaceMinMi;
         private swimmingCSSMinPer100Yards;
         private email;
+        private effiency_factor;
         constructor(bikeFTPWatts: number, renameTPace: string, swimCSS: string, email: string);
+        setEfficiencyFactor(ef: any): void;
+        getEfficiencyFactor(): number;
         getBikeFTP(): number;
         getRunningTPaceMinMi(): number;
+        getRunnintTPaceMph(): number;
         getEmail(): string;
         getPaceMph(intensity: Intensity): number;
         getPaceMinMi(intensity: Intensity): number;

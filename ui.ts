@@ -27,21 +27,25 @@ export class QueryParams {
 	public t_pace: string;
 	public swim_css: string;
 	public email: string;
+	public efficiency_factor:string;
 
 	public workout_title: string;
 	public workout_text: string;
 	public sport_type: string;
 	public output_unit: string;
+
 	public experimental: boolean;
 	
 	constructor() {
+		// HACK HACK: enable this just for me
+		this.experimental = this.experimental || this.email == 'sergioclemente@gmail.com';
+		this.efficiency_factor = "1";
+
 		if (!this.validate()) {
 			if (!this.loadFromURL()) {
 				this.loadFromStorage();
 			}
 		}
-		// HACK HACK: enable this just for me
-		this.experimental = this.experimental || this.email == 'sergioclemente@gmail.com';		
 	}
 
 	static createCopy(params: QueryParams) : QueryParams {
@@ -51,6 +55,7 @@ export class QueryParams {
 		ret.ftp_watts = params.ftp_watts;
 		ret.t_pace = params.t_pace;
 		ret.swim_css = params.swim_css;
+		ret.efficiency_factor = params.efficiency_factor;
 		ret.sport_type = params.sport_type;
 		ret.output_unit = params.output_unit;
 		ret.email = params.email;
@@ -65,6 +70,7 @@ export class QueryParams {
 		this.ftp_watts = params.ftp;
 		this.t_pace = params.tpace;
 		this.swim_css = params.css;
+		this.efficiency_factor = params.ef;
 		this.sport_type = params.st;
 		this.output_unit = params.ou;
 		this.email = params.email;
@@ -78,6 +84,7 @@ export class QueryParams {
 		this.ftp_watts = new PersistedItem("ftp_watts").load();
 		this.t_pace = new PersistedItem("t_pace").load();
 		this.swim_css = new PersistedItem("swim_css").load();
+		this.efficiency_factor = new PersistedItem("ef").load() || "1";
 		this.sport_type = new PersistedItem("sport_type").load();
 		this.output_unit = new PersistedItem("output_unit").load();
 		this.email = new PersistedItem("email").load();
@@ -91,6 +98,7 @@ export class QueryParams {
 		new PersistedItem("ftp_watts").save(this.ftp_watts);
 		new PersistedItem("t_pace").save(this.t_pace);
 		new PersistedItem("swim_css").save(this.swim_css);
+		new PersistedItem("ef").save(this.efficiency_factor);
 		new PersistedItem("sport_type").save(this.sport_type);
 		new PersistedItem("output_unit").save(this.output_unit);
 		new PersistedItem("email").save(this.email);
@@ -103,6 +111,7 @@ export class QueryParams {
 			typeof(this.ftp_watts) != 'undefined' && this.ftp_watts != "" &&
 			typeof(this.t_pace) != 'undefined' && this.t_pace != "" &&
 			typeof(this.swim_css) != 'undefined' && this.swim_css != "" &&
+			typeof(this.efficiency_factor) != 'undefined' && this.efficiency_factor != "" &&
 			typeof(this.sport_type) != 'undefined' && this.sport_type != "" &&
 			typeof(this.output_unit) != 'undefined' && this.output_unit != "" &&
 			typeof(this.email) != 'undefined' && this.email != "";
@@ -115,6 +124,7 @@ export class QueryParams {
 			"&ftp=" + encodeURIComponent(this.ftp_watts) +
 			"&tpace=" + encodeURIComponent(this.t_pace) +
 			"&css=" + encodeURIComponent(this.swim_css) +
+			"&ef=" + encodeURIComponent(this.efficiency_factor) +
 			"&ou=" + encodeURIComponent(this.output_unit) +
 			"&email=" + encodeURIComponent(this.email) + 
 			"&e=" + encodeURIComponent(this.experimental ? "1" : "0");
