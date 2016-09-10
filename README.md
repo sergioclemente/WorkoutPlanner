@@ -2,20 +2,21 @@
 
 The current deployed code is been deployed at:
 
-https://intense-thicket-9526.herokuapp.com
+https://workoutplanner.herokuapp.com
 
 # Installing dependencies
 
-First of all install node js. Then install the following dependencies:
-
+1. First of all install node js (https://nodejs.org/en/download/).
+2. Then install the following dependencies (as an administrator):
 
 ```
 npm install -g typescript
-npm install nodemailer
-npm install browserify
-npm install react
-npm install react-dom
-npm install minifier
+npm install -g nodemailer
+npm install -g browserify
+npm install -g react
+npm install -g react-dom
+npm install -g minifier
+npm install -g mysql
 ```
 
 # Compiling and running

@@ -1,5 +1,7 @@
 # Build model files Typescript files
-tsc --moduleResolution node --m commonjs --target ES5 --removeComments model.ts ui.ts model_server.ts
+JS_TARGET="ES5"
+
+tsc --moduleResolution node --m commonjs --target ${JS_TARGET} --removeComments model.ts ui.ts model_server.ts
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
@@ -30,7 +32,7 @@ mv model.d.ts type_definitions/model.d.ts
 perl -pi -e 's/type_definitions\///g' type_definitions/model.d.ts
 
 # Build JSX files
-tsc --moduleResolution node --m commonjs --target ES5 --jsx react app/*.tsx
+tsc --moduleResolution node --m commonjs --target ${JS_TARGET} --jsx react app/*.tsx
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
