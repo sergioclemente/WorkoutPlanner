@@ -1,10 +1,5 @@
 /// <reference path="../type_definitions/react.d.ts" />
 "use strict";
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
         s = arguments[i];
@@ -13,16 +8,11 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     }
     return t;
 };
-var React = require('react');
-var SelectOption = (function (_super) {
-    __extends(SelectOption, _super);
-    function SelectOption() {
-        _super.apply(this, arguments);
-    }
-    SelectOption.prototype.render = function () {
+const React = require('react');
+class SelectOption extends React.Component {
+    render() {
         return (React.createElement("option", __assign({}, this.props), this.props.children));
-    };
-    return SelectOption;
-}(React.Component));
+    }
+}
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = SelectOption;

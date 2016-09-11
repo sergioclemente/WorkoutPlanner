@@ -2,15 +2,15 @@
 var mysql = require('mysql');
 var ModelServer;
 (function (ModelServer) {
-    var MailSender = (function () {
-        function MailSender(host, port, use_ssl, user, password) {
+    class MailSender {
+        constructor(host, port, use_ssl, user, password) {
             this.host = host;
             this.port = port;
             this.use_ssl = use_ssl;
             this.user = user;
             this.password = password;
         }
-        MailSender.prototype.send = function (to, subject, body, attachments, callback) {
+        send(to, subject, body, attachments, callback) {
             var smtpConfig = {
                 host: this.host,
                 port: this.port,
@@ -45,43 +45,35 @@ var ModelServer;
                     callback(true, "");
                 }
             });
-        };
-        return MailSender;
-    }());
-    ModelServer.MailSender = MailSender;
-    var Workout = (function () {
-        function Workout() {
         }
-        Workout.load = function (id) {
+    }
+    ModelServer.MailSender = MailSender;
+    class Workout {
+        static load(id) {
             var ret = new Workout();
             return ret;
-        };
-        return Workout;
-    }());
-    ModelServer.Workout = Workout;
-    function stringFormat(format) {
-        var args = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            args[_i - 1] = arguments[_i];
         }
+    }
+    ModelServer.Workout = Workout;
+    function stringFormat(format, ...args) {
         return format.replace(/{(\d+)}/g, function (match, number) {
             return typeof args[number] != 'undefined'
                 ? args[number]
                 : match;
         });
     }
-    var WorkoutDB = (function () {
-        function WorkoutDB(connection_string) {
+    class WorkoutDB {
+        constructor(connection_string) {
             this.connection = null;
             this.connection = mysql.createConnection(connection_string);
         }
-        WorkoutDB.prototype.add = function (workout) {
+        add(workout) {
             var sql = "INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES ({0}, {1}, {2}, {3}, {4}, {5})";
             sql = stringFormat(sql, this.connection.escape(workout.title), this.connection.escape(workout.value), this.connection.escape(workout.tags), this.connection.escape(workout.duration_sec), this.connection.escape(workout.tss), this.connection.escape(workout.sport_type));
             console.log(stringFormat("executing {0}", sql));
             this.connection.query(sql);
-        };
-        WorkoutDB.prototype._createWorkout = function (row) {
+        }
+        _createWorkout(row) {
             var workout = new Workout();
             workout.id = row.id;
             workout.title = row.title;
@@ -91,8 +83,8 @@ var ModelServer;
             workout.tss = row.tss;
             workout.sport_type = row.sport_type;
             return workout;
-        };
-        WorkoutDB.prototype.get = function (id, callback) {
+        }
+        get(id, callback) {
             var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts where id={0}";
             sql = stringFormat(this.connection.escape(id));
             this.connection.query(sql, function (err, rows, fields) {
@@ -109,8 +101,8 @@ var ModelServer;
                     callback("Error while reading from db", null);
                 }
             }.bind(this));
-        };
-        WorkoutDB.prototype.getAll = function (callback) {
+        }
+        getAll(callback) {
             var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id";
             this.connection.query(sql, function (err, rows, fields) {
                 var workouts = [];
@@ -130,17 +122,16 @@ var ModelServer;
                     callback("Error while reading from db", null);
                 }
             }.bind(this));
-        };
-        WorkoutDB.prototype.connect = function () {
+        }
+        connect() {
             this.connection.connect();
             console.log("connected to the db");
-        };
-        WorkoutDB.prototype.close = function () {
+        }
+        close() {
             this.connection.end({ timeout: 60000 });
             console.log("closed the db");
-        };
-        return WorkoutDB;
-    }());
+        }
+    }
     ModelServer.WorkoutDB = WorkoutDB;
 })(ModelServer || (ModelServer = {}));
 module.exports = ModelServer;

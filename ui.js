@@ -2,16 +2,16 @@
 /// <reference path="type_definitions/node.d.ts" />
 var UI;
 (function (UI) {
-    var PersistedItem = (function () {
-        function PersistedItem(id) {
+    class PersistedItem {
+        constructor(id) {
             this.id = id;
         }
-        PersistedItem.prototype.save = function (value) {
+        save(value) {
             if (window.localStorage) {
                 window.localStorage.setItem(this.id, value);
             }
-        };
-        PersistedItem.prototype.load = function () {
+        }
+        load() {
             if (window.localStorage) {
                 var result = window.localStorage.getItem(this.id);
                 return result ? result.trim() : "";
@@ -19,12 +19,11 @@ var UI;
             else {
                 return null;
             }
-        };
-        return PersistedItem;
-    }());
+        }
+    }
     UI.PersistedItem = PersistedItem;
-    var QueryParams = (function () {
-        function QueryParams() {
+    class QueryParams {
+        constructor() {
             // HACK HACK: enable this just for me
             this.experimental = this.experimental || this.email == 'sergioclemente@gmail.com';
             this.efficiency_factor = "1";
@@ -34,7 +33,7 @@ var UI;
                 }
             }
         }
-        QueryParams.createCopy = function (params) {
+        static createCopy(params) {
             var ret = new QueryParams();
             ret.workout_title = params.workout_title;
             ret.workout_text = params.workout_text;
@@ -47,8 +46,8 @@ var UI;
             ret.email = params.email;
             ret.experimental = params.experimental;
             return ret;
-        };
-        QueryParams.prototype.loadFromURL = function () {
+        }
+        loadFromURL() {
             var params = getQueryParams();
             this.workout_title = params.t;
             this.workout_text = params.w;
@@ -61,8 +60,8 @@ var UI;
             this.email = params.email;
             this.experimental = typeof (params.e) != 'undefined' && params.e == "1";
             return this.validate();
-        };
-        QueryParams.prototype.loadFromStorage = function () {
+        }
+        loadFromStorage() {
             this.workout_title = new PersistedItem("title").load();
             this.workout_text = new PersistedItem("workout").load();
             this.ftp_watts = new PersistedItem("ftp_watts").load();
@@ -74,8 +73,8 @@ var UI;
             this.email = new PersistedItem("email").load();
             // do not load experimental
             return this.validate();
-        };
-        QueryParams.prototype.saveToStorage = function () {
+        }
+        saveToStorage() {
             new PersistedItem("title").save(this.workout_title);
             new PersistedItem("workout").save(this.workout_text);
             new PersistedItem("ftp_watts").save(this.ftp_watts);
@@ -86,8 +85,8 @@ var UI;
             new PersistedItem("output_unit").save(this.output_unit);
             new PersistedItem("email").save(this.email);
             // do not save experimental
-        };
-        QueryParams.prototype.validate = function () {
+        }
+        validate() {
             return typeof (this.workout_title) != 'undefined' && this.workout_title != "" &&
                 typeof (this.workout_text) != 'undefined' && this.workout_text != "" &&
                 typeof (this.ftp_watts) != 'undefined' && this.ftp_watts != "" &&
@@ -97,8 +96,8 @@ var UI;
                 typeof (this.sport_type) != 'undefined' && this.sport_type != "" &&
                 typeof (this.output_unit) != 'undefined' && this.output_unit != "" &&
                 typeof (this.email) != 'undefined' && this.email != "";
-        };
-        QueryParams.prototype.getURL = function () {
+        }
+        getURL() {
             return "?t=" + encodeURIComponent(this.workout_title) +
                 "&w=" + encodeURIComponent(this.workout_text) +
                 "&st=" + encodeURIComponent(this.sport_type) +
@@ -109,9 +108,8 @@ var UI;
                 "&ou=" + encodeURIComponent(this.output_unit) +
                 "&email=" + encodeURIComponent(this.email) +
                 "&e=" + encodeURIComponent(this.experimental ? "1" : "0");
-        };
-        return QueryParams;
-    }());
+        }
+    }
     UI.QueryParams = QueryParams;
     function getQueryParams() {
         var qs = document.location.search;
@@ -122,14 +120,12 @@ var UI;
         }
         return params;
     }
-    var FieldValidator = (function () {
-        function FieldValidator() {
-        }
-        FieldValidator.validateEmail = function (email) {
+    class FieldValidator {
+        static validateEmail(email) {
             var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             return re.test(email);
-        };
-        FieldValidator.validateNumber = function (num) {
+        }
+        static validateNumber(num) {
             if (num == null || num.trim().length == 0) {
                 return false;
             }
@@ -137,14 +133,11 @@ var UI;
                 var num_val = parseFloat(num);
                 return !isNaN(num_val);
             }
-        };
-        return FieldValidator;
-    }());
-    UI.FieldValidator = FieldValidator;
-    var ClipboardHelper = (function () {
-        function ClipboardHelper() {
         }
-        ClipboardHelper.copyText = function (text) {
+    }
+    UI.FieldValidator = FieldValidator;
+    class ClipboardHelper {
+        static copyText(text) {
             var textArea = document.createElement("textarea");
             // Place in top-left corner of screen regardless of scroll position.
             textArea.style.position = 'fixed';
@@ -169,9 +162,8 @@ var UI;
                 console.log('Oops, unable to copy');
             }
             document.body.removeChild(textArea);
-        };
-        return ClipboardHelper;
-    }());
+        }
+    }
     UI.ClipboardHelper = ClipboardHelper;
 })(UI || (UI = {}));
 module.exports = UI;

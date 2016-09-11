@@ -1,10 +1,5 @@
 /// <reference path="../type_definitions/react.d.ts" />
 "use strict";
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
         s = arguments[i];
@@ -13,41 +8,38 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     }
     return t;
 };
-var React = require('react');
-var UI = require('../ui');
-var error_label_1 = require('./error_label');
+const React = require('react');
+const UI = require('../ui');
+const error_label_1 = require('./error_label');
 // inspired from react-formal/src/inputs/Number.jsx
-var NumberInput = (function (_super) {
-    __extends(NumberInput, _super);
-    function NumberInput(props) {
-        _super.call(this, props);
+class NumberInput extends React.Component {
+    constructor(props) {
+        super(props);
         this.state = {
             value: props.value,
         };
     }
-    NumberInput.prototype.componentWillReceiveProps = function (nextProps) {
+    componentWillReceiveProps(nextProps) {
         this.setState({ value: '' + nextProps.value });
-    };
-    NumberInput.prototype.render = function () {
-        var _this = this;
-        return (React.createElement("span", null, React.createElement("input", __assign({}, this.props, {type: 'number', value: this.state.value, onChange: function (e) { return _this._change(e); }, onBlur: function (e) { return _this._blur(e); }})), React.createElement(error_label_1.default, {ref: 'errorLabel', message: ''})));
-    };
-    NumberInput.prototype._change = function (e) {
+    }
+    render() {
+        return (React.createElement("span", null, React.createElement("input", __assign({}, this.props, {type: 'number', value: this.state.value, onChange: e => this._change(e), onBlur: e => this._blur(e)})), React.createElement(error_label_1.default, {ref: 'errorLabel', message: ''})));
+    }
+    _change(e) {
         this.setState({ value: e.target.value });
-    };
-    NumberInput.prototype._blur = function (e) {
+    }
+    _blur(e) {
         if (!UI.FieldValidator.validateNumber(e.target.value)) {
             this.props.onChange(null);
         }
         else {
             this.props.onChange(e.target.value);
         }
-    };
-    NumberInput.prototype.setError = function (msg) {
+    }
+    setError(msg) {
         var errorLabel = this.refs['errorLabel'];
         errorLabel.setError(msg);
-    };
-    return NumberInput;
-}(React.Component));
+    }
+}
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = NumberInput;

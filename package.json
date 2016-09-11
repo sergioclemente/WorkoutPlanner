@@ -7,15 +7,15 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "ejs": "2.4.1",
-    "express": "4.13.4",
-    "nodemailer": "2.3.1",
-    "react": "15.0.1",
-    "react-dom": "15.0.1",
-    "mysql": "2.10.2"
+    "ejs": "2.5.2",
+    "express": "4.14.0",
+    "nodemailer": "2.6.0",
+    "react": "15.3.1",
+    "react-dom": "15.3.1",
+    "mysql": "2.11.1"
   },
   "engines": {
-    "node": "0.12.7"
+    "node": "6.5.0"
   },
   "repository": {
     "type": "git",

@@ -1,24 +1,26 @@
 # Build model files Typescript files
-JS_TARGET="ES5"
+JS_TARGET="ES6"
 
 tsc --moduleResolution node --m commonjs --target ${JS_TARGET} --removeComments model.ts ui.ts model_server.ts
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
 fi
+echo "Compiled TSC files"
 
-# Run tests
-tsc --module commonjs ./tests.ts
+tsc --module commonjs --target ${JS_TARGET} ./tests.ts
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
 fi
+echo "Compiled Tests"
 
-node tests.js
+node --harmony tests.js
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
 fi
+echo "Ran Tests"
 
 # Update type object
 tsc --module commonjs ./model.ts -d

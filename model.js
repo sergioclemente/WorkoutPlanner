@@ -1,9 +1,4 @@
 "use strict";
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 var Model;
 (function (Model) {
     // TODO: Add other
@@ -14,6 +9,8 @@ var Model;
         SportType[SportType["Run"] = 2] = "Run";
     })(Model.SportType || (Model.SportType = {}));
     var SportType = Model.SportType;
+    // If you add another distance, make sure you update the MAX_DISTANCE
+    // and that it doesn't overlap with TimeUnit
     (function (DistanceUnit) {
         DistanceUnit[DistanceUnit["Unknown"] = 0] = "Unknown";
         DistanceUnit[DistanceUnit["Miles"] = 1] = "Miles";
@@ -22,7 +19,7 @@ var Model;
         DistanceUnit[DistanceUnit["Yards"] = 4] = "Yards";
     })(Model.DistanceUnit || (Model.DistanceUnit = {}));
     var DistanceUnit = Model.DistanceUnit;
-    var MAX_DISTANCE = 10;
+    // If you add another time unit, be careful not adding one before MIN_TIME
     (function (TimeUnit) {
         TimeUnit[TimeUnit["Unknown"] = 11] = "Unknown";
         TimeUnit[TimeUnit["Seconds"] = 12] = "Seconds";
@@ -30,7 +27,8 @@ var Model;
         TimeUnit[TimeUnit["Hours"] = 14] = "Hours";
     })(Model.TimeUnit || (Model.TimeUnit = {}));
     var TimeUnit = Model.TimeUnit;
-    var MIN_TIME = 10;
+    const MIN_TIME = 10;
+    const MAX_DISTANCE = 10;
     (function (IntensityUnit) {
         IntensityUnit[IntensityUnit["Unknown"] = -1] = "Unknown";
         IntensityUnit[IntensityUnit["IF"] = 0] = "IF";
@@ -53,9 +51,7 @@ var Model;
         RunningPaceUnit[RunningPaceUnit["KmHr"] = 4] = "KmHr";
     })(Model.RunningPaceUnit || (Model.RunningPaceUnit = {}));
     var RunningPaceUnit = Model.RunningPaceUnit;
-    var MyMath = (function () {
-        function MyMath() {
-        }
+    class MyMath {
         /**
          * Decimal adjustment of a number.
          *
@@ -64,7 +60,7 @@ var Model;
          * @param   {Integer}   exp     The exponent (the 10 logarithm of the adjustment base).
          * @returns {Number}            The adjusted value.
          */
-        MyMath.decimalAdjust = function (type, value, exp) {
+        static decimalAdjust(type, value, exp) {
             // If the exp is undefined or zero...
             if (typeof exp === 'undefined' || +exp === 0) {
                 return Math[type](value);
@@ -81,23 +77,20 @@ var Model;
             // Shift back
             value = value.toString().split('e');
             return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
-        };
-        MyMath.round10 = function (value, exp) {
-            return MyMath.decimalAdjust('round', value, exp);
-        };
-        MyMath.floor10 = function (value, exp) {
-            return MyMath.decimalAdjust('floor', value, exp);
-        };
-        MyMath.ceil10 = function (value, exp) {
-            return MyMath.decimalAdjust('ceil', value, exp);
-        };
-        return MyMath;
-    }());
-    Model.MyMath = MyMath;
-    var DistanceUnitHelper = (function () {
-        function DistanceUnitHelper() {
         }
-        DistanceUnitHelper.convertTo = function (value, unitFrom, unitTo) {
+        static round10(value, exp) {
+            return MyMath.decimalAdjust('round', value, exp);
+        }
+        static floor10(value, exp) {
+            return MyMath.decimalAdjust('floor', value, exp);
+        }
+        static ceil10(value, exp) {
+            return MyMath.decimalAdjust('ceil', value, exp);
+        }
+    }
+    Model.MyMath = MyMath;
+    class DistanceUnitHelper {
+        static convertTo(value, unitFrom, unitTo) {
             // convert first to meters
             var distanceInMeters = 0;
             if (unitFrom == DistanceUnit.Kilometers) {
@@ -132,14 +125,11 @@ var Model;
             else {
                 return -1;
             }
-        };
-        return DistanceUnitHelper;
-    }());
-    Model.DistanceUnitHelper = DistanceUnitHelper;
-    var TimeUnitHelper = (function () {
-        function TimeUnitHelper() {
         }
-        TimeUnitHelper.convertTo = function (value, unitFrom, unitTo) {
+    }
+    Model.DistanceUnitHelper = DistanceUnitHelper;
+    class TimeUnitHelper {
+        static convertTo(value, unitFrom, unitTo) {
             var timeInSeconds = 0;
             if (unitFrom == TimeUnit.Seconds) {
                 timeInSeconds = value;
@@ -167,9 +157,8 @@ var Model;
             else {
                 return -1;
             }
-        };
-        return TimeUnitHelper;
-    }());
+        }
+    }
     Model.TimeUnitHelper = TimeUnitHelper;
     function getStringFromDurationUnit(unit) {
         switch (unit) {
@@ -192,16 +181,14 @@ var Model;
                 return "unknown";
         }
     }
-    var DurationUnitHelper = (function () {
-        function DurationUnitHelper() {
-        }
-        DurationUnitHelper.isTime = function (durationUnit) {
+    class DurationUnitHelper {
+        static isTime(durationUnit) {
             return durationUnit >= MIN_TIME;
-        };
-        DurationUnitHelper.isDistance = function (durationUnit) {
+        }
+        static isDistance(durationUnit) {
             return durationUnit <= MAX_DISTANCE;
-        };
-        DurationUnitHelper.getDistanceMiles = function (unit, value) {
+        }
+        static getDistanceMiles(unit, value) {
             if (DurationUnitHelper.isTime(unit)) {
                 return 0;
             }
@@ -223,8 +210,8 @@ var Model;
                     return 0;
                 }
             }
-        };
-        DurationUnitHelper.getDurationSeconds = function (unit, value) {
+        }
+        static getDurationSeconds(unit, value) {
             if (DurationUnitHelper.isDistance(unit)) {
                 return 0;
             }
@@ -243,12 +230,11 @@ var Model;
                     return 0;
                 }
             }
-        };
-        return DurationUnitHelper;
-    }());
+        }
+    }
     Model.DurationUnitHelper = DurationUnitHelper;
-    var Duration = (function () {
-        function Duration(unit, value, estimatedDurationInSeconds, estimatedDistanceInMiles) {
+    class Duration {
+        constructor(unit, value, estimatedDurationInSeconds, estimatedDistanceInMiles) {
             this.unit = unit;
             this.value = value;
             if (estimatedDistanceInMiles == 0 && DurationUnitHelper.isDistance(unit)) {
@@ -264,20 +250,19 @@ var Model;
                 this.estimatedDurationInSeconds = estimatedDurationInSeconds;
             }
         }
-        Duration.prototype.getUnit = function () {
+        getUnit() {
             return this.unit;
-        };
-        Duration.prototype.getValue = function () {
+        }
+        getValue() {
             return this.value;
-        };
-        Duration.prototype.getSeconds = function () {
+        }
+        getSeconds() {
             return this.estimatedDurationInSeconds;
-        };
-        Duration.prototype.getDistanceInMiles = function () {
+        }
+        getDistanceInMiles() {
             return this.estimatedDistanceInMiles;
-        };
-        Duration.prototype.toStringDistance = function (unitTo) {
-            if (unitTo === void 0) { unitTo = DistanceUnit.Unknown; }
+        }
+        toStringDistance(unitTo = DistanceUnit.Unknown) {
             if (DurationUnitHelper.isDistance(this.unit)) {
                 if (unitTo == DistanceUnit.Unknown) {
                     return MyMath.round10(this.value, -1) + getStringFromDurationUnit(this.unit);
@@ -295,16 +280,16 @@ var Model;
             else {
                 return MyMath.round10(this.estimatedDistanceInMiles, -1) + getStringFromDurationUnit(DistanceUnit.Miles);
             }
-        };
-        Duration.prototype.getTimeComponents = function () {
+        }
+        getTimeComponents() {
             var hours = (this.estimatedDurationInSeconds / 3600) | 0;
             return {
                 hours: hours,
                 minutes: ((this.estimatedDurationInSeconds - hours * 3600) / 60) | 0,
                 seconds: (this.estimatedDurationInSeconds % 60) | 0
             };
-        };
-        Duration.prototype.toTimeStringLong = function () {
+        }
+        toTimeStringLong() {
             var result = "";
             var time = this.getTimeComponents();
             if (time.hours != 0) {
@@ -317,8 +302,8 @@ var Model;
                 result += time.seconds + "sec";
             }
             return result;
-        };
-        Duration.prototype.toStringShort = function () {
+        }
+        toStringShort() {
             if (!DurationUnitHelper.isTime(this.unit)) {
                 return this.toStringDistance();
             }
@@ -334,16 +319,16 @@ var Model;
                 result += time.seconds + "''";
             }
             return result;
-        };
-        Duration.prototype.toString = function () {
+        }
+        toString() {
             if (DurationUnitHelper.isTime(this.unit)) {
                 return this.toTimeStringLong();
             }
             else {
                 return this.toStringDistance();
             }
-        };
-        Duration.combine = function (dur1, dur2) {
+        }
+        static combine(dur1, dur2) {
             var estTime = dur1.getSeconds() + dur2.getSeconds();
             var estDistance = dur1.getDistanceInMiles() + dur2.getDistanceInMiles();
             if (DurationUnitHelper.isTime(dur1.getUnit())) {
@@ -370,9 +355,8 @@ var Model;
                     return new Duration(DistanceUnit.Miles, distance1 + distance2, estTime, estDistance);
                 }
             }
-        };
-        return Duration;
-    }());
+        }
+    }
     Model.Duration = Duration;
     function getStringFromIntensityUnit(unit) {
         switch (unit) {
@@ -486,21 +470,15 @@ var Model;
     function isIntensityUnit(value) {
         return getIntensityUnitFromString(value) != IntensityUnit.Unknown;
     }
-    function stringFormat(format) {
-        var args = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            args[_i - 1] = arguments[_i];
-        }
+    function stringFormat(format, ...args) {
         return format.replace(/{(\d+)}/g, function (match, number) {
             return typeof args[number] != 'undefined'
                 ? args[number]
                 : match;
         });
     }
-    var IntensityUnitHelper = (function () {
-        function IntensityUnitHelper() {
-        }
-        IntensityUnitHelper.convertTo = function (value, unitFrom, unitTo) {
+    class IntensityUnitHelper {
+        static convertTo(value, unitFrom, unitTo) {
             var invalidUnitsForConversion = [
                 IntensityUnit.Unknown,
                 IntensityUnit.IF,
@@ -559,16 +537,12 @@ var Model;
                 throw new Error("Unknown IntensityUnit!");
             }
             return result;
-        };
-        return IntensityUnitHelper;
-    }());
+        }
+    }
     Model.IntensityUnitHelper = IntensityUnitHelper;
     ;
-    var Intensity = (function () {
-        function Intensity(ifValue, value, unit) {
-            if (ifValue === void 0) { ifValue = 0; }
-            if (value === void 0) { value = 0; }
-            if (unit === void 0) { unit = IntensityUnit.IF; }
+    class Intensity {
+        constructor(ifValue = 0, value = 0, unit = IntensityUnit.IF) {
             // HACK: Find a better way of doing this
             if (ifValue > 10) {
                 ifValue = ifValue / 100;
@@ -595,10 +569,10 @@ var Model;
         /**
          * A value between 0 and 1 that represents the intensity of the interval
          */
-        Intensity.prototype.getValue = function () {
+        getValue() {
             return this.ifValue;
-        };
-        Intensity.prototype.toString = function () {
+        }
+        toString() {
             if (this.originalUnit == IntensityUnit.IF) {
                 return MyMath.round10(100 * this.originalValue, -1) + "%";
             }
@@ -626,14 +600,14 @@ var Model;
                     }
                 }
             }
-        };
-        Intensity.prototype.getOriginalUnit = function () {
+        }
+        getOriginalUnit() {
             return this.originalUnit;
-        };
-        Intensity.prototype.getOriginalValue = function () {
+        }
+        getOriginalValue() {
             return this.originalValue;
-        };
-        Intensity.combine = function (intensities, weights) {
+        }
+        static combine(intensities, weights) {
             if (weights.length != intensities.length) {
                 console.assert(false, "The size of intensities and weights should be the same");
                 throw new Error("The size of intensities and weights should be the same");
@@ -646,99 +620,90 @@ var Model;
                 sum2 += weights[i];
             }
             return new Intensity(Math.sqrt(sum1 / sum2));
-        };
-        return Intensity;
-    }());
+        }
+    }
     Model.Intensity = Intensity;
-    var BaseInterval = (function () {
-        function BaseInterval(title) {
+    class BaseInterval {
+        constructor(title) {
             this.title = title;
         }
-        BaseInterval.prototype.getTitle = function () {
+        getTitle() {
             return this.title;
-        };
-        BaseInterval.prototype.getIntensity = function () {
-            // not aware that typescript supports abstract methods
-            throw new Error("not implemented");
-        };
-        BaseInterval.prototype.getDuration = function () {
-            // not aware that typescript supports abstract methods
-            throw new Error("not implemented");
-        };
-        return BaseInterval;
-    }());
-    Model.BaseInterval = BaseInterval;
-    var CommentInterval = (function (_super) {
-        __extends(CommentInterval, _super);
-        function CommentInterval(title) {
-            _super.call(this, title);
         }
-        CommentInterval.prototype.getIntensity = function () {
+        getIntensity() {
+            // not aware that typescript supports abstract methods
+            throw new Error("not implemented");
+        }
+        getDuration() {
+            // not aware that typescript supports abstract methods
+            throw new Error("not implemented");
+        }
+    }
+    Model.BaseInterval = BaseInterval;
+    class CommentInterval extends BaseInterval {
+        constructor(title) {
+            super(title);
+        }
+        getIntensity() {
             return new Intensity(0, 0, IntensityUnit.IF);
-        };
-        CommentInterval.prototype.getDuration = function () {
+        }
+        getDuration() {
             return new Duration(TimeUnit.Seconds, 0, 0, 0);
-        };
-        return CommentInterval;
-    }(BaseInterval));
+        }
+    }
     Model.CommentInterval = CommentInterval;
-    var SimpleInterval = (function (_super) {
-        __extends(SimpleInterval, _super);
-        function SimpleInterval(title, intensity, duration) {
-            _super.call(this, title);
+    class SimpleInterval extends BaseInterval {
+        constructor(title, intensity, duration) {
+            super(title);
             this.intensity = intensity;
             this.duration = duration;
         }
-        SimpleInterval.prototype.getIntensity = function () {
+        getIntensity() {
             return this.intensity;
-        };
-        SimpleInterval.prototype.getDuration = function () {
+        }
+        getDuration() {
             return this.duration;
-        };
-        return SimpleInterval;
-    }(BaseInterval));
+        }
+    }
     Model.SimpleInterval = SimpleInterval;
-    var RampBuildInterval = (function (_super) {
-        __extends(RampBuildInterval, _super);
-        function RampBuildInterval(title, startIntensity, endIntensity, duration) {
-            _super.call(this, title);
+    class RampBuildInterval extends BaseInterval {
+        constructor(title, startIntensity, endIntensity, duration) {
+            super(title);
             this.startIntensity = startIntensity;
             this.endIntensity = endIntensity;
             this.duration = duration;
         }
-        RampBuildInterval.prototype.getIntensity = function () {
+        getIntensity() {
             return RampBuildInterval.computeAverageIntensity(this.startIntensity, this.endIntensity);
-        };
-        RampBuildInterval.prototype.getDuration = function () {
+        }
+        getDuration() {
             return this.duration;
-        };
-        RampBuildInterval.prototype.getStartIntensity = function () {
+        }
+        getStartIntensity() {
             return this.startIntensity;
-        };
-        RampBuildInterval.prototype.getEndIntensity = function () {
+        }
+        getEndIntensity() {
             return this.endIntensity;
-        };
-        RampBuildInterval.computeAverageIntensity = function (intensity1, intensity2) {
+        }
+        static computeAverageIntensity(intensity1, intensity2) {
             return Intensity.combine([intensity1, intensity2], [1, 1]);
-        };
-        return RampBuildInterval;
-    }(BaseInterval));
+        }
+    }
     Model.RampBuildInterval = RampBuildInterval;
-    var Point = (function () {
-        function Point(x, y, label) {
+    class Point {
+        constructor(x, y, label) {
             this.x = x;
             this.y = y;
             this.label = label;
         }
-        return Point;
-    }());
+    }
     Model.Point = Point;
-    var ArrayInterval = (function () {
-        function ArrayInterval(title, intervals) {
+    class ArrayInterval {
+        constructor(title, intervals) {
             this.title = title;
             this.intervals = intervals;
         }
-        ArrayInterval.prototype.getIntensity = function () {
+        getIntensity() {
             var intensities = this.intervals.map(function (value, index, array) {
                 return value.getIntensity();
             });
@@ -746,8 +711,8 @@ var Model;
                 return value.getDuration().getSeconds();
             });
             return Intensity.combine(intensities, weights);
-        };
-        ArrayInterval.prototype.getDuration = function () {
+        }
+        getDuration() {
             // If the interval is empty lets bail right away otherwise reducing the array will cause an
             // exception
             if (this.intervals.length == 0) {
@@ -761,28 +726,28 @@ var Model;
                 return new SimpleInterval("", new Intensity(0), duration);
             });
             return res.getDuration();
-        };
-        ArrayInterval.prototype.getTitle = function () {
+        }
+        getTitle() {
             return this.title;
-        };
-        ArrayInterval.prototype.getIntervals = function () {
+        }
+        getIntervals() {
             return this.intervals;
-        };
-        ArrayInterval.prototype.getTSS = function () {
+        }
+        getTSS() {
             var tssVisitor = new TSSVisitor();
             VisitorHelper.visitAndFinalize(tssVisitor, this);
             return tssVisitor.getTSS();
-        };
-        ArrayInterval.prototype.getTSSFromIF = function () {
+        }
+        getTSSFromIF() {
             var tss_from_if = (this.getIntensity().getValue() * this.getIntensity().getValue() * this.getDuration().getSeconds()) / 36;
             return MyMath.round10(tss_from_if, -1);
-        };
-        ArrayInterval.prototype.getIntensities = function () {
+        }
+        getIntensities() {
             var iv = new IntensitiesVisitor();
             VisitorHelper.visitAndFinalize(iv, this);
             return iv.getIntensities();
-        };
-        ArrayInterval.prototype.getTimeSeries = function () {
+        }
+        getTimeSeries() {
             var pv = new DataPointVisitor();
             VisitorHelper.visitAndFinalize(pv, this);
             // TODO: Massaging the data here to show in minutes
@@ -792,18 +757,16 @@ var Model;
                     y: Math.round(item.y.getValue() * 100),
                 };
             });
-        };
-        ArrayInterval.prototype.getTimeInZones = function (sportType) {
+        }
+        getTimeInZones(sportType) {
             var zv = new ZonesVisitor(sportType);
             VisitorHelper.visitAndFinalize(zv, this);
             return zv.getTimeInZones();
-        };
-        return ArrayInterval;
-    }());
+        }
+    }
     Model.ArrayInterval = ArrayInterval;
-    var RepeatInterval = (function (_super) {
-        __extends(RepeatInterval, _super);
-        function RepeatInterval(title, mainInterval, restInterval, repeatCount) {
+    class RepeatInterval extends ArrayInterval {
+        constructor(title, mainInterval, restInterval, repeatCount) {
             var intervals = [];
             if (mainInterval != null) {
                 intervals.push(mainInterval);
@@ -811,21 +774,20 @@ var Model;
             if (restInterval != null) {
                 intervals.push(restInterval);
             }
-            _super.call(this, title, intervals);
+            super(title, intervals);
             this.repeatCount = repeatCount;
         }
-        RepeatInterval.prototype.getDuration = function () {
-            var baseDuration = _super.prototype.getDuration.call(this);
+        getDuration() {
+            var baseDuration = super.getDuration();
             var durationRaw = baseDuration.getValue() * this.repeatCount;
             var durationSecs = baseDuration.getSeconds() * this.repeatCount;
             var durationMiles = baseDuration.getDistanceInMiles() * this.repeatCount;
             return new Duration(baseDuration.getUnit(), durationRaw, durationSecs, durationMiles);
-        };
-        RepeatInterval.prototype.getRepeatCount = function () {
+        }
+        getRepeatCount() {
             return this.repeatCount;
-        };
-        return RepeatInterval;
-    }(ArrayInterval));
+        }
+    }
     Model.RepeatInterval = RepeatInterval;
     // Step is defined as follows
     // 2[(1min, 85, 95), (30s, 55)]
@@ -834,15 +796,14 @@ var Model;
     // * 30s @ 55
     // * 1min @ 95
     // * 30s @ 55
-    var StepBuildInterval = (function (_super) {
-        __extends(StepBuildInterval, _super);
+    class StepBuildInterval extends ArrayInterval {
         // The constructor receives the step intervals, the rest will be added later on
         // so that for the above interval it will look like:
         // [(1min, 85), (1min, 95), (30s, 55)]
-        function StepBuildInterval(title, intervals) {
-            _super.call(this, title, intervals);
+        constructor(title, intervals) {
+            super(title, intervals);
         }
-        StepBuildInterval.prototype.getIntensity = function () {
+        getIntensity() {
             var intensities = this.intervals.map(function (value, index, array) {
                 return value.getIntensity();
             });
@@ -851,17 +812,17 @@ var Model;
                 return value.getDuration().getSeconds() * repeatCount;
             });
             return Intensity.combine(intensities, weights);
-        };
-        StepBuildInterval.prototype.getRepeatCount = function () {
+        }
+        getRepeatCount() {
             return this.intervals.length - 1;
-        };
-        StepBuildInterval.prototype.getStepInterval = function (idx) {
+        }
+        getStepInterval(idx) {
             return this.intervals[idx];
-        };
-        StepBuildInterval.prototype.getRestInterval = function () {
+        }
+        getRestInterval() {
             return this.intervals[this.intervals.length - 1];
-        };
-        StepBuildInterval.prototype.areAllIntensitiesSame = function () {
+        }
+        areAllIntensitiesSame() {
             var prev_intensity = this.intervals[0].getIntensity().getValue();
             for (var i = 1; i < this.intervals.length - 1; i++) {
                 var cur_intensity = this.intervals[i].getIntensity().getValue();
@@ -871,8 +832,8 @@ var Model;
                 prev_intensity = cur_intensity;
             }
             return true;
-        };
-        StepBuildInterval.prototype.getDuration = function () {
+        }
+        getDuration() {
             var durations = [];
             for (var i = 0; i < this.intervals.length; i++) {
                 durations[i] = this.intervals[i].getDuration();
@@ -893,14 +854,11 @@ var Model;
                 }
                 return duration;
             }
-        };
-        return StepBuildInterval;
-    }(ArrayInterval));
-    Model.StepBuildInterval = StepBuildInterval;
-    var NumberParser = (function () {
-        function NumberParser() {
         }
-        NumberParser.prototype.evaluate = function (input, i) {
+    }
+    Model.StepBuildInterval = StepBuildInterval;
+    class NumberParser {
+        evaluate(input, i) {
             this.value = 0;
             for (; i < input.length; i++) {
                 var ch = input[i];
@@ -928,18 +886,17 @@ var Model;
             }
             // Points to the last valid char
             return i - 1;
-        };
-        NumberParser.prototype.getValue = function () {
+        }
+        getValue() {
             return this.value;
-        };
-        return NumberParser;
-    }());
+        }
+    }
     Model.NumberParser = NumberParser;
-    var StringChunkParser = (function () {
-        function StringChunkParser(delimiters) {
+    class StringChunkParser {
+        constructor(delimiters) {
             this.delimiters = delimiters;
         }
-        StringChunkParser.prototype.evaluate = function (input, i) {
+        evaluate(input, i) {
             this.value = "";
             while (input[i] == ',' || input[i] == ' ') {
                 i++;
@@ -953,17 +910,14 @@ var Model;
             }
             // Points to the last valid char
             return i - 1;
-        };
-        StringChunkParser.prototype.getValue = function () {
-            return this.value;
-        };
-        return StringChunkParser;
-    }());
-    Model.StringChunkParser = StringChunkParser;
-    var IntensityParser = (function () {
-        function IntensityParser() {
         }
-        IntensityParser.prototype.evaluate = function (input, i) {
+        getValue() {
+            return this.value;
+        }
+    }
+    Model.StringChunkParser = StringChunkParser;
+    class IntensityParser {
+        evaluate(input, i) {
             var num_parser = new NumberParser();
             i = num_parser.evaluate(input, i);
             this.value = num_parser.getValue();
@@ -1002,49 +956,46 @@ var Model;
                 }
             }
             return i + this.unit.length;
-        };
-        IntensityParser.prototype.getValue = function () {
-            return this.value;
-        };
-        IntensityParser.prototype.getUnit = function () {
-            return this.unit;
-        };
-        return IntensityParser;
-    }());
-    Model.IntensityParser = IntensityParser;
-    var IntervalParser = (function () {
-        function IntervalParser() {
         }
-        IntervalParser.getCharVal = function (ch) {
+        getValue() {
+            return this.value;
+        }
+        getUnit() {
+            return this.unit;
+        }
+    }
+    Model.IntensityParser = IntensityParser;
+    class IntervalParser {
+        static getCharVal(ch) {
             if (ch.length == 1) {
                 return ch.charCodeAt(0);
             }
             else {
                 return 0;
             }
-        };
-        IntervalParser.isDigit = function (ch) {
+        }
+        static isDigit(ch) {
             return ch.length == 1 &&
                 IntervalParser.getCharVal(ch) >= IntervalParser.getCharVal("0") &&
                 IntervalParser.getCharVal(ch) <= IntervalParser.getCharVal("9");
-        };
-        IntervalParser.isLetter = function (ch) {
+        }
+        static isLetter(ch) {
             return ch.length == 1 &&
                 IntervalParser.getCharVal(ch) >= IntervalParser.getCharVal("a") &&
                 IntervalParser.getCharVal(ch) <= IntervalParser.getCharVal("z");
-        };
-        IntervalParser.parseDouble = function (input, i) {
+        }
+        static parseDouble(input, i) {
             var p = new NumberParser();
             var pos = p.evaluate(input, i);
             return { i: pos, value: p.getValue() };
-        };
-        IntervalParser.isWhitespace = function (ch) {
+        }
+        static isWhitespace(ch) {
             return ch.length == 1 && (ch == " " || ch == "\t" || ch == "\n");
-        };
-        IntervalParser.throwParserError = function (column, msg) {
+        }
+        static throwParserError(column, msg) {
             throw Error("Error while parsing input on column " + column + "-  Error: " + msg);
-        };
-        IntervalParser.parse = function (factory, input) {
+        }
+        static parse(factory, input) {
             var result = new ArrayInterval("Workout", []);
             var stack = [];
             stack.push(result);
@@ -1240,18 +1191,15 @@ var Model;
                 IntervalParser.throwParserError(0, "Invalid interval");
             }
             return result;
-        };
-        return IntervalParser;
-    }());
-    Model.IntervalParser = IntervalParser;
-    var VisitorHelper = (function () {
-        function VisitorHelper() {
         }
-        VisitorHelper.visitAndFinalize = function (visitor, interval) {
+    }
+    Model.IntervalParser = IntervalParser;
+    class VisitorHelper {
+        static visitAndFinalize(visitor, interval) {
             this.visit(visitor, interval);
             visitor.finalize();
-        };
-        VisitorHelper.visit = function (visitor, interval) {
+        }
+        static visit(visitor, interval) {
             if (interval instanceof SimpleInterval) {
                 return visitor.visitSimpleInterval(interval);
             }
@@ -1274,21 +1222,18 @@ var Model;
                 console.assert(false, "invalid type!");
                 return null;
             }
-        };
-        return VisitorHelper;
-    }());
-    Model.VisitorHelper = VisitorHelper;
-    var BaseVisitor = (function () {
-        function BaseVisitor() {
         }
-        BaseVisitor.prototype.visitCommentInterval = function (interval) {
+    }
+    Model.VisitorHelper = VisitorHelper;
+    class BaseVisitor {
+        visitCommentInterval(interval) {
             // nothing to do
-        };
-        BaseVisitor.prototype.visitSimpleInterval = function (interval) {
+        }
+        visitSimpleInterval(interval) {
             // not aware that typescript supports abstract methods
             throw new Error("not implemented");
-        };
-        BaseVisitor.prototype.visitStepBuildInterval = function (interval) {
+        }
+        visitStepBuildInterval(interval) {
             // Generic implementation
             for (var i = 0; i < interval.getRepeatCount(); i++) {
                 // step interval
@@ -1296,43 +1241,41 @@ var Model;
                 // rest interval
                 VisitorHelper.visit(this, interval.getRestInterval());
             }
-        };
-        BaseVisitor.prototype.visitRampBuildInterval = function (interval) {
+        }
+        visitRampBuildInterval(interval) {
             // not aware that typescript supports abstract methods
             throw new Error("not implemented");
-        };
-        BaseVisitor.prototype.visitRepeatInterval = function (interval) {
+        }
+        visitRepeatInterval(interval) {
             for (var i = 0; i < interval.getRepeatCount(); i++) {
                 this.visitArrayInterval(interval);
             }
-        };
-        BaseVisitor.prototype.visitArrayInterval = function (interval) {
+        }
+        visitArrayInterval(interval) {
             for (var i = 0; i < interval.getIntervals().length; i++) {
                 VisitorHelper.visit(this, interval.getIntervals()[i]);
             }
-        };
-        BaseVisitor.prototype.finalize = function () {
-        };
-        return BaseVisitor;
-    }());
+        }
+        finalize() {
+        }
+    }
     Model.BaseVisitor = BaseVisitor;
     // TSS = [(s x NP x IF) / (FTP x 3600)] x 100
     // IF = NP / FTP
     // TSS = [(s x NP x NP/FTP) / (FTP x 3600)] x 100
     // TSS = [s x (NP / FTP) ^ 2] / 36
-    var TSSVisitor = (function (_super) {
-        __extends(TSSVisitor, _super);
-        function TSSVisitor() {
-            _super.apply(this, arguments);
+    class TSSVisitor extends BaseVisitor {
+        constructor(...args) {
+            super(...args);
             this.tss = 0;
         }
-        TSSVisitor.prototype.visitSimpleInterval = function (interval) {
+        visitSimpleInterval(interval) {
             var duration = interval.getDuration().getSeconds();
             var intensity = interval.getIntensity().getValue();
             var val = duration * Math.pow(intensity, 2);
             this.tss += val;
-        };
-        TSSVisitor.prototype.visitRampBuildInterval = function (interval) {
+        }
+        visitRampBuildInterval(interval) {
             var startIntensity = interval.getStartIntensity().getValue();
             var endIntensity = interval.getEndIntensity().getValue();
             var duration = interval.getDuration().getSeconds();
@@ -1342,17 +1285,14 @@ var Model;
                 var val = 1 * Math.pow(intensity, 2);
                 this.tss += val;
             }
-        };
-        TSSVisitor.prototype.getTSS = function () {
-            return MyMath.round10(this.tss / 36, -1);
-        };
-        return TSSVisitor;
-    }(BaseVisitor));
-    Model.TSSVisitor = TSSVisitor;
-    var DateHelper = (function () {
-        function DateHelper() {
         }
-        DateHelper.getDayOfWeek = function () {
+        getTSS() {
+            return MyMath.round10(this.tss / 36, -1);
+        }
+    }
+    Model.TSSVisitor = TSSVisitor;
+    class DateHelper {
+        static getDayOfWeek() {
             var d = new Date();
             var weekday = new Array(7);
             weekday[0] = "Sunday";
@@ -1363,14 +1303,11 @@ var Model;
             weekday[5] = "Friday";
             weekday[6] = "Saturday";
             return weekday[d.getDay()];
-        };
-        return DateHelper;
-    }());
-    Model.DateHelper = DateHelper;
-    var ZonesMap = (function () {
-        function ZonesMap() {
         }
-        ZonesMap.getZoneMap = function (sportType) {
+    }
+    Model.DateHelper = DateHelper;
+    class ZonesMap {
+        static getZoneMap(sportType) {
             // TODO: Use same zones as bike for now
             if (sportType == SportType.Bike) {
                 return {
@@ -1402,14 +1339,12 @@ var Model;
                     6: { name: "z6", low: 1.05, high: 10 },
                 };
             }
-        };
-        return ZonesMap;
-    }());
+        }
+    }
     Model.ZonesMap = ZonesMap;
-    var ZonesVisitor = (function (_super) {
-        __extends(ZonesVisitor, _super);
-        function ZonesVisitor(sportType) {
-            _super.call(this);
+    class ZonesVisitor extends BaseVisitor {
+        constructor(sportType) {
+            super();
             this.zones = {};
             this.zones = {};
             this.sportType = sportType;
@@ -1430,7 +1365,7 @@ var Model;
                 };
             }
         }
-        ZonesVisitor.getZone = function (sportType, intensity) {
+        static getZone(sportType, intensity) {
             var zone_map = ZonesMap.getZoneMap(sportType);
             for (var zone = 1; zone <= 5; zone++) {
                 var zone_obj = zone_map[zone];
@@ -1439,15 +1374,15 @@ var Model;
                 }
             }
             return 6;
-        };
-        ZonesVisitor.prototype.incrementZoneTime = function (intensity, numberOfSeconds) {
+        }
+        incrementZoneTime(intensity, numberOfSeconds) {
             var zone = ZonesVisitor.getZone(this.sportType, intensity);
             this.zones[zone].value += numberOfSeconds;
-        };
-        ZonesVisitor.prototype.visitSimpleInterval = function (interval) {
+        }
+        visitSimpleInterval(interval) {
             this.incrementZoneTime(interval.getIntensity().getValue(), interval.getDuration().getSeconds());
-        };
-        ZonesVisitor.prototype.visitRampBuildInterval = function (interval) {
+        }
+        visitRampBuildInterval(interval) {
             var startIntensity = interval.getStartIntensity().getValue();
             var endIntensity = interval.getEndIntensity().getValue();
             var duration = interval.getDuration().getSeconds();
@@ -1458,8 +1393,8 @@ var Model;
                 this.incrementZoneTime(intensity, 1);
                 intensity += intensityIncrement;
             }
-        };
-        ZonesVisitor.prototype.getTimeInZones = function () {
+        }
+        getTimeInZones() {
             var result = [];
             for (var key in this.zones) {
                 var zone = this.zones[key];
@@ -1472,24 +1407,22 @@ var Model;
                 }
             }
             return result;
-        };
-        return ZonesVisitor;
-    }(BaseVisitor));
+        }
+    }
     Model.ZonesVisitor = ZonesVisitor;
-    var IntensitiesVisitor = (function (_super) {
-        __extends(IntensitiesVisitor, _super);
-        function IntensitiesVisitor() {
-            _super.apply(this, arguments);
+    class IntensitiesVisitor extends BaseVisitor {
+        constructor(...args) {
+            super(...args);
             this.intensities = {};
         }
-        IntensitiesVisitor.prototype.visitSimpleInterval = function (interval) {
+        visitSimpleInterval(interval) {
             this.intensities[interval.getIntensity().getValue()] = interval.getIntensity();
-        };
-        IntensitiesVisitor.prototype.visitRampBuildInterval = function (interval) {
+        }
+        visitRampBuildInterval(interval) {
             this.intensities[interval.getStartIntensity().getValue()] = interval.getStartIntensity();
             this.intensities[interval.getEndIntensity().getValue()] = interval.getEndIntensity();
-        };
-        IntensitiesVisitor.prototype.getIntensities = function () {
+        }
+        getIntensities() {
             var result = [];
             for (var intensityValue in this.intensities) {
                 result.push(this.intensities[intensityValue]);
@@ -1498,88 +1431,90 @@ var Model;
                 return left.getValue() - right.getValue();
             });
             return result;
-        };
-        return IntensitiesVisitor;
-    }(BaseVisitor));
+        }
+    }
     Model.IntensitiesVisitor = IntensitiesVisitor;
-    var DataPointVisitor = (function (_super) {
-        __extends(DataPointVisitor, _super);
-        function DataPointVisitor() {
-            _super.apply(this, arguments);
+    class DataPointVisitor extends BaseVisitor {
+        constructor(...args) {
+            super(...args);
             this.x = null;
             this.data = [];
         }
-        DataPointVisitor.prototype.initX = function (duration) {
+        initX(duration) {
             if (this.x == null) {
                 this.x = new Duration(duration.getUnit(), 0, 0, 0);
             }
-        };
-        DataPointVisitor.prototype.incrementX = function (duration) {
+        }
+        incrementX(duration) {
             this.x = Duration.combine(this.x, duration);
-        };
-        DataPointVisitor.prototype.visitSimpleInterval = function (interval) {
+        }
+        visitSimpleInterval(interval) {
             var title = WorkoutTextVisitor.getIntervalTitle(interval);
             this.initX(interval.getDuration());
             this.data.push(new Point(this.x, interval.getIntensity(), title));
             this.incrementX(interval.getDuration());
             this.data.push(new Point(this.x, interval.getIntensity(), title));
-        };
-        DataPointVisitor.prototype.visitRampBuildInterval = function (interval) {
+        }
+        visitRampBuildInterval(interval) {
             var title = WorkoutTextVisitor.getIntervalTitle(interval);
             this.initX(interval.getDuration());
             this.data.push(new Point(this.x, interval.getStartIntensity(), title));
             this.incrementX(interval.getDuration());
             this.data.push(new Point(this.x, interval.getEndIntensity(), title));
-        };
-        return DataPointVisitor;
-    }(BaseVisitor));
-    Model.DataPointVisitor = DataPointVisitor;
-    var ZwiftDataVisitor = (function (_super) {
-        __extends(ZwiftDataVisitor, _super);
-        function ZwiftDataVisitor(name) {
-            _super.call(this);
-            this.content = "";
-            this.content = "<workout_file>\n\t<author>Workout Planner Author</author>\n\t<name>" + name + "</name>\n\t<description>Auto generated by https://github.com/sergioclemente/WorkoutPlanner</description>\n\t<tags>\n\t\t<tag name=\"INTERVALS\"/>\n\t</tags>\n\t<workout>\n";
         }
-        ZwiftDataVisitor.prototype.finalize = function () {
-            this.content += "\t</workout>\n</workout_file>";
-        };
-        ZwiftDataVisitor.prototype.getIntervalTitle = function (interval) {
+    }
+    Model.DataPointVisitor = DataPointVisitor;
+    class ZwiftDataVisitor extends BaseVisitor {
+        constructor(name) {
+            super();
+            this.content = "";
+            this.content = `<workout_file>
+\t<author>Workout Planner Author</author>
+\t<name>${name}</name>
+\t<description>Auto generated by https://github.com/sergioclemente/WorkoutPlanner</description>
+\t<tags>
+\t\t<tag name="INTERVALS"/>
+\t</tags>
+\t<workout>\n`;
+        }
+        finalize() {
+            this.content += `\t</workout>
+</workout_file>`;
+        }
+        getIntervalTitle(interval) {
             var title = interval.getTitle();
             if (title.length == 0) {
                 title = WorkoutTextVisitor.getIntervalTitle(interval);
             }
             return title;
-        };
-        ZwiftDataVisitor.prototype.visitSimpleInterval = function (interval) {
+        }
+        visitSimpleInterval(interval) {
             var duration = interval.getDuration().getSeconds();
             var intensity = interval.getIntensity().getValue();
             var title = this.getIntervalTitle(interval);
-            this.content += "\t\t<SteadyState Duration='" + duration + "' Power='" + intensity + "'>\n";
-            this.content += "\t\t\t<textevent timeoffset='0' message='" + title + "'/>\n";
-            this.content += "\t\t</SteadyState>\n";
-        };
-        ZwiftDataVisitor.prototype.visitRampBuildInterval = function (interval) {
+            this.content += `\t\t<SteadyState Duration='${duration}' Power='${intensity}'>\n`;
+            this.content += `\t\t\t<textevent timeoffset='0' message='${title}'/>\n`;
+            this.content += `\t\t</SteadyState>\n`;
+        }
+        visitRampBuildInterval(interval) {
             var duration = interval.getDuration().getSeconds();
             var intensityStart = interval.getStartIntensity().getValue();
             var intensityEnd = interval.getEndIntensity().getValue();
             if (intensityStart < intensityEnd) {
-                this.content += "\t\t<Warmup Duration='" + duration + "' PowerLow='" + intensityStart + "' PowerHigh='" + intensityEnd + "'/>\n";
+                this.content += `\t\t<Warmup Duration='${duration}' PowerLow='${intensityStart}' PowerHigh='${intensityEnd}'/>\n`;
             }
             else {
-                this.content += "\t\t<Cooldown Duration='" + duration + "' PowerLow='" + intensityStart + "' PowerHigh='" + intensityEnd + "'/>\n";
+                this.content += `\t\t<Cooldown Duration='${duration}' PowerLow='${intensityStart}' PowerHigh='${intensityEnd}'/>\n`;
             }
-        };
-        ZwiftDataVisitor.prototype.getContent = function () {
+        }
+        getContent() {
             return this.content;
-        };
-        return ZwiftDataVisitor;
-    }(BaseVisitor));
+        }
+    }
     Model.ZwiftDataVisitor = ZwiftDataVisitor;
-    var MRCCourseDataVisitor = (function (_super) {
-        __extends(MRCCourseDataVisitor, _super);
-        function MRCCourseDataVisitor(fileName) {
-            _super.call(this);
+    class MRCCourseDataVisitor extends BaseVisitor {
+        constructor(fileName) {
+            super();
             this.courseData = "";
             this.time = 0;
             this.idx = 0;
@@ -1590,12 +1525,12 @@ var Model;
             this.repeatIteration = [];
             this.fileName = fileName;
         }
-        MRCCourseDataVisitor.prototype.processCourseData = function (intensity, durationInSeconds) {
+        processCourseData(intensity, durationInSeconds) {
             this.time += durationInSeconds;
             // Course Data has to be in minutes
             this.courseData += (this.time / 60) + "\t" + Math.round(intensity.getValue() * 100) + "\n";
-        };
-        MRCCourseDataVisitor.prototype.processTitle = function (interval) {
+        }
+        processTitle(interval) {
             var title = interval.getTitle();
             if (title.length == 0) {
                 title = WorkoutTextVisitor.getIntervalTitle(interval);
@@ -1608,18 +1543,18 @@ var Model;
                 suffix = " | " + iteration + " of " + total;
             }
             this.perfPRODescription += "Desc" + this.idx++ + "=" + title + suffix + "\n";
-        };
-        MRCCourseDataVisitor.prototype.visitSimpleInterval = function (interval) {
+        }
+        visitSimpleInterval(interval) {
             this.processCourseData(interval.getIntensity(), 0);
             this.processCourseData(interval.getIntensity(), interval.getDuration().getSeconds());
             this.processTitle(interval);
-        };
-        MRCCourseDataVisitor.prototype.visitRampBuildInterval = function (interval) {
+        }
+        visitRampBuildInterval(interval) {
             this.processCourseData(interval.getStartIntensity(), 0);
             this.processCourseData(interval.getEndIntensity(), interval.getDuration().getSeconds());
             this.processTitle(interval);
-        };
-        MRCCourseDataVisitor.prototype.visitRepeatInterval = function (interval) {
+        }
+        visitRepeatInterval(interval) {
             this.repeatIntervals.push(interval);
             for (var i = 0; i < interval.getRepeatCount(); i++) {
                 this.repeatIteration.push(i);
@@ -1627,8 +1562,8 @@ var Model;
                 this.repeatIteration.pop();
             }
             this.repeatIntervals.pop();
-        };
-        MRCCourseDataVisitor.prototype.finalize = function () {
+        }
+        finalize() {
             this.content = "";
             this.content += "[COURSE HEADER]\n";
             this.content += "VERSION=2\n";
@@ -1642,18 +1577,17 @@ var Model;
             this.content += "[PERFPRO DESCRIPTIONS]\n";
             this.content += this.perfPRODescription;
             this.content += "[END PERFPRO DESCRIPTIONS]\n";
-        };
-        MRCCourseDataVisitor.prototype.getContent = function () {
+        }
+        getContent() {
             return this.content;
-        };
-        return MRCCourseDataVisitor;
-    }(BaseVisitor));
+        }
+    }
     Model.MRCCourseDataVisitor = MRCCourseDataVisitor;
-    var FileNameHelper = (function () {
-        function FileNameHelper(intervals) {
+    class FileNameHelper {
+        constructor(intervals) {
             this.intervals = intervals;
         }
-        FileNameHelper.prototype.getFileName = function () {
+        getFileName() {
             var mainInterval = null;
             var duration = this.intervals.getDuration().getSeconds();
             var intensity_string = DateHelper.getDayOfWeek() + " - IF" + Math.round(this.intervals.getIntensity().getValue() * 100) + " - ";
@@ -1689,16 +1623,12 @@ var Model;
             else {
                 return intensity_string;
             }
-        };
-        return FileNameHelper;
-    }());
+        }
+    }
     Model.FileNameHelper = FileNameHelper;
-    var EASY_THRESHOLD = 0.60;
-    var WorkoutTextVisitor = (function () {
-        function WorkoutTextVisitor(userProfile, sportType, outputUnit) {
-            if (userProfile === void 0) { userProfile = null; }
-            if (sportType === void 0) { sportType = SportType.Unknown; }
-            if (outputUnit === void 0) { outputUnit = IntensityUnit.Unknown; }
+    const EASY_THRESHOLD = 0.60;
+    class WorkoutTextVisitor {
+        constructor(userProfile = null, sportType = SportType.Unknown, outputUnit = IntensityUnit.Unknown) {
             this.result = "";
             this.userProfile = null;
             this.sportType = SportType.Unknown;
@@ -1708,8 +1638,7 @@ var Model;
             this.sportType = sportType;
             this.outputUnit = outputUnit;
         }
-        WorkoutTextVisitor.roundNumberUp = function (value, round_val) {
-            if (round_val === void 0) { round_val = 0; }
+        static roundNumberUp(value, round_val = 0) {
             if (round_val != 0) {
                 var mod = value % round_val;
                 if (mod != 0) {
@@ -1717,9 +1646,8 @@ var Model;
                 }
             }
             return value;
-        };
-        WorkoutTextVisitor.roundNumberDown = function (value, round_val) {
-            if (round_val === void 0) { round_val = 0; }
+        }
+        static roundNumberDown(value, round_val = 0) {
             if (round_val != 0) {
                 var mod = value % round_val;
                 if (mod != 0) {
@@ -1727,14 +1655,13 @@ var Model;
                 }
             }
             return value;
-        };
-        WorkoutTextVisitor.formatNumber = function (value, decimalMultiplier, separator, unit, round_val) {
-            if (round_val === void 0) { round_val = 0; }
+        }
+        static formatNumber(value, decimalMultiplier, separator, unit, round_val = 0) {
             var integerPart = Math.floor(value);
             var fractionPart = WorkoutTextVisitor.roundNumberDown(Math.round(decimalMultiplier * (value - integerPart)), round_val);
             return integerPart + separator + WorkoutTextVisitor.enforceDigits(fractionPart, 2) + unit;
-        };
-        WorkoutTextVisitor.enforceDigits = function (value, digits) {
+        }
+        static enforceDigits(value, digits) {
             var result = value + "";
             if (result.length > digits) {
                 return result.substring(0, digits);
@@ -1745,20 +1672,17 @@ var Model;
                 }
                 return result;
             }
-        };
-        WorkoutTextVisitor.getIntervalTitle = function (interval, userProfile, sportType, outputUnit) {
-            if (userProfile === void 0) { userProfile = null; }
-            if (sportType === void 0) { sportType = SportType.Unknown; }
-            if (outputUnit === void 0) { outputUnit = IntensityUnit.Unknown; }
+        }
+        static getIntervalTitle(interval, userProfile = null, sportType = SportType.Unknown, outputUnit = IntensityUnit.Unknown) {
             // TODO: instantiating visitor is a bit clowny
             var f = new WorkoutTextVisitor(userProfile, sportType, outputUnit);
             VisitorHelper.visitAndFinalize(f, interval);
             return f.result;
-        };
-        WorkoutTextVisitor.prototype.visitCommentInterval = function (interval) {
+        }
+        visitCommentInterval(interval) {
             this.result += interval.getTitle();
-        };
-        WorkoutTextVisitor.prototype.visitRestInterval = function (interval) {
+        }
+        visitRestInterval(interval) {
             var value = interval.getIntensity().getValue();
             if (value <= EASY_THRESHOLD) {
                 this.result += interval.getDuration().toStringShort() + " easy";
@@ -1766,12 +1690,12 @@ var Model;
             else {
                 this.result += interval.getDuration().toStringShort() + " @ " + this.getIntensityPretty(interval.getIntensity());
             }
-        };
+        }
         // ArrayInterval
-        WorkoutTextVisitor.prototype.visitArrayInterval = function (interval) {
+        visitArrayInterval(interval) {
             this.visitArrayIntervalInternal(interval, false);
-        };
-        WorkoutTextVisitor.prototype.visitArrayIntervalInternal = function (interval, always_add_parenthesis) {
+        }
+        visitArrayIntervalInternal(interval, always_add_parenthesis) {
             var length = interval.getIntervals().length;
             var firstInterval = interval.getIntervals()[0];
             var lastInterval = interval.getIntervals()[length - 1];
@@ -1828,22 +1752,22 @@ var Model;
                     }
                 }
             }
-        };
+        }
         // RepeatInterval
-        WorkoutTextVisitor.prototype.visitRepeatInterval = function (interval) {
+        visitRepeatInterval(interval) {
             this.result += interval.getRepeatCount() + " x ";
             this.visitArrayIntervalInternal(interval, true);
-        };
+        }
         // RampBuildInterval
-        WorkoutTextVisitor.prototype.visitRampBuildInterval = function (interval) {
+        visitRampBuildInterval(interval) {
             if (interval.getStartIntensity().getValue() <= EASY_THRESHOLD) {
                 this.result += interval.getDuration().toStringShort() + " warmup to " + this.getIntensityPretty(interval.getEndIntensity());
             }
             else {
                 this.result += interval.getDuration().toStringShort() + " build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());
             }
-        };
-        WorkoutTextVisitor.prototype.visitStepBuildInterval = function (interval) {
+        }
+        visitStepBuildInterval(interval) {
             this.result += interval.getRepeatCount() + " x ";
             // There are two types of step build interval
             // 1) Same duration - different intensities
@@ -1875,9 +1799,9 @@ var Model;
                 this.result = this.result.slice(0, this.result.length - 2);
                 this.result += ")";
             }
-        };
+        }
         // SimpleInterval
-        WorkoutTextVisitor.prototype.visitSimpleInterval = function (interval) {
+        visitSimpleInterval(interval) {
             this.result += interval.getDuration().toStringShort();
             var title = interval.getTitle();
             if (title.length > 0) {
@@ -1900,8 +1824,8 @@ var Model;
             else {
                 this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
             }
-        };
-        WorkoutTextVisitor.prototype.getIntensityPretty = function (intensity) {
+        }
+        getIntensityPretty(intensity) {
             if (this.outputUnit == IntensityUnit.HeartRate) {
                 var bpm = 0;
                 if (this.sportType == SportType.Bike) {
@@ -1952,16 +1876,13 @@ var Model;
             else {
                 console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
             }
-        };
-        WorkoutTextVisitor.prototype.finalize = function () {
-        };
-        return WorkoutTextVisitor;
-    }());
-    Model.WorkoutTextVisitor = WorkoutTextVisitor;
-    var SpeedParser = (function () {
-        function SpeedParser() {
         }
-        SpeedParser.getSpeedInMph = function (speed) {
+        finalize() {
+        }
+    }
+    Model.WorkoutTextVisitor = WorkoutTextVisitor;
+    class SpeedParser {
+        static getSpeedInMph(speed) {
             var res = null;
             try {
                 if (speed.indexOf("min/mi") != -1) {
@@ -1991,8 +1912,8 @@ var Model;
             catch (e) {
             }
             return res;
-        };
-        SpeedParser._extractNumber = function (numberString, decimalMultiplier, strSeparator, strSuffix) {
+        }
+        static _extractNumber(numberString, decimalMultiplier, strSeparator, strSuffix) {
             var indexSuffix = numberString.indexOf(strSuffix);
             var indexSeparator = numberString.indexOf(strSeparator);
             if (indexSuffix < 0) {
@@ -2008,12 +1929,11 @@ var Model;
             }
             var integerPart = parseInt(numberString.substr(0, indexSeparator));
             return integerPart + fractionPart / decimalMultiplier;
-        };
-        return SpeedParser;
-    }());
+        }
+    }
     Model.SpeedParser = SpeedParser;
-    var UserProfile = (function () {
-        function UserProfile(bikeFTPWatts, renameTPace, swimCSS, email) {
+    class UserProfile {
+        constructor(bikeFTPWatts, renameTPace, swimCSS, email) {
             this.bikeFTP = bikeFTPWatts;
             var speed_mph = SpeedParser.getSpeedInMph(renameTPace);
             this.runningTPaceMinMi = IntensityUnitHelper.convertTo(speed_mph, IntensityUnit.Mph, IntensityUnit.MinMi);
@@ -2021,53 +1941,52 @@ var Model;
             this.swimmingCSSMinPer100Yards = IntensityUnitHelper.convertTo(swim_css_mph, IntensityUnit.Mph, IntensityUnit.Per100Yards);
             this.email = email;
         }
-        UserProfile.prototype.setEfficiencyFactor = function (ef) {
+        setEfficiencyFactor(ef) {
             this.effiency_factor = parseFloat(ef);
-        };
-        UserProfile.prototype.getEfficiencyFactor = function () {
+        }
+        getEfficiencyFactor() {
             return this.effiency_factor;
-        };
-        UserProfile.prototype.getBikeFTP = function () {
+        }
+        getBikeFTP() {
             return this.bikeFTP;
-        };
-        UserProfile.prototype.getRunningTPaceMinMi = function () {
+        }
+        getRunningTPaceMinMi() {
             return this.runningTPaceMinMi;
-        };
-        UserProfile.prototype.getRunnintTPaceMph = function () {
+        }
+        getRunnintTPaceMph() {
             return IntensityUnitHelper.convertTo(this.getRunningTPaceMinMi(), IntensityUnit.MinMi, IntensityUnit.Mph);
-        };
-        UserProfile.prototype.getEmail = function () {
+        }
+        getEmail() {
             return this.email;
-        };
-        UserProfile.prototype.getPaceMph = function (intensity) {
+        }
+        getPaceMph(intensity) {
             var estPaceMinMi = this.getPaceMinMi(intensity);
             return 60 / estPaceMinMi;
-        };
-        UserProfile.prototype.getPaceMinMi = function (intensity) {
+        }
+        getPaceMinMi(intensity) {
             var pace_mph = IntensityUnitHelper.convertTo(this.getRunningTPaceMinMi(), IntensityUnit.MinMi, IntensityUnit.Mph) * intensity.getValue();
             return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, IntensityUnit.MinMi);
-        };
-        UserProfile.prototype.getSwimCSSMph = function () {
+        }
+        getSwimCSSMph() {
             var css_mph = IntensityUnitHelper.convertTo(this.swimmingCSSMinPer100Yards, IntensityUnit.Per100Yards, IntensityUnit.Mph);
             return css_mph;
-        };
-        UserProfile.prototype.getSwimPaceMph = function (intensity) {
+        }
+        getSwimPaceMph(intensity) {
             var css_mph = IntensityUnitHelper.convertTo(this.swimmingCSSMinPer100Yards, IntensityUnit.Per100Yards, IntensityUnit.Mph);
             return css_mph * intensity.getValue();
-        };
-        UserProfile.prototype.getSwimPace = function (intensity_unit_result, intensity) {
+        }
+        getSwimPace(intensity_unit_result, intensity) {
             var pace_mph = this.getSwimCSSMph() * intensity.getValue();
             return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, intensity_unit_result);
-        };
-        return UserProfile;
-    }());
+        }
+    }
     Model.UserProfile = UserProfile;
-    var ObjectFactory = (function () {
-        function ObjectFactory(userProfile, sportType) {
+    class ObjectFactory {
+        constructor(userProfile, sportType) {
             this.userProfile = userProfile;
             this.sportType = sportType;
         }
-        ObjectFactory.prototype.getBikeSpeedMphForIntensity = function (intensity) {
+        getBikeSpeedMphForIntensity(intensity) {
             // TODO: simplifying it for now
             var actualSpeedMph = 0;
             if (intensity.getValue() < 0.65) {
@@ -2077,8 +1996,8 @@ var Model;
                 actualSpeedMph = 20;
             }
             return actualSpeedMph;
-        };
-        ObjectFactory.prototype.createIntensity = function (value, unit) {
+        }
+        createIntensity(value, unit) {
             var ifValue = 0;
             if (this.sportType == SportType.Bike) {
                 if (unit == IntensityUnit.Watts) {
@@ -2141,8 +2060,8 @@ var Model;
                 console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
             }
             return new Intensity(ifValue, value, unit);
-        };
-        ObjectFactory.prototype.createDuration = function (intensity, unit, value) {
+        }
+        createDuration(intensity, unit, value) {
             var estimatedDistanceInMiles = 0;
             var estimatedTimeInSeconds = 0;
             var estimatedSpeedMph;
@@ -2171,127 +2090,124 @@ var Model;
                 estimatedTimeInSeconds = 3600 * (estimatedDistanceInMiles / estimatedSpeedMph);
             }
             return new Duration(unit, value, estimatedTimeInSeconds, estimatedDistanceInMiles);
-        };
-        return ObjectFactory;
-    }());
+        }
+    }
     Model.ObjectFactory = ObjectFactory;
-    var StopWatch = (function () {
-        function StopWatch() {
+    class StopWatch {
+        constructor() {
             this.startTime = null;
             this.stoppedTime = null;
         }
-        StopWatch.prototype.start = function () {
+        start() {
             if (this.startTime === null) {
                 this.startTime = Date.now();
             }
-        };
-        StopWatch.prototype.stop = function () {
+        }
+        stop() {
             if (this.startTime !== null) {
                 this.stoppedTime += Date.now() - this.startTime;
                 this.startTime = null;
             }
-        };
-        StopWatch.prototype.getIsStarted = function () {
+        }
+        getIsStarted() {
             return this.startTime !== null;
-        };
-        StopWatch.prototype.getElapsedTime = function () {
+        }
+        getElapsedTime() {
             if (this.startTime !== null) {
                 return (Date.now() - this.startTime) + this.stoppedTime;
             }
             else {
                 return this.stoppedTime;
             }
-        };
-        StopWatch.prototype.reset = function () {
+        }
+        reset() {
             this.startTime = null;
             this.stoppedTime = 0;
-        };
-        return StopWatch;
-    }());
+        }
+    }
     Model.StopWatch = StopWatch;
-    var ArrayIterator = (function () {
-        function ArrayIterator(array) {
+    class ArrayIterator {
+        constructor(array) {
             this.array = array;
         }
-        ArrayIterator.prototype.reset = function () {
+        reset() {
             this.index = -1;
-        };
-        ArrayIterator.prototype.getCurrent = function () {
+        }
+        getCurrent() {
             return this.array[this.index];
-        };
-        ArrayIterator.prototype.getCurrentIndex = function () {
+        }
+        getCurrentIndex() {
             return this.index;
-        };
-        ArrayIterator.prototype.tryGettingNext = function () {
+        }
+        tryGettingNext() {
             if (this.index + 1 < this.array.length) {
                 return this.array[this.index + 1];
             }
             else {
                 return null;
             }
-        };
-        ArrayIterator.prototype.getIsValid = function () {
+        }
+        getIsValid() {
             return this.index >= 0 && this.index < this.array.length;
-        };
-        ArrayIterator.prototype.moveNext = function () {
+        }
+        moveNext() {
             this.index++;
             return this.getIsValid();
-        };
-        return ArrayIterator;
-    }());
+        }
+    }
     Model.ArrayIterator = ArrayIterator;
-    var WorkoutBuilder = (function () {
-        function WorkoutBuilder(userProfile, sportType, outputUnit) {
+    class WorkoutBuilder {
+        constructor(userProfile, sportType, outputUnit) {
             this.userProfile = userProfile;
             this.sportType = sportType;
             this.outputUnit = outputUnit;
         }
-        WorkoutBuilder.prototype.getInterval = function () {
+        getInterval() {
             return this.intervals;
-        };
-        WorkoutBuilder.prototype.getSportType = function () {
+        }
+        getSportType() {
             return this.sportType;
-        };
-        WorkoutBuilder.prototype.getWorkoutTitle = function () {
+        }
+        getWorkoutTitle() {
             return this.workoutTitle;
-        };
-        WorkoutBuilder.prototype.withDefinition = function (workoutTitle, workoutDefinition) {
+        }
+        withDefinition(workoutTitle, workoutDefinition) {
             this.intervals = IntervalParser.parse(new ObjectFactory(this.userProfile, this.sportType), workoutDefinition);
             this.workoutTitle = workoutTitle;
             this.workoutDefinition = workoutDefinition;
             return this;
-        };
-        WorkoutBuilder.prototype.getIntensityFriendly = function (intensity) {
+        }
+        getIntensityFriendly(intensity) {
             var f = new WorkoutTextVisitor(this.userProfile, this.sportType, this.outputUnit);
             return f.getIntensityPretty(intensity);
-        };
-        WorkoutBuilder.prototype.getTSS = function () {
+        }
+        getTSS() {
             return this.intervals.getTSS();
-        };
-        WorkoutBuilder.prototype.getTSSFromIF = function () {
+        }
+        getTSSFromIF() {
             return this.intervals.getTSSFromIF();
-        };
-        WorkoutBuilder.prototype.getTimePretty = function () {
+        }
+        getTimePretty() {
             return this.intervals.getDuration().toTimeStringLong();
-        };
-        WorkoutBuilder.prototype.getIF = function () {
+        }
+        getIF() {
             return MyMath.round10(this.intervals.getIntensity().getValue() * 100, -1);
-        };
-        WorkoutBuilder.prototype.getAveragePower = function () {
+        }
+        getAveragePower() {
             return MyMath.round10(this.userProfile.getBikeFTP() * this.intervals.getIntensity().getValue(), -1);
-        };
-        WorkoutBuilder.prototype.getIntervalPretty = function (interval) {
+        }
+        getIntervalPretty(interval) {
             return WorkoutTextVisitor.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit);
-        };
-        WorkoutBuilder.prototype.getEstimatedDistancePretty = function () {
+        }
+        getEstimatedDistancePretty() {
             if (this.sportType == SportType.Swim) {
                 return this.intervals.getDuration().toStringDistance(DistanceUnit.Yards);
             }
             else {
                 return this.intervals.getDuration().toStringDistance(DistanceUnit.Miles);
             }
-        };
-        WorkoutBuilder.prototype.getAveragePace = function () {
+        }
+        getAveragePace() {
             var minMi = this.userProfile.getPaceMinMi(this.intervals.getIntensity());
             var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, this.outputUnit);
             if (this.outputUnit == IntensityUnit.Kmh || this.outputUnit == IntensityUnit.Mph) {
@@ -2300,15 +2216,15 @@ var Model;
             else {
                 return WorkoutTextVisitor.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
             }
-        };
-        WorkoutBuilder.prototype.getStepsList = function (new_line) {
+        }
+        getStepsList(new_line) {
             var result = "";
             this.intervals.getIntervals().forEach(function (interval) {
                 result += ("* " + this.getIntervalPretty(interval) + new_line);
             }.bind(this));
             return result;
-        };
-        WorkoutBuilder.prototype.getDistanceInMiles = function () {
+        }
+        getDistanceInMiles() {
             var result = 0;
             this.intervals.getIntervals().forEach(function (interval) {
                 if (interval.getDuration().getDistanceInMiles() > 0) {
@@ -2316,42 +2232,40 @@ var Model;
                 }
             }.bind(this));
             return result;
-        };
-        WorkoutBuilder.prototype.getPrettyPrint = function (new_line) {
-            if (new_line === void 0) { new_line = "\n"; }
+        }
+        getPrettyPrint(new_line = "\n") {
             var intensities = this.intervals.getIntensities();
             var result = "";
             result += this.getStepsList(new_line);
             return result;
-        };
-        WorkoutBuilder.prototype.getMRCFile = function () {
+        }
+        getMRCFile() {
             var dataVisitor = new MRCCourseDataVisitor(this.getMRCFileName());
             VisitorHelper.visitAndFinalize(dataVisitor, this.intervals);
             return dataVisitor.getContent();
-        };
-        WorkoutBuilder.prototype.getZWOFile = function () {
+        }
+        getZWOFile() {
             var fileNameHelper = new FileNameHelper(this.intervals);
             var workout_name = fileNameHelper.getFileName();
             var zwift = new ZwiftDataVisitor(workout_name);
             VisitorHelper.visitAndFinalize(zwift, this.intervals);
             return zwift.getContent();
-        };
-        WorkoutBuilder.prototype.getZWOFileName = function () {
+        }
+        getZWOFileName() {
             if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
                 return this.workoutTitle + ".zwo";
             }
             var fileNameHelper = new FileNameHelper(this.intervals);
             return fileNameHelper.getFileName() + ".zwo";
-        };
-        WorkoutBuilder.prototype.getMRCFileName = function () {
+        }
+        getMRCFileName() {
             if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
                 return this.workoutTitle + ".mrc";
             }
             var fileNameHelper = new FileNameHelper(this.intervals);
             return fileNameHelper.getFileName() + ".mrc";
-        };
-        return WorkoutBuilder;
-    }());
+        }
+    }
     Model.WorkoutBuilder = WorkoutBuilder;
     ;
 })(Model || (Model = {}));
