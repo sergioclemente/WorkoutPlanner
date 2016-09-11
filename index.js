@@ -8,9 +8,8 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 function _init() {
-    // Initialize the fields
-    var params = new UI.QueryParams();
-
+    // Use params as react expects a plain object
+    var params = Object.assign(new Object(), new UI.QueryParams());
     ReactDOM.render(
         React.createElement(Workout, params),
         document.getElementById('workout')

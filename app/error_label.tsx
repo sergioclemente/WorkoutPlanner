@@ -17,7 +17,7 @@ export default class ErrorLabel extends React.Component <any, any> {
 
   render() {
     return (
-      <span {...this.props} style={{marginLeft: "10px", color: "#a94442"}}>{this.state.message}</span>
+      <span style={{marginLeft: "10px", color: "#a94442"}}>{this.state.message}</span>
     )
   }
 
