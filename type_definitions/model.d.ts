@@ -13,21 +13,12 @@ declare module Model {
         Yards = 4,
     }
     enum TimeUnit {
-        Unknown = 0,
-        Seconds = 1,
-        Minutes = 2,
-        Hours = 3,
+        Unknown = 11,
+        Seconds = 12,
+        Minutes = 13,
+        Hours = 14,
     }
-    enum DurationUnit {
-        Unknown = -1,
-        Seconds = 0,
-        Minutes = 1,
-        Hours = 2,
-        Meters = 3,
-        Miles = 4,
-        Kilometers = 5,
-        Yards = 6,
-    }
+    type DurationUnit = TimeUnit | DistanceUnit;
     enum IntensityUnit {
         Unknown = -1,
         IF = 0,

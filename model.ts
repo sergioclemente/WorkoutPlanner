@@ -8,31 +8,30 @@ export enum SportType {
 	Run=2
 }
 
+// If you add another distance, make sure you update the MAX_DISTANCE
+// and that it doesn't overlap with TimeUnit
 export enum DistanceUnit {
-	Unknown,
-	Miles,
-	Kilometers,
-	Meters,
-	Yards
+	Unknown=0,
+	Miles=1,
+	Kilometers=2,
+	Meters=3,
+	Yards=4,
 }
 
+// If you add another time unit, be careful not adding one before MIN_TIME
 export enum TimeUnit {
-	Unknown,
+	Unknown=11,
 	Seconds,
 	Minutes,
 	Hours
 }
-
-export enum DurationUnit {
-	Unknown=-1,
-	Seconds=0,
-	Minutes=1,
-	Hours=2,
-	Meters=3,
-	Miles=4,
-	Kilometers=5,
-	Yards = 6
-}
+ 
+// Duration of a workout can be either specified as time or distance
+// We use the | definition of typescript, but we have to be careful
+// so that the enums don't overlap. 
+export type DurationUnit = TimeUnit | DistanceUnit;
+const MIN_TIME : number = 10;
+const MAX_DISTANCE : number = 10;
 
 export enum IntensityUnit {
 	Unknown=-1,
@@ -156,20 +155,20 @@ export class TimeUnitHelper {
 
 function getStringFromDurationUnit(unit: DurationUnit) {
 	switch(unit) {
-		case DurationUnit.Miles:
+		case DistanceUnit.Miles:
 			return "mi";
-		case DurationUnit.Kilometers:
+		case DistanceUnit.Kilometers:
 			return "km";
-		case DurationUnit.Meters:
+		case DistanceUnit.Meters:
 			return "m";
-		case DurationUnit.Hours:
+		case DistanceUnit.Yards:
+			return "yards";			
+		case TimeUnit.Hours:
 			return "h";
-		case DurationUnit.Minutes:
+		case TimeUnit.Minutes:
 			return "min";
-		case DurationUnit.Seconds:
+		case TimeUnit.Seconds:
 			return "s";
-		case DurationUnit.Yards:
-			return "yards";
 		default:
 			console.assert(false, stringFormat("unkown duration {0}", unit));
 			return "unknown";
@@ -178,13 +177,11 @@ function getStringFromDurationUnit(unit: DurationUnit) {
 
 export class DurationUnitHelper {
 	public static isTime(durationUnit: DurationUnit) : boolean {
-		return (durationUnit == DurationUnit.Hours
-			|| durationUnit == DurationUnit.Minutes
-			|| durationUnit == DurationUnit.Seconds);
+		return durationUnit >= MIN_TIME;
 	}
 	
 	public static isDistance(durationUnit: DurationUnit) : boolean {
-		return !DurationUnitHelper.isTime(durationUnit);
+		return durationUnit <= MAX_DISTANCE;
 	}	
 
 	static getDistanceMiles(unit: DurationUnit, value: number) {
@@ -192,13 +189,13 @@ export class DurationUnitHelper {
 			return 0;
 		} else {
 			var distance = value;
-			if (unit == DurationUnit.Meters) {
+			if (unit == DistanceUnit.Meters) {
 				return DistanceUnitHelper.convertTo(value, DistanceUnit.Meters, DistanceUnit.Miles);
-			} else if (unit == DurationUnit.Kilometers) {
+			} else if (unit == DistanceUnit.Kilometers) {
 				return DistanceUnitHelper.convertTo(value, DistanceUnit.Kilometers, DistanceUnit.Miles);
-			} else if (unit == DurationUnit.Yards) {
+			} else if (unit == DistanceUnit.Yards) {
 				return DistanceUnitHelper.convertTo(value, DistanceUnit.Yards, DistanceUnit.Miles);
-			} else if (unit == DurationUnit.Miles) {
+			} else if (unit == DistanceUnit.Miles) {
 				return distance;
 			} else {
 				return 0;
@@ -211,11 +208,11 @@ export class DurationUnitHelper {
 			return 0;
 		} else {
 			var time = value;
-			if (unit == DurationUnit.Hours) {
+			if (unit == TimeUnit.Hours) {
 				return TimeUnitHelper.convertTo(value, TimeUnit.Hours, TimeUnit.Seconds); 
-			} else if (unit == DurationUnit.Minutes) {
+			} else if (unit == TimeUnit.Minutes) {
 				return TimeUnitHelper.convertTo(value, TimeUnit.Minutes, TimeUnit.Seconds);
-			} else if (unit == DurationUnit.Seconds) {
+			} else if (unit == TimeUnit.Seconds) {
 				return time;
 			} else {
 				return 0;
@@ -268,13 +265,13 @@ export class Duration {
 			} else {
 				if (unitTo == DistanceUnit.Yards) {
 					var yards = DistanceUnitHelper.convertTo(this.getDistanceInMiles(), DistanceUnit.Miles, DistanceUnit.Yards);
-					return MyMath.round10(yards, -1) + getStringFromDurationUnit(DurationUnit.Yards);
+					return MyMath.round10(yards, -1) + getStringFromDurationUnit(DistanceUnit.Yards);
 				} else {
 					return MyMath.round10(this.value, -1) + getStringFromDurationUnit(this.unit);
 				}
 			}
 		} else {
-			return MyMath.round10(this.estimatedDistanceInMiles, -1) + getStringFromDurationUnit(DurationUnit.Miles);	
+			return MyMath.round10(this.estimatedDistanceInMiles, -1) + getStringFromDurationUnit(DistanceUnit.Miles);	
 		}
 	}
 	
@@ -348,19 +345,19 @@ export class Duration {
 				// Convert both to seconds
 				var time1 = DurationUnitHelper.getDurationSeconds(dur1.getUnit(), dur1.getValue());
 				var time2 = DurationUnitHelper.getDurationSeconds(dur2.getUnit(), dur2.getValue());
-				return new Duration(DurationUnit.Seconds, time1+time2, estTime, estDistance);
+				return new Duration(TimeUnit.Seconds, time1+time2, estTime, estDistance);
 			} else {
 				// Use the unit of time in case is different
-				return new Duration(DurationUnit.Seconds, estTime, estTime, estDistance);
+				return new Duration(TimeUnit.Seconds, estTime, estTime, estDistance);
 			}
 		} else {
 			if (DurationUnitHelper.isTime(dur2.getUnit())) {
 				// Use the unit of time in case is different
-				return new Duration(DurationUnit.Seconds, estTime, estTime, estDistance);
+				return new Duration(TimeUnit.Seconds, estTime, estTime, estDistance);
 			} else {
 				var distance1 = DurationUnitHelper.getDistanceMiles(dur1.getUnit(), dur1.getValue());
 				var distance2 = DurationUnitHelper.getDistanceMiles(dur2.getUnit(), dur2.getValue());
-				return new Duration(DurationUnit.Miles, distance1+distance2, estTime, estDistance);
+				return new Duration(DistanceUnit.Miles, distance1+distance2, estTime, estDistance);
 			}
 		}
 	}
@@ -394,26 +391,26 @@ function getStringFromIntensityUnit(unit: IntensityUnit) {
 
 function getDurationUnitFromString(unit: string) : DurationUnit {
 	var conversionMap = {
-		"mi": DurationUnit.Miles,
-		"km": DurationUnit.Kilometers,
-		"m": DurationUnit.Meters,
-		"meter": DurationUnit.Meters,
-		"meters": DurationUnit.Meters,
-		"h" : DurationUnit.Hours,
-		"hr" : DurationUnit.Hours,
-		"hour" : DurationUnit.Hours,
-		"hours" : DurationUnit.Hours,
-		"min" : DurationUnit.Minutes,
-		"sec" : DurationUnit.Seconds,
-		"s" : DurationUnit.Seconds,
-		"yards": DurationUnit.Yards,
-		"y": DurationUnit.Yards,
-		"yrd": DurationUnit.Yards,
+		"mi": DistanceUnit.Miles,
+		"km": DistanceUnit.Kilometers,
+		"m": DistanceUnit.Meters,
+		"meter": DistanceUnit.Meters,
+		"meters": DistanceUnit.Meters,
+		"h" : TimeUnit.Hours,
+		"hr" : TimeUnit.Hours,
+		"hour" : TimeUnit.Hours,
+		"hours" : TimeUnit.Hours,
+		"min" : TimeUnit.Minutes,
+		"sec" : TimeUnit.Seconds,
+		"s" : TimeUnit.Seconds,
+		"yards": DistanceUnit.Yards,
+		"y": DistanceUnit.Yards,
+		"yrd": DistanceUnit.Yards,
 	};
 	if (unit in conversionMap) {
 		return conversionMap[unit];	
 	} else {
-		return DurationUnit.Unknown;
+		return TimeUnit.Unknown;
 	}
 }
 
@@ -467,7 +464,7 @@ function getIntensityUnit(unit: IntensityUnit) {
 }
 
 function isDurationUnit(value: string) {
-	return getDurationUnitFromString(value) != DurationUnit.Unknown;
+	return getDurationUnitFromString(value) != TimeUnit.Unknown;
 }
 
 function isIntensityUnit(value: string) {
@@ -660,7 +657,7 @@ export class CommentInterval extends BaseInterval {
 		return new Intensity(0, 0, IntensityUnit.IF);
 	}
 	getDuration(): Duration {
-		return new Duration(DurationUnit.Seconds, 0, 0, 0);
+		return new Duration(TimeUnit.Seconds, 0, 0, 0);
 	}	
 }
 
@@ -745,7 +742,7 @@ export class ArrayInterval implements Interval {
 		// If the interval is empty lets bail right away otherwise reducing the array will cause an
 		// exception
 		if (this.intervals.length == 0) {
-			return new Duration(DurationUnit.Seconds, 0, 0, 0);
+			return new Duration(TimeUnit.Seconds, 0, 0, 0);
 		}
 
 		// It will create dummy intervals along the way so that I can use
@@ -1492,7 +1489,7 @@ export class ZonesVisitor extends BaseVisitor {
 				result.push({
 					name: zone.name,
 					range: zone.range,
-					duration: new Duration(DurationUnit.Seconds, zone.value, 0, 0)
+					duration: new Duration(TimeUnit.Seconds, zone.value, 0, 0)
 				});
 			}
 		}
