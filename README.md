@@ -6,7 +6,7 @@ https://workoutplanner.herokuapp.com
 
 # Installing dependencies
 
-1. First of all install node js (https://nodejs.org/en/download/).
+1. First of all install node js 6.5 or higher (https://nodejs.org/en/download/).
 2. Then install the following dependencies (as an administrator):
 
 ```
@@ -17,6 +17,7 @@ npm install -g react
 npm install -g react-dom
 npm install -g minifier
 npm install -g mysql
+npm install -g mocha
 ```
 
 # Compiling and running
@@ -40,13 +41,15 @@ Its automatically pushed on every commit.
 ```
 
 # Bugs/Feature requests
+* Add builder for UserProfile
+* Refactor Intensity
+
 * Auto merge MRC intervals
 * Zwift files are broken
 * Change output units on sport type
 * More logging on usage
 * Refactor validation of parameters on server.js
 * Add player
-* Add support for bpm
 
 Nice to have things
 * Add Url shortener
@@ -58,7 +61,6 @@ Nice to have things
 * pipe (|) missing in Repeat interval
 * Ajax TS
 * List workouts
-* Units
 
 
 # Where to find type definition files:

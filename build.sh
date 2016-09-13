@@ -15,7 +15,7 @@ if [[ "$?" != 0 ]]; then
 fi
 echo "Compiled Tests"
 
-node --harmony tests.js
+mocha tests.js
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1

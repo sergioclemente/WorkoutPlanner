@@ -26,5 +26,8 @@
     "heroku",
     "express"
   ],
-  "license": "Gibhub"
+  "license": "Gibhub",
+  "devDependencies": {
+    "mocha": "^3.0.2"
+  }
 }
