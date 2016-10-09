@@ -9,3 +9,9 @@ CREATE TABLE workouts
      sport_type  INT DEFAULT 0,
      PRIMARY KEY(id) 
   );
+  CREATE TABLE url 
+  ( 
+     id          INT auto_increment,
+     params       VARCHAR(5000) NOT NULL,
+     PRIMARY KEY(id) 
+  );

@@ -1265,8 +1265,8 @@ var Model;
     // TSS = [(s x NP x NP/FTP) / (FTP x 3600)] x 100
     // TSS = [s x (NP / FTP) ^ 2] / 36
     class TSSVisitor extends BaseVisitor {
-        constructor(...args) {
-            super(...args);
+        constructor() {
+            super(...arguments);
             this.tss = 0;
         }
         visitSimpleInterval(interval) {
@@ -1411,8 +1411,8 @@ var Model;
     }
     Model.ZonesVisitor = ZonesVisitor;
     class IntensitiesVisitor extends BaseVisitor {
-        constructor(...args) {
-            super(...args);
+        constructor() {
+            super(...arguments);
             this.intensities = {};
         }
         visitSimpleInterval(interval) {
@@ -1435,8 +1435,8 @@ var Model;
     }
     Model.IntensitiesVisitor = IntensitiesVisitor;
     class DataPointVisitor extends BaseVisitor {
-        constructor(...args) {
-            super(...args);
+        constructor() {
+            super(...arguments);
             this.x = null;
             this.data = [];
         }

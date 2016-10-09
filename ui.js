@@ -24,14 +24,14 @@ var UI;
     UI.PersistedItem = PersistedItem;
     class QueryParams {
         constructor() {
-            // HACK HACK: enable this just for me
-            this.experimental = this.experimental || this.email == 'sergioclemente@gmail.com';
-            this.efficiency_factor = "1";
             if (!this.validate()) {
                 if (!this.loadFromURL()) {
                     this.loadFromStorage();
                 }
             }
+            // HACK HACK: enable this just for me
+            this.experimental = this.experimental || this.email == 'sergioclemente@gmail.com';
+            this.efficiency_factor = "1";
         }
         static createCopy(params) {
             var ret = new QueryParams();

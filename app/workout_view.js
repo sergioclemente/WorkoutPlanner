@@ -71,18 +71,24 @@ class WorkoutView extends React.Component {
     }
     renderPower() {
         if (this.state.sport_type == Model.SportType.Bike) {
-            return (React.createElement("tr", null, React.createElement("td", null, "Average Power"), React.createElement("td", null, this.state.avg_power)));
+            return (React.createElement("tr", null, 
+                React.createElement("td", null, "Average Power"), 
+                React.createElement("td", null, this.state.avg_power)));
         }
         else {
             return;
         }
     }
     renderDistance() {
-        return (React.createElement("tr", null, React.createElement("td", null, "Distance"), React.createElement("td", null, this.state.distance)));
+        return (React.createElement("tr", null, 
+            React.createElement("td", null, "Distance"), 
+            React.createElement("td", null, this.state.distance)));
     }
     renderPace() {
         if (this.state.sport_type == Model.SportType.Run) {
-            return (React.createElement("tr", null, React.createElement("td", null, "Pace"), React.createElement("td", null, this.state.avg_pace)));
+            return (React.createElement("tr", null, 
+                React.createElement("td", null, "Pace"), 
+                React.createElement("td", null, this.state.avg_pace)));
         }
         else {
             return;
@@ -145,7 +151,38 @@ class WorkoutView extends React.Component {
         }
     }
     render() {
-        return (React.createElement("div", null, React.createElement("h2", null, "Steps"), React.createElement("ul", null, this.renderWorkoutSteps()), React.createElement("h2", null, "Summary"), React.createElement("button", {id: "id_clipboard"}, "Copy to clipboard"), React.createElement("table", null, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("b", null, "Metric")), React.createElement("td", null, React.createElement("b", null, "Value"))), React.createElement("tr", null, React.createElement("td", null, "TSS"), React.createElement("td", null, this.state.tss)), React.createElement("tr", null, React.createElement("td", null, "TSS From IF"), React.createElement("td", null, this.state.tss_from_if)), React.createElement("tr", null, React.createElement("td", null, "Time"), React.createElement("td", null, this.state.time)), React.createElement("tr", null, React.createElement("td", null, "IF"), React.createElement("td", null, this.state.intensity)), this.renderPower(), this.renderDistance(), this.renderPace())), React.createElement("div", {id: "chartTimeline", style: { height: "300px", width: "100%" }}), React.createElement("div", {id: "chartZones", style: { height: "200px", width: "100%" }})));
+        return (React.createElement("div", null, 
+            React.createElement("h2", null, "Steps"), 
+            React.createElement("ul", null, this.renderWorkoutSteps()), 
+            React.createElement("h2", null, "Summary"), 
+            React.createElement("button", {id: "id_clipboard"}, "Copy to clipboard"), 
+            React.createElement("table", null, 
+                React.createElement("tbody", null, 
+                    React.createElement("tr", null, 
+                        React.createElement("td", null, 
+                            React.createElement("b", null, "Metric")
+                        ), 
+                        React.createElement("td", null, 
+                            React.createElement("b", null, "Value")
+                        )), 
+                    React.createElement("tr", null, 
+                        React.createElement("td", null, "TSS"), 
+                        React.createElement("td", null, this.state.tss)), 
+                    React.createElement("tr", null, 
+                        React.createElement("td", null, "TSS From IF"), 
+                        React.createElement("td", null, this.state.tss_from_if)), 
+                    React.createElement("tr", null, 
+                        React.createElement("td", null, "Time"), 
+                        React.createElement("td", null, this.state.time)), 
+                    React.createElement("tr", null, 
+                        React.createElement("td", null, "IF"), 
+                        React.createElement("td", null, this.state.intensity)), 
+                    this.renderPower(), 
+                    this.renderDistance(), 
+                    this.renderPace())
+            ), 
+            React.createElement("div", {id: "chartTimeline", style: { height: "300px", width: "100%" }}), 
+            React.createElement("div", {id: "chartZones", style: { height: "200px", width: "100%" }})));
     }
 }
 Object.defineProperty(exports, "__esModule", { value: true });

@@ -23,7 +23,9 @@ class NumberInput extends React.Component {
         this.setState({ value: '' + nextProps.value });
     }
     render() {
-        return (React.createElement("span", null, React.createElement("input", __assign({}, this.props, {type: 'number', value: this.state.value, onChange: e => this._change(e), onBlur: e => this._blur(e)})), React.createElement(error_label_1.default, {ref: 'errorLabel', message: ''})));
+        return (React.createElement("span", null, 
+            React.createElement("input", __assign({}, this.props, {type: 'number', value: this.state.value, onChange: e => this._change(e), onBlur: e => this._blur(e)})), 
+            React.createElement(error_label_1.default, {ref: 'errorLabel', message: ''})));
     }
     _change(e) {
         this.setState({ value: e.target.value });

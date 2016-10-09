@@ -53,7 +53,32 @@ class WorkoutInput extends React.Component {
         }
     }
     render() {
-        return (React.createElement("div", null, React.createElement("h1", null, " Workout Settings "), React.createElement("form", null, "Title: ", React.createElement("input", {ref: "workout_title", defaultValue: this.props.workout_title, onChange: e => this._onWorkoutTitleChange(e)}), React.createElement("br", null), "Sport type:", React.createElement(select_1.default, {ref: "sportType", defaultValue: this.props.sport_type, onChange: e => this._onSportTypeChange(e)}, React.createElement(select_option_1.default, {value: Model.SportType.Swim}, "Swim"), React.createElement(select_option_1.default, {value: Model.SportType.Bike}, "Bike"), React.createElement(select_option_1.default, {value: Model.SportType.Run}, "Run")), React.createElement("br", null), "Unit:", React.createElement(select_1.default, {ref: "unit", defaultValue: this.props.output_unit, onChange: e => this._onUnitChanged(e)}, React.createElement(select_option_1.default, {value: Model.IntensityUnit.Watts}, "Watts"), React.createElement(select_option_1.default, {value: Model.IntensityUnit.MinMi}, "min/mi"), React.createElement(select_option_1.default, {value: Model.IntensityUnit.Mph}, "mi/h"), React.createElement(select_option_1.default, {value: Model.IntensityUnit.MinKm}, "min/km"), React.createElement(select_option_1.default, {value: Model.IntensityUnit.Kmh}, "km/h"), React.createElement(select_option_1.default, {value: Model.IntensityUnit.IF}, "IF"), React.createElement(select_option_1.default, {value: Model.IntensityUnit.Per100Yards}, "/100yards"), React.createElement(select_option_1.default, {value: Model.IntensityUnit.Per100Meters}, "/100m"), React.createElement(select_option_1.default, {value: Model.IntensityUnit.HeartRate}, "Heart rate")), React.createElement("br", null), React.createElement("textarea", {ref: "workout_text", defaultValue: this.props.workout_text, style: { height: "200px", width: "100%" }, onChange: e => this._onWorkoutTextChange(e)}), React.createElement("br", null))));
+        return (React.createElement("div", null, 
+            React.createElement("h1", null, " Workout Settings "), 
+            React.createElement("form", null, 
+                "Title: ", 
+                React.createElement("input", {ref: "workout_title", defaultValue: this.props.workout_title, onChange: e => this._onWorkoutTitleChange(e)}), 
+                React.createElement("br", null), 
+                "Sport type:", 
+                React.createElement(select_1.default, {ref: "sportType", defaultValue: this.props.sport_type, onChange: e => this._onSportTypeChange(e)}, 
+                    React.createElement(select_option_1.default, {value: Model.SportType.Swim}, "Swim"), 
+                    React.createElement(select_option_1.default, {value: Model.SportType.Bike}, "Bike"), 
+                    React.createElement(select_option_1.default, {value: Model.SportType.Run}, "Run")), 
+                React.createElement("br", null), 
+                "Unit:", 
+                React.createElement(select_1.default, {ref: "unit", defaultValue: this.props.output_unit, onChange: e => this._onUnitChanged(e)}, 
+                    React.createElement(select_option_1.default, {value: Model.IntensityUnit.Watts}, "Watts"), 
+                    React.createElement(select_option_1.default, {value: Model.IntensityUnit.MinMi}, "min/mi"), 
+                    React.createElement(select_option_1.default, {value: Model.IntensityUnit.Mph}, "mi/h"), 
+                    React.createElement(select_option_1.default, {value: Model.IntensityUnit.MinKm}, "min/km"), 
+                    React.createElement(select_option_1.default, {value: Model.IntensityUnit.Kmh}, "km/h"), 
+                    React.createElement(select_option_1.default, {value: Model.IntensityUnit.IF}, "IF"), 
+                    React.createElement(select_option_1.default, {value: Model.IntensityUnit.Per100Yards}, "/100yards"), 
+                    React.createElement(select_option_1.default, {value: Model.IntensityUnit.Per100Meters}, "/100m"), 
+                    React.createElement(select_option_1.default, {value: Model.IntensityUnit.HeartRate}, "Heart rate")), 
+                React.createElement("br", null), 
+                React.createElement("textarea", {ref: "workout_text", defaultValue: this.props.workout_text, style: { height: "200px", width: "100%" }, onChange: e => this._onWorkoutTextChange(e)}), 
+                React.createElement("br", null))));
     }
 }
 Object.defineProperty(exports, "__esModule", { value: true });
