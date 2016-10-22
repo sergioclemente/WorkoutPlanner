@@ -1491,9 +1491,9 @@ var Model;
         visitSimpleInterval(interval) {
             var duration = interval.getDuration().getSeconds();
             var intensity = interval.getIntensity().getValue();
-            var title = encodeURI(this.getIntervalTitle(interval));
-            this.content += `\t\t<SteadyState Duration='${duration}' Power='${intensity}'>\n`;
-            this.content += `\t\t\t<textevent timeoffset='0' message='${title}'/>\n`;
+            var title = encodeURI(this.getIntervalTitle(interval)).replace("'", "\'");
+            this.content += `\t\t<SteadyState Duration="${duration}" Power="${intensity}">\n`;
+            this.content += `\t\t\t<textevent timeoffset="0" message="${title}"/>\n`;
             this.content += `\t\t</SteadyState>\n`;
         }
         visitRampBuildInterval(interval) {
@@ -1501,10 +1501,10 @@ var Model;
             var intensityStart = interval.getStartIntensity().getValue();
             var intensityEnd = interval.getEndIntensity().getValue();
             if (intensityStart < intensityEnd) {
-                this.content += `\t\t<Warmup Duration='${duration}' PowerLow='${intensityStart}' PowerHigh='${intensityEnd}'/>\n`;
+                this.content += `\t\t<Warmup Duration="${duration}" PowerLow="${intensityStart}" PowerHigh="${intensityEnd}"/>\n`;
             }
             else {
-                this.content += `\t\t<Cooldown Duration='${duration}' PowerLow='${intensityStart}' PowerHigh='${intensityEnd}'/>\n`;
+                this.content += `\t\t<Cooldown Duration="${duration}" PowerLow="${intensityStart}" PowerHigh="${intensityEnd}"/>\n`;
             }
         }
         getContent() {
