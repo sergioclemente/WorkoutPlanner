@@ -1491,7 +1491,7 @@ var Model;
         visitSimpleInterval(interval) {
             var duration = interval.getDuration().getSeconds();
             var intensity = interval.getIntensity().getValue();
-            var title = encodeURI(this.getIntervalTitle(interval)).replace("'", "\'");
+            var title = encodeURI(this.getIntervalTitle(interval));
             this.content += `\t\t<SteadyState Duration="${duration}" Power="${intensity}">\n`;
             this.content += `\t\t\t<textevent timeoffset="0" message="${title}"/>\n`;
             this.content += `\t\t</SteadyState>\n`;
