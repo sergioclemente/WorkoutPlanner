@@ -62,15 +62,33 @@ var UI;
             return this.validate();
         }
         loadFromStorage() {
-            this.workout_title = new PersistedItem("title").load();
-            this.workout_text = new PersistedItem("workout").load();
-            this.ftp_watts = new PersistedItem("ftp_watts").load();
-            this.t_pace = new PersistedItem("t_pace").load();
-            this.swim_css = new PersistedItem("swim_css").load();
-            this.efficiency_factor = new PersistedItem("ef").load() || "1";
-            this.sport_type = new PersistedItem("sport_type").load();
-            this.output_unit = new PersistedItem("output_unit").load();
-            this.email = new PersistedItem("email").load();
+            if (this.workout_title == null || this.workout_title == "") {
+                this.workout_title = new PersistedItem("title").load();
+            }
+            if (this.workout_text == null || this.workout_text == "") {
+                this.workout_text = new PersistedItem("workout").load();
+            }
+            if (this.ftp_watts == null || this.ftp_watts == "") {
+                this.ftp_watts = new PersistedItem("ftp_watts").load();
+            }
+            if (this.t_pace == null || this.t_pace == "") {
+                this.t_pace = new PersistedItem("t_pace").load();
+            }
+            if (this.swim_css == null || this.swim_css == "") {
+                this.swim_css = new PersistedItem("swim_css").load();
+            }
+            if (this.efficiency_factor == null && this.efficiency_factor == "") {
+                this.efficiency_factor = new PersistedItem("ef").load() || "1";
+            }
+            if (this.sport_type == null || this.sport_type == "") {
+                this.sport_type = new PersistedItem("sport_type").load();
+            }
+            if (this.output_unit == null || this.output_unit == "") {
+                this.output_unit = new PersistedItem("output_unit").load();
+            }
+            if (this.email == null || this.email == "") {
+                this.email = new PersistedItem("email").load();
+            }
             // do not load experimental
             return this.validate();
         }
