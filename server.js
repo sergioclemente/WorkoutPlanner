@@ -151,8 +151,11 @@ function onUrlRetrieved(req, res, err, id, params) {
     res.writeHead(301, {
       Location: url
     });
+    console.log("Url: " + url);
+    logRequest(req, 301);
     res.end();
   } else {
+    logRequest(req, 500);
     res.writeHead(500, "Error while retrieving id from db");
     res.end();
   }

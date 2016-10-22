@@ -238,7 +238,7 @@ describe('File Generation', function() {
 	<workout>
 		<Warmup Duration='600' PowerLow='0.55' PowerHigh='0.75'/>
 		<SteadyState Duration='3600' Power='0.8'>
-			<textevent timeoffset='0' message='1hr @ 80%'/>
+			<textevent timeoffset='0' message='1hr%20@%2080%25'/>
 		</SteadyState>
 		<Cooldown Duration='300' PowerLow='0.75' PowerHigh='0.55'/>
 	</workout>

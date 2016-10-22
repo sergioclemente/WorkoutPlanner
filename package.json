@@ -28,6 +28,7 @@
   ],
   "license": "Gibhub",
   "devDependencies": {
+    "@types/node": "^6.0.45",
     "mocha": "^3.0.2"
   }
 }

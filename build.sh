@@ -23,11 +23,12 @@ fi
 echo "Ran Tests"
 
 # Update type object
-tsc --module commonjs ./model.ts -d
+tsc --module commonjs --target ${JS_TARGET} ./model.ts -d
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
 fi
+echo "Updated type object"
 
 # Fix a clowny reference
 mv model.d.ts type_definitions/model.d.ts
@@ -39,6 +40,7 @@ if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
 fi
+echo "Updated JSX files"
 
 # Combine the files together
 # TODO: be smart so it doesnt have to browserify/minify for each page
@@ -53,6 +55,7 @@ if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
 fi
+echo "Combined javascript files"
 
 
 # From here on everthing will be skipped if in dev mode
@@ -72,3 +75,4 @@ if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
 fi
+echo "Minified files"
