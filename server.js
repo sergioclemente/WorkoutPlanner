@@ -153,8 +153,8 @@ function onUrlRetrieved(req, res, err, id, params) {
     });
     res.end();
   } else {
-    req.writeHead(500, "Error while retrieving id from db");
-    req.end();
+    res.writeHead(500, "Error while retrieving id from db");
+    res.end();
   }
 }
 

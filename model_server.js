@@ -110,7 +110,7 @@ var ModelServer;
             connection.query(sql, this._insert.bind(this, connection, callback));
         }
         get(id, callback) {
-            var sql = "SELECT FROM url WHERE id={0}";
+            var sql = "SELECT * FROM url WHERE id={0}";
             var connection = this._get_connection();
             sql = stringFormat(sql, connection.escape(id));
             connection.query(sql, this._query.bind(this, connection, callback));

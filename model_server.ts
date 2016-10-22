@@ -139,7 +139,7 @@ export class UrlShortening {
 	}
 
 	get(id: number, callback : (err: string, id: number, params:string) => void) : void {
-		var sql = "SELECT FROM url WHERE id={0}";
+		var sql = "SELECT * FROM url WHERE id={0}";
 
 		var connection = this._get_connection();
 
