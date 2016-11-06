@@ -179,6 +179,8 @@ function handleSaveWorkout(req, res, uri, params) {
   db.add(w);               
   res.write("Workout saved");
   res.end();     
+
+  return true;
 }
 
 http.createServer(function (req, res) {
