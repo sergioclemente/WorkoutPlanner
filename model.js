@@ -89,6 +89,24 @@ var Model;
         }
     }
     Model.MyMath = MyMath;
+    class SportTypeHelper {
+        static convertToString(sportType) {
+            if (sportType == SportType.Bike) {
+                return "Bike";
+            }
+            else if (sportType == SportType.Run) {
+                return "Run";
+            }
+            else if (sportType == SportType.Swim) {
+                return "Swim";
+            }
+            else {
+                console.assert(false);
+                return "";
+            }
+        }
+    }
+    Model.SportTypeHelper = SportTypeHelper;
     class DistanceUnitHelper {
         static convertTo(value, unitFrom, unitTo) {
             // convert first to meters

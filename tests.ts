@@ -1,4 +1,4 @@
-/// <reference path="./type_definitions/node.d.ts" />
+/// <reference path="./node_modules/@types/node/index.d.ts"/>
 /// <reference path="./type_definitions/model.d.ts" />
 /// <reference path="./type_definitions/jasmine.d.ts" />
 

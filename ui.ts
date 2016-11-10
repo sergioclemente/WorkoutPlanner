@@ -1,4 +1,5 @@
-/// <reference path="type_definitions/node.d.ts" />
+/// <reference path="./node_modules/@types/node/index.d.ts"/>
+
 module UI {
 
 export class PersistedItem {

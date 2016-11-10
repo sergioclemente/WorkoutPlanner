@@ -18,6 +18,7 @@ npm install -g react-dom
 npm install -g minifier
 npm install -g mysql
 npm install -g mocha
+npm install -g fixed-data-table
 ```
 
 # Compiling and running

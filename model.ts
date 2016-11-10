@@ -94,6 +94,21 @@ export class MyMath {
     }
 }
 
+export class SportTypeHelper {
+	static convertToString(sportType : SportType) {
+		if (sportType == SportType.Bike) {
+			return "Bike";
+		} else if (sportType == SportType.Run) {
+			return "Run";
+		} else if (sportType == SportType.Swim) {
+			return "Swim";
+		} else {
+			console.assert(false);
+			return "";
+		}
+	}
+}
+
 export class DistanceUnitHelper {
 	static convertTo(value: number, unitFrom: DistanceUnit, unitTo: DistanceUnit) : number {
 		// convert first to meters

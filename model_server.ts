@@ -237,7 +237,7 @@ export class WorkoutDB {
 				}
 			}.bind(this));	
 		} finally {
-			connection.close();
+			connection.end({ timeout: 60000 });
 		}
 	}
 }

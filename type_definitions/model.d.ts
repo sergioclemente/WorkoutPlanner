@@ -53,6 +53,9 @@ declare module Model {
         static floor10(value: number, exp: number): number;
         static ceil10(value: number, exp: number): number;
     }
+    class SportTypeHelper {
+        static convertToString(sportType: SportType): string;
+    }
     class DistanceUnitHelper {
         static convertTo(value: number, unitFrom: DistanceUnit, unitTo: DistanceUnit): number;
     }

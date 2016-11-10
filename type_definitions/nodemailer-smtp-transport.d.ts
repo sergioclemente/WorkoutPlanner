@@ -3,7 +3,7 @@
 // Definitions by: Rogier Schouten <https://github.com/rogierschouten/>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-/// <reference path="node.d.ts" />
+/// <reference path="../node_modules/@types/node/index.d.ts"/>
 /// <reference path="nodemailer-types.d.ts" />
 
 declare module "nodemailer-smtp-transport" {

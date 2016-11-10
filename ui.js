@@ -1,5 +1,5 @@
+/// <reference path="./node_modules/@types/node/index.d.ts"/>
 "use strict";
-/// <reference path="type_definitions/node.d.ts" />
 var UI;
 (function (UI) {
     class PersistedItem {
