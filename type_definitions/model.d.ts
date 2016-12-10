@@ -68,6 +68,12 @@ declare module Model {
         static getDistanceMiles(unit: DurationUnit, value: number): number;
         static getDurationSeconds(unit: DurationUnit, value: number): number;
     }
+    class FormatterHelper {
+        static roundNumberUp(value: number, round_val?: number): number;
+        static roundNumberDown(value: number, round_val?: number): number;
+        static formatNumber(value: number, decimalMultiplier: number, separator: string, unit: string, round_val?: number): string;
+        private static enforceDigits(value, digits);
+    }
     class Duration {
         private value;
         private unit;
@@ -334,10 +340,6 @@ declare module Model {
         outputUnit: IntensityUnit;
         shouldDisplayEasy: boolean;
         constructor(userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit);
-        static roundNumberUp(value: number, round_val?: number): number;
-        static roundNumberDown(value: number, round_val?: number): number;
-        static formatNumber(value: number, decimalMultiplier: number, separator: string, unit: string, round_val?: number): string;
-        private static enforceDigits(value, digits);
         static getIntervalTitle(interval: Interval, userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit): string;
         visitCommentInterval(interval: CommentInterval): void;
         visitRestInterval(interval: Interval): void;

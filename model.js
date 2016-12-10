@@ -251,6 +251,44 @@ var Model;
         }
     }
     Model.DurationUnitHelper = DurationUnitHelper;
+    class FormatterHelper {
+        static roundNumberUp(value, round_val = 0) {
+            if (round_val != 0) {
+                var mod = value % round_val;
+                if (mod != 0) {
+                    value += round_val - mod;
+                }
+            }
+            return value;
+        }
+        static roundNumberDown(value, round_val = 0) {
+            if (round_val != 0) {
+                var mod = value % round_val;
+                if (mod != 0) {
+                    value -= mod;
+                }
+            }
+            return value;
+        }
+        static formatNumber(value, decimalMultiplier, separator, unit, round_val = 0) {
+            var integerPart = Math.floor(value);
+            var fractionPart = FormatterHelper.roundNumberDown(Math.round(decimalMultiplier * (value - integerPart)), round_val);
+            return integerPart + separator + FormatterHelper.enforceDigits(fractionPart, 2) + unit;
+        }
+        static enforceDigits(value, digits) {
+            var result = value + "";
+            if (result.length > digits) {
+                return result.substring(0, digits);
+            }
+            else {
+                while (result.length < digits) {
+                    result = "0" + result;
+                }
+                return result;
+            }
+        }
+    }
+    Model.FormatterHelper = FormatterHelper;
     class Duration {
         constructor(unit, value, estimatedDurationInSeconds, estimatedDistanceInMiles) {
             this.unit = unit;
@@ -596,10 +634,10 @@ var Model;
             }
             else {
                 if (this.originalUnit == IntensityUnit.MinMi) {
-                    return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", getIntensityUnit(IntensityUnit.MinMi));
+                    return FormatterHelper.formatNumber(this.originalValue, 60, ":", getIntensityUnit(IntensityUnit.MinMi));
                 }
                 else if (this.originalUnit == IntensityUnit.Per100Yards || this.originalUnit == IntensityUnit.Per100Meters) {
-                    return WorkoutTextVisitor.formatNumber(this.originalValue, 60, ":", getIntensityUnit(this.originalUnit));
+                    return FormatterHelper.formatNumber(this.originalValue, 60, ":", getIntensityUnit(this.originalUnit));
                 }
                 else {
                     if (this.originalUnit == IntensityUnit.OffsetSeconds) {
@@ -1656,41 +1694,6 @@ var Model;
             this.sportType = sportType;
             this.outputUnit = outputUnit;
         }
-        static roundNumberUp(value, round_val = 0) {
-            if (round_val != 0) {
-                var mod = value % round_val;
-                if (mod != 0) {
-                    value += round_val - mod;
-                }
-            }
-            return value;
-        }
-        static roundNumberDown(value, round_val = 0) {
-            if (round_val != 0) {
-                var mod = value % round_val;
-                if (mod != 0) {
-                    value -= mod;
-                }
-            }
-            return value;
-        }
-        static formatNumber(value, decimalMultiplier, separator, unit, round_val = 0) {
-            var integerPart = Math.floor(value);
-            var fractionPart = WorkoutTextVisitor.roundNumberDown(Math.round(decimalMultiplier * (value - integerPart)), round_val);
-            return integerPart + separator + WorkoutTextVisitor.enforceDigits(fractionPart, 2) + unit;
-        }
-        static enforceDigits(value, digits) {
-            var result = value + "";
-            if (result.length > digits) {
-                return result.substring(0, digits);
-            }
-            else {
-                while (result.length < digits) {
-                    result = "0" + result;
-                }
-                return result;
-            }
-        }
         static getIntervalTitle(interval, userProfile = null, sportType = SportType.Unknown, outputUnit = IntensityUnit.Unknown) {
             // TODO: instantiating visitor is a bit clowny
             var f = new WorkoutTextVisitor(userProfile, sportType, outputUnit);
@@ -1863,7 +1866,7 @@ var Model;
             }
             if (this.sportType == SportType.Bike) {
                 if (this.outputUnit == IntensityUnit.Watts) {
-                    return WorkoutTextVisitor.roundNumberUp(Math.round(this.userProfile.getBikeFTP() * intensity.getValue()), 5) + "w";
+                    return FormatterHelper.roundNumberUp(Math.round(this.userProfile.getBikeFTP() * intensity.getValue()), 5) + "w";
                 }
                 else {
                     return intensity.toString();
@@ -1876,7 +1879,7 @@ var Model;
                     return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
                 }
                 else {
-                    return WorkoutTextVisitor.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit), 5);
+                    return FormatterHelper.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit), 5);
                 }
             }
             else if (this.sportType == SportType.Swim) {
@@ -1885,7 +1888,7 @@ var Model;
                 }
                 else if (this.outputUnit == IntensityUnit.Per100Yards || this.outputUnit == IntensityUnit.Per100Meters) {
                     var swim_pace_per_100 = this.userProfile.getSwimPace(this.outputUnit, intensity);
-                    return WorkoutTextVisitor.formatNumber(swim_pace_per_100, 60, ":", "");
+                    return FormatterHelper.formatNumber(swim_pace_per_100, 60, ":", "");
                 }
                 else {
                     console.assert(false, stringFormat("Invalid output unit {0}", this.outputUnit));
@@ -2232,7 +2235,7 @@ var Model;
                 return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
             }
             else {
-                return WorkoutTextVisitor.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
+                return FormatterHelper.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
             }
         }
         getStepsList(new_line) {

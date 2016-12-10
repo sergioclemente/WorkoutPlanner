@@ -385,17 +385,34 @@ describe('Interval title', function () {
 });
 describe('Formatter', function () {
     it('number formatter', function () {
-        // WorkoutTextVisitor
-        expect_eq_str("8:00min/mi", Model.WorkoutTextVisitor.formatNumber(8, 60, ":", "min/mi", 0));
-        expect_eq_str("8:00min/mi", Model.WorkoutTextVisitor.formatNumber(8, 60, ":", "min/mi", 5));
-        expect_eq_str("7:30min/mi", Model.WorkoutTextVisitor.formatNumber(7.5, 60, ":", "min/mi", 0));
-        expect_eq_str("7:30min/mi", Model.WorkoutTextVisitor.formatNumber(7.5, 60, ":", "min/mi", 5));
-        expect_eq_str("7:08min/mi", Model.WorkoutTextVisitor.formatNumber(7.13, 60, ":", "min/mi", 0));
-        expect_eq_str("7:05min/mi", Model.WorkoutTextVisitor.formatNumber(7.13, 60, ":", "min/mi", 5));
-        expect_eq_str("7:46min/mi", Model.WorkoutTextVisitor.formatNumber(7.77, 60, ":", "min/mi", 0));
-        expect_eq_str("7:45min/mi", Model.WorkoutTextVisitor.formatNumber(7.77, 60, ":", "min/mi", 5));
-        expect_eq_str("7:14min/mi", Model.WorkoutTextVisitor.formatNumber(7.23, 60, ":", "min/mi", 0));
-        expect_eq_str("7:10min/mi", Model.WorkoutTextVisitor.formatNumber(7.23, 60, ":", "min/mi", 5));
+        expect_eq_str("8:00min/mi", Model.FormatterHelper.formatNumber(8, 60, ":", "min/mi", 0));
+        expect_eq_str("8:00min/mi", Model.FormatterHelper.formatNumber(8, 60, ":", "min/mi", 5));
+        expect_eq_str("7:30min/mi", Model.FormatterHelper.formatNumber(7.5, 60, ":", "min/mi", 0));
+        expect_eq_str("7:30min/mi", Model.FormatterHelper.formatNumber(7.5, 60, ":", "min/mi", 5));
+        expect_eq_str("7:08min/mi", Model.FormatterHelper.formatNumber(7.13, 60, ":", "min/mi", 0));
+        expect_eq_str("7:05min/mi", Model.FormatterHelper.formatNumber(7.13, 60, ":", "min/mi", 5));
+        expect_eq_str("7:46min/mi", Model.FormatterHelper.formatNumber(7.77, 60, ":", "min/mi", 0));
+        expect_eq_str("7:45min/mi", Model.FormatterHelper.formatNumber(7.77, 60, ":", "min/mi", 5));
+        expect_eq_str("7:14min/mi", Model.FormatterHelper.formatNumber(7.23, 60, ":", "min/mi", 0));
+        expect_eq_str("7:10min/mi", Model.FormatterHelper.formatNumber(7.23, 60, ":", "min/mi", 5));
+    });
+    it('number rounder (up)', function () {
+        expect_eq_nbr(240, Model.FormatterHelper.roundNumberUp(240, 5));
+        expect_eq_nbr(245, Model.FormatterHelper.roundNumberUp(241, 5));
+        expect_eq_nbr(245, Model.FormatterHelper.roundNumberUp(242, 5));
+        expect_eq_nbr(245, Model.FormatterHelper.roundNumberUp(243, 5));
+        expect_eq_nbr(245, Model.FormatterHelper.roundNumberUp(244, 5));
+        expect_eq_nbr(245, Model.FormatterHelper.roundNumberUp(245, 5));
+        expect_eq_nbr(250, Model.FormatterHelper.roundNumberUp(246, 5));
+    });
+    it('number rounder (down)', function () {
+        expect_eq_nbr(240, Model.FormatterHelper.roundNumberDown(240, 5));
+        expect_eq_nbr(240, Model.FormatterHelper.roundNumberDown(241, 5));
+        expect_eq_nbr(240, Model.FormatterHelper.roundNumberDown(242, 5));
+        expect_eq_nbr(240, Model.FormatterHelper.roundNumberDown(243, 5));
+        expect_eq_nbr(240, Model.FormatterHelper.roundNumberDown(244, 5));
+        expect_eq_nbr(245, Model.FormatterHelper.roundNumberDown(245, 5));
+        expect_eq_nbr(245, Model.FormatterHelper.roundNumberDown(246, 5));
     });
 });
 describe('Swim', function () {
