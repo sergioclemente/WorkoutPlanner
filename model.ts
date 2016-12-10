@@ -1979,7 +1979,7 @@ export class WorkoutTextVisitor implements Visitor {
 				// http://home.trainingpeaks.com/blog/article/the-efficiency-factor-in-running
 				bpm = (1760 * this.userProfile.getRunnintTPaceMph()) / (60 * this.userProfile.getEfficiencyFactor());
 			}
-			return (intensity.getValue() * bpm) + "bpm";
+			return Math.round(intensity.getValue() * bpm) + "bpm";
 		}
 
 		if (this.outputUnit == IntensityUnit.Unknown ||

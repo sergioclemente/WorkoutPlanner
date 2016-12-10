@@ -43,6 +43,7 @@ const assert = require('assert');
 
 var intensity_100_pct = new Model.Intensity(1, 1);
 var up = new Model.UserProfile(310, "6:00min/mi", "1:25/100yards");
+up.setEfficiencyFactor(2);
 var of_swim = new Model.ObjectFactory(up, Model.SportType.Swim);
 var of_bike = new Model.ObjectFactory(up, Model.SportType.Bike);
 var of_run = new Model.ObjectFactory(up, Model.SportType.Run);
@@ -68,6 +69,16 @@ describe('Intensity', function() {
 		res = Model.Intensity.combine([i90, i80], [1, 1]).getValue();
 		expect_eq_nbr(0.85, res);
   });
+  it('hr conversion', function() {
+	  var hr_visitor = new Model.WorkoutTextVisitor(up, Model.SportType.Bike, Model.IntensityUnit.HeartRate);
+	  expect_eq_str("155bpm", hr_visitor.getIntensityPretty(intensity_100_pct));
+
+	  var intensity_90_pct = new Model.Intensity(0.9, 0.9);
+	  expect_eq_str("140bpm", hr_visitor.getIntensityPretty(intensity_90_pct));
+
+	  var intensity_85_pct = new Model.Intensity(0.85, 0.85);
+	  expect_eq_str("132bpm", hr_visitor.getIntensityPretty(intensity_85_pct));
+  });  
 });
 
 describe('TSS', function() {
@@ -481,8 +492,8 @@ describe('Swim', function() {
 		var swim_visitor_mph = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Mph);
 		var swim_visitor_per100 = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Per100Meters);
 
-		expect_eq_str("2.4mi/h", swim_visitor_mph.getIntensityPretty(intensity_100_pct))
-		expect_eq_str("1:33", swim_visitor_per100.getIntensityPretty(intensity_100_pct))		
+		expect_eq_str("2.4mi/h", swim_visitor_mph.getIntensityPretty(intensity_100_pct));
+		expect_eq_str("1:33", swim_visitor_per100.getIntensityPretty(intensity_100_pct));		
   });
   it('speed', function() {
 		expect_eq_nbr(/* 1:25 */ 60 + 25, new Model.ObjectFactory(up, Model.SportType.Swim).createDuration(intensity_100_pct, Model.DistanceUnit.Yards, 100).getSeconds());		
