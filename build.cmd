@@ -1,3 +1,4 @@
+@echo off
 set JS_TARGET=ES6
 
 call tsc --moduleResolution node --m commonjs --target %JS_TARGET% --removeComments model.ts ui.ts model_server.ts
