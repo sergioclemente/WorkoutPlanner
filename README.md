@@ -19,6 +19,7 @@ npm install -g minifier
 npm install -g mysql
 npm install -g mocha
 npm install -g fixed-data-table
+npm install
 ```
 
 # Compiling and running
@@ -26,8 +27,10 @@ npm install -g fixed-data-table
 * Compile and run tests
 
 ```
-build.sh
+./build.sh
 ```
+
+PS: If you are on windows you can also use build.cmd. HOWEVER what gets deployed its using build.sh.
 
 * Starting the node server
 
@@ -46,22 +49,24 @@ Its automatically pushed on every commit.
 * Refactor Intensity
 
 * Auto merge MRC intervals
-* Zwift files are broken
 * Change output units on sport type
 * More logging on usage
 * Refactor validation of parameters on server.js
 * Add player
 
 Nice to have things
-* Add Url shortener
 * Suggestion for learning
 * [P3] Add free ride do zwift
         <FreeRide Duration="600" FlatRoad="1"/>
 * [P3] Add react for generating emails
-* Zwift file incorrect quotes '
 * pipe (|) missing in Repeat interval
 * Ajax TS
-* List workouts
+* For the list of workouts Add
+** TSS
+** Duration
+** IF
+* Add download without contacting the server (Generating the file on the client)
+http://stackoverflow.com/questions/2897619/using-html5-javascript-to-generate-and-save-a-file
 
 
 # Where to find type definition files:
