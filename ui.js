@@ -1,5 +1,7 @@
 /// <reference path="./node_modules/@types/node/index.d.ts"/>
+/// <reference path="type_definitions/mysql.d.ts" />
 "use strict";
+const Model = require('./model');
 var UI;
 (function (UI) {
     class PersistedItem {
@@ -126,6 +128,26 @@ var UI;
                 "&ou=" + encodeURIComponent(this.output_unit) +
                 "&email=" + encodeURIComponent(this.email) +
                 "&e=" + encodeURIComponent(this.experimental ? "1" : "0");
+        }
+        createUserProfile() {
+            if (this.validate()) {
+                let result = new Model.UserProfile(parseInt(this.ftp_watts), this.t_pace, this.swim_css, this.email);
+                result.setEfficiencyFactor(parseFloat(this.efficiency_factor));
+                return result;
+            }
+            else {
+                return null;
+            }
+        }
+        createWorkoutBuilder() {
+            if (this.validate()) {
+                let result = new Model.WorkoutBuilder(this.createUserProfile(), parseInt(this.sport_type), parseInt(this.output_unit));
+                result.withDefinition(this.workout_title, this.workout_text);
+                return result;
+            }
+            else {
+                return null;
+            }
         }
     }
     UI.QueryParams = QueryParams;

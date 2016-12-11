@@ -2088,10 +2088,10 @@ export class UserProfile {
 		this.email = email;
 	}
 
-	setEfficiencyFactor(ef) {
-		this.effiency_factor = parseFloat(ef);
+	setEfficiencyFactor(ef : number) {
+		this.effiency_factor = ef;
 	}
-	getEfficiencyFactor() {
+	getEfficiencyFactor() : number {
 		return this.effiency_factor;
 	}
 	

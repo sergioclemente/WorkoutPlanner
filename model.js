@@ -1963,7 +1963,7 @@ var Model;
             this.email = email;
         }
         setEfficiencyFactor(ef) {
-            this.effiency_factor = parseFloat(ef);
+            this.effiency_factor = ef;
         }
         getEfficiencyFactor() {
             return this.effiency_factor;

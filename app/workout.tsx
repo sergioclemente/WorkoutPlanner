@@ -87,8 +87,7 @@ export default class Workout extends React.Component<any, any> {
 	}
 
 	_onClickLink() {
-		let userProfile = new Model.UserProfile(parseInt(this.params.ftp_watts), this.params.t_pace, this.params.swim_css, this.params.email);
-		let builder = new Model.WorkoutBuilder(userProfile, parseInt(this.params.sport_type), parseInt(this.params.output_unit)).withDefinition(this.params.workout_title, this.params.workout_text);
+		let builder = this.params.createWorkoutBuilder();
 
 		// Download both files (mrc and zwo)
 		{

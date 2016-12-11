@@ -10,7 +10,6 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 };
 const React = require('react');
 const UI = require('../ui');
-const Model = require('../model');
 const user_settings_1 = require('./user_settings');
 const workout_input_1 = require('./workout_input');
 const workout_view_1 = require('./workout_view');
@@ -76,8 +75,7 @@ class Workout extends React.Component {
         anchor.hidden = !visible;
     }
     _onClickLink() {
-        let userProfile = new Model.UserProfile(parseInt(this.params.ftp_watts), this.params.t_pace, this.params.swim_css, this.params.email);
-        let builder = new Model.WorkoutBuilder(userProfile, parseInt(this.params.sport_type), parseInt(this.params.output_unit)).withDefinition(this.params.workout_title, this.params.workout_text);
+        let builder = this.params.createWorkoutBuilder();
         // Download both files (mrc and zwo)
         {
             let fileName = builder.getMRCFileName();

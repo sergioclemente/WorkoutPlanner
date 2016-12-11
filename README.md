@@ -47,12 +47,12 @@ Its automatically pushed on every commit.
 # Bugs/Feature requests
 * Add builder for UserProfile
 * Refactor Intensity
-
 * Auto merge MRC intervals
 * Change output units on sport type
 * More logging on usage
 * Refactor validation of parameters on server.js
 * Add player
+* Make node.js a typescript file
 
 Nice to have things
 * Suggestion for learning
@@ -65,8 +65,6 @@ Nice to have things
 ** TSS
 ** Duration
 ** IF
-* Add download without contacting the server (Generating the file on the client)
-http://stackoverflow.com/questions/2897619/using-html5-javascript-to-generate-and-save-a-file
 
 
 # Where to find type definition files:

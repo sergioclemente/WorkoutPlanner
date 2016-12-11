@@ -363,7 +363,7 @@ declare module Model {
         private email;
         private effiency_factor;
         constructor(bikeFTPWatts: number, renameTPace: string, swimCSS: string, email: string);
-        setEfficiencyFactor(ef: any): void;
+        setEfficiencyFactor(ef: number): void;
         getEfficiencyFactor(): number;
         getBikeFTP(): number;
         getRunningTPaceMinMi(): number;
