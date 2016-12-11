@@ -10,6 +10,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 };
 const React = require('react');
 const UI = require('../ui');
+const Model = require('../model');
 const user_settings_1 = require('./user_settings');
 const workout_input_1 = require('./workout_input');
 const workout_view_1 = require('./workout_view');
@@ -61,8 +62,6 @@ class Workout extends React.Component {
     }
     refreshUrls() {
         var url_parameters = this.params.getURL();
-        this._setHref("download_mrc", "workout.mrc" + url_parameters);
-        this._setHref("download_zwo", "workout.zwo" + url_parameters);
         this._setHref("email_send_workout", "send_mail" + url_parameters);
         this._setHref("save_workout", "save_workout" + url_parameters);
         this._setVisibility("save_workout", this.params.experimental);
@@ -76,6 +75,28 @@ class Workout extends React.Component {
         var anchor = this.refs[element_ref];
         anchor.hidden = !visible;
     }
+    _onClickLink() {
+        let userProfile = new Model.UserProfile(parseInt(this.params.ftp_watts), this.params.t_pace, this.params.swim_css, this.params.email);
+        let builder = new Model.WorkoutBuilder(userProfile, parseInt(this.params.sport_type), parseInt(this.params.output_unit)).withDefinition(this.params.workout_title, this.params.workout_text);
+        // Download both files (mrc and zwo)
+        {
+            let fileName = builder.getMRCFileName();
+            let content = builder.getMRCFile();
+            this._downloadFile(fileName, content);
+        }
+        {
+            let fileName = builder.getZWOFileName();
+            let content = builder.getZWOFile();
+            this._downloadFile(fileName, content);
+        }
+    }
+    _downloadFile(fileName, content) {
+        let uriContent = "data:application/octet-stream," + encodeURIComponent(content);
+        var link = document.createElement('a');
+        link.download = fileName;
+        link.href = uriContent;
+        link.click();
+    }
     render() {
         return (React.createElement("div", null, 
             React.createElement(user_settings_1.default, __assign({}, this.props, {ref: 'settings', onChange: (f, t, c, e, ef) => this._onUserSettingsChanged(f, t, c, e, ef)})), 
@@ -84,10 +105,7 @@ class Workout extends React.Component {
                 React.createElement("tbody", null, 
                     React.createElement("tr", null, 
                         React.createElement("td", null, 
-                            React.createElement("a", {ref: "download_mrc"}, "Download MRC")
-                        ), 
-                        React.createElement("td", null, 
-                            React.createElement("a", {ref: "download_zwo"}, "Download ZWO")
+                            React.createElement("a", {href: "#", onClick: (e) => this._onClickLink()}, "Download Files")
                         ), 
                         React.createElement("td", null, 
                             React.createElement("a", {ref: "email_send_workout"}, "Email Workout")

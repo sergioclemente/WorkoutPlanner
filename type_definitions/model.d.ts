@@ -404,6 +404,15 @@ declare module Model {
         getIsValid(): boolean;
         moveNext(): boolean;
     }
+    class WorkoutFileGenerator {
+        private workoutTitle;
+        private intervals;
+        constructor(workoutTitle: string, intervals: ArrayInterval);
+        getMRCFile(): string;
+        getZWOFile(): string;
+        getZWOFileName(): string;
+        getMRCFileName(): string;
+    }
     class WorkoutBuilder {
         private userProfile;
         private sportType;

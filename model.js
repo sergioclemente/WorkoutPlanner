@@ -2177,6 +2177,39 @@ var Model;
         }
     }
     Model.ArrayIterator = ArrayIterator;
+    class WorkoutFileGenerator {
+        constructor(workoutTitle, intervals) {
+            this.workoutTitle = workoutTitle;
+            this.intervals = intervals;
+        }
+        getMRCFile() {
+            var dataVisitor = new MRCCourseDataVisitor(this.getMRCFileName());
+            VisitorHelper.visitAndFinalize(dataVisitor, this.intervals);
+            return dataVisitor.getContent();
+        }
+        getZWOFile() {
+            var fileNameHelper = new FileNameHelper(this.intervals);
+            var workout_name = fileNameHelper.getFileName();
+            var zwift = new ZwiftDataVisitor(workout_name);
+            VisitorHelper.visitAndFinalize(zwift, this.intervals);
+            return zwift.getContent();
+        }
+        getZWOFileName() {
+            if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
+                return this.workoutTitle + ".zwo";
+            }
+            var fileNameHelper = new FileNameHelper(this.intervals);
+            return fileNameHelper.getFileName() + ".zwo";
+        }
+        getMRCFileName() {
+            if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
+                return this.workoutTitle + ".mrc";
+            }
+            var fileNameHelper = new FileNameHelper(this.intervals);
+            return fileNameHelper.getFileName() + ".mrc";
+        }
+    }
+    Model.WorkoutFileGenerator = WorkoutFileGenerator;
     class WorkoutBuilder {
         constructor(userProfile, sportType, outputUnit) {
             this.userProfile = userProfile;
@@ -2261,30 +2294,20 @@ var Model;
             return result;
         }
         getMRCFile() {
-            var dataVisitor = new MRCCourseDataVisitor(this.getMRCFileName());
-            VisitorHelper.visitAndFinalize(dataVisitor, this.intervals);
-            return dataVisitor.getContent();
+            let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
+            return wfg.getMRCFile();
         }
         getZWOFile() {
-            var fileNameHelper = new FileNameHelper(this.intervals);
-            var workout_name = fileNameHelper.getFileName();
-            var zwift = new ZwiftDataVisitor(workout_name);
-            VisitorHelper.visitAndFinalize(zwift, this.intervals);
-            return zwift.getContent();
+            let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
+            return wfg.getZWOFile();
         }
         getZWOFileName() {
-            if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
-                return this.workoutTitle + ".zwo";
-            }
-            var fileNameHelper = new FileNameHelper(this.intervals);
-            return fileNameHelper.getFileName() + ".zwo";
+            let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
+            return wfg.getZWOFileName();
         }
         getMRCFileName() {
-            if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
-                return this.workoutTitle + ".mrc";
-            }
-            var fileNameHelper = new FileNameHelper(this.intervals);
-            return fileNameHelper.getFileName() + ".mrc";
+            let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
+            return wfg.getMRCFileName();
         }
     }
     Model.WorkoutBuilder = WorkoutBuilder;

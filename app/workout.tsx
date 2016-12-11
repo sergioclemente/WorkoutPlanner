@@ -66,8 +66,6 @@ export default class Workout extends React.Component<any, any> {
 
 	refreshUrls() {
 		var url_parameters = this.params.getURL();
-		this._setHref("download_mrc", "workout.mrc" + url_parameters);
-		this._setHref("download_zwo", "workout.zwo" + url_parameters);
 		this._setHref("email_send_workout", "send_mail" + url_parameters);
 		this._setHref("save_workout", "save_workout" + url_parameters);
 		
@@ -88,6 +86,32 @@ export default class Workout extends React.Component<any, any> {
 		anchor.hidden = !visible;
 	}
 
+	_onClickLink() {
+		let userProfile = new Model.UserProfile(parseInt(this.params.ftp_watts), this.params.t_pace, this.params.swim_css, this.params.email);
+		let builder = new Model.WorkoutBuilder(userProfile, parseInt(this.params.sport_type), parseInt(this.params.output_unit)).withDefinition(this.params.workout_title, this.params.workout_text);
+
+		// Download both files (mrc and zwo)
+		{
+			let fileName = builder.getMRCFileName();
+			let content = builder.getMRCFile();
+			this._downloadFile(fileName, content);
+		}
+		{
+			let fileName = builder.getZWOFileName();
+			let content = builder.getZWOFile();
+			this._downloadFile(fileName, content);
+		}
+	}
+
+	_downloadFile(fileName : string, content : string) {
+		let uriContent = "data:application/octet-stream," + encodeURIComponent(content);
+
+		var link = document.createElement('a');
+		link.download = fileName;
+		link.href = uriContent;
+		link.click();
+	}
+
 	render() {
 		return (<div>
 					<UserSettings {...this.props} ref='settings' onChange={ (f,t,c,e,ef) => this._onUserSettingsChanged(f,t,c,e,ef) }></UserSettings>
@@ -95,8 +119,7 @@ export default class Workout extends React.Component<any, any> {
 					<table>
 						<tbody>
 							<tr>
-								<td><a ref="download_mrc" >Download MRC</a></td>
-								<td><a ref="download_zwo" >Download ZWO</a></td>
+								<td><a href="#" onClick={(e) => this._onClickLink()}>Download Files</a></td>
 								<td><a ref="email_send_workout" >Email Workout</a></td>
 								<td><a ref="save_workout" >Save Workout</a></td>
 								<td><a ref="shorten_url" href="#" onClick={(e) => this._onShortenInvoked(e)}>Shorten Url</a></td>

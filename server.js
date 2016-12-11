@@ -32,37 +32,6 @@ function handleExistentFile(req, res, fs, filename) {
   });
 }
 
-function handleDownloadWorkout(req, res, uri, params) {
-  if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
-    var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
-    var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.t, params.w);
-    logRequest(req, 200);
-
-    var workout_filename = "";
-    var workout_content = "";
-
-    if (uri === "/workout.mrc") {
-      workout_filename = builder.getMRCFileName();
-      workout_content = builder.getMRCFile();
-    } else {
-      workout_filename = builder.getZWOFileName();
-      workout_content = builder.getZWOFile();
-    }
-
-    res.writeHead(200,
-      {
-        "Content-Type": "application/octet-stream",
-        "Content-Disposition": "attachment; filename=\"" + workout_filename + "\";"
-      }
-    );
-    res.write(workout_content);
-    res.end();
-    return true;
-  } else {
-    return false;
-  }
-}
-
 function handleSendEmail(req, res, uri, params) {
   if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
     var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
@@ -200,8 +169,6 @@ http.createServer(function (req, res) {
     }
 
     var handler_map = {
-      "/workout.mrc": handleDownloadWorkout,
-      "/workout.zwo": handleDownloadWorkout,
       "/send_mail": handleSendEmail,
       "/save_workout": handleSaveWorkout,
       "/workouts": handleGetWorkouts,
