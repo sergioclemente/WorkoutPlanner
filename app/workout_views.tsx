@@ -90,6 +90,7 @@ export default class WorkoutViews extends React.Component<any, any> {
 				params.workout_text = this._rows[i].value;
 				params.workout_title =  this._rows[i].title;
 				this._rows[i].link = "/" + params.getURL();
+				this._setExtraRowFields(params, i);
 			}
 
 			// force a re-render
@@ -97,6 +98,17 @@ export default class WorkoutViews extends React.Component<any, any> {
 		} else {
 			console.error("Error while shortening url");
 		}
+	}
+
+	_setExtraRowFields(params : UI.QueryParams, i : number) : void {
+			// HACK: Lets override the output unit to IF since we want to get the IF
+			params.output_unit = Model.IntensityUnit.IF.toString();
+			let intervals = Model.IntervalParser.parse(
+				new Model.ObjectFactory(params.createUserProfile(), this._rows[i].sport_type),
+				params.workout_text
+			);
+			this._rows[i].if = intervals.getIntensity().toString();
+			this._rows[i].tss = intervals.getTSS().toString();
 	}
 
 	getState(params: UI.QueryParams) : any {
@@ -126,6 +138,16 @@ export default class WorkoutViews extends React.Component<any, any> {
 					cell={<DurationCell data={this._rows} field="duration_sec"> </DurationCell>}
 					width={80}
 				/>
+				<Column
+					header={<Cell>IF</Cell>}
+					cell={<CustomCell data={this._rows} field="if"> </CustomCell>}
+					width={60}
+				/>		
+				<Column
+					header={<Cell>TSS</Cell>}
+					cell={<CustomCell data={this._rows} field="tss"> </CustomCell>}
+					width={80}
+				/>									
 				<Column
 					header={<Cell>Title</Cell>}
 					cell={<TitleCell data={this._rows} field="title" link="link"> </TitleCell>}

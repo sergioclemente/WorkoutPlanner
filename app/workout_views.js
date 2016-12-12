@@ -70,6 +70,7 @@ class WorkoutViews extends React.Component {
                 params.workout_text = this._rows[i].value;
                 params.workout_title = this._rows[i].title;
                 this._rows[i].link = "/" + params.getURL();
+                this._setExtraRowFields(params, i);
             }
             // force a re-render
             this.forceUpdate();
@@ -77,6 +78,13 @@ class WorkoutViews extends React.Component {
         else {
             console.error("Error while shortening url");
         }
+    }
+    _setExtraRowFields(params, i) {
+        // HACK: Lets override the output unit to IF since we want to get the IF
+        params.output_unit = Model.IntensityUnit.IF.toString();
+        let intervals = Model.IntervalParser.parse(new Model.ObjectFactory(params.createUserProfile(), this._rows[i].sport_type), params.workout_text);
+        this._rows[i].if = intervals.getIntensity().toString();
+        this._rows[i].tss = intervals.getTSS().toString();
     }
     getState(params) {
         return ({});
@@ -87,6 +95,8 @@ class WorkoutViews extends React.Component {
             React.createElement(fixed_data_table_1.Table, {ref: "tbl", rowsCount: this._rows.length, rowHeight: 50, headerHeight: 50, width: 1000, height: 800}, 
                 React.createElement(fixed_data_table_1.Column, {header: React.createElement(fixed_data_table_1.Cell, null, "Sport Type"), cell: React.createElement(SportTypeCell, {data: this._rows, field: "sport_type"}, " "), width: 50}), 
                 React.createElement(fixed_data_table_1.Column, {header: React.createElement(fixed_data_table_1.Cell, null, "Duration"), cell: React.createElement(DurationCell, {data: this._rows, field: "duration_sec"}, " "), width: 80}), 
+                React.createElement(fixed_data_table_1.Column, {header: React.createElement(fixed_data_table_1.Cell, null, "IF"), cell: React.createElement(CustomCell, {data: this._rows, field: "if"}, " "), width: 60}), 
+                React.createElement(fixed_data_table_1.Column, {header: React.createElement(fixed_data_table_1.Cell, null, "TSS"), cell: React.createElement(CustomCell, {data: this._rows, field: "tss"}, " "), width: 80}), 
                 React.createElement(fixed_data_table_1.Column, {header: React.createElement(fixed_data_table_1.Cell, null, "Title"), cell: React.createElement(TitleCell, {data: this._rows, field: "title", link: "link"}, " "), width: 400}), 
                 React.createElement(fixed_data_table_1.Column, {header: React.createElement(fixed_data_table_1.Cell, null, "Workout"), cell: React.createElement(CustomCell, {data: this._rows, field: "value"}, " "), width: 600}))));
     }
