@@ -60,11 +60,22 @@ Nice to have things
         <FreeRide Duration="600" FlatRoad="1"/>
 * [P3] Add react for generating emails
 * pipe (|) missing in Repeat interval
-* Ajax TS
-* For the list of workouts Add
-** TSS
-** Duration
-** IF
+* load parameters on list workout to workout
+* refactor 
+        getStringFromDurationUnit
+        getStringFromIntensityUnit
+        getDurationUnitFromString
+        getIntensityUnitFromString
+        getIntensityUnit
+        isDurationUnit
+        isIntensityUnit
+        stringFormat
+        DateHelper
+        SpeedParser
+        remove StopWatch
+        remove ArrayIterator
+        factory for UserProfile from UI.QueryParams
+        refactor file generation to just depend on the workout.
 
 
 # Where to find type definition files:
