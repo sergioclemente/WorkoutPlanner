@@ -62,61 +62,6 @@ var ModelServer;
                 : match;
         });
     }
-    class UrlShortening {
-        constructor(connection_string) {
-            this.connection_string = null;
-            this.connection_string = connection_string;
-        }
-        _get_connection() {
-            return mysql.createConnection(this.connection_string);
-        }
-        _insert(connection, callback, err, row) {
-            try {
-                if (!err) {
-                    callback("", row.insertId, "");
-                }
-                else {
-                    console.log(err);
-                    callback("Error while querying the db", 0, "");
-                }
-            }
-            finally {
-                connection.end({ timeout: 60000 });
-            }
-        }
-        _query(connection, callback, err, rows, fields) {
-            try {
-                if (!err) {
-                    if (rows.length == 0) {
-                        callback("", 0, null);
-                    }
-                    else {
-                        callback("", rows[0].id, rows[0].params);
-                    }
-                }
-                else {
-                    console.log(err);
-                    callback("Error while reading from db", 0, null);
-                }
-            }
-            finally {
-                connection.end({ timeout: 60000 });
-            }
-        }
-        add(params, callback) {
-            var sql = "INSERT INTO url (params) VALUES ({0})";
-            var connection = this._get_connection();
-            sql = stringFormat(sql, connection.escape(params));
-            connection.query(sql, this._insert.bind(this, connection, callback));
-        }
-        get(id, callback) {
-            var sql = "SELECT * FROM url WHERE id={0}";
-            var connection = this._get_connection();
-            sql = stringFormat(sql, connection.escape(id));
-            connection.query(sql, this._query.bind(this, connection, callback));
-        }
-    }
-    ModelServer.UrlShortening = UrlShortening;
     class WorkoutDB {
         constructor(connection_string) {
             this.connection_string = null;

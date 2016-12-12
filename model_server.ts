@@ -87,68 +87,6 @@ function stringFormat(format : string, ...args: any[]) {
     });
 }
 
-export class UrlShortening {
-	private connection_string = null;
-
-	constructor(connection_string: string) {
-		this.connection_string = connection_string;
-	}
-
-	_get_connection() {
-		return mysql.createConnection(this.connection_string);
-	}
-
-	_insert(connection, callback : (err: string, id: number, params:string) => void, err, row) {
-		try {
-			if (!err) {
-				callback("", row.insertId, "");
-			} else {
-				console.log(err);
-				callback("Error while querying the db", 0, "");
-			}
-		} finally {
-			connection.end({ timeout: 60000 });
-		}
-	}
-
-	_query(connection, callback : (err: string, id: number, params:string) => void, err, rows, fields) {
-		try {
-			if (!err) {
-				if (rows.length == 0) {
-					callback("", 0, null);
-				} else {
-					callback("", rows[0].id, rows[0].params);
-				}
-			} else {
-				console.log(err);
-				callback("Error while reading from db", 0, null);
-			}
-		} finally {
-			connection.end({ timeout: 60000 });
-		}
-	}
-
-	add(params: string, callback : (err: string, id: number, params:string) => void) : void {
-		var sql = "INSERT INTO url (params) VALUES ({0})";
-
-		var connection = this._get_connection();
-
-		sql = stringFormat(sql, connection.escape(params));
-
-		connection.query(sql, this._insert.bind(this, connection, callback));
-	}
-
-	get(id: number, callback : (err: string, id: number, params:string) => void) : void {
-		var sql = "SELECT * FROM url WHERE id={0}";
-
-		var connection = this._get_connection();
-
-		sql = stringFormat(sql, connection.escape(id));
-
-		connection.query(sql, this._query.bind(this, connection, callback));
-	}
-}
-
 export class WorkoutDB {
 	private connection_string = null;
 	

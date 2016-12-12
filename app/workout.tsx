@@ -32,24 +32,6 @@ export default class Workout extends React.Component<any, any> {
 		this.refresh();
 	}
 
-	_onShortenInvoked(e) {
-		var url = "/shorten" + this.params.getURL();
-
-		var req = new XMLHttpRequest();
-		req.addEventListener("load", this._onUrlShortened.bind(this, req));
-		req.open("GET", url);
-		req.send();
-	}
-
-	_onUrlShortened(req : XMLHttpRequest) {
-		if (req.status == 200) {
-			console.log(req.responseText);
-			UI.ClipboardHelper.copyText(req.responseText);
-		} else {
-			console.error("Error while shortening url");
-		}
-	}
-
 	componentDidMount() {
 		// Put here which is guaranteed for the DOM tree to be created
 		this.refreshUrls();
@@ -121,7 +103,7 @@ export default class Workout extends React.Component<any, any> {
 								<td><a href="#" onClick={(e) => this._onClickLink()}>Download Files</a></td>
 								<td><a ref="email_send_workout" >Email Workout</a></td>
 								<td><a ref="save_workout" >Save Workout</a></td>
-								<td><a ref="shorten_url" href="#" onClick={(e) => this._onShortenInvoked(e)}>Shorten Url</a></td>
+								<td><a href="workouts_view.html">List Workouts</a></td>
 							</tr>
 							</tbody>
 						</table>

@@ -1,4 +1,7 @@
 /// <reference path="./node_modules/@types/node/index.d.ts"/>
+/// <reference path="type_definitions/mysql.d.ts" />
+
+import * as Model from './model';
 
 module UI {
 
@@ -156,6 +159,27 @@ export class QueryParams {
 			"&email=" + encodeURIComponent(this.email) + 
 			"&e=" + encodeURIComponent(this.experimental ? "1" : "0");
 	}
+
+	createUserProfile() : Model.UserProfile {
+		if (this.validate()) {
+			let result = new Model.UserProfile(parseInt(this.ftp_watts), this.t_pace, this.swim_css, this.email);
+			result.setEfficiencyFactor(parseFloat(this.efficiency_factor));
+			return result;
+		} else {
+			return null;
+		}
+	}
+
+	createWorkoutBuilder() : Model.WorkoutBuilder {
+		if (this.validate()) {
+			let result = new Model.WorkoutBuilder(this.createUserProfile(),
+				parseInt(this.sport_type), parseInt(this.output_unit));
+			result.withDefinition(this.workout_title, this.workout_text);
+			return result;
+		} else {
+			return null;
+		}
+	}
 }
 
 function getQueryParams(): any {
@@ -221,7 +245,6 @@ export class ClipboardHelper {
 		document.body.removeChild(textArea);
 	}
 }
-
 }
 
 export = UI;

@@ -94,43 +94,6 @@ function show404(req, res) {
   res.end();
 }
 
-function handleShortenUrl(req, res, uri, params) {
-  logRequest(req, 200);
-  var paramsString = req.url.replace("/shorten?", "");
-  var short = new model_server.UrlShortening(config.mysql);
-  short.add(paramsString, onUrlAdded.bind(this, req, res));
-  return true;
-}
-
-function onUrlAdded(req, res, err, id, params) {
-  res.write("/unshorten?id=" + id + "\n");
-  res.end();
-}
-
-function handleUnshortenUrl(req, res, uri, params) {
-  var id = params.id;
-  var short = new model_server.UrlShortening(config.mysql);
-  short.get(parseInt(id), onUrlRetrieved.bind(this, req, res));
-  return true;
-}
-
-function onUrlRetrieved(req, res, err, id, params) {
-  if (params != null) {
-    var url = "?" + params;
-    res.writeHead(301, {
-      Location: url
-    });
-    console.log("Url: " + url);
-    logRequest(req, 301);
-    res.end();
-  } else {
-    logRequest(req, 500);
-    res.writeHead(500, "Error while retrieving id from db");
-    res.end();
-  }
-}
-
-
 function handleSaveWorkout(req, res, uri, params) {
   logRequest(req, 200);
   var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
@@ -172,8 +135,6 @@ http.createServer(function (req, res) {
       "/send_mail": handleSendEmail,
       "/save_workout": handleSaveWorkout,
       "/workouts": handleGetWorkouts,
-      "/shorten": handleShortenUrl,
-      "/unshorten": handleUnshortenUrl,
     };
 
     fs.exists(filename, function(exists) {

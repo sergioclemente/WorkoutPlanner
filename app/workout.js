@@ -33,22 +33,6 @@ class Workout extends React.Component {
         this.params.efficiency_factor = efficiency_factor;
         this.refresh();
     }
-    _onShortenInvoked(e) {
-        var url = "/shorten" + this.params.getURL();
-        var req = new XMLHttpRequest();
-        req.addEventListener("load", this._onUrlShortened.bind(this, req));
-        req.open("GET", url);
-        req.send();
-    }
-    _onUrlShortened(req) {
-        if (req.status == 200) {
-            console.log(req.responseText);
-            UI.ClipboardHelper.copyText(req.responseText);
-        }
-        else {
-            console.error("Error while shortening url");
-        }
-    }
     componentDidMount() {
         // Put here which is guaranteed for the DOM tree to be created
         this.refreshUrls();
@@ -112,7 +96,7 @@ class Workout extends React.Component {
                             React.createElement("a", {ref: "save_workout"}, "Save Workout")
                         ), 
                         React.createElement("td", null, 
-                            React.createElement("a", {ref: "shorten_url", href: "#", onClick: (e) => this._onShortenInvoked(e)}, "Shorten Url")
+                            React.createElement("a", {href: "workouts_view.html"}, "List Workouts")
                         ))
                 )
             ), 
