@@ -30,8 +30,6 @@ npm install
 ./build.sh
 ```
 
-PS: If you are on windows you can also use build.cmd. HOWEVER what gets deployed its using build.sh.
-
 * Starting the node server
 
 ```
@@ -45,22 +43,18 @@ Its automatically pushed on every commit.
 ```
 
 # Bugs/Feature requests
+* load parameters on list workout to workout
+* make swim workouts more readable
+* add the hability for named groups (warmup/mainset/cooldown)
+* change output units on sport type
+* Make node.js a typescript file
+* Refactor validation of parameters on server.js
+* add profiles
+* add histogram of zones on list of workouts
+
 * Add builder for UserProfile
 * Refactor Intensity
-* Auto merge MRC intervals
-* Change output units on sport type
 * More logging on usage
-* Refactor validation of parameters on server.js
-* Add player
-* Make node.js a typescript file
-
-Nice to have things
-* Suggestion for learning
-* [P3] Add free ride do zwift
-        <FreeRide Duration="600" FlatRoad="1"/>
-* [P3] Add react for generating emails
-* pipe (|) missing in Repeat interval
-* load parameters on list workout to workout
 * refactor 
         getStringFromDurationUnit
         getStringFromIntensityUnit
@@ -76,7 +70,6 @@ Nice to have things
         remove ArrayIterator
         factory for UserProfile from UI.QueryParams
         refactor file generation to just depend on the workout.
-
 
 # Where to find type definition files:
 ** https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/node/node.d.ts
