@@ -51,6 +51,9 @@ Its automatically pushed on every commit.
 * Refactor validation of parameters on server.js
 * add profiles
 * add histogram of zones on list of workouts
+* sometimes workout is not loading
+* move sending email to client side
+* Bundle JS more efficiently
 
 * Add builder for UserProfile
 * Refactor Intensity

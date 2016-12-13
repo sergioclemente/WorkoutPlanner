@@ -69,6 +69,7 @@ class WorkoutViews extends React.Component {
                 var params = new UI.QueryParams();
                 params.workout_text = this._rows[i].value;
                 params.workout_title = this._rows[i].title;
+                params.sport_type = this._rows[i].sport_type.toString();
                 this._rows[i].link = "/" + params.getURL();
                 this._setExtraRowFields(params, i);
             }
