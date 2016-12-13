@@ -1083,6 +1083,8 @@ export class IntensityParser implements Parser {
 	}
 }
 
+const DEFAULT_INTENSITY = 55;
+
 export class IntervalParser {
 	static getCharVal(ch: string) : number {
 		if (ch.length == 1) {
@@ -1157,7 +1159,7 @@ export class IntervalParser {
 							}
 						}
 
-						// Patch the missing units now
+						// Patch the missing units now.
 						if (!containsUnit) {
 							for (var k = 0; k < Object.keys(units).length; k++) {
 								if (units[k] == "") {
@@ -1182,7 +1184,7 @@ export class IntervalParser {
 								}
 								intensities.push(factory.createIntensity(nums[k], intensityUnit));
 							} else if (nums[k] == -1) {
-								// Rest interval. Lets assume as intensity = 0 
+								// Rest interval. Lets assume as intensity = 0
 								intensities.push(factory.createIntensity(0, IntensityUnit.IF));
 							} else {
 								var unit = getIntensityUnitFromString(units[k]);
@@ -1242,8 +1244,8 @@ export class IntervalParser {
 							var duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
 							interval = new SimpleInterval(title.trim(), intensity, duration);
 						} else {
-							// assume a default intensity of 55%
-							var intensity = factory.createIntensity(55, IntensityUnit.IF);
+							// Assume a default intensity of |DEFAULT_INTENSITY|
+							var intensity = factory.createIntensity(DEFAULT_INTENSITY, IntensityUnit.IF);
 							var duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
 							interval = new SimpleInterval("", intensity, duration);
 						}
@@ -1272,6 +1274,8 @@ export class IntervalParser {
 							integer_parser.evaluate(value, 1);
 							nums[numIndex] = integer_parser.getValue();
 							if (value[0] == "-") {
+								// TODO: This has a bug where -1 would be ambiguous, maybe use
+								// a bigger range like 1000 * X ?
 								nums[numIndex] = -1 * nums[numIndex];
 							}
 							// HACK: we want to put the final unit here to avoid creating
@@ -1969,6 +1973,7 @@ export class WorkoutTextVisitor implements Visitor {
 		}		
 	}
 
+	// |intensity| : The intensity of the interval. For example 90%, 100%
 	getIntensityPretty(intensity: Intensity): string {
 		if (this.outputUnit == IntensityUnit.HeartRate) {
 			var bpm = 0;
@@ -2006,7 +2011,7 @@ export class WorkoutTextVisitor implements Visitor {
 				return MyMath.round10(this.userProfile.getSwimPaceMph(intensity), -1) + getIntensityUnit(this.outputUnit);	
 			} else if (this.outputUnit == IntensityUnit.Per100Yards || this.outputUnit == IntensityUnit.Per100Meters) {
 				var swim_pace_per_100 = this.userProfile.getSwimPace(this.outputUnit, intensity);
-				return FormatterHelper.formatNumber(swim_pace_per_100, 60, ":", "");	
+				return FormatterHelper.formatNumber(swim_pace_per_100, 60, ":", "") + getStringFromIntensityUnit(this.outputUnit);	
 			} else {
 				console.assert(false, stringFormat("Invalid output unit {0}", this.outputUnit));
 			}
