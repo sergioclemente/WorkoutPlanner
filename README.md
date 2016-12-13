@@ -43,7 +43,6 @@ Its automatically pushed on every commit.
 ```
 
 # Bugs/Feature requests
-* load parameters on list workout to workout
 * make swim workouts more readable
 * add the hability for named groups (warmup/mainset/cooldown)
 * change output units on sport type
@@ -51,7 +50,6 @@ Its automatically pushed on every commit.
 * Refactor validation of parameters on server.js
 * add profiles
 * add histogram of zones on list of workouts
-* sometimes workout is not loading
 * move sending email to client side
 * Bundle JS more efficiently
 

@@ -9,7 +9,7 @@ export default class WorkoutView extends React.Component<any, any> {
 	constructor(params: any) {
 		super(params);
 
-		this.state = this.getState(params);
+		this.state = this.getState(UI.QueryParams.createCopy(params));
 	}
 
 	componentWillReceiveProps(nextProps) {
