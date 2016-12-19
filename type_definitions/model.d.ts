@@ -383,27 +383,6 @@ declare module Model {
         createIntensity(value: number, unit: IntensityUnit): Intensity;
         createDuration(intensity: Intensity, unit: DurationUnit, value: number): Duration;
     }
-    class StopWatch {
-        startTime: number;
-        stoppedTime: number;
-        constructor();
-        start(): void;
-        stop(): void;
-        getIsStarted(): boolean;
-        getElapsedTime(): number;
-        reset(): void;
-    }
-    class ArrayIterator {
-        array: any[];
-        index: number;
-        constructor(array: any);
-        reset(): void;
-        getCurrent(): any;
-        getCurrentIndex(): number;
-        tryGettingNext(): any;
-        getIsValid(): boolean;
-        moveNext(): boolean;
-    }
     class WorkoutFileGenerator {
         private workoutTitle;
         private intervals;
