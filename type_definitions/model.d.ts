@@ -94,6 +94,10 @@ declare module Model {
     class IntensityUnitHelper {
         static convertTo(value: number, unitFrom: IntensityUnit, unitTo: IntensityUnit): number;
     }
+    class DefaultIntensity {
+        static isEasy(intensity: Intensity, sportType: SportType): boolean;
+        static getEasyThreshold(sportType: SportType): number;
+    }
     class Intensity {
         private ifValue;
         private originalValue;
@@ -338,7 +342,7 @@ declare module Model {
         userProfile: UserProfile;
         sportType: SportType;
         outputUnit: IntensityUnit;
-        shouldDisplayEasy: boolean;
+        disableEasyTitle: boolean;
         constructor(userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit);
         static getIntervalTitle(interval: Interval, userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit): string;
         visitCommentInterval(interval: CommentInterval): void;
@@ -361,9 +365,9 @@ declare module Model {
         private runningTPaceMinMi;
         private swimmingCSSMinPer100Yards;
         private email;
-        private effiency_factor;
+        private effiencyFactor;
         constructor(bikeFTPWatts: number, renameTPace: string, swimCSS: string, email: string);
-        setEfficiencyFactor(ef: number): void;
+        setEfficiencyFactor(efficiencyFactor: number): void;
         getEfficiencyFactor(): number;
         getBikeFTP(): number;
         getRunningTPaceMinMi(): number;
@@ -382,6 +386,7 @@ declare module Model {
         getBikeSpeedMphForIntensity(intensity: Intensity): number;
         createIntensity(value: number, unit: IntensityUnit): Intensity;
         createDuration(intensity: Intensity, unit: DurationUnit, value: number): Duration;
+        getEasyThreshold(): number;
     }
     class WorkoutFileGenerator {
         private workoutTitle;

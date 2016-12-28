@@ -589,6 +589,33 @@ export class IntensityUnitHelper {
 	} 
 };
 
+export class DefaultIntensity {
+	static isEasy(intensity : Intensity, sportType: SportType) : boolean {
+		// If the pace is swim based and its on offset relative to the CSS, lets handle it 
+		// differently. 10s from CSS is the threshold for easy.
+		if (sportType == SportType.Swim
+			&& intensity.getOriginalUnit() == IntensityUnit.OffsetSeconds) {
+			return intensity.getOriginalValue() > 10;
+		}
+
+		return intensity.getValue() <= DefaultIntensity.getEasyThreshold(sportType);
+	}
+
+	static getEasyThreshold(sportType: SportType) : number {
+		var easyThreshold = 0.55;
+		if (sportType == SportType.Run) {
+			easyThreshold = 0.75;
+		} else if (sportType == SportType.Swim) {
+			easyThreshold = 0.88;
+		}
+		return easyThreshold;
+	}
+}
+
+
+
+
+
 export class Intensity {
 	private ifValue: number;
 
@@ -921,13 +948,12 @@ export class StepBuildInterval extends ArrayInterval {
 		return this.intervals[this.intervals.length - 1];
 	}
 	areAllIntensitiesSame() : boolean {
-		var prev_intensity = this.intervals[0].getIntensity().getValue();
+		var first_intensity = this.intervals[0].getIntensity().getValue();
 		for (var i = 1; i < this.intervals.length - 1; i++) {
 			var cur_intensity = this.intervals[i].getIntensity().getValue();
-			if (cur_intensity != prev_intensity) {
+			if (cur_intensity != first_intensity) {
 				return false;
 			}
-			prev_intensity = cur_intensity;
 		}
 		return true;
 	}
@@ -1083,8 +1109,6 @@ export class IntensityParser implements Parser {
 	}
 }
 
-const DEFAULT_INTENSITY = 55;
-
 export class IntervalParser {
 	static getCharVal(ch: string) : number {
 		if (ch.length == 1) {
@@ -1183,11 +1207,9 @@ export class IntervalParser {
 									intensityUnit = getIntensityUnitFromString(units[k]);
 								}
 								intensities.push(factory.createIntensity(nums[k], intensityUnit));
-							} else if (nums[k] == -1) {
-								// Rest interval. Lets assume as intensity = 0
-								intensities.push(factory.createIntensity(0, IntensityUnit.IF));
 							} else {
 								var unit = getIntensityUnitFromString(units[k]);
+								
 								if (unit == IntensityUnit.OffsetSeconds) {
 									intensities.push(factory.createIntensity(nums[k], IntensityUnit.OffsetSeconds));
 								}
@@ -1221,10 +1243,10 @@ export class IntervalParser {
 									var durationValue = k < durationValues.length ? durationValues[k] : durationValues[0];
 									var intensity = k < intensities.length ? intensities[k] : intensities[0];
 									var step_duration = factory.createDuration(intensity, durationUnit, durationValue);
-									step_intervals.push(new SimpleInterval("", intensity, step_duration));
+									step_intervals.push(new SimpleInterval(title.trim(), intensity, step_duration));
 								}
 
-								var bsi = new StepBuildInterval("", step_intervals);
+								var bsi = new StepBuildInterval(title.trim(), step_intervals);
 
 								// put back to the parent and top of the stack
 								stack[stack.length-1].getIntervals().push(bsi);
@@ -1244,10 +1266,17 @@ export class IntervalParser {
 							var duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
 							interval = new SimpleInterval(title.trim(), intensity, duration);
 						} else {
-							// Assume a default intensity of |DEFAULT_INTENSITY|
-							var intensity = factory.createIntensity(DEFAULT_INTENSITY, IntensityUnit.IF);
+							// Two types of interval here:
+							// (10s) - means 10s rest
+							// (10min, easy) - means 10min at default interval pace
+							let intensity = null;
+							if (title.trim().length == 0) {
+								intensity = factory.createIntensity(0, IntensityUnit.IF);
+							} else {
+								intensity = factory.createIntensity(factory.getEasyThreshold(), IntensityUnit.IF);
+							} 
 							var duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
-							interval = new SimpleInterval("", intensity, duration);
+							interval = new SimpleInterval(title.trim(), intensity, duration);
 						}
 
 						stack[stack.length-1].getIntervals().push(interval);
@@ -1259,12 +1288,8 @@ export class IntervalParser {
 						i = string_parser.evaluate(input, i);
 						var value = string_parser.getValue();
 						
-						// We have to distinguish between title and intensity
-						if (value == "rest") {
-							// HACK! this used
-							nums[numIndex] = -1;
-							units[numIndex] = "";
-						} else if (IntervalParser.isDigit(value[0])) {
+						// If its a number
+						if (IntervalParser.isDigit(value[0])) {
 							var intensity_parser = new IntensityParser();
 							intensity_parser.evaluate(string_parser.getValue(), 0);
 							nums[numIndex] = intensity_parser.getValue();
@@ -1788,15 +1813,13 @@ export class FileNameHelper {
 		}
 	}
 }
-
-const EASY_THRESHOLD = 0.60;
  
 export class WorkoutTextVisitor implements Visitor {
 	result : string = "";
 	userProfile: UserProfile = null;
 	sportType: SportType = SportType.Unknown;
 	outputUnit: IntensityUnit = IntensityUnit.Unknown;
-	shouldDisplayEasy : boolean = true;
+	disableEasyTitle : boolean = false;
 
 	constructor(userProfile: UserProfile = null,
 				sportType: SportType = SportType.Unknown,
@@ -1823,7 +1846,7 @@ export class WorkoutTextVisitor implements Visitor {
 	
 	visitRestInterval(interval: Interval) : void {
 		var value = interval.getIntensity().getValue(); 
-		if (value <= EASY_THRESHOLD) {
+		if (value <= DefaultIntensity.getEasyThreshold(this.sportType)) {
 			this.result += interval.getDuration().toStringShort() + " easy";
 		} else {
 			this.result += interval.getDuration().toStringShort() + " @ " + this.getIntensityPretty(interval.getIntensity());
@@ -1834,6 +1857,7 @@ export class WorkoutTextVisitor implements Visitor {
 	visitArrayInterval(interval: ArrayInterval) {
 		this.visitArrayIntervalInternal(interval, false);
 	}
+
 	visitArrayIntervalInternal(interval: ArrayInterval, always_add_parenthesis : boolean) {
 		var length = interval.getIntervals().length;
 		var firstInterval = interval.getIntervals()[0];
@@ -1845,10 +1869,10 @@ export class WorkoutTextVisitor implements Visitor {
 				
 		if (length == 2) {			
 			if (isRestIncluded) {
-				var oldFlag = this.shouldDisplayEasy;
-				this.shouldDisplayEasy = false;
+				var oldFlag = this.disableEasyTitle;
+				this.disableEasyTitle = true;
 				VisitorHelper.visit(this, firstInterval);
-				this.shouldDisplayEasy = oldFlag;
+				this.disableEasyTitle = oldFlag;
 				this.result += " - ";
 				this.visitRestInterval(lastInterval);
 			} else {
@@ -1903,7 +1927,7 @@ export class WorkoutTextVisitor implements Visitor {
 	
 	// RampBuildInterval
 	visitRampBuildInterval(interval: RampBuildInterval) : any {
-		if (interval.getStartIntensity().getValue() <= EASY_THRESHOLD) {
+		if (interval.getStartIntensity().getValue() <= DefaultIntensity.getEasyThreshold(this.sportType)) {
 			this.result += interval.getDuration().toStringShort() + " warmup to " + this.getIntensityPretty(interval.getEndIntensity());	
 		} else {
 			this.result += interval.getDuration().toStringShort() + " build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());	
@@ -1959,17 +1983,24 @@ export class WorkoutTextVisitor implements Visitor {
 		// 3 cases to cover:
 		// - warmup (usually IF around 50-60) - no title - easy peasy
 		// - drills with single leg (IF < 60) - title present - check for title
-		// - recovery day, first interval in a repeat rest is something like 60. 
-		// 
-		if (interval.getIntensity().getValue() <= EASY_THRESHOLD && title.length == 0 &&
-			this.shouldDisplayEasy) {
-			if (interval.getIntensity().getValue() == 0) {
-				this.result += " rest";
+		// - recovery interval, first interval in a repeat rest is something like 60. 
+		let isEasyInterval = DefaultIntensity.isEasy(interval.getIntensity(), this.sportType);
+		if (isEasyInterval && !this.disableEasyTitle) {
+			// If no title was provided, let's give one
+			if (interval.getTitle().length == 0) {
+				if (interval.getIntensity().getValue() == 0) {
+					this.result += " rest";
+				} else {
+					this.result += " easy";	
+				}
 			} else {
-				this.result += " easy";	
+				// Remove intensity from easy swim intervals
+				if (this.sportType != SportType.Swim) {
+					this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
+				}
 			}
 		} else {
-			this.result += " @ " + this.getIntensityPretty(interval.getIntensity())	
+			this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
 		}		
 	}
 
@@ -2075,7 +2106,7 @@ export class UserProfile {
 	private runningTPaceMinMi: number;
 	private swimmingCSSMinPer100Yards: number;
 	private email: string;
-	private effiency_factor : number;
+	private effiencyFactor : number;
 	
 	constructor(bikeFTPWatts: number, renameTPace: string, swimCSS: string, email: string) {
 		this.bikeFTP = bikeFTPWatts;
@@ -2093,11 +2124,11 @@ export class UserProfile {
 		this.email = email;
 	}
 
-	setEfficiencyFactor(ef : number) {
-		this.effiency_factor = ef;
+	setEfficiencyFactor(efficiencyFactor : number) {
+		this.effiencyFactor = efficiencyFactor;
 	}
 	getEfficiencyFactor() : number {
-		return this.effiency_factor;
+		return this.effiencyFactor;
 	}
 	
 	getBikeFTP() {
@@ -2160,7 +2191,8 @@ export class ObjectFactory {
 	}
 	
 	getBikeSpeedMphForIntensity(intensity: Intensity) : number {
-		// TODO: simplifying it for now
+		// TODO: very simple for now
+		// its either 20 or 15mph
 		var actualSpeedMph = 0;
 		if (intensity.getValue() < 0.65) {
 			actualSpeedMph = 15;
@@ -2260,6 +2292,10 @@ export class ObjectFactory {
 		}
 		
 		return new Duration(unit, value, estimatedTimeInSeconds, estimatedDistanceInMiles);
+	}
+
+	getEasyThreshold() : number {
+		return DefaultIntensity.getEasyThreshold(this.sportType);
 	}
 }
 

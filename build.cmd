@@ -46,6 +46,8 @@ if  %ERRORLEVEL% NEQ 0 ( goto build_fail)
 
 echo Combined javascript files
 
+REM Minify files...
+
 echo Build succeeded
 exit /b 0
 
