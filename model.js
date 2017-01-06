@@ -287,6 +287,27 @@ var Model;
                 return result;
             }
         }
+        static formatTime(milliseconds) {
+            var hours = ((milliseconds / 3600000) % 60) | 0;
+            var minutes = ((milliseconds / 60000) % 60) | 0;
+            var seconds = ((milliseconds % 60000) / 1000) | 0;
+            // Round up
+            var ms = (milliseconds % 1000) | 0;
+            if (ms > 500) {
+                seconds++;
+            }
+            if (hours != 0) {
+                return FormatterHelper.enforceDigits(hours, 2) + ":" + FormatterHelper.enforceDigits(minutes, 2) + ":" + FormatterHelper.enforceDigits(seconds, 2);
+            }
+            else {
+                if (minutes != 0) {
+                    return FormatterHelper.enforceDigits(minutes, 2) + "m" + FormatterHelper.enforceDigits(seconds, 2) + "s";
+                }
+                else {
+                    return seconds + "s";
+                }
+            }
+        }
     }
     Model.FormatterHelper = FormatterHelper;
     class Duration {
@@ -2283,5 +2304,106 @@ var Model;
     }
     Model.WorkoutBuilder = WorkoutBuilder;
     ;
+    class StopWatch {
+        constructor() {
+            this.startTime = null;
+            this.stoppedTime = null;
+        }
+        start() {
+            if (this.startTime === null) {
+                this.startTime = Date.now();
+            }
+        }
+        stop() {
+            if (this.startTime !== null) {
+                this.stoppedTime += Date.now() - this.startTime;
+                this.startTime = null;
+            }
+        }
+        reset() {
+            this.startTime = null;
+            this.stoppedTime = 0;
+        }
+        getIsStarted() {
+            return this.startTime !== null;
+        }
+        getElapsedTime() {
+            if (this.startTime !== null) {
+                return (Date.now() - this.startTime) + this.stoppedTime;
+            }
+            else {
+                return this.stoppedTime;
+            }
+        }
+    }
+    Model.StopWatch = StopWatch;
+    // Class that is created with the absolute begin and end times.
+    // |interval_| will be either SimpleInterval or RampBuildInterval.
+    class AbsoluteTimeInterval {
+        constructor(begin, end, interval) {
+            this.begin_ = begin;
+            this.end_ = end;
+            this.interval_ = interval;
+        }
+        getBeginSeconds() {
+            return this.begin_;
+        }
+        getEndSeconds() {
+            return this.end_;
+        }
+        getDurationSeconds() {
+            return this.end_ - this.begin_;
+        }
+        getInterval() {
+            return this.interval_;
+        }
+    }
+    Model.AbsoluteTimeInterval = AbsoluteTimeInterval;
+    class AbsoluteTimeIntervalVisitor extends BaseVisitor {
+        constructor() {
+            super(...arguments);
+            this.time_ = 0;
+            this.data_ = [];
+        }
+        visitSimpleInterval(interval) {
+            var duration_seconds = interval.getDuration().getSeconds();
+            this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval));
+            this.time_ += duration_seconds;
+        }
+        visitRampBuildInterval(interval) {
+            var duration_seconds = interval.getDuration().getSeconds();
+            this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval));
+            this.time_ += duration_seconds;
+        }
+        getIntervalArray() {
+            return this.data_;
+        }
+    }
+    Model.AbsoluteTimeIntervalVisitor = AbsoluteTimeIntervalVisitor;
+    class PlayerHelper {
+        constructor(interval) {
+            this.data_ = [];
+            this.durationTotalSeconds_ = 0;
+            // Create the visitor for the AbsoluteTimeInterval.
+            var pv = new AbsoluteTimeIntervalVisitor();
+            VisitorHelper.visitAndFinalize(pv, interval);
+            this.data_ = pv.getIntervalArray();
+            this.durationTotalSeconds_ = interval.getDuration().getSeconds();
+        }
+        get(ts) {
+            // TODO: Can potentially do a binary search here.
+            for (let i = 0; i < this.data_.length; i++) {
+                let bei = this.data_[i];
+                if (ts >= bei.getBeginSeconds() && ts <= bei.getEndSeconds()) {
+                    return bei;
+                }
+            }
+            return null;
+        }
+        getDurationTotalSeconds() {
+            return this.durationTotalSeconds_;
+        }
+    }
+    Model.PlayerHelper = PlayerHelper;
 })(Model || (Model = {}));
 module.exports = Model;

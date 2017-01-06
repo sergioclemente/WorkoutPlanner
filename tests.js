@@ -462,3 +462,14 @@ describe('Swim', function () {
         expect_eq_nbr(/* 1:32 */ 92.95, new Model.ObjectFactory(up, Model.SportType.Swim).createDuration(intensity_100_pct, Model.DistanceUnit.Meters, 100).getSeconds());
     });
 });
+describe('Player Helper', function () {
+    it('Two intervals, 2 boundaries', function () {
+        let interval = Model.IntervalParser.parse(of_swim, "(10min, 55, t1), (20min, 60, t2)");
+        let ph = new Model.PlayerHelper(interval);
+        expect_eq_str("t1", ph.get(0).getInterval().getTitle());
+        expect_eq_str("t1", ph.get(10 * 60).getInterval().getTitle());
+        expect_eq_str("t2", ph.get(20 * 60).getInterval().getTitle());
+        expect_eq_str("t2", ph.get(30 * 60).getInterval().getTitle());
+        expect_eq_str(null, ph.get(40 * 60));
+    });
+});

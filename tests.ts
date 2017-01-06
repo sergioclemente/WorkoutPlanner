@@ -469,7 +469,6 @@ describe('Formatter', function() {
   });    
 });
 
-
 describe('Swim', function() {
   it('speed conversion', function() {
 		expect_eq_nbr(2.41, Model.IntensityUnitHelper.convertTo(1.41, Model.IntensityUnit.Per100Yards, Model.IntensityUnit.Mph));
@@ -510,3 +509,14 @@ describe('Swim', function() {
   });			
 });
 
+describe('Player Helper', function() {
+  it('Two intervals, 2 boundaries', function() {
+		let interval = Model.IntervalParser.parse(of_swim, "(10min, 55, t1), (20min, 60, t2)");
+		let ph = new Model.PlayerHelper(interval);
+		expect_eq_str("t1", ph.get(0).getInterval().getTitle());
+		expect_eq_str("t1", ph.get(10*60).getInterval().getTitle());
+		expect_eq_str("t2", ph.get(20*60).getInterval().getTitle());
+		expect_eq_str("t2", ph.get(30*60).getInterval().getTitle());
+		expect_eq_str(null, ph.get(40*60));
+  });
+});

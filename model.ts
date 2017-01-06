@@ -274,6 +274,28 @@ export class FormatterHelper {
 			return result;
 		}
 	}
+
+	static formatTime(milliseconds) : string {
+		var hours = ((milliseconds / 3600000) % 60) | 0;
+		var minutes = ((milliseconds / 60000) % 60) | 0;
+		var seconds = ((milliseconds % 60000) / 1000) | 0;
+
+		// Round up
+		var ms = (milliseconds % 1000) | 0;
+		if (ms > 500) {
+			seconds++;
+		}
+
+		if (hours != 0) {
+			return FormatterHelper.enforceDigits(hours, 2) + ":" + FormatterHelper.enforceDigits(minutes, 2) + ":" + FormatterHelper.enforceDigits(seconds, 2);
+		} else {
+			if (minutes != 0) {
+				return FormatterHelper.enforceDigits(minutes, 2) + "m" + FormatterHelper.enforceDigits(seconds, 2) + "s";
+			} else {
+				return seconds + "s";
+			}
+		}
+	}	
 }
 
 export class Duration {
@@ -2472,6 +2494,122 @@ export class WorkoutBuilder {
 		return wfg.getMRCFileName();
 	}
 };
+
+export class StopWatch {
+	startTime: number;
+	stoppedTime: number;
+	
+	constructor() {
+		this.startTime = null;
+		this.stoppedTime = null;
+	}
+	
+	start() : void {
+		if (this.startTime === null) {
+			this.startTime = Date.now();
+		}
+	}
+	stop() : void {
+		if (this.startTime !== null) {
+			this.stoppedTime += Date.now() - this.startTime;
+			this.startTime = null;
+		}
+	}
+	reset() : void {
+		this.startTime = null;
+		this.stoppedTime = 0;
+	}	
+	getIsStarted() : boolean {
+		return this.startTime !== null;
+	}
+	getElapsedTime() : number {
+		if (this.startTime !== null) {
+			return (Date.now() - this.startTime) + this.stoppedTime;
+		} else {
+			return this.stoppedTime;
+		}
+	}
+}
+
+// Class that is created with the absolute begin and end times.
+// |interval_| will be either SimpleInterval or RampBuildInterval.
+export class AbsoluteTimeInterval {
+	private begin_ : number;
+	private end_ : number;
+	private interval_ : BaseInterval;
+
+	constructor(begin: number, end: number, interval : BaseInterval) {
+		this.begin_ = begin;
+		this.end_ = end;
+		this.interval_ = interval;
+	}
+
+	getBeginSeconds() : number {
+		return this.begin_;
+	}
+
+	getEndSeconds() : number {
+		return this.end_;
+	}
+
+	getDurationSeconds() : number {
+		return this.end_ - this.begin_;
+	}
+
+	getInterval() : BaseInterval {
+		return this.interval_;
+	}
+}
+
+export class AbsoluteTimeIntervalVisitor extends BaseVisitor {
+	private time_ : number = 0;
+	private data_ : AbsoluteTimeInterval[] = [];
+
+	visitSimpleInterval(interval: SimpleInterval) {
+		var duration_seconds = interval.getDuration().getSeconds();
+		this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval));
+		this.time_ += duration_seconds;
+	}
+	visitRampBuildInterval(interval: RampBuildInterval) {
+		var duration_seconds = interval.getDuration().getSeconds();
+		this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval));
+		this.time_ += duration_seconds;
+	}
+
+	getIntervalArray() : AbsoluteTimeInterval[] {
+		return this.data_;
+	}
+}
+
+export class PlayerHelper {
+	private data_ : AbsoluteTimeInterval[] = [];
+	private durationTotalSeconds_ : number = 0;
+
+	constructor(interval: Interval) {
+		// Create the visitor for the AbsoluteTimeInterval.
+		var pv = new AbsoluteTimeIntervalVisitor();
+		
+		VisitorHelper.visitAndFinalize(pv, interval); 
+		
+		this.data_ = pv.getIntervalArray();
+		this.durationTotalSeconds_ = interval.getDuration().getSeconds();
+	}
+
+	get(ts: number) : AbsoluteTimeInterval {
+		// TODO: Can potentially do a binary search here.
+		for (let i = 0 ; i < this.data_.length; i++) {
+			let bei = this.data_[i];
+			if (ts >= bei.getBeginSeconds() && ts <= bei.getEndSeconds()) {
+				return bei;
+			}
+		}
+		return null;
+	}
+
+	getDurationTotalSeconds() : number {
+		return this.durationTotalSeconds_;
+	}
+}
 
 }
 

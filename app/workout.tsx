@@ -50,6 +50,7 @@ export default class Workout extends React.Component<any, any> {
 		var url_parameters = this.params.getURL();
 		this._setHref("email_send_workout", "send_mail" + url_parameters);
 		this._setHref("save_workout", "save_workout" + url_parameters);
+		this._setHref("player_link", "player.html" + url_parameters);
 		
 
 		this._setVisibility("save_workout", this.params.experimental);
@@ -101,6 +102,7 @@ export default class Workout extends React.Component<any, any> {
 						<tbody>
 							<tr>
 								<td><a href="#" onClick={(e) => this._onClickLink()}>Download Files</a></td>
+								<td><a ref="player_link">Player</a></td>
 								<td><a ref="email_send_workout" >Email Workout</a></td>
 								<td><a ref="save_workout" >Save Workout</a></td>
 								<td><a href="workouts_view.html">List Workouts</a></td>

@@ -245,6 +245,7 @@ export class ClipboardHelper {
 		document.body.removeChild(textArea);
 	}
 }
+
 }
 
 export = UI;

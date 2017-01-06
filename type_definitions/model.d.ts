@@ -73,6 +73,7 @@ declare module Model {
         static roundNumberDown(value: number, round_val?: number): number;
         static formatNumber(value: number, decimalMultiplier: number, separator: string, unit: string, round_val?: number): string;
         private static enforceDigits(value, digits);
+        static formatTime(milliseconds: any): string;
     }
     class Duration {
         private value;
@@ -425,6 +426,40 @@ declare module Model {
         getZWOFile(): string;
         getZWOFileName(): string;
         getMRCFileName(): string;
+    }
+    class StopWatch {
+        startTime: number;
+        stoppedTime: number;
+        constructor();
+        start(): void;
+        stop(): void;
+        reset(): void;
+        getIsStarted(): boolean;
+        getElapsedTime(): number;
+    }
+    class AbsoluteTimeInterval {
+        private begin_;
+        private end_;
+        private interval_;
+        constructor(begin: number, end: number, interval: BaseInterval);
+        getBeginSeconds(): number;
+        getEndSeconds(): number;
+        getDurationSeconds(): number;
+        getInterval(): BaseInterval;
+    }
+    class AbsoluteTimeIntervalVisitor extends BaseVisitor {
+        private time_;
+        private data_;
+        visitSimpleInterval(interval: SimpleInterval): void;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
+        getIntervalArray(): AbsoluteTimeInterval[];
+    }
+    class PlayerHelper {
+        private data_;
+        private durationTotalSeconds_;
+        constructor(interval: Interval);
+        get(ts: number): AbsoluteTimeInterval;
+        getDurationTotalSeconds(): number;
     }
 }
 export = Model;

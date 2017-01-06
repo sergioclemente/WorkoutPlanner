@@ -47,6 +47,7 @@ class Workout extends React.Component {
         var url_parameters = this.params.getURL();
         this._setHref("email_send_workout", "send_mail" + url_parameters);
         this._setHref("save_workout", "save_workout" + url_parameters);
+        this._setHref("player_link", "player.html" + url_parameters);
         this._setVisibility("save_workout", this.params.experimental);
         window.history.pushState('Object', 'Title', url_parameters);
     }
@@ -88,6 +89,9 @@ class Workout extends React.Component {
                     React.createElement("tr", null, 
                         React.createElement("td", null, 
                             React.createElement("a", {href: "#", onClick: (e) => this._onClickLink()}, "Download Files")
+                        ), 
+                        React.createElement("td", null, 
+                            React.createElement("a", {ref: "player_link"}, "Player")
                         ), 
                         React.createElement("td", null, 
                             React.createElement("a", {ref: "email_send_workout"}, "Email Workout")
