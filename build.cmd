@@ -52,6 +52,7 @@ echo Combined javascript files
 rm app/*.js
 echo Removed intermediate files
 
+REM Minified files
 
 echo Build succeeded
 exit /b 0
