@@ -49,6 +49,10 @@ if  %ERRORLEVEL% NEQ 0 (goto build_fail)
 
 echo Combined javascript files
 
+rm app/*.js
+echo Removed intermediate files
+
+
 REM Minify files...
 
 echo Build succeeded
