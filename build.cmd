@@ -53,8 +53,6 @@ rm app/*.js
 echo Removed intermediate files
 
 
-REM Minify files...
-
 echo Build succeeded
 exit /b 0
 

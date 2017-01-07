@@ -43,19 +43,34 @@ Its automatically pushed on every commit.
 ```
 
 # Bugs/Feature requests
-* make swim workouts more readable
-* add the hability for named groups (warmup/mainset/cooldown)
-* change output units on sport type
-* Make node.js a typescript file
-* Refactor validation of parameters on server.js
-* add profiles
-* add histogram of zones on list of workouts
-* move sending email to client side
+Client JS
 * Bundle JS more efficiently
+* Fix minification
 
-* Add builder for UserProfile
+Server
+* Add authentication
+* Refactor validation of parameters on server.js
+* Make node.js a typescript file
+* Move to kubernetes
+
+Workout View
+* Fix email Feature
+* change output units on sport type
+* [BUG] Anytime duration is time, Duration.combine outputs time
+* add profiles - workaround today is links
+* add the hability for named groups (warmup/mainset/cooldown) - workaround today is comments
+* Make save async without showing empty page
+
+List Workouts:
+* Add filtering
+* Add histogram of zones
+
+Player:
+* Fix play of music on iphone
+* Implement next
+* Add some sort of highlight or next
+
 * Refactor Intensity
-* More logging on usage
 * refactor 
         getStringFromDurationUnit
         getStringFromIntensityUnit
