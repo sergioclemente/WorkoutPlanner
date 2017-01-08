@@ -69,6 +69,7 @@ export default class Workout extends React.Component<any, any> {
 	_onSaveWorkout() {
 		var req = new XMLHttpRequest();
 		req.addEventListener("load", this._onWorkoutSaved.bind(this, req));
+		req.open("GET", "/save_workout" + this.params.getURL());
 		req.send();		
 	}
 
