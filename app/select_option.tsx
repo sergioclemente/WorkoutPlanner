@@ -12,6 +12,7 @@ export default class SelectOption extends React.Component<any, any> {
 
 	setEnabled(value: boolean) : void {
 		var option : HTMLOptionElement = this.refs["opt"] as HTMLOptionElement;
+		option.hidden = !value;
 	}
 }
 
