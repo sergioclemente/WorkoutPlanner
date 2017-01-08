@@ -58,7 +58,6 @@ Workout View
 * [BUG] Anytime duration is time, Duration.combine outputs time
 * add profiles - workaround today is links
 * add the hability for named groups (warmup/mainset/cooldown) - workaround today is comments
-* Make save async without showing empty page
 
 List Workouts:
 * Add filtering

@@ -108,9 +108,8 @@ function handleSaveWorkout(req, res, uri, params) {
   w.tss = builder.getInterval().getTSS();
   w.sport_type = params.st;
 
-  db.add(w);               
-  res.write("Workout saved");
-  res.end();     
+  db.add(w);
+  res.end();
 
   return true;
 }

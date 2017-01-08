@@ -97,7 +97,7 @@ export default class WorkoutViews extends React.Component<any, any> {
 			// force a re-render
 			this.forceUpdate();
 		} else {
-			console.error("Error while shortening url");
+			alert("Error while fetching workouts");
 		}
 	}
 
