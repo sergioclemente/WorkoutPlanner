@@ -55,7 +55,6 @@ Server
 
 Workout View
 * Fix email Feature
-* change output units on sport type
 * [BUG] Anytime duration is time, Duration.combine outputs time
 * add profiles - workaround today is links
 * add the hability for named groups (warmup/mainset/cooldown) - workaround today is comments

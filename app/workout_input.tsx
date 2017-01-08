@@ -32,16 +32,41 @@ export default class WorkoutInput extends React.Component<any, any> {
 	}
 
 	_onSportTypeChange(sport_type_str) {
-		var sport_type: Model.SportType = parseInt(sport_type_str);
-		var sltUnit: Select = this.refs['unit'] as Select;
-		if (sport_type == Model.SportType.Run) {
-			sltUnit.setSelectedValue(Model.IntensityUnit.MinMi.toString());
-		} else if (sport_type == Model.SportType.Bike) {
-			sltUnit.setSelectedValue(Model.IntensityUnit.Watts.toString());
-		} else if (sport_type == Model.SportType.Swim) {
-			sltUnit.setSelectedValue(Model.IntensityUnit.IF.toString());
-		}
+		this._enableCompatibleOutputUnits(sport_type_str);
 		this._loadWorkout();
+	}
+
+	_enableCompatibleOutputUnits(sportType : string) {
+		// Select the default unit.
+		var sportTypeEnum: Model.SportType = parseInt(sportType);
+		let selectUnit : Select = this.refs["unit"] as Select;
+		if (sportTypeEnum == Model.SportType.Run) {
+			selectUnit.setSelectedValue(Model.IntensityUnit.MinMi.toString());
+		} else if (sportTypeEnum == Model.SportType.Bike) {
+			selectUnit.setSelectedValue(Model.IntensityUnit.Watts.toString());
+		} else if (sportTypeEnum == Model.SportType.Swim) {
+			selectUnit.setSelectedValue(Model.IntensityUnit.Per100Yards.toString());
+		} else {
+			console.assert(false);
+		}
+
+		// Disable all options.
+		// TODO: Not sure how to fix this hack.
+		var units =  ["yards", "meters", "watts", "if", "hr", "minmi", "mih", "minkm", "kmh", "hr"];
+		for (let idx in units) {
+			let selectOption : SelectOption = this.refs[units[idx]] as SelectOption;
+			selectOption.setEnabled(false);
+		}
+
+		// Enable just the ones that make sense.
+		let map = {};
+		map[Model.SportType.Swim.toString()] = ["yards", "meters"];
+		map[Model.SportType.Bike.toString()] = ["watts", "if", "hr"];
+		map[Model.SportType.Run.toString()] = ["minmi", "mih", "minkm", "kmh", "hr"];
+		for (let idx in map[sportType]) {
+			let selectOption : SelectOption = this.refs[map[sportType][idx]] as SelectOption;
+			selectOption.setEnabled(true);
+		}		
 	}
 
 	_onUnitChanged(e) {
@@ -62,6 +87,10 @@ export default class WorkoutInput extends React.Component<any, any> {
 		}
 	}
 
+	componentDidMount() {
+		this._enableCompatibleOutputUnits(this.props.sport_type);
+	}	
+
 	render() {
 		return (<div>
 					<h1> Workout Settings </h1>
@@ -77,15 +106,15 @@ export default class WorkoutInput extends React.Component<any, any> {
 					<br />
 					Unit:
 					<Select ref="unit" defaultValue={this.props.output_unit} onChange={e => this._onUnitChanged(e)}>
-						<SelectOption value={Model.IntensityUnit.Watts}>Watts</SelectOption>
-						<SelectOption value={Model.IntensityUnit.MinMi}>min/mi</SelectOption>
-						<SelectOption value={Model.IntensityUnit.Mph}>mi/h</SelectOption>
-						<SelectOption value={Model.IntensityUnit.MinKm}>min/km</SelectOption>
-						<SelectOption value={Model.IntensityUnit.Kmh}>km/h</SelectOption>
-						<SelectOption value={Model.IntensityUnit.IF}>IF</SelectOption>
-						<SelectOption value={Model.IntensityUnit.Per100Yards}>/100yards</SelectOption>
-						<SelectOption value={Model.IntensityUnit.Per100Meters}>/100m</SelectOption>
-						<SelectOption value={Model.IntensityUnit.HeartRate}>Heart rate</SelectOption>
+						<SelectOption ref="watts" value={Model.IntensityUnit.Watts}>Watts</SelectOption>
+						<SelectOption ref="minmi" value={Model.IntensityUnit.MinMi}>min/mi</SelectOption>
+						<SelectOption ref="mih" value={Model.IntensityUnit.Mph}>mi/h</SelectOption>
+						<SelectOption ref="minkm" value={Model.IntensityUnit.MinKm}>min/km</SelectOption>
+						<SelectOption ref="kmh" value={Model.IntensityUnit.Kmh}>km/h</SelectOption>
+						<SelectOption ref="if" value={Model.IntensityUnit.IF}>IF</SelectOption>
+						<SelectOption ref="yards" value={Model.IntensityUnit.Per100Yards}>/100yards</SelectOption>
+						<SelectOption ref="meters" value={Model.IntensityUnit.Per100Meters}>/100m</SelectOption>
+						<SelectOption ref="hr" value={Model.IntensityUnit.HeartRate}>Heart rate</SelectOption>
 					</Select>
 					<br />	
 					<textarea ref="workout_text" defaultValue={this.props.workout_text} style={{ height: "200px", width: "100%" }} onChange={e => this._onWorkoutTextChange(e) }>
