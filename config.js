@@ -2,11 +2,11 @@ var config = {};
 
 config.port = (process.env.PORT || 7000);
 config.smtp = {};
-config.smtp.server_host = 'smtp.gmail.com';
-config.smtp.server_port = 465;
-config.smtp.use_ssl = true;
-config.smtp.login = process.env.EMAIL_ACCOUNT;
-config.smtp.password = process.env.EMAIL_PASSWORD;
+config.smtp.server_host = process.env.MAILGUN_SMTP_SERVER;
+config.smtp.server_port = process.env.MAILGUN_SMTP_PORT;
+config.smtp.use_ssl = false;
+config.smtp.login = process.env.MAILGUN_SMTP_LOGIN;
+config.smtp.password = process.env.MAILGUN_SMTP_PASSWORD;
 config.mysql = (process.env.CLEARDB_DATABASE_URL || "mysql://@localhost/test");
 
 module.exports = config;

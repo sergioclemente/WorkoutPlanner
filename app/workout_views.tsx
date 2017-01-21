@@ -4,6 +4,8 @@
 
 import * as React from 'react';
 import {Table, Column, Cell} from 'fixed-data-table';
+import Select from './select';
+import SelectOption from './select_option';
 import * as UI from '../ui';
 import * as Model from '../model';
 
@@ -59,12 +61,10 @@ export default class WorkoutViews extends React.Component<any, any> {
 	constructor(params: any) {
 		super(params);
 
-		this.state = this.getState(params);
 		this._rows = [];
-	}
-
-	componentWillReceiveProps(nextProps) {
-		this.setState({ value: '' + nextProps.value })
+		this.state = {
+			filteredRows: this._rows,
+		};
 	}
 
 	componentDidMount() {
@@ -83,16 +83,19 @@ export default class WorkoutViews extends React.Component<any, any> {
 
 	_onWorkoutsLoaded(req : XMLHttpRequest) {
 		if (req.status == 200) {
-			this._rows = JSON.parse(req.responseText);
+			var rows = JSON.parse(req.responseText);
 
-			for (let i = 0 ; i < this._rows.length; i++) {
+			for (let i = 0 ; i < rows.length; i++) {
 				var params = new UI.QueryParams();
-				params.workout_text = this._rows[i].value;
-				params.workout_title =  this._rows[i].title;
-				params.sport_type = this._rows[i].sport_type.toString();
-				this._rows[i].link = "/" + params.getURL();
-				this._setExtraRowFields(params, i);
+				params.workout_text = rows[i].value;
+				params.workout_title =  rows[i].title;
+				params.sport_type = rows[i].sport_type.toString();
+				rows[i].link = "/" + params.getURL();
+				this._setExtraRowFields(rows, params, i);
 			}
+
+			this._rows = rows;
+			this.setState({filteredRows: rows});
 
 			// force a re-render
 			this.forceUpdate();
@@ -101,62 +104,81 @@ export default class WorkoutViews extends React.Component<any, any> {
 		}
 	}
 
-	_setExtraRowFields(params : UI.QueryParams, i : number) : void {
+	_setExtraRowFields(rows: any, params : UI.QueryParams, i : number) : void {
 			// HACK: Lets override the output unit to IF since we want to get the IF
 			params.output_unit = Model.IntensityUnit.IF.toString();
 			let intervals = Model.IntervalParser.parse(
-				new Model.ObjectFactory(params.createUserProfile(), this._rows[i].sport_type),
+				new Model.ObjectFactory(params.createUserProfile(), rows[i].sport_type),
 				params.workout_text
 			);
-			this._rows[i].if = intervals.getIntensity().toString();
-			this._rows[i].tss = intervals.getTSS().toString();
+			rows[i].if = intervals.getIntensity().toString();
+			rows[i].tss = intervals.getTSS().toString();
 	}
 
-	getState(params: UI.QueryParams) : any {
-        return (
-            {
-            }
-        );
-	}
+	_onSportTypeChange(sport_type_str) {
+		var sportTypeEnum: Model.SportType = parseInt(sport_type_str);
+		var filteredRows = [];
 
+		// nothing to be filtered if its unknown (All)
+		if (sportTypeEnum != Model.SportType.Unknown) {
+			for (let i = 0 ; i < this._rows.length; i++) {
+				var row = this._rows[i];
+				if (row.sport_type == sport_type_str) {
+					filteredRows.push(row);
+				}
+			}
+		} else {
+			filteredRows = this._rows;
+		}
+
+		this.setState({filteredRows: filteredRows});
+	}
 
 	render() {
+
+		var {filteredRows} = this.state;
 		return (<div>Workouts
+			<Select ref="sportType" defaultValue={this.props.sport_type} onChange={e => this._onSportTypeChange(e) }>
+				<SelectOption value={Model.SportType.Unknown}>All</SelectOption>
+				<SelectOption value={Model.SportType.Swim}>Swim</SelectOption>
+				<SelectOption value={Model.SportType.Bike}>Bike</SelectOption>
+				<SelectOption value={Model.SportType.Run}>Run</SelectOption>
+			</Select>
 			<Table
 				ref="tbl"
-				rowsCount={this._rows.length}
+				rowsCount={filteredRows.length}
 				rowHeight={50}
 				headerHeight={50}
 				width={1000}
 				height={800}>
 				<Column
 					header={<Cell>Sport Type</Cell>}
-					cell={<SportTypeCell data={this._rows} field="sport_type"> </SportTypeCell>}
+					cell={<SportTypeCell data={filteredRows} field="sport_type"> </SportTypeCell>}
 					width={50}
 				/>
 				<Column
 					header={<Cell>Duration</Cell>}
-					cell={<DurationCell data={this._rows} field="duration_sec"> </DurationCell>}
+					cell={<DurationCell data={filteredRows} field="duration_sec"> </DurationCell>}
 					width={80}
 				/>
 				<Column
 					header={<Cell>IF</Cell>}
-					cell={<CustomCell data={this._rows} field="if"> </CustomCell>}
+					cell={<CustomCell data={filteredRows} field="if"> </CustomCell>}
 					width={60}
 				/>		
 				<Column
 					header={<Cell>TSS</Cell>}
-					cell={<CustomCell data={this._rows} field="tss"> </CustomCell>}
+					cell={<CustomCell data={filteredRows} field="tss"> </CustomCell>}
 					width={80}
 				/>									
 				<Column
 					header={<Cell>Title</Cell>}
-					cell={<TitleCell data={this._rows} field="title" link="link"> </TitleCell>}
+					cell={<TitleCell data={filteredRows} field="title" link="link"> </TitleCell>}
 					width={400}
 				/>
 				<Column
 					header={<Cell>Workout</Cell>}
-					cell={<CustomCell data={this._rows} field="value"> </CustomCell>}
+					cell={<CustomCell data={filteredRows} field="value"> </CustomCell>}
 					width={600}
 				/>
 			</Table>

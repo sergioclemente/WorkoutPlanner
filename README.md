@@ -60,7 +60,7 @@ Workout View
 * add the hability for named groups (warmup/mainset/cooldown) - workaround today is comments
 
 List Workouts:
-* Add filtering
+* Add filtering (to text and duration)
 * Add histogram of zones
 
 Player:
