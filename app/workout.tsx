@@ -116,7 +116,7 @@ export default class Workout extends React.Component<any, any> {
 								<td><a href="#" onClick={(e) => this._onClickLink()}>Download Files</a></td>
 								<td><a ref="player_link">Player</a></td>
 								<td><a ref="email_send_workout" >Email Workout</a></td>
-								<td><a href="#" onClick={(e) => this._onSaveWorkout()}>Save Workout</a></td>
+								<td><a ref="save_workout" href="#" onClick={(e) => this._onSaveWorkout()}>Save Workout</a></td>
 								<td><a href="workouts_view.html">List Workouts</a></td>
 							</tr>
 							</tbody>
