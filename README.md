@@ -54,8 +54,9 @@ Server
 * Move to kubernetes
 
 Workout View
-* Fix email Feature
 * [BUG] Anytime duration is time, Duration.combine outputs time
+* [BUG] Anytime we have a comment, distance become miles
+* Don't require a title for validating
 * add profiles - workaround today is links
 * add the hability for named groups (warmup/mainset/cooldown) - workaround today is comments
 

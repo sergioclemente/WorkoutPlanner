@@ -39,6 +39,7 @@ up.setEfficiencyFactor(2);
 var of_swim = new Model.ObjectFactory(up, Model.SportType.Swim);
 var of_bike = new Model.ObjectFactory(up, Model.SportType.Bike);
 var of_run = new Model.ObjectFactory(up, Model.SportType.Run);
+var of_other = new Model.ObjectFactory(up, Model.SportType.Other);
 describe('DistanceUnitHelper', function () {
     it('convert miles to kilometers', function () {
         let res = Model.DistanceUnitHelper.convertTo(1000, Model.DistanceUnit.Miles, Model.DistanceUnit.Kilometers);
@@ -78,6 +79,12 @@ describe('TSS', function () {
     });
     it('1min @ 55%-75%', function () {
         var buildInterval = Model.IntervalParser.parse(of_bike, "(1min, 55, 75)");
+        expect_eq_nbr(0.7, buildInterval.getTSS());
+    });
+});
+describe('Other Sport Type', function () {
+    it('1min @ 55%-75%', function () {
+        var buildInterval = Model.IntervalParser.parse(of_other, "(1min, 55, 75)");
         expect_eq_nbr(0.7, buildInterval.getTSS());
     });
 });

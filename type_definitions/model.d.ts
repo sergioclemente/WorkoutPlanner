@@ -4,6 +4,7 @@ declare module Model {
         Swim = 0,
         Bike = 1,
         Run = 2,
+        Other = 3,
     }
     enum DistanceUnit {
         Unknown = 0,

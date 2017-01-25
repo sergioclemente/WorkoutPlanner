@@ -143,6 +143,7 @@ export default class WorkoutViews extends React.Component<any, any> {
 				<SelectOption value={Model.SportType.Swim}>Swim</SelectOption>
 				<SelectOption value={Model.SportType.Bike}>Bike</SelectOption>
 				<SelectOption value={Model.SportType.Run}>Run</SelectOption>
+				<SelectOption value={Model.SportType.Other}>Other</SelectOption>
 			</Select>
 			<Table
 				ref="tbl"

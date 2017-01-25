@@ -1,12 +1,12 @@
 "use strict";
 var Model;
 (function (Model) {
-    // TODO: Add other
     (function (SportType) {
         SportType[SportType["Unknown"] = -1] = "Unknown";
         SportType[SportType["Swim"] = 0] = "Swim";
         SportType[SportType["Bike"] = 1] = "Bike";
         SportType[SportType["Run"] = 2] = "Run";
+        SportType[SportType["Other"] = 3] = "Other";
     })(Model.SportType || (Model.SportType = {}));
     var SportType = Model.SportType;
     // If you add another distance, make sure you update the MAX_DISTANCE
@@ -99,6 +99,9 @@ var Model;
             }
             else if (sportType == SportType.Swim) {
                 return "Swim";
+            }
+            else if (sportType == SportType.Other) {
+                return "Other";
             }
             else {
                 console.assert(false);
@@ -1407,8 +1410,7 @@ var Model;
     Model.DateHelper = DateHelper;
     class ZonesMap {
         static getZoneMap(sportType) {
-            // TODO: Use same zones as bike for now
-            if (sportType == SportType.Bike) {
+            if (sportType == SportType.Bike || sportType == SportType.Other) {
                 return {
                     1: { name: "z1", low: 0.00, high: 0.55 },
                     2: { name: "z2", low: 0.55, high: 0.75 },
@@ -1946,7 +1948,8 @@ var Model;
                 }
             }
             else {
-                console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
+                console.assert(this.sportType == SportType.Other);
+                return "";
             }
         }
         finalize() {
@@ -2130,7 +2133,9 @@ var Model;
                 }
             }
             else {
-                console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
+                console.assert(this.sportType == SportType.Other);
+                console.assert(unit == IntensityUnit.IF);
+                ifValue = value;
             }
             return new Intensity(ifValue, value, unit);
         }
@@ -2148,7 +2153,8 @@ var Model;
                 estimatedSpeedMph = this.userProfile.getSwimPaceMph(intensity);
             }
             else {
-                console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
+                console.assert(this.sportType == SportType.Other);
+                estimatedSpeedMph = 0;
             }
             if (DurationUnitHelper.isTime(unit)) {
                 estimatedTimeInSeconds = DurationUnitHelper.getDurationSeconds(unit, value);

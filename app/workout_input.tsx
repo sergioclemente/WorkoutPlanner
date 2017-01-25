@@ -37,6 +37,9 @@ export default class WorkoutInput extends React.Component<any, any> {
 	}
 
 	_enableCompatibleOutputUnits(sportType : string) {
+		if (sportType == null || sportType.trim() == "") {
+			return;
+		}
 		// Select the default unit.
 		var sportTypeEnum: Model.SportType = parseInt(sportType);
 		let selectUnit : Select = this.refs["unit"] as Select;
@@ -47,7 +50,8 @@ export default class WorkoutInput extends React.Component<any, any> {
 		} else if (sportTypeEnum == Model.SportType.Swim) {
 			selectUnit.setSelectedValue(Model.IntensityUnit.Per100Yards.toString());
 		} else {
-			console.assert(false);
+			console.assert(sportTypeEnum == Model.SportType.Other);
+			selectUnit.setSelectedValue(Model.IntensityUnit.IF.toString());
 		}
 
 		// Disable all options.
@@ -63,6 +67,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 		map[Model.SportType.Swim.toString()] = ["yards", "meters"];
 		map[Model.SportType.Bike.toString()] = ["watts", "if", "hr"];
 		map[Model.SportType.Run.toString()] = ["minmi", "mih", "minkm", "kmh", "hr"];
+		map[Model.SportType.Other.toString()] = ["if", "hr"];
 		for (let idx in map[sportType]) {
 			let selectOption : SelectOption = this.refs[map[sportType][idx]] as SelectOption;
 			selectOption.setEnabled(true);
@@ -102,6 +107,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 						<SelectOption value={Model.SportType.Swim}>Swim</SelectOption>
 						<SelectOption value={Model.SportType.Bike}>Bike</SelectOption>
 						<SelectOption value={Model.SportType.Run}>Run</SelectOption>
+						<SelectOption value={Model.SportType.Other}>Other</SelectOption>
 					</Select>
 					<br />
 					Unit:

@@ -1,11 +1,11 @@
 module Model {
 
-// TODO: Add other
 export enum SportType {
 	Unknown=-1,
 	Swim=0,
 	Bike=1,
-	Run=2
+	Run=2,
+	Other=3
 }
 
 // If you add another distance, make sure you update the MAX_DISTANCE
@@ -102,6 +102,8 @@ export class SportTypeHelper {
 			return "Run";
 		} else if (sportType == SportType.Swim) {
 			return "Swim";
+		} else if (sportType == SportType.Other) {
+			return "Other";
 		} else {
 			console.assert(false);
 			return "";
@@ -1495,8 +1497,7 @@ export class DateHelper {
 
 export class ZonesMap {
 	public static getZoneMap(sportType: SportType) {
-		// TODO: Use same zones as bike for now
-		if (sportType == SportType.Bike) {
+		if (sportType == SportType.Bike || sportType == SportType.Other) {
 			return {
 				1: {name: "z1", low: 0.00, high: 0.55},
 				2: {name: "z2", low: 0.55, high: 0.75},
@@ -2069,7 +2070,8 @@ export class WorkoutTextVisitor implements Visitor {
 				console.assert(false, stringFormat("Invalid output unit {0}", this.outputUnit));
 			}
 		} else {
-			console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
+			console.assert(this.sportType == SportType.Other);
+			return "";
 		}
 	}
 	
@@ -2281,7 +2283,9 @@ export class ObjectFactory {
 				console.assert(false, stringFormat("Invalid intensity unit {0}", unit));
 			}
 		} else {
-			console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
+			console.assert(this.sportType == SportType.Other);
+			console.assert(unit == IntensityUnit.IF);
+			ifValue = value;
 		}
 		return new Intensity(ifValue, value, unit);
 	}
@@ -2298,7 +2302,8 @@ export class ObjectFactory {
 		} else if (this.sportType == SportType.Swim) {
 			estimatedSpeedMph = this.userProfile.getSwimPaceMph(intensity);
 		} else {
-			console.assert(false, stringFormat("Invalid sport type {0}", this.sportType));
+			console.assert(this.sportType == SportType.Other);
+			estimatedSpeedMph = 0;
 		}
 		
 		if (DurationUnitHelper.isTime(unit)) {
