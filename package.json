@@ -30,6 +30,7 @@
   "license": "Gibhub",
   "devDependencies": {
     "@types/node": "^6.0.45",
+    "babili": "0.0.10",
     "mocha": "^3.0.2"
   }
 }
