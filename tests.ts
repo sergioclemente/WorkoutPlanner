@@ -104,6 +104,7 @@ describe('Other Sport Type', function() {
   });
 });
 
+describe('Bugs', function() {
   it('text causes distance to become miles', function() {
 		let d1 = new Model.Duration(Model.DistanceUnit.Yards, 400, 60, 0);
 		let d2 = new Model.Duration(Model.TimeUnit.Seconds, 0, 0, 0);
