@@ -104,6 +104,18 @@ describe('Other Sport Type', function() {
   });
 });
 
+  it('text causes distance to become miles', function() {
+		let d1 = new Model.Duration(Model.DistanceUnit.Yards, 400, 60, 0);
+		let d2 = new Model.Duration(Model.TimeUnit.Seconds, 0, 0, 0);
+		let cd1 = Model.Duration.combine(d1, d2);
+		expect_eq_nbr(Model.DistanceUnit.Yards, cd1.getUnit());
+		expect_eq_nbr(400, cd1.getValue());
+		let cd2 = Model.Duration.combine(d2, d1);
+		expect_eq_nbr(Model.DistanceUnit.Yards, cd2.getUnit());
+		expect_eq_nbr(400, cd2.getValue());		
+  });
+});
+
 describe('IntervalParser', function() {
   it('Parse double', function() {
 		expect_eq_nbr(123, Model.IntervalParser.parseDouble("123", 0).value);

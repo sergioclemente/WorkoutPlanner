@@ -415,6 +415,14 @@ export class Duration {
 	}
 		
 	static combine(dur1: Duration, dur2: Duration) : Duration {
+		// Check if either is 0
+		if (dur1.getValue() == 0) {
+			return dur2;
+		}
+		if (dur2.getValue() == 0) {
+			return dur1;
+		}
+
 		var estTime = dur1.getSeconds() + dur2.getSeconds();
 		var estDistance = dur1.getDistanceInMiles() + dur2.getDistanceInMiles();
 		
@@ -1870,7 +1878,11 @@ export class WorkoutTextVisitor implements Visitor {
 	visitRestInterval(interval: Interval) : void {
 		var value = interval.getIntensity().getValue(); 
 		if (value <= DefaultIntensity.getEasyThreshold(this.sportType)) {
-			this.result += interval.getDuration().toStringShort() + " easy";
+			let title = interval.getTitle();
+			if (title == null || title.trim().length == 0) {
+				title = "easy";
+			}
+			this.result += interval.getDuration().toStringShort() + " " + title;;
 		} else {
 			this.result += interval.getDuration().toStringShort() + " @ " + this.getIntensityPretty(interval.getIntensity());
 		}
@@ -2010,7 +2022,8 @@ export class WorkoutTextVisitor implements Visitor {
 		let isEasyInterval = DefaultIntensity.isEasy(interval.getIntensity(), this.sportType);
 		if (isEasyInterval && !this.disableEasyTitle) {
 			// If no title was provided, let's give one
-			if (interval.getTitle().length == 0) {
+			let title = interval.getTitle();
+			if (title == null || title.trim().length == 0) {
 				if (interval.getIntensity().getValue() == 0) {
 					this.result += " rest";
 				} else {

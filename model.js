@@ -409,6 +409,13 @@ var Model;
             }
         }
         static combine(dur1, dur2) {
+            // Check if either is 0
+            if (dur1.getValue() == 0) {
+                return dur2;
+            }
+            if (dur2.getValue() == 0) {
+                return dur1;
+            }
             var estTime = dur1.getSeconds() + dur2.getSeconds();
             var estDistance = dur1.getDistanceInMiles() + dur2.getDistanceInMiles();
             if (DurationUnitHelper.isTime(dur1.getUnit())) {
@@ -1747,10 +1754,16 @@ var Model;
         visitCommentInterval(interval) {
             this.result += interval.getTitle();
         }
+        // TODO: Title fix
         visitRestInterval(interval) {
             var value = interval.getIntensity().getValue();
             if (value <= DefaultIntensity.getEasyThreshold(this.sportType)) {
-                this.result += interval.getDuration().toStringShort() + " easy";
+                let title = interval.getTitle();
+                if (title == null || title.trim().length == 0) {
+                    title = "easy";
+                }
+                this.result += interval.getDuration().toStringShort() + " " + title;
+                ;
             }
             else {
                 this.result += interval.getDuration().toStringShort() + " @ " + this.getIntensityPretty(interval.getIntensity());
@@ -1879,7 +1892,8 @@ var Model;
             let isEasyInterval = DefaultIntensity.isEasy(interval.getIntensity(), this.sportType);
             if (isEasyInterval && !this.disableEasyTitle) {
                 // If no title was provided, let's give one
-                if (interval.getTitle().length == 0) {
+                let title = interval.getTitle();
+                if (title == null || title.trim().length == 0) {
                     if (interval.getIntensity().getValue() == 0) {
                         this.result += " rest";
                     }
