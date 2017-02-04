@@ -2521,7 +2521,6 @@ export class StopWatch {
 		this.startTime = null;
 		this.stoppedTime = null;
 	}
-	
 	start() : void {
 		if (this.startTime === null) {
 			this.startTime = Date.now();
@@ -2536,7 +2535,7 @@ export class StopWatch {
 	reset() : void {
 		this.startTime = null;
 		this.stoppedTime = 0;
-	}	
+	}
 	getIsStarted() : boolean {
 		return this.startTime !== null;
 	}

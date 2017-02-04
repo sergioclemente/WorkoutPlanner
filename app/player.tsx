@@ -105,7 +105,7 @@ export default class PlayerView extends React.Component<any, any> {
 	}
 
 	_next(e) {
-		console.log("next");
+		console.log("not implemented");
 	}
 
 	_reset(e) {

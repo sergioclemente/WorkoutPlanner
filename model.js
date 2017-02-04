@@ -1754,7 +1754,6 @@ var Model;
         visitCommentInterval(interval) {
             this.result += interval.getTitle();
         }
-        // TODO: Title fix
         visitRestInterval(interval) {
             var value = interval.getIntensity().getValue();
             if (value <= DefaultIntensity.getEasyThreshold(this.sportType)) {
