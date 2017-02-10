@@ -153,34 +153,34 @@ export default class WorkoutViews extends React.Component<any, any> {
 				width={1000}
 				height={800}>
 				<Column
-					header={<Cell>Sport Type</Cell>}
+					header={<Cell>Type</Cell>}
 					cell={<SportTypeCell data={filteredRows} field="sport_type"> </SportTypeCell>}
 					width={50}
-				/>
-				<Column
-					header={<Cell>Duration</Cell>}
-					cell={<DurationCell data={filteredRows} field="duration_sec"> </DurationCell>}
-					width={80}
 				/>
 				<Column
 					header={<Cell>IF</Cell>}
 					cell={<CustomCell data={filteredRows} field="if"> </CustomCell>}
 					width={60}
-				/>		
+				/>
+				<Column
+					header={<Cell>Duration</Cell>}
+					cell={<DurationCell data={filteredRows} field="duration_sec"> </DurationCell>}
+					width={80}
+				/>						
 				<Column
 					header={<Cell>TSS</Cell>}
 					cell={<CustomCell data={filteredRows} field="tss"> </CustomCell>}
-					width={80}
+					width={70}
 				/>									
 				<Column
 					header={<Cell>Title</Cell>}
 					cell={<TitleCell data={filteredRows} field="title" link="link"> </TitleCell>}
-					width={400}
+					width={300}
 				/>
 				<Column
 					header={<Cell>Workout</Cell>}
 					cell={<CustomCell data={filteredRows} field="value"> </CustomCell>}
-					width={600}
+					width={800}
 				/>
 			</Table>
 				</div>);
