@@ -116,6 +116,10 @@ export class QueryParams {
 		if (this.email == null || this.email == "") {
 			this.email = new PersistedItem("email").load();
 		}
+
+		if (this.efficiency_factor == null || this.efficiency_factor == "") {
+			this.efficiency_factor = new PersistedItem("efficiency_factor").load();
+		}
 		
 		// do not load experimental
 		return this.validate();
@@ -131,6 +135,8 @@ export class QueryParams {
 		new PersistedItem("sport_type").save(this.sport_type);
 		new PersistedItem("output_unit").save(this.output_unit);
 		new PersistedItem("email").save(this.email);
+		new PersistedItem("efficiency_factor").save(this.efficiency_factor);
+
 		// do not save experimental
 	}
 
