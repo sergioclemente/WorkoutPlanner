@@ -24,6 +24,30 @@ var UI;
         }
     }
     UI.PersistedItem = PersistedItem;
+    class QueryParamsList {
+        constructor() {
+            this.loadFromURL();
+        }
+        loadFromURL() {
+            var params = getQueryParams();
+            this.sport_type_ = params.st;
+            return this.validate();
+        }
+        validate() {
+            return typeof (this.sport_type_) != 'undefined' && this.sport_type_ != "";
+        }
+        getURL() {
+            return "?st=" + encodeURIComponent(this.sport_type_);
+        }
+        getSportType() {
+            return this.sport_type_;
+        }
+        setSportType(st) {
+            this.sport_type_ = st;
+            window.history.pushState('Object', 'Title', this.getURL());
+        }
+    }
+    UI.QueryParamsList = QueryParamsList;
     class QueryParams {
         constructor() {
             if (!this.validate()) {
@@ -107,6 +131,7 @@ var UI;
             new PersistedItem("output_unit").save(this.output_unit);
             new PersistedItem("email").save(this.email);
             new PersistedItem("efficiency_factor").save(this.efficiency_factor);
+            // do not save experimental
         }
         validate() {
             return typeof (this.workout_title) != 'undefined' && this.workout_title != "" &&

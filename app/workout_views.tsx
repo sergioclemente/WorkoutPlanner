@@ -57,6 +57,7 @@ class DurationCell extends React.Component<any,any> {
 
 export default class WorkoutViews extends React.Component<any, any> {
 	private _rows : any;
+	private _params : UI.QueryParamsList;
 
 	constructor(params: any) {
 		super(params);
@@ -65,6 +66,8 @@ export default class WorkoutViews extends React.Component<any, any> {
 		this.state = {
 			filteredRows: this._rows,
 		};
+
+		this._params = new UI.QueryParamsList();
 	}
 
 	componentDidMount() {
@@ -91,11 +94,19 @@ export default class WorkoutViews extends React.Component<any, any> {
 				params.workout_title =  rows[i].title;
 				params.sport_type = rows[i].sport_type.toString();
 				rows[i].link = "/" + params.getURL();
-				this._setExtraRowFields(rows, params, i);
+				if (params.validate()) {
+					this._setExtraRowFields(rows, params, i);
+				}
 			}
 
 			this._rows = rows;
-			this.setState({filteredRows: rows});
+
+			// Check the ui parameters
+			if (this._params.validate()) {
+				this._onSportTypeChange(this._params.getSportType());
+			} else {
+				this.setState({filteredRows: rows});
+			}
 
 			// force a re-render
 			this.forceUpdate();
@@ -105,6 +116,8 @@ export default class WorkoutViews extends React.Component<any, any> {
 	}
 
 	_setExtraRowFields(rows: any, params : UI.QueryParams, i : number) : void {
+			console.assert(params.validate());
+
 			// HACK: Lets override the output unit to IF since we want to get the IF
 			params.output_unit = Model.IntensityUnit.IF.toString();
 			let intervals = Model.IntervalParser.parse(
@@ -113,23 +126,27 @@ export default class WorkoutViews extends React.Component<any, any> {
 			);
 			rows[i].if = intervals.getIntensity().toString();
 			rows[i].tss = intervals.getTSS().toString();
+			// TODO: Compute required data for charts
 	}
 
-	_onSportTypeChange(sport_type_str) {
-		var sportTypeEnum: Model.SportType = parseInt(sport_type_str);
+	_onSportTypeChange(sportTypeStr: string) {
+		var sportTypeEnum: Model.SportType = parseInt(sportTypeStr);
 		var filteredRows = [];
 
-		// nothing to be filtered if its unknown (All)
+		// Nothing to be filtered if its unknown (All)
 		if (sportTypeEnum != Model.SportType.Unknown) {
 			for (let i = 0 ; i < this._rows.length; i++) {
 				var row = this._rows[i];
-				if (row.sport_type == sport_type_str) {
+				if (row.sport_type == sportTypeStr) {
 					filteredRows.push(row);
 				}
 			}
 		} else {
 			filteredRows = this._rows;
 		}
+
+		// Update the sport type (And url)
+		this._params.setSportType(sportTypeStr);
 
 		this.setState({filteredRows: filteredRows});
 	}
@@ -155,32 +172,32 @@ export default class WorkoutViews extends React.Component<any, any> {
 				<Column
 					header={<Cell>Type</Cell>}
 					cell={<SportTypeCell data={filteredRows} field="sport_type"> </SportTypeCell>}
-					width={50}
+					width={100}
 				/>
 				<Column
 					header={<Cell>IF</Cell>}
 					cell={<CustomCell data={filteredRows} field="if"> </CustomCell>}
-					width={60}
+					width={100}
 				/>
 				<Column
 					header={<Cell>Duration</Cell>}
 					cell={<DurationCell data={filteredRows} field="duration_sec"> </DurationCell>}
-					width={80}
+					width={100}
 				/>						
 				<Column
 					header={<Cell>TSS</Cell>}
 					cell={<CustomCell data={filteredRows} field="tss"> </CustomCell>}
-					width={70}
+					width={100}
 				/>									
 				<Column
 					header={<Cell>Title</Cell>}
 					cell={<TitleCell data={filteredRows} field="title" link="link"> </TitleCell>}
-					width={300}
+					width={400}
 				/>
 				<Column
-					header={<Cell>Workout</Cell>}
-					cell={<CustomCell data={filteredRows} field="value"> </CustomCell>}
-					width={800}
+					header={<Cell>Tags</Cell>}
+					cell={<CustomCell data={filteredRows} field="tags"> </CustomCell>}
+					width={200}
 				/>
 			</Table>
 				</div>);

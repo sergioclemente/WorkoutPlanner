@@ -26,6 +26,37 @@ export class PersistedItem {
 	}
 }
 
+export class QueryParamsList {
+	private sport_type_ : string;
+
+	constructor() {
+		this.loadFromURL();
+	}
+
+	loadFromURL(): boolean {
+		var params = getQueryParams();
+		this.sport_type_ = params.st;
+		return this.validate();
+	}
+
+	validate() : boolean {
+		return typeof(this.sport_type_) != 'undefined' && this.sport_type_ != "";
+	}
+
+	getURL(): string {
+		return "?st=" + encodeURIComponent(this.sport_type_);
+	}
+
+	getSportType() : string {
+		return this.sport_type_;
+	}
+
+	setSportType(st : string) : void {
+		this.sport_type_ = st;
+		window.history.pushState('Object', 'Title', this.getURL());
+	}
+}
+
 export class QueryParams {
 	public ftp_watts: string;
 	public t_pace: string;

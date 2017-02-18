@@ -47,6 +47,7 @@ export default class Workout extends React.Component<any, any> {
 	}
 
 	refreshUrls() {
+		// TODO: Merge pushing into the history with the UI.QueryParams
 		var url_parameters = this.params.getURL();
 		this._setHref("email_send_workout", "send_mail" + url_parameters);
 		this._setHref("player_link", "player.html" + url_parameters);
