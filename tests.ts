@@ -7,8 +7,7 @@ var UI = require("./ui");
 
 function expect_true(condition : boolean, message : string = "Expect true failed") {
     if (!condition) {
-		console.log(message);
-		console.trace();
+		console.assert(false, message);
     }
 }
 
@@ -116,6 +115,15 @@ describe('Bugs', function() {
 		expect_eq_nbr(400, cd2.getValue());		
   });
 });
+
+// TODO: Fix this bug
+// describe('Bugs', function() {
+//   it('Low cadence intervals being parsed as intensity', function() {
+// 		var low_cadence = Model.IntervalParser.parse(of_bike, "(1min, 55, 70rpm)");
+// 		expect_eq_nbr(55.5, low_cadence.getIntensity());		
+// 		expect_eq_str("70rpm", low_cadence.getTitle());	
+//   });
+// });
 
 describe('IntervalParser', function() {
   it('Parse double', function() {
