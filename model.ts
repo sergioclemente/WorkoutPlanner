@@ -382,12 +382,8 @@ export class Duration {
 		
 		return result;
 	}
-	
-	toStringShort() : string {		
-		if (!DurationUnitHelper.isTime(this.unit)) {
-			return this.toStringDistance();
-		}
-		
+
+	toTimeStringShort() : string {
 		var result = "";
 		var time = this.getTimeComponents();
 		
@@ -404,6 +400,14 @@ export class Duration {
 		}
 		
 		return result;
+	}
+	
+	toStringShort() : string {		
+		if (!DurationUnitHelper.isTime(this.unit)) {
+			return this.toStringDistance();
+		}
+		
+		return this.toTimeStringShort();
 	}
 	
 	toString(): string {
@@ -2036,7 +2040,15 @@ export class WorkoutTextVisitor implements Visitor {
 				}
 			}
 		} else {
-			this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
+			// Handle swim differently
+			// We want to add the total touch time on the swim. For example, if you CSS
+			// is 1:30 /100yards and you are doing 200 yards, we want to add
+			// that you are touching the wall on 3 min.
+			if (this.sportType == SportType.Swim) {
+				this.result += " on " + interval.getDuration().toTimeStringShort();
+			} else {
+				this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
+			}
 		}		
 	}
 

@@ -89,6 +89,7 @@ declare module Model {
         toStringDistance(unitTo?: DistanceUnit): string;
         getTimeComponents(): any;
         toTimeStringLong(): string;
+        toTimeStringShort(): string;
         toStringShort(): string;
         toString(): string;
         static combine(dur1: Duration, dur2: Duration): Duration;
