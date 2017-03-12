@@ -32,6 +32,7 @@ declare module Model {
         Per100Meters = 7,
         OffsetSeconds = 8,
         HeartRate = 9,
+        FreeRide = 10,
     }
     enum RunningPaceUnit {
         Unknown = 0,
@@ -73,7 +74,7 @@ declare module Model {
         static roundNumberUp(value: number, round_val?: number): number;
         static roundNumberDown(value: number, round_val?: number): number;
         static formatNumber(value: number, decimalMultiplier: number, separator: string, unit: string, round_val?: number): string;
-        private static enforceDigits(value, digits);
+        static enforceDigits(value: number, digits: number): string;
         static formatTime(milliseconds: any): string;
     }
     class Duration {
@@ -111,7 +112,7 @@ declare module Model {
          */
         getValue(): number;
         toString(): string;
-        getOriginalUnit(): number;
+        getOriginalUnit(): IntensityUnit;
         getOriginalValue(): number;
         static combine(intensities: Intensity[], weights: number[]): Intensity;
     }
@@ -193,7 +194,7 @@ declare module Model {
         evaluate(input: string, i: number): number;
         getValue(): number;
     }
-    class StringChunkParser implements Parser {
+    class TokenParser implements Parser {
         private value;
         private delimiters;
         constructor(delimiters: string[]);
@@ -335,6 +336,21 @@ declare module Model {
         finalize(): void;
         getContent(): string;
     }
+    class PPSMRXCourseDataVisitor extends BaseVisitor {
+        private fileName;
+        private content;
+        private groupId;
+        private isGroupActive;
+        constructor(fileName: string);
+        getTitlePretty(interval: BaseInterval): string;
+        getGroupId(): number;
+        getMode(interval: Interval): string;
+        visitSimpleInterval(interval: SimpleInterval): void;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
+        visitRepeatInterval(interval: RepeatInterval): void;
+        finalize(): void;
+        getContent(): string;
+    }
     class FileNameHelper {
         private intervals;
         constructor(intervals: ArrayInterval);
@@ -355,6 +371,7 @@ declare module Model {
         visitRepeatInterval(interval: RepeatInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): any;
         visitStepBuildInterval(interval: StepBuildInterval): void;
+        getDurationForWork(durationWork: Duration): Duration;
         visitSimpleInterval(interval: SimpleInterval): any;
         getIntensityPretty(intensity: Intensity): string;
         finalize(): void;
@@ -397,8 +414,10 @@ declare module Model {
         constructor(workoutTitle: string, intervals: ArrayInterval);
         getMRCFile(): string;
         getZWOFile(): string;
+        getPPSMRXFile(): string;
         getZWOFileName(): string;
         getMRCFileName(): string;
+        getPPSMRXFileName(): string;
     }
     class WorkoutBuilder {
         private userProfile;
@@ -426,8 +445,10 @@ declare module Model {
         getPrettyPrint(new_line?: string): string;
         getMRCFile(): string;
         getZWOFile(): string;
+        getPPSMRXFile(): string;
         getZWOFileName(): string;
         getMRCFileName(): string;
+        getPPSMRXFileName(): string;
     }
     class StopWatch {
         startTime: number;

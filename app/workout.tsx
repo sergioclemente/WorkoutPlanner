@@ -96,6 +96,11 @@ export default class Workout extends React.Component<any, any> {
 			let content = builder.getZWOFile();
 			this._downloadFile(fileName, content);
 		}
+		{
+			let fileName = builder.getPPSMRXFileName();
+			let content = builder.getPPSMRXFile();
+			this._downloadFile(fileName, content);
+		}		
 	}
 
 	_downloadFile(fileName : string, content : string) {

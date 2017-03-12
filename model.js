@@ -41,6 +41,7 @@ var Model;
         IntensityUnit[IntensityUnit["Per100Meters"] = 7] = "Per100Meters";
         IntensityUnit[IntensityUnit["OffsetSeconds"] = 8] = "OffsetSeconds";
         IntensityUnit[IntensityUnit["HeartRate"] = 9] = "HeartRate";
+        IntensityUnit[IntensityUnit["FreeRide"] = 10] = "FreeRide";
     })(Model.IntensityUnit || (Model.IntensityUnit = {}));
     var IntensityUnit = Model.IntensityUnit;
     (function (RunningPaceUnit) {
@@ -393,7 +394,7 @@ var Model;
                 result += time.minutes + "'";
             }
             if (time.seconds != 0) {
-                result += time.seconds + "''";
+                result += FormatterHelper.enforceDigits(time.seconds, 2) + "''";
             }
             return result;
         }
@@ -468,6 +469,8 @@ var Model;
                 return "/100meters";
             case IntensityUnit.HeartRate:
                 return "hr";
+            case IntensityUnit.FreeRide:
+                return "free-ride";
             default:
                 console.assert(false, stringFormat("Unknown intensity unit {0}", unit));
                 return "unknown";
@@ -513,7 +516,9 @@ var Model;
             "offset": IntensityUnit.OffsetSeconds,
             "hr": IntensityUnit.HeartRate,
             "heart rate": IntensityUnit.HeartRate,
-            "bpm": IntensityUnit.HeartRate
+            "bpm": IntensityUnit.HeartRate,
+            "free-ride": IntensityUnit.FreeRide,
+            "fr": IntensityUnit.FreeRide,
         };
         if (unit in conversionMap) {
             return conversionMap[unit];
@@ -549,6 +554,9 @@ var Model;
         }
         else if (unit == IntensityUnit.HeartRate) {
             return "hr";
+        }
+        else if (unit == IntensityUnit.FreeRide) {
+            return "free-ride";
         }
         else {
             console.assert(false, stringFormat("Invalid intensity unit {0}", unit));
@@ -1003,7 +1011,11 @@ var Model;
         }
     }
     Model.NumberParser = NumberParser;
-    class StringChunkParser {
+    // Retrieves the next token from the interval.
+    // For example:
+    // (10min, 75, free)
+    // Can return: "10min" or "75" or "free"
+    class TokenParser {
         constructor(delimiters) {
             this.delimiters = delimiters;
         }
@@ -1026,7 +1038,7 @@ var Model;
             return this.value;
         }
     }
-    Model.StringChunkParser = StringChunkParser;
+    Model.TokenParser = TokenParser;
     class IntensityParser {
         evaluate(input, i) {
             var num_parser = new NumberParser();
@@ -1171,6 +1183,9 @@ var Model;
                                     if (unit == IntensityUnit.OffsetSeconds) {
                                         intensities.push(factory.createIntensity(nums[k], IntensityUnit.OffsetSeconds));
                                     }
+                                    else if (unit == IntensityUnit.FreeRide) {
+                                        intensities.push(factory.createIntensity(0, IntensityUnit.FreeRide));
+                                    }
                                 }
                             }
                             // Take a peek at the top of the stack
@@ -1240,13 +1255,13 @@ var Model;
                             numIndex++;
                         }
                         else {
-                            var string_parser = new StringChunkParser([',', ')']);
+                            var string_parser = new TokenParser([',', ')']);
                             i = string_parser.evaluate(input, i);
                             var value = string_parser.getValue();
                             // If its a number
                             if (IntervalParser.isDigit(value[0])) {
                                 var intensity_parser = new IntensityParser();
-                                intensity_parser.evaluate(string_parser.getValue(), 0);
+                                intensity_parser.evaluate(value, 0);
                                 nums[numIndex] = intensity_parser.getValue();
                                 units[numIndex] = intensity_parser.getUnit();
                             }
@@ -1264,9 +1279,15 @@ var Model;
                                 units[numIndex] = "offset";
                             }
                             else {
-                                // Set the value for the title and a dummy value in the units
-                                title = string_parser.getValue();
-                                units[numIndex] = "";
+                                // TODO: Use magic number for identifying free ride for now
+                                if (value == "*") {
+                                    units[numIndex] = "free-ride";
+                                }
+                                else {
+                                    // Set the value for the title and a dummy value in the units
+                                    title = value;
+                                    units[numIndex] = "";
+                                }
                             }
                         }
                     }
@@ -1293,7 +1314,7 @@ var Model;
                     }
                 }
                 else if (ch == "\"") {
-                    var scp = new StringChunkParser(["\""]);
+                    var scp = new TokenParser(["\""]);
                     // it returns the last valid char, so we want to skip that and the quotes
                     i = scp.evaluate(input, i + 1) + 2;
                     stack[stack.length - 1].getIntervals().push(new CommentInterval(scp.getValue()));
@@ -1601,11 +1622,18 @@ var Model;
         }
         visitSimpleInterval(interval) {
             var duration = interval.getDuration().getSeconds();
-            var intensity = interval.getIntensity().getValue();
             var title = encodeURI(this.getIntervalTitle(interval));
-            this.content += `\t\t<SteadyState Duration="${duration}" Power="${intensity}">\n`;
-            this.content += `\t\t\t<textevent timeoffset="0" message="${title}"/>\n`;
-            this.content += `\t\t</SteadyState>\n`;
+            if (interval.getIntensity().getOriginalUnit() == IntensityUnit.FreeRide) {
+                this.content += `\t\t<FreeRide Duration="${duration}">\n`;
+                this.content += `\t\t\t<textevent timeoffset="0" message="${title}"/>\n`;
+                this.content += `\t\t</FreeRide>\n`;
+            }
+            else {
+                var intensity = interval.getIntensity().getValue();
+                this.content += `\t\t<SteadyState Duration="${duration}" Power="${intensity}">\n`;
+                this.content += `\t\t\t<textevent timeoffset="0" message="${title}"/>\n`;
+                this.content += `\t\t</SteadyState>\n`;
+            }
         }
         visitRampBuildInterval(interval) {
             var duration = interval.getDuration().getSeconds();
@@ -1694,6 +1722,82 @@ var Model;
         }
     }
     Model.MRCCourseDataVisitor = MRCCourseDataVisitor;
+    class PPSMRXCourseDataVisitor extends BaseVisitor {
+        constructor(fileName) {
+            super();
+            this.fileName = "";
+            this.content = "";
+            this.groupId = 1;
+            this.isGroupActive = false;
+            this.fileName = fileName;
+        }
+        getTitlePretty(interval) {
+            var title = interval.getTitle();
+            if (title.length == 0) {
+                title = WorkoutTextVisitor.getIntervalTitle(interval);
+            }
+            return title;
+        }
+        getGroupId() {
+            if (this.isGroupActive) {
+                return this.groupId;
+            }
+            else {
+                return 0;
+            }
+        }
+        getMode(interval) {
+            if (interval.getIntensity().getOriginalUnit() == IntensityUnit.FreeRide) {
+                return "T";
+            }
+            else {
+                return "M";
+            }
+        }
+        // ["description","seconds","start","finish","mode","intervals","group","autolap","targetcad"]
+        visitSimpleInterval(interval) {
+            this.content += stringFormat(`\t\t["{0}",{1},{2},{2},"{3}",1,{4},0,90],\n`, this.getTitlePretty(interval), interval.getDuration().getSeconds(), Math.round(interval.getIntensity().getValue() * 100), this.getMode(interval), this.getGroupId());
+        }
+        visitRampBuildInterval(interval) {
+            this.content += stringFormat(`\t\t["{0}",{1},{2},{3},"M",1,{3},0,90],\n`, this.getTitlePretty(interval), interval.getDuration().getSeconds(), Math.round(interval.getStartIntensity().getValue() * 100), Math.round(interval.getEndIntensity().getValue() * 100), this.getGroupId());
+        }
+        visitRepeatInterval(interval) {
+            this.isGroupActive = true;
+            super.visitRepeatInterval(interval);
+            this.isGroupActive = false;
+            this.groupId++;
+        }
+        finalize() {
+            if (this.content.length > 0) {
+                // Remove trailing ",\n"
+                this.content = this.content.substr(0, this.content.length - 2);
+                // Add just the "\n"
+                this.content += "\n";
+            }
+            this.content = stringFormat(`{
+	"type":"json",
+	"createdby":"PerfPRO Studio v5.80.25",
+	"version":5.00,
+	"name":"manual mode",
+	"workoutType":"",
+	"comments":"",
+	"isLocked":0,
+	"videoFile":"",
+	"showCountDown":0,
+	"showStep":0,
+	"movieMode":0,
+	"startMinute":0,
+	"set_fields":["description","seconds","start","finish","mode","intervals","group","autolap","targetcad"],
+	"sets":[
+`) + this.content +
+                `	]
+}`;
+        }
+        getContent() {
+            return this.content;
+        }
+    }
+    Model.PPSMRXCourseDataVisitor = PPSMRXCourseDataVisitor;
     class FileNameHelper {
         constructor(intervals) {
             this.intervals = intervals;
@@ -1844,7 +1948,12 @@ var Model;
                 this.result += interval.getDuration().toStringShort() + " warmup to " + this.getIntensityPretty(interval.getEndIntensity());
             }
             else {
-                this.result += interval.getDuration().toStringShort() + " build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());
+                if (interval.getStartIntensity().getValue() < interval.getEndIntensity().getValue()) {
+                    this.result += interval.getDuration().toStringShort() + " build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());
+                }
+                else {
+                    this.result += interval.getDuration().toStringShort() + " warm down from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());
+                }
             }
         }
         visitStepBuildInterval(interval) {
@@ -1880,12 +1989,24 @@ var Model;
                 this.result += ")";
             }
         }
+        getDurationForWork(durationWork) {
+            if (durationWork.getUnit() == DistanceUnit.Yards) {
+                return new Duration(TimeUnit.Seconds, durationWork.getSeconds() + 10 * durationWork.getValue() / 100, 0, 0);
+            }
+            else {
+                return durationWork;
+            }
+        }
         // SimpleInterval
         visitSimpleInterval(interval) {
             this.result += interval.getDuration().toStringShort();
             var title = interval.getTitle();
             if (title.length > 0) {
                 this.result += " " + title;
+            }
+            // If its a Free ride we are done!
+            if (interval.getIntensity().getOriginalUnit() == IntensityUnit.FreeRide) {
+                return;
             }
             // 3 cases to cover:
             // - warmup (usually IF around 50-60) - no title - easy peasy
@@ -1916,7 +2037,13 @@ var Model;
                 // is 1:30 /100yards and you are doing 200 yards, we want to add
                 // that you are touching the wall on 3 min.
                 if (this.sportType == SportType.Swim) {
-                    this.result += " on " + interval.getDuration().toTimeStringShort();
+                    var total_duration = this.getDurationForWork(interval.getDuration());
+                    if (total_duration.getSeconds() != interval.getDuration().getSeconds()) {
+                        this.result += " on " + interval.getDuration().toTimeStringShort() + " off " + total_duration.toTimeStringShort();
+                    }
+                    else {
+                        this.result += " on " + interval.getDuration().toTimeStringShort();
+                    }
                 }
                 else {
                     this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
@@ -1936,6 +2063,9 @@ var Model;
                     bpm = (1760 * this.userProfile.getRunnintTPaceMph()) / (60 * this.userProfile.getEfficiencyFactor());
                 }
                 return Math.round(intensity.getValue() * bpm) + "bpm";
+            }
+            if (this.outputUnit == IntensityUnit.FreeRide) {
+                return "Free Ride";
             }
             if (this.outputUnit == IntensityUnit.Unknown ||
                 this.sportType == SportType.Unknown ||
@@ -2100,6 +2230,10 @@ var Model;
         }
         createIntensity(value, unit) {
             var ifValue = 0;
+            // HACK here for now
+            if (unit == IntensityUnit.FreeRide) {
+                return new Intensity(0, 0, IntensityUnit.FreeRide);
+            }
             if (this.sportType == SportType.Bike) {
                 if (unit == IntensityUnit.Watts) {
                     ifValue = value / this.userProfile.getBikeFTP();
@@ -2195,6 +2329,7 @@ var Model;
             }
             return new Duration(unit, value, estimatedTimeInSeconds, estimatedDistanceInMiles);
         }
+        // Returns the easy IF threshold
         getEasyThreshold() {
             return DefaultIntensity.getEasyThreshold(this.sportType);
         }
@@ -2217,6 +2352,13 @@ var Model;
             VisitorHelper.visitAndFinalize(zwift, this.intervals);
             return zwift.getContent();
         }
+        getPPSMRXFile() {
+            var fileNameHelper = new FileNameHelper(this.intervals);
+            var workout_name = fileNameHelper.getFileName();
+            var zwift = new PPSMRXCourseDataVisitor(workout_name);
+            VisitorHelper.visitAndFinalize(zwift, this.intervals);
+            return zwift.getContent();
+        }
         getZWOFileName() {
             if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
                 return this.workoutTitle + ".zwo";
@@ -2227,6 +2369,13 @@ var Model;
         getMRCFileName() {
             if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
                 return this.workoutTitle + ".mrc";
+            }
+            var fileNameHelper = new FileNameHelper(this.intervals);
+            return fileNameHelper.getFileName() + ".mrc";
+        }
+        getPPSMRXFileName() {
+            if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
+                return this.workoutTitle + ".ppsmrx";
             }
             var fileNameHelper = new FileNameHelper(this.intervals);
             return fileNameHelper.getFileName() + ".mrc";
@@ -2324,6 +2473,10 @@ var Model;
             let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
             return wfg.getZWOFile();
         }
+        getPPSMRXFile() {
+            let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
+            return wfg.getPPSMRXFile();
+        }
         getZWOFileName() {
             let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
             return wfg.getZWOFileName();
@@ -2331,6 +2484,10 @@ var Model;
         getMRCFileName() {
             let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
             return wfg.getMRCFileName();
+        }
+        getPPSMRXFileName() {
+            let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
+            return wfg.getPPSMRXFileName();
         }
     }
     Model.WorkoutBuilder = WorkoutBuilder;
