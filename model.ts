@@ -420,6 +420,14 @@ export class Duration {
 	}
 		
 	static combine(dur1: Duration, dur2: Duration) : Duration {
+		var estTime = dur1.getSeconds() + dur2.getSeconds();
+		var estDistance = dur1.getDistanceInMiles() + dur2.getDistanceInMiles();
+		
+		// Combine the units directly if they are the same
+		if (dur1.getUnit() == dur2.getUnit()) {
+			return new Duration(dur1.getUnit(), dur1.getValue() + dur2.getValue(), estTime, estDistance);
+		}
+
 		// Check if either is 0
 		if (dur1.getValue() == 0) {
 			return dur2;
@@ -428,9 +436,6 @@ export class Duration {
 			return dur1;
 		}
 
-		var estTime = dur1.getSeconds() + dur2.getSeconds();
-		var estDistance = dur1.getDistanceInMiles() + dur2.getDistanceInMiles();
-		
 		if (DurationUnitHelper.isTime(dur1.getUnit())) {
 			if (DurationUnitHelper.isTime(dur2.getUnit())) {
 				// Both are Time
@@ -439,13 +444,13 @@ export class Duration {
 				var time2 = DurationUnitHelper.getDurationSeconds(dur2.getUnit(), dur2.getValue());
 				return new Duration(TimeUnit.Seconds, time1+time2, estTime, estDistance);
 			} else {
-				// Use the unit of time in case is different
-				return new Duration(TimeUnit.Seconds, estTime, estTime, estDistance);
+				// Use the distance unit in case they are different.
+				return new Duration(dur2.getUnit(), dur2.getValue(), estTime, estDistance);
 			}
 		} else {
 			if (DurationUnitHelper.isTime(dur2.getUnit())) {
-				// Use the unit of time in case is different
-				return new Duration(TimeUnit.Seconds, estTime, estTime, estDistance);
+				// Use the distance unit in case they are different.
+				return new Duration(dur1.getUnit(), dur1.getValue(), estTime, estDistance);
 			} else {
 				var distance1 = DurationUnitHelper.getDistanceMiles(dur1.getUnit(), dur1.getValue());
 				var distance2 = DurationUnitHelper.getDistanceMiles(dur2.getUnit(), dur2.getValue());
@@ -1341,8 +1346,17 @@ export class IntervalParser {
 						if (IntervalParser.isDigit(value[0])) {
 							var intensity_parser = new IntensityParser();
 							intensity_parser.evaluate(value, 0);
-							nums[numIndex] = intensity_parser.getValue();
-							units[numIndex] = intensity_parser.getUnit();
+
+							let unit = intensity_parser.getUnit().trim();
+							// If there is not unit (implict) or the unit is known
+							if (unit.length == 0 || isIntensityUnit(unit) || isDurationUnit(unit)) {
+								nums[numIndex] = intensity_parser.getValue();
+								units[numIndex] = intensity_parser.getUnit();	
+							} else {
+							 	// If we don't recognize, fallback and set as a title
+							 	title = value;
+							 	units[numIndex] = "";								
+							 }
 						} else if (value[0] == "+" || value[0] == "-") {
 							var integer_parser = new NumberParser();
 							integer_parser.evaluate(value, 1);
