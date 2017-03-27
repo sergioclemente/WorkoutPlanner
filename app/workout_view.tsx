@@ -52,6 +52,7 @@ export default class WorkoutView extends React.Component<any, any> {
 					time_in_zones_data: time_in_zones_data,
 					workout_steps: workout_steps,
 					workout_pretty: builder.getPrettyPrint(),
+					workout_text: params.workout_text,
 				}
 			);
 		} catch (err) {
@@ -70,6 +71,7 @@ export default class WorkoutView extends React.Component<any, any> {
 					time_in_zones_data: [],
 					workout_steps: [],
 					workout_pretty: "",
+					workout_text: "",
 				}
 			);
 		}
@@ -126,7 +128,11 @@ export default class WorkoutView extends React.Component<any, any> {
 		this.renderCharts(this.state);
 
 		document.getElementById("id_clipboard").addEventListener('click',function() {
-			UI.ClipboardHelper.copyText(this.state.workout_pretty);
+			let clipboard_content = this.state.workout_pretty;
+			clipboard_content += "\n\n";
+			clipboard_content += "internal:\n";
+			clipboard_content += window.btoa(this.state.workout_text);
+			UI.ClipboardHelper.copyText(clipboard_content);
 		}.bind(this));
 	}
 

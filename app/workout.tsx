@@ -52,8 +52,6 @@ export default class Workout extends React.Component<any, any> {
 		this._setHref("email_send_workout", "send_mail" + url_parameters);
 		this._setHref("player_link", "player.html" + url_parameters);
 
-		this._setVisibility("save_workout", this.params.experimental);
-
 		window.history.pushState('Object', 'Title', url_parameters);
 	}
 

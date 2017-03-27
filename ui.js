@@ -55,8 +55,6 @@ var UI;
                     this.loadFromStorage();
                 }
             }
-            // HACK HACK: enable this just for me
-            this.experimental = this.experimental || this.email == 'sergioclemente@gmail.com';
         }
         static createCopy(params) {
             var ret = new QueryParams();
@@ -69,7 +67,6 @@ var UI;
             ret.sport_type = params.sport_type;
             ret.output_unit = params.output_unit;
             ret.email = params.email;
-            ret.experimental = params.experimental;
             return ret;
         }
         loadFromURL() {
@@ -83,7 +80,6 @@ var UI;
             this.sport_type = params.st;
             this.output_unit = params.ou;
             this.email = params.email;
-            this.experimental = typeof (params.e) != 'undefined' && params.e == "1";
             return this.validate();
         }
         loadFromStorage() {
@@ -131,7 +127,6 @@ var UI;
             new PersistedItem("output_unit").save(this.output_unit);
             new PersistedItem("email").save(this.email);
             new PersistedItem("efficiency_factor").save(this.efficiency_factor);
-            // do not save experimental
         }
         validate() {
             return typeof (this.workout_title) != 'undefined' && this.workout_title != "" &&
@@ -153,8 +148,7 @@ var UI;
                 "&css=" + encodeURIComponent(this.swim_css) +
                 "&ef=" + encodeURIComponent(this.efficiency_factor) +
                 "&ou=" + encodeURIComponent(this.output_unit) +
-                "&email=" + encodeURIComponent(this.email) +
-                "&e=" + encodeURIComponent(this.experimental ? "1" : "0");
+                "&email=" + encodeURIComponent(this.email);
         }
         createUserProfile() {
             if (this.validate()) {

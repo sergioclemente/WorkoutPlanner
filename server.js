@@ -52,9 +52,14 @@ function handleSendEmail(req, res, uri, params) {
       var attachment_zwo = {
         name : builder.getZWOFileName(),
         data : builder.getZWOFile()
+      };       
+      var attachment_ppsmrx = {
+        name : builder.getPPSMRXFileName(),
+        data : builder.getPPSMRXFile()
       };                
       attachments.push(attachment_zwo);
       attachments.push(attachment_mrc);
+      attachments.push(attachment_ppsmrx);
     }
 
     res.write("Sending email...\n");

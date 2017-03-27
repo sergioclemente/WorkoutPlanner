@@ -43,6 +43,9 @@ Its automatically pushed on every commit.
 ```
 
 # Bugs/Feature requests
+Hi-Pri
+- Clutterness in swimming
+
 Client JS
 * Bundle JS more efficiently
 * Fix minification
@@ -54,7 +57,6 @@ Server
 * Move to kubernetes
 
 Workout View
-* [BUG] Anytime duration is time, Duration.combine outputs time
 * Don't require a title for validating
 * add profiles - workaround today is links
 * add the hability for named groups (warmup/mainset/cooldown) - workaround today is comments

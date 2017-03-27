@@ -68,8 +68,6 @@ export class QueryParams {
 	public workout_text: string;
 	public sport_type: string;
 	public output_unit: string;
-
-	public experimental: boolean;
 	
 	constructor() {
 		if (!this.validate()) {
@@ -77,8 +75,6 @@ export class QueryParams {
 				this.loadFromStorage();
 			}
 		}
-		// HACK HACK: enable this just for me
-		this.experimental = this.experimental || this.email == 'sergioclemente@gmail.com';
 	}
 
 	static createCopy(params: QueryParams) : QueryParams {
@@ -92,7 +88,6 @@ export class QueryParams {
 		ret.sport_type = params.sport_type;
 		ret.output_unit = params.output_unit;
 		ret.email = params.email;
-		ret.experimental = params.experimental;
 		return ret;
 	}
 
@@ -107,7 +102,6 @@ export class QueryParams {
 		this.sport_type = params.st;
 		this.output_unit = params.ou;
 		this.email = params.email;
-		this.experimental = typeof (params.e) != 'undefined' && params.e == "1";
 		return this.validate();
 	}
 
@@ -167,8 +161,6 @@ export class QueryParams {
 		new PersistedItem("output_unit").save(this.output_unit);
 		new PersistedItem("email").save(this.email);
 		new PersistedItem("efficiency_factor").save(this.efficiency_factor);
-
-		// do not save experimental
 	}
 
 	validate(): boolean {
@@ -192,8 +184,7 @@ export class QueryParams {
 			"&css=" + encodeURIComponent(this.swim_css) +
 			"&ef=" + encodeURIComponent(this.efficiency_factor) +
 			"&ou=" + encodeURIComponent(this.output_unit) +
-			"&email=" + encodeURIComponent(this.email) + 
-			"&e=" + encodeURIComponent(this.experimental ? "1" : "0");
+			"&email=" + encodeURIComponent(this.email);
 	}
 
 	createUserProfile() : Model.UserProfile {
