@@ -2480,7 +2480,7 @@ var Model;
             result += new_line;
             result += new_line;
             result += "web+wp://";
-            result += btoa(workout_text);
+            result += btoa(this.workoutDefinition);
             return result;
         }
         getMRCFile() {
