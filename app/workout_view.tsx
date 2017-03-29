@@ -128,11 +128,7 @@ export default class WorkoutView extends React.Component<any, any> {
 		this.renderCharts(this.state);
 
 		document.getElementById("id_clipboard").addEventListener('click',function() {
-			let clipboard_content = this.state.workout_pretty;
-			clipboard_content += "\n\n";
-			clipboard_content += "web+wp://";
-			clipboard_content += btoa(this.state.workout_text);
-			UI.ClipboardHelper.copyText(clipboard_content);
+			UI.ClipboardHelper.copyText(this.state.workout_pretty);
 		}.bind(this));
 	}
 

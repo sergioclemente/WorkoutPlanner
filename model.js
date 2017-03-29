@@ -2474,8 +2474,12 @@ var Model;
         }
         getPrettyPrint(new_line = "\n") {
             var intensities = this.intervals.getIntensities();
-            var result = "";
-            result += this.getStepsList(new_line);
+            let workout_text = this.getStepsList(new_line);
+            var result = workout_text;
+            result += new_line;
+            result += new_line;
+            result += "web+wp://";
+            result += btoa(workout_text);
             return result;
         }
         getMRCFile() {
