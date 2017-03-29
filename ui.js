@@ -82,7 +82,7 @@ var UI;
             this.email = params.email;
             // Load the workout when its encoded
             if (params.wh != null) {
-                this.workout_text = atob(params.wh);
+                this.workout_text = window.atob(params.wh);
             }
             return this.validate();
         }

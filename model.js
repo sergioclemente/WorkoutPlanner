@@ -2479,7 +2479,7 @@ var Model;
             result += new_line;
             result += new_line;
             result += "web+wp://";
-            result += btoa(workout_text);
+            result += window.btoa(workout_text);
             return result;
         }
         getMRCFile() {
