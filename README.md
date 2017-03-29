@@ -15,6 +15,7 @@ npm install -g nodemailer
 npm install -g browserify
 npm install -g react
 npm install -g react-dom
+npm install -g btoa
 npm install -g minifier
 npm install -g mysql
 npm install -g mocha

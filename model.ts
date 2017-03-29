@@ -1,5 +1,7 @@
 module Model {
 
+var btoa = require('btoa');
+
 export enum SportType {
 	Unknown=-1,
 	Swim=0,
@@ -2687,7 +2689,7 @@ export class WorkoutBuilder {
 		result += new_line;
 		result += new_line;	
 		result += "web+wp://";
-		result += window.btoa(workout_text);
+		result += btoa(workout_text);
 
 		return result
 	}

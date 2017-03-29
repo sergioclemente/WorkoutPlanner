@@ -1,6 +1,7 @@
 "use strict";
 var Model;
 (function (Model) {
+    var btoa = require('btoa');
     (function (SportType) {
         SportType[SportType["Unknown"] = -1] = "Unknown";
         SportType[SportType["Swim"] = 0] = "Swim";
@@ -2479,7 +2480,7 @@ var Model;
             result += new_line;
             result += new_line;
             result += "web+wp://";
-            result += window.btoa(workout_text);
+            result += btoa(workout_text);
             return result;
         }
         getMRCFile() {
