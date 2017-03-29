@@ -80,6 +80,10 @@ var UI;
             this.sport_type = params.st;
             this.output_unit = params.ou;
             this.email = params.email;
+            // Load the workout when its encoded
+            if (params.wh != null) {
+                this.workout_text = atob(params.wh);
+            }
             return this.validate();
         }
         loadFromStorage() {

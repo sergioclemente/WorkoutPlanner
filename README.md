@@ -42,6 +42,10 @@ node ./server.js
 Its automatically pushed on every commit.
 ```
 
+To install the protocol handler:
+- Run this in a developer console window 
+-- navigator.registerProtocolHandler("web+wp", "http://workoutplanner.herokuapp.com?wh=%s", "Workout Planner handler");
+
 # Bugs/Feature requests
 Hi-Pri
 - Clutterness in swimming
