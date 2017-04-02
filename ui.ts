@@ -105,7 +105,9 @@ export class QueryParams {
 
 		// Load the workout when its encoded
 		if (params.wh != null) {
-			this.workout_text = window.atob(params.wh);
+			if (params.wh.startsWith("web+wp://")) {
+				this.workout_text = window.atob(params.wh.substr(9,params.wh.length));
+			}
 		}
 
 		return this.validate();

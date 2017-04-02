@@ -1115,8 +1115,8 @@ export class IntensityParser implements Parser {
 		i = num_parser.evaluate(input, i);
 		this.value = num_parser.getValue();
 		
-		// Parse the unit
-		// Check for :
+		// - Check for another number after the current cursor.
+		// - Skip any white spaces as well
 		if (i+1 < input.length && input[i+1]==":") {
 			i = i + 2; // skip : and go to the next char
 			var res_temp = IntervalParser.parseDouble(input, i);
@@ -1133,7 +1133,7 @@ export class IntensityParser implements Parser {
 			i--;
 		}
 		
-		// look for a unit
+		// - Check the unit
 		this.unit = "";
 		for (var j = i+1; j < input.length; j++) {
 			// check for letters or (slashes/percent)
@@ -1149,7 +1149,7 @@ export class IntensityParser implements Parser {
 			} else {
 				break;
 			}
-		}	
+		}
 		
 		return i + this.unit.length;			
 	}
@@ -1350,10 +1350,13 @@ export class IntervalParser {
 							intensity_parser.evaluate(value, 0);
 
 							let unit = intensity_parser.getUnit().trim();
+							let intensity_value = intensity_parser.getValue();
+							// If we have a value from the intensity parser and
 							// If there is not unit (implict) or the unit is known
-							if (unit.length == 0 || isIntensityUnit(unit) || isDurationUnit(unit)) {
-								nums[numIndex] = intensity_parser.getValue();
-								units[numIndex] = intensity_parser.getUnit();	
+							if (intensity_value != null &&
+								(unit.length == 0 || isIntensityUnit(unit) || isDurationUnit(unit))) {
+								nums[numIndex] = intensity_value;
+								units[numIndex] = unit;	
 							} else {
 							 	// If we don't recognize, fallback and set as a title
 							 	title = value;

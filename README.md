@@ -45,11 +45,13 @@ Its automatically pushed on every commit.
 
 To install the protocol handler:
 - Run this in a developer console window 
--- navigator.registerProtocolHandler("web+wp", "http://workoutplanner.herokuapp.com?wh=%s", "Workout Planner handler");
+-- navigator.registerProtocolHandler("web+wp", "http://workoutplanner.herokuapp.com/?wh=%s", "Workout Planner handler");
 
 # Bugs/Feature requests
 Hi-Pri
 - Clutterness in swimming
+- Add rest support built in into interval. Make it a first class citizen in the Interval/BaseInterval base.
+- Add first letter upper case
 
 Client JS
 * Bundle JS more efficiently

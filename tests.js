@@ -110,6 +110,12 @@ describe('Bugs', function () {
         expect_eq_nbr(0.55, first_interval.getIntensity().getOriginalValue());
         expect_eq_str("70rpm", first_interval.getTitle());
     });
+    //   it('grade being parsed as intensity', function() {
+    // 		var low_cadence = Model.IntervalParser.parse(of_bike, "(1min, 55, 2% grade)");
+    // 		let first_interval = low_cadence.getIntervals()[0];
+    // 		expect_eq_nbr(0.55, first_interval.getIntensity().getOriginalValue());		
+    // 		expect_eq_str("2% grade", first_interval.getTitle());	
+    //   });  
 });
 describe('Combine duration', function () {
     it('Combine two distances', function () {
