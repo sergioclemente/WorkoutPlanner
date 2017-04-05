@@ -308,6 +308,8 @@ export class Duration {
 	private unit: DurationUnit;
 	private estimatedDurationInSeconds: number;
 	private estimatedDistanceInMiles : number;	
+
+	public static ZeroDuration : Duration = new Duration(TimeUnit.Seconds, 0, 0, 0);
 	
 	constructor(unit: DurationUnit, value: number, estimatedDurationInSeconds: number, estimatedDistanceInMiles: number) {
 		this.unit = unit;
@@ -671,6 +673,8 @@ export class Intensity {
 
 	private originalValue: number;
 	private originalUnit: IntensityUnit;
+
+	public static ZeroIntensity : Intensity = new Intensity(0, 0, IntensityUnit.IF);
 	
 	constructor(ifValue:number = 0, value: number = 0, unit:IntensityUnit = IntensityUnit.IF) {
 		// HACK: Find a better way of doing this
@@ -759,10 +763,12 @@ export class Intensity {
 export interface Interval {
 	getTitle() : string;
 	getIntensity(): Intensity;	
-	getDuration() : Duration;
+	getWorkDuration() : Duration;
+	getRestDuration() : Duration;
+	getTotalDuration() : Duration;
 }
 
-export class BaseInterval implements Interval {
+export abstract class BaseInterval implements Interval {
 	private title: string;
 	
 	constructor(title: string) {
@@ -771,13 +777,13 @@ export class BaseInterval implements Interval {
 	getTitle() : string {
 		return this.title;
 	}
-	getIntensity(): Intensity {
-		// not aware that typescript supports abstract methods
-		throw new Error("not implemented");
+	abstract getIntensity(): Intensity;
+	abstract getWorkDuration() : Duration;
+	getRestDuration() : Duration {
+		return Duration.ZeroDuration;
 	}
-	getDuration() : Duration {
-		// not aware that typescript supports abstract methods
-		throw new Error("not implemented");
+	getTotalDuration() : Duration {
+		return Duration.combine(this.getWorkDuration(), this.getRestDuration());
 	}
 }
 
@@ -786,28 +792,33 @@ export class CommentInterval extends BaseInterval {
 		super(title);
 	}
 	getIntensity() : Intensity {
-		return new Intensity(0, 0, IntensityUnit.IF);
+		return Intensity.ZeroIntensity;
 	}
-	getDuration(): Duration {
-		return new Duration(TimeUnit.Seconds, 0, 0, 0);
-	}	
+	getWorkDuration(): Duration {
+		return Duration.ZeroDuration;
+	}		
 }
 
 export class SimpleInterval extends BaseInterval {
 	private intensity: Intensity;
 	private duration: Duration;
+	private restDuration: Duration;
 
-	constructor(title: string, intensity: Intensity, duration: Duration) {
+	constructor(title: string, intensity: Intensity, duration: Duration, restDuration: Duration) {
 		super(title);
 		this.intensity = intensity;
 		this.duration = duration;
+		this.restDuration = restDuration;
 	}
 	getIntensity() : Intensity {
 		return this.intensity;
 	}
-	getDuration(): Duration {
+	getWorkDuration(): Duration {
 		return this.duration;
 	}
+	getRestDuration(): Duration {
+		return this.restDuration;
+	}		
 }
 
 export class RampBuildInterval extends BaseInterval {
@@ -824,7 +835,7 @@ export class RampBuildInterval extends BaseInterval {
 	getIntensity() : Intensity {
 		return RampBuildInterval.computeAverageIntensity(this.startIntensity, this.endIntensity);
 	}
-	getDuration(): Duration {
+	getWorkDuration(): Duration {
 		return this.duration;
 	}
 	getStartIntensity() : Intensity {
@@ -865,29 +876,34 @@ export class ArrayInterval implements Interval {
 			return value.getIntensity();
 		});
 		var weights : number[] = this.intervals.map(function(value, index, array) {
-			return value.getDuration().getSeconds();
+			return value.getWorkDuration().getSeconds();
 		});
 
 		return Intensity.combine(intensities, weights);
 	}
-	getDuration() : Duration {
+	getWorkDuration() : Duration {
 		// If the interval is empty lets bail right away otherwise reducing the array will cause an
 		// exception
 		if (this.intervals.length == 0) {
-			return new Duration(TimeUnit.Seconds, 0, 0, 0);
+			return Duration.ZeroDuration;
 		}
 
 		// It will create dummy intervals along the way so that I can use
 		// the reduce abstraction		
 		var res = this.intervals.reduce(function(previousValue, currentValue) {
-			var duration = Duration.combine(previousValue.getDuration(), currentValue.getDuration());
+			var duration = Duration.combine(previousValue.getWorkDuration(), currentValue.getWorkDuration());
 			
 			// Create a dummy interval with the proper duration
-			return new SimpleInterval("", new Intensity(0), duration);
+			return new SimpleInterval("", Intensity.ZeroIntensity, duration, Duration.ZeroDuration);
 		});
-		return res.getDuration();
+		return res.getWorkDuration();
 	}
-	
+	getRestDuration() : Duration {
+		return Duration.ZeroDuration;
+	}	
+	getTotalDuration() : Duration {
+		return Duration.combine(this.getWorkDuration(), this.getRestDuration());
+	}	
 	getTitle() : string {
 		return this.title;
 	}
@@ -903,7 +919,7 @@ export class ArrayInterval implements Interval {
 	}
 	
 	getTSSFromIF() : number {
-		var tss_from_if = (this.getIntensity().getValue() * this.getIntensity().getValue() * this.getDuration().getSeconds()) / 36;
+		var tss_from_if = (this.getIntensity().getValue() * this.getIntensity().getValue() * this.getWorkDuration().getSeconds()) / 36;
 		return MyMath.round10(tss_from_if, -1);
 	}
 
@@ -950,8 +966,8 @@ export class RepeatInterval extends ArrayInterval {
 		this.repeatCount = repeatCount;
 	}
 	
-	getDuration(): Duration {
-		var baseDuration = super.getDuration();
+	getWorkDuration(): Duration {
+		var baseDuration = super.getWorkDuration();
 		var durationRaw = baseDuration.getValue() * this.repeatCount;
 		var durationSecs = baseDuration.getSeconds() * this.repeatCount;
 		var durationMiles = baseDuration.getDistanceInMiles() * this.repeatCount;
@@ -983,7 +999,7 @@ export class StepBuildInterval extends ArrayInterval {
 		});
 		var repeatCount = this.getRepeatCount();
 		var weights : number[] = this.intervals.map(function(value, index, array) {
-			return value.getDuration().getSeconds() * repeatCount;
+			return value.getWorkDuration().getSeconds() * repeatCount;
 		});
 
 		return Intensity.combine(intensities, weights);
@@ -1007,10 +1023,10 @@ export class StepBuildInterval extends ArrayInterval {
 		}
 		return true;
 	}
-	getDuration(): Duration {
+	getWorkDuration(): Duration {
 		var durations = [];
 		for (var i = 0; i < this.intervals.length; i++) {
-			durations[i] = this.intervals[i].getDuration();
+			durations[i] = this.intervals[i].getWorkDuration();
 		}
 		if (durations.length < 2) {
 			return durations[0];
@@ -1106,7 +1122,7 @@ export class TokenParser implements Parser {
 	}
 }
 
-export class IntensityParser implements Parser {
+export class NumberAndUnitParser implements Parser {
 	private value: number;
 	private unit: string;
 	
@@ -1114,10 +1130,11 @@ export class IntensityParser implements Parser {
 		var num_parser = new NumberParser();
 		i = num_parser.evaluate(input, i);
 		this.value = num_parser.getValue();
+		let original_i = i;
 		
 		// - Check for another number after the current cursor.
 		// - Skip any white spaces as well
-		if (i+1 < input.length && input[i+1]==":") {
+		if (i+1 < input.length && input[i+1] == ":") {
 			i = i + 2; // skip : and go to the next char
 			var res_temp = IntervalParser.parseDouble(input, i);
 			i = res_temp.i;
@@ -1135,23 +1152,39 @@ export class IntensityParser implements Parser {
 		
 		// - Check the unit
 		this.unit = "";
-		for (var j = i+1; j < input.length; j++) {
+		for (i++; i < input.length; i++) {
 			// check for letters or (slashes/percent)
 			// this will cover for example: 
 			// 210w
 			// 75w
 			// 10mph
 			// 6min/mi
-			if (IntervalParser.isLetter(input[j])
-					|| input[j] == "%"
-					|| input[j] == "/") {
-				this.unit += input[j];
+			if (IntervalParser.isLetter(input[i])
+					|| input[i] == "%"
+					|| input[i] == "/") {
+				this.unit += input[i];
 			} else {
 				break;
 			}
 		}
+
+		// We do a sanity check now. We want to make sure there is nothing that is not
+		// a whitespace after the unit. For example: 2% incline should not parse as
+		// a intensity
+		while (i < input.length) {
+			if (input[i] == ',' || input[i] == ")") {
+				break;
+			}
+			if (!IntervalParser.isWhitespace(input[i])) {
+				this.value = null;
+				this.unit = "";
+				i = original_i;
+				break;
+			}
+			i++;
+		}		
 		
-		return i + this.unit.length;			
+		return i - 1;			
 	}
 	
 	getValue() : number {
@@ -1216,17 +1249,15 @@ export class IntervalParser {
 				for (; i < input.length; i++) {
 					ch = input[i];
 					if (ch == ")") {
-						// simple workout completed, pop element from stack and create
 						var interval : Interval;
 						var durationValues : number[] = [];
 						var durationUnits : DurationUnit[] = [];
 						var intensities : Intensity[] = [];
 						
-						// Do we have the units?
-						var containsUnit = false;
-						// Tries to guess where is the time and where is the intensity
+						// (1) Tries to guess where is the time and where is the intensity
 						// The assumption here is that intensity will likely be bigger
 						// than time. For example: 65% for 60min
+						var containsUnit = false;						
 						var minIndex = -1;
 						var minValue = 9999999999999;
 						for (var k = 0; k < Object.keys(units).length; k++) {
@@ -1250,7 +1281,7 @@ export class IntervalParser {
 							}
 						}
 
-						// Handle properly the duration unit
+						// (2) Create the duration units and intensities
 						for (var k = 0; k < Object.keys(units).length; k++) {
 							if (isDurationUnit(units[k])) {
 								durationUnits.push(getDurationUnitFromString(units[k]));
@@ -1262,6 +1293,8 @@ export class IntervalParser {
 								}
 								intensities.push(factory.createIntensity(nums[k], intensityUnit));
 							} else {
+								// Most of the times here means we didn't have a intensity
+								// Free ride or offset mode for example.
 								var unit = getIntensityUnitFromString(units[k]);
 								
 								if (unit == IntensityUnit.OffsetSeconds) {
@@ -1272,7 +1305,7 @@ export class IntervalParser {
 							}
 						}
 						
-						// Take a peek at the top of the stack
+						// (3) Handle repeat interval by peaking at the stack
 						if (stack[stack.length-1] instanceof RepeatInterval) {
 							var repeatInterval = <RepeatInterval>(stack[stack.length - 1]);
 							// There is ambiguity in the following interval:
@@ -1299,7 +1332,7 @@ export class IntervalParser {
 									var durationValue = k < durationValues.length ? durationValues[k] : durationValues[0];
 									var intensity = k < intensities.length ? intensities[k] : intensities[0];
 									var step_duration = factory.createDuration(intensity, durationUnit, durationValue);
-									step_intervals.push(new SimpleInterval(title.trim(), intensity, step_duration));
+									step_intervals.push(new SimpleInterval(title.trim(), intensity, step_duration, Duration.ZeroDuration));
 								}
 
 								var bsi = new StepBuildInterval(title.trim(), step_intervals);
@@ -1311,16 +1344,25 @@ export class IntervalParser {
 							}
 						}
 	
+						console.assert(durationValues.length >= 1);
+						console.assert(durationUnits.length >= 1);
+						let restDuration = Duration.ZeroDuration;
+						let zeroIntensity = Intensity.ZeroIntensity;
 						if (intensities.length == 2) {
-							var startIntensity = intensities[0];
-							var endIntensity = intensities[1]
-							var intensity = RampBuildInterval.computeAverageIntensity(startIntensity, endIntensity);
-							var duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
+							// Ramp build interval
+							let startIntensity = intensities[0];
+							let endIntensity = intensities[1]
+							let intensity = RampBuildInterval.computeAverageIntensity(startIntensity, endIntensity);
+							let duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
 							interval = new RampBuildInterval(title.trim(), startIntensity, endIntensity, duration);
 						} else if (intensities.length == 1) {
-							var intensity = intensities[0];
-							var duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
-							interval = new SimpleInterval(title.trim(), intensity, duration);
+							// Simple interval
+							let intensity = intensities[0];
+							let duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
+							if (durationUnits.length == 2 && durationValues.length == 2) {
+								restDuration = factory.createDuration(zeroIntensity, durationUnits[1], durationValues[1]);
+							}
+							interval = new SimpleInterval(title.trim(), intensity, duration, restDuration);
 						} else {
 							// Two types of interval here:
 							// (10s) - means 10s rest
@@ -1330,9 +1372,12 @@ export class IntervalParser {
 								intensity = factory.createIntensity(0, IntensityUnit.IF);
 							} else {
 								intensity = factory.createIntensity(factory.getEasyThreshold(), IntensityUnit.IF);
-							} 
-							var duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
-							interval = new SimpleInterval(title.trim(), intensity, duration);
+							}
+							let duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
+							if (durationUnits.length == 2 && durationValues.length == 2) {
+								restDuration = factory.createDuration(zeroIntensity, durationUnits[1], durationValues[1]);
+							}							
+							interval = new SimpleInterval(title.trim(), intensity, duration, restDuration);
 						}
 
 						stack[stack.length-1].getIntervals().push(interval);
@@ -1346,7 +1391,7 @@ export class IntervalParser {
 						
 						// If its a number
 						if (IntervalParser.isDigit(value[0])) {
-							var intensity_parser = new IntensityParser();
+							var intensity_parser = new NumberAndUnitParser();
 							intensity_parser.evaluate(value, 0);
 
 							let unit = intensity_parser.getUnit().trim();
@@ -1458,16 +1503,13 @@ export interface Visitor {
 	finalize() : void;
 }
 
-export class BaseVisitor implements Visitor {
+export abstract class BaseVisitor implements Visitor {
 
 	visitCommentInterval(interval: CommentInterval) : void {
 		// nothing to do
 	}
 
-	visitSimpleInterval(interval: SimpleInterval) : void {
-		// not aware that typescript supports abstract methods
-		throw new Error("not implemented");
-	}
+	abstract visitSimpleInterval(interval: SimpleInterval) : void;
 	visitStepBuildInterval(interval: StepBuildInterval) : void {
 		// Generic implementation
 		for (var i = 0; i < interval.getRepeatCount() ; i++) {
@@ -1478,10 +1520,7 @@ export class BaseVisitor implements Visitor {
 			VisitorHelper.visit(this, interval.getRestInterval());
 		}
 	}
-	visitRampBuildInterval(interval: RampBuildInterval) : void {
-		// not aware that typescript supports abstract methods
-		throw new Error("not implemented");
-	}
+	abstract visitRampBuildInterval(interval: RampBuildInterval) : void;
 
 	visitRepeatInterval(interval: RepeatInterval) {
 		for (var i = 0 ; i < interval.getRepeatCount(); i++) {
@@ -1505,7 +1544,7 @@ export class TSSVisitor extends BaseVisitor {
 	private tss : number = 0;
 	
 	visitSimpleInterval(interval: SimpleInterval) : void {
-		var duration = interval.getDuration().getSeconds();
+		var duration = interval.getWorkDuration().getSeconds();
 		var intensity = interval.getIntensity().getValue();
 		var val = duration * Math.pow(intensity, 2);
 		this.tss += val;
@@ -1513,7 +1552,7 @@ export class TSSVisitor extends BaseVisitor {
 	visitRampBuildInterval(interval: RampBuildInterval) : void {
 		var startIntensity = interval.getStartIntensity().getValue();
 		var endIntensity = interval.getEndIntensity().getValue();
-		var duration = interval.getDuration().getSeconds();
+		var duration = interval.getWorkDuration().getSeconds();
 		
 		// Right way to estimate the intensity is by doing incremental of 1 sec
 		for (var t = 0; t < duration; t++) {
@@ -1621,12 +1660,12 @@ export class ZonesVisitor extends BaseVisitor {
 	}
 
 	visitSimpleInterval(interval: SimpleInterval) : void {
-		this.incrementZoneTime(interval.getIntensity().getValue(), interval.getDuration().getSeconds());			
+		this.incrementZoneTime(interval.getIntensity().getValue(), interval.getWorkDuration().getSeconds());			
 	}
 	visitRampBuildInterval(interval: RampBuildInterval) : void {
 		var startIntensity = interval.getStartIntensity().getValue();
 		var endIntensity = interval.getEndIntensity().getValue();
-		var duration = interval.getDuration().getSeconds();
+		var duration = interval.getWorkDuration().getSeconds();
 
 		// Go on 1 second increments 
 		var intensity = startIntensity;
@@ -1692,16 +1731,22 @@ export class DataPointVisitor extends BaseVisitor {
 
 	visitSimpleInterval(interval: SimpleInterval) {
 		var title = WorkoutTextVisitor.getIntervalTitle(interval);
-		this.initX(interval.getDuration());
+		// Work interval
+		this.initX(interval.getWorkDuration());
 		this.data.push(new Point(this.x, interval.getIntensity(), title));
-		this.incrementX(interval.getDuration());
+		this.incrementX(interval.getWorkDuration());
 		this.data.push(new Point(this.x, interval.getIntensity(), title));
+		// Rest interval
+		this.initX(interval.getRestDuration());
+		this.data.push(new Point(this.x, Intensity.ZeroIntensity, title));
+		this.incrementX(interval.getRestDuration());
+		this.data.push(new Point(this.x, Intensity.ZeroIntensity, title));
 	}
 	visitRampBuildInterval(interval: RampBuildInterval) {
 		var title = WorkoutTextVisitor.getIntervalTitle(interval);
-		this.initX(interval.getDuration());
+		this.initX(interval.getWorkDuration());
 		this.data.push(new Point(this.x, interval.getStartIntensity(), title));
-		this.incrementX(interval.getDuration());
+		this.incrementX(interval.getWorkDuration());
 		this.data.push(new Point(this.x, interval.getEndIntensity(), title));
 	}
 }
@@ -1732,7 +1777,7 @@ export class ZwiftDataVisitor extends BaseVisitor {
 		return title;
 	}
 	visitSimpleInterval(interval: SimpleInterval) {
-		var duration = interval.getDuration().getSeconds();
+		var duration = interval.getWorkDuration().getSeconds();
 		var title = encodeURI(this.getIntervalTitle(interval));
 		if (interval.getIntensity().getOriginalUnit() == IntensityUnit.FreeRide) {
 			this.content += `\t\t<FreeRide Duration="${duration}">\n`;
@@ -1744,9 +1789,10 @@ export class ZwiftDataVisitor extends BaseVisitor {
 			this.content += `\t\t\t<textevent timeoffset="0" message="${title}"/>\n`;
 			this.content += `\t\t</SteadyState>\n`;
 		}
+		// TODO: Add rest duration here
 	}
 	visitRampBuildInterval(interval: RampBuildInterval) {
-		var duration = interval.getDuration().getSeconds();
+		var duration = interval.getWorkDuration().getSeconds();
 		var intensityStart = interval.getStartIntensity().getValue();
 		var intensityEnd = interval.getEndIntensity().getValue();
 		if (intensityStart < intensityEnd) {
@@ -1798,12 +1844,13 @@ export class MRCCourseDataVisitor extends BaseVisitor {
 
 	visitSimpleInterval(interval: SimpleInterval) {
 		this.processCourseData(interval.getIntensity(), 0);
-		this.processCourseData(interval.getIntensity(), interval.getDuration().getSeconds());
+		this.processCourseData(interval.getIntensity(), interval.getWorkDuration().getSeconds());
 		this.processTitle(interval);
+		// TODO: Add rest interval here
 	}
 	visitRampBuildInterval(interval: RampBuildInterval) {
 		this.processCourseData(interval.getStartIntensity(), 0);
-		this.processCourseData(interval.getEndIntensity(), interval.getDuration().getSeconds());
+		this.processCourseData(interval.getEndIntensity(), interval.getWorkDuration().getSeconds());
 		this.processTitle(interval);
 	}
 	
@@ -1878,16 +1925,17 @@ export class PPSMRXCourseDataVisitor extends BaseVisitor {
 	visitSimpleInterval(interval: SimpleInterval) {
 		this.content += stringFormat(`\t\t["{0}",{1},{2},{2},"{3}",1,{4},0,90],\n`,
 			this.getTitlePretty(interval),
-			interval.getDuration().getSeconds(),
+			interval.getWorkDuration().getSeconds(),
 			Math.round(interval.getIntensity().getValue() * 100),
 			this.getMode(interval),
 			this.getGroupId()
 		);
+		// TODO: Add rest interval here
 	}
 	visitRampBuildInterval(interval: RampBuildInterval) {
 		this.content += stringFormat(`\t\t["{0}",{1},{2},{3},"M",1,{3},0,90],\n`,
 			this.getTitlePretty(interval),
-			interval.getDuration().getSeconds(),
+			interval.getWorkDuration().getSeconds(),
 			Math.round(interval.getStartIntensity().getValue() * 100),
 			Math.round(interval.getEndIntensity().getValue() * 100),
 			this.getGroupId()
@@ -1943,12 +1991,12 @@ export class FileNameHelper {
 
 	getFileName() : string {
 		var mainInterval = null;
-		var duration = this.intervals.getDuration().getSeconds();
+		var duration = this.intervals.getTotalDuration().getSeconds();
 
 		var intensity_string = DateHelper.getDayOfWeek() + " - IF" + Math.round(this.intervals.getIntensity().getValue()*100) + " - ";
 	
 		this.intervals.getIntervals().forEach(function(interval) {            
-            if (interval.getDuration().getSeconds() > duration / 2) {
+            if (interval.getTotalDuration().getSeconds() > duration / 2) {
                 mainInterval = interval;
             }
         });
@@ -2014,19 +2062,19 @@ export class WorkoutTextVisitor implements Visitor {
 	}
 	
 	visitCommentInterval(interval: CommentInterval) : void {
-		this.result += interval.getTitle();
+		this.result += this.getIntervalTitle(interval);
 	}
 	
 	visitRestInterval(interval: Interval) : void {
 		var value = interval.getIntensity().getValue(); 
 		if (value <= DefaultIntensity.getEasyThreshold(this.sportType)) {
-			let title = interval.getTitle();
+			let title = this.getIntervalTitle(interval);
 			if (title == null || title.trim().length == 0) {
 				title = "easy";
 			}
-			this.result += interval.getDuration().toStringShort() + " " + title;;
+			this.result += interval.getWorkDuration().toStringShort() + " " + title;;
 		} else {
-			this.result += interval.getDuration().toStringShort() + " @ " + this.getIntensityPretty(interval.getIntensity());
+			this.result += interval.getWorkDuration().toStringShort() + " @ " + this.getIntensityPretty(interval.getIntensity());
 		}
 	}
 
@@ -2105,12 +2153,12 @@ export class WorkoutTextVisitor implements Visitor {
 	// RampBuildInterval
 	visitRampBuildInterval(interval: RampBuildInterval) : any {
 		if (interval.getStartIntensity().getValue() <= DefaultIntensity.getEasyThreshold(this.sportType)) {
-			this.result += interval.getDuration().toStringShort() + " warmup to " + this.getIntensityPretty(interval.getEndIntensity());	
+			this.result += interval.getWorkDuration().toStringShort() + " warm up to " + this.getIntensityPretty(interval.getEndIntensity());	
 		} else {
 			if (interval.getStartIntensity().getValue() < interval.getEndIntensity().getValue()) {
-				this.result += interval.getDuration().toStringShort() + " build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());	
+				this.result += interval.getWorkDuration().toStringShort() + " build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());	
 			} else {
-				this.result += interval.getDuration().toStringShort() + " warm down from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());	
+				this.result += interval.getWorkDuration().toStringShort() + " warm down from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());	
 			}
 		}		
 	}
@@ -2129,7 +2177,7 @@ export class WorkoutTextVisitor implements Visitor {
 			
 			this.result += " (";
 			for (var i = 0; i < interval.getRepeatCount(); i++) {
-				this.result += interval.getStepInterval(i).getDuration().toStringShort();
+				this.result += interval.getStepInterval(i).getWorkDuration().toStringShort();
 				this.result += ", ";
 			}
 				
@@ -2137,7 +2185,7 @@ export class WorkoutTextVisitor implements Visitor {
 			this.result = this.result.slice(0, this.result.length - 2);
 			this.result += ")";
 		} else {
-			this.result += interval.getStepInterval(0).getDuration().toStringShort();
+			this.result += interval.getStepInterval(0).getWorkDuration().toStringShort();
 
 			this.result += " - w/ ";
 			this.visitRestInterval(interval.getRestInterval());
@@ -2163,9 +2211,9 @@ export class WorkoutTextVisitor implements Visitor {
 
 	// SimpleInterval
 	visitSimpleInterval(interval: SimpleInterval) : any {
-		this.result += interval.getDuration().toStringShort();		
-		var title = interval.getTitle();
-		if (title.length > 0) {
+		this.result += interval.getWorkDuration().toStringShort();		
+		let title = this.getIntervalTitle(interval);
+		if (title != null && title.length > 0) {
 			this.result += " " + title;
 		}
 
@@ -2200,17 +2248,21 @@ export class WorkoutTextVisitor implements Visitor {
 			// is 1:30 /100yards and you are doing 200 yards, we want to add
 			// that you are touching the wall on 3 min.
 			if (this.sportType == SportType.Swim) {
-				var total_duration = this.getDurationForWork(interval.getDuration());
-				if (total_duration.getSeconds() != interval.getDuration().getSeconds()) {
-					this.result += " on " + interval.getDuration().toTimeStringShort() + " off " + total_duration.toTimeStringShort();
+				var total_duration = this.getDurationForWork(interval.getWorkDuration());
+				if (total_duration.getSeconds() != interval.getWorkDuration().getSeconds()) {
+					this.result += " on " + interval.getWorkDuration().toTimeStringShort() + " off " + total_duration.toTimeStringShort();
 				} else {
-					this.result += " on " + interval.getDuration().toTimeStringShort();
+					this.result += " on " + interval.getWorkDuration().toTimeStringShort();
 				}
 				
 			} else {
 				this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
 			}
-		}		
+		}
+
+		if (interval.getRestDuration().getSeconds() > 0) {
+			return this.result += " w/ " + interval.getRestDuration().toStringShort() + " rest";
+		}
 	}
 
 	// |intensity| : The intensity of the interval. For example 90%, 100%
@@ -2262,6 +2314,15 @@ export class WorkoutTextVisitor implements Visitor {
 			console.assert(this.sportType == SportType.Other);
 			return "";
 		}
+	}
+
+	getIntervalTitle(interval : Interval) {
+		let title = interval.getTitle();
+		if (title == null || title.length == 0) {
+			return null;
+		}
+		// TODO: Do some camel casing
+		return title;
 	}
 	
 	finalize() : void {
@@ -2628,7 +2689,7 @@ export class WorkoutBuilder {
 	}
 
 	getTimePretty() : string {
-		return this.intervals.getDuration().toTimeStringLong();
+		return this.intervals.getTotalDuration().toTimeStringLong();
 	}
 
 	getIF() : number {
@@ -2645,9 +2706,9 @@ export class WorkoutBuilder {
 
 	getEstimatedDistancePretty() : string {
 		if (this.sportType == SportType.Swim) {
-			return this.intervals.getDuration().toStringDistance(DistanceUnit.Yards);
+			return this.intervals.getWorkDuration().toStringDistance(DistanceUnit.Yards);
 		} else {
-			return this.intervals.getDuration().toStringDistance(DistanceUnit.Miles);
+			return this.intervals.getWorkDuration().toStringDistance(DistanceUnit.Miles);
 		}
 	}
 
@@ -2675,8 +2736,8 @@ export class WorkoutBuilder {
 		var result = 0;
 
         this.intervals.getIntervals().forEach(function(interval) {
-            if (interval.getDuration().getDistanceInMiles() > 0) {
-                result += interval.getDuration().getDistanceInMiles();
+            if (interval.getWorkDuration().getDistanceInMiles() > 0) {
+                result += interval.getWorkDuration().getDistanceInMiles();
             }
         }.bind(this));
 
@@ -2797,12 +2858,12 @@ export class AbsoluteTimeIntervalVisitor extends BaseVisitor {
 	private data_ : AbsoluteTimeInterval[] = [];
 
 	visitSimpleInterval(interval: SimpleInterval) {
-		var duration_seconds = interval.getDuration().getSeconds();
+		var duration_seconds = interval.getTotalDuration().getSeconds();
 		this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval));
 		this.time_ += duration_seconds;
 	}
 	visitRampBuildInterval(interval: RampBuildInterval) {
-		var duration_seconds = interval.getDuration().getSeconds();
+		var duration_seconds = interval.getWorkDuration().getSeconds();
 		this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval));
 		this.time_ += duration_seconds;
 	}
@@ -2823,7 +2884,7 @@ export class PlayerHelper {
 		VisitorHelper.visitAndFinalize(pv, interval); 
 		
 		this.data_ = pv.getIntervalArray();
-		this.durationTotalSeconds_ = interval.getDuration().getSeconds();
+		this.durationTotalSeconds_ = interval.getTotalDuration().getSeconds();
 	}
 
 	get(ts: number) : AbsoluteTimeInterval {

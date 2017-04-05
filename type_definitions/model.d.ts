@@ -82,6 +82,7 @@ declare module Model {
         private unit;
         private estimatedDurationInSeconds;
         private estimatedDistanceInMiles;
+        static ZeroDuration: Duration;
         constructor(unit: DurationUnit, value: number, estimatedDurationInSeconds: number, estimatedDistanceInMiles: number);
         getUnit(): DurationUnit;
         getValue(): number;
@@ -106,6 +107,7 @@ declare module Model {
         private ifValue;
         private originalValue;
         private originalUnit;
+        static ZeroIntensity: Intensity;
         constructor(ifValue?: number, value?: number, unit?: IntensityUnit);
         /**
          * A value between 0 and 1 that represents the intensity of the interval
@@ -119,26 +121,32 @@ declare module Model {
     interface Interval {
         getTitle(): string;
         getIntensity(): Intensity;
-        getDuration(): Duration;
+        getWorkDuration(): Duration;
+        getRestDuration(): Duration;
+        getTotalDuration(): Duration;
     }
-    class BaseInterval implements Interval {
+    abstract class BaseInterval implements Interval {
         private title;
         constructor(title: string);
         getTitle(): string;
-        getIntensity(): Intensity;
-        getDuration(): Duration;
+        abstract getIntensity(): Intensity;
+        abstract getWorkDuration(): Duration;
+        getRestDuration(): Duration;
+        getTotalDuration(): Duration;
     }
     class CommentInterval extends BaseInterval {
         constructor(title: string);
         getIntensity(): Intensity;
-        getDuration(): Duration;
+        getWorkDuration(): Duration;
     }
     class SimpleInterval extends BaseInterval {
         private intensity;
         private duration;
-        constructor(title: string, intensity: Intensity, duration: Duration);
+        private restDuration;
+        constructor(title: string, intensity: Intensity, duration: Duration, restDuration: Duration);
         getIntensity(): Intensity;
-        getDuration(): Duration;
+        getWorkDuration(): Duration;
+        getRestDuration(): Duration;
     }
     class RampBuildInterval extends BaseInterval {
         private startIntensity;
@@ -146,7 +154,7 @@ declare module Model {
         private duration;
         constructor(title: string, startIntensity: Intensity, endIntensity: Intensity, duration: Duration);
         getIntensity(): Intensity;
-        getDuration(): Duration;
+        getWorkDuration(): Duration;
         getStartIntensity(): Intensity;
         getEndIntensity(): Intensity;
         static computeAverageIntensity(intensity1: Intensity, intensity2: Intensity): Intensity;
@@ -162,7 +170,9 @@ declare module Model {
         protected intervals: Interval[];
         constructor(title: string, intervals: Interval[]);
         getIntensity(): Intensity;
-        getDuration(): Duration;
+        getWorkDuration(): Duration;
+        getRestDuration(): Duration;
+        getTotalDuration(): Duration;
         getTitle(): string;
         getIntervals(): Interval[];
         getTSS(): number;
@@ -174,7 +184,7 @@ declare module Model {
     class RepeatInterval extends ArrayInterval {
         private repeatCount;
         constructor(title: string, mainInterval: Interval, restInterval: Interval, repeatCount: number);
-        getDuration(): Duration;
+        getWorkDuration(): Duration;
         getRepeatCount(): number;
     }
     class StepBuildInterval extends ArrayInterval {
@@ -184,7 +194,7 @@ declare module Model {
         getStepInterval(idx: number): Interval;
         getRestInterval(): Interval;
         areAllIntensitiesSame(): boolean;
-        getDuration(): Duration;
+        getWorkDuration(): Duration;
     }
     interface Parser {
         evaluate(input: string, pos: number): number;
@@ -201,7 +211,7 @@ declare module Model {
         evaluate(input: string, i: number): number;
         getValue(): string;
     }
-    class IntensityParser implements Parser {
+    class NumberAndUnitParser implements Parser {
         private value;
         private unit;
         evaluate(input: string, i: number): number;
@@ -233,11 +243,11 @@ declare module Model {
         visitArrayInterval(interval: ArrayInterval): void;
         finalize(): void;
     }
-    class BaseVisitor implements Visitor {
+    abstract class BaseVisitor implements Visitor {
         visitCommentInterval(interval: CommentInterval): void;
-        visitSimpleInterval(interval: SimpleInterval): void;
+        abstract visitSimpleInterval(interval: SimpleInterval): void;
         visitStepBuildInterval(interval: StepBuildInterval): void;
-        visitRampBuildInterval(interval: RampBuildInterval): void;
+        abstract visitRampBuildInterval(interval: RampBuildInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
         visitArrayInterval(interval: ArrayInterval): void;
         finalize(): void;
@@ -374,6 +384,7 @@ declare module Model {
         getDurationForWork(durationWork: Duration): Duration;
         visitSimpleInterval(interval: SimpleInterval): any;
         getIntensityPretty(intensity: Intensity): string;
+        getIntervalTitle(interval: Interval): string;
         finalize(): void;
     }
     class SpeedParser {
