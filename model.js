@@ -820,10 +820,11 @@ var Model;
     }
     Model.RampBuildInterval = RampBuildInterval;
     class Point {
-        constructor(x, y, label) {
+        constructor(x, y, label, tag) {
             this.x = x;
             this.y = y;
             this.label = label;
+            this.tag = tag;
         }
     }
     Model.Point = Point;
@@ -885,7 +886,9 @@ var Model;
         getTimeSeries() {
             var pv = new DataPointVisitor();
             VisitorHelper.visitAndFinalize(pv, this);
-            // TODO: Massaging the data here to show in minutes
+            // TODO: Process the data doing 2 things:
+            // - Grouping by data with the same tag into different series
+            // - Massaging the time componetn
             return pv.data.map(function (item) {
                 return {
                     x: item.x.getSeconds() / 60,
@@ -1627,25 +1630,33 @@ var Model;
         incrementX(duration) {
             this.x = Duration.combine(this.x, duration);
         }
+        getIntervalTag(interval) {
+            if (interval.getIntensity().getOriginalUnit() == IntensityUnit.FreeRide) {
+                return "free-ride";
+            }
+            else {
+                return "if";
+            }
+        }
         visitSimpleInterval(interval) {
             var title = WorkoutTextVisitor.getIntervalTitle(interval);
             // Work interval
             this.initX(interval.getWorkDuration());
-            this.data.push(new Point(this.x, interval.getIntensity(), title));
+            this.data.push(new Point(this.x, interval.getIntensity(), title, this.getIntervalTag(interval)));
             this.incrementX(interval.getWorkDuration());
-            this.data.push(new Point(this.x, interval.getIntensity(), title));
+            this.data.push(new Point(this.x, interval.getIntensity(), title, this.getIntervalTag(interval)));
             // Rest interval
             this.initX(interval.getRestDuration());
-            this.data.push(new Point(this.x, Intensity.ZeroIntensity, title));
+            this.data.push(new Point(this.x, Intensity.ZeroIntensity, title, this.getIntervalTag(interval)));
             this.incrementX(interval.getRestDuration());
-            this.data.push(new Point(this.x, Intensity.ZeroIntensity, title));
+            this.data.push(new Point(this.x, Intensity.ZeroIntensity, title, this.getIntervalTag(interval)));
         }
         visitRampBuildInterval(interval) {
             var title = WorkoutTextVisitor.getIntervalTitle(interval);
             this.initX(interval.getWorkDuration());
-            this.data.push(new Point(this.x, interval.getStartIntensity(), title));
+            this.data.push(new Point(this.x, interval.getStartIntensity(), title, this.getIntervalTag(interval)));
             this.incrementX(interval.getWorkDuration());
-            this.data.push(new Point(this.x, interval.getEndIntensity(), title));
+            this.data.push(new Point(this.x, interval.getEndIntensity(), title, this.getIntervalTag(interval)));
         }
     }
     Model.DataPointVisitor = DataPointVisitor;
@@ -2045,14 +2056,6 @@ var Model;
                 this.result += ")";
             }
         }
-        getDurationForWork(durationWork) {
-            if (durationWork.getUnit() == DistanceUnit.Yards) {
-                return new Duration(TimeUnit.Seconds, durationWork.getSeconds() + 10 * durationWork.getValue() / 100, 0, 0);
-            }
-            else {
-                return durationWork;
-            }
-        }
         // SimpleInterval
         visitSimpleInterval(interval) {
             this.result += interval.getWorkDuration().toStringShort();
@@ -2093,7 +2096,7 @@ var Model;
                 // is 1:30 /100yards and you are doing 200 yards, we want to add
                 // that you are touching the wall on 3 min.
                 if (this.sportType == SportType.Swim) {
-                    var total_duration = this.getDurationForWork(interval.getWorkDuration());
+                    var total_duration = interval.getTotalDuration();
                     if (total_duration.getSeconds() != interval.getWorkDuration().getSeconds()) {
                         this.result += " on " + interval.getWorkDuration().toTimeStringShort() + " off " + total_duration.toTimeStringShort();
                     }
@@ -2103,10 +2106,10 @@ var Model;
                 }
                 else {
                     this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
+                    if (interval.getRestDuration().getSeconds() > 0) {
+                        return this.result += " w/ " + interval.getRestDuration().toStringShort() + " rest";
+                    }
                 }
-            }
-            if (interval.getRestDuration().getSeconds() > 0) {
-                return this.result += " w/ " + interval.getRestDuration().toStringShort() + " rest";
             }
         }
         // |intensity| : The intensity of the interval. For example 90%, 100%

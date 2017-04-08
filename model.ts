@@ -854,11 +854,13 @@ export class Point {
 	x : Duration;
 	y : Intensity;
 	label: string;
+	tag: string;
 	
-	constructor(x: Duration, y: Intensity, label: string) {
+	constructor(x: Duration, y: Intensity, label: string, tag: string) {
 		this.x = x;
 		this.y = y;
 		this.label = label;
+		this.tag = tag;
 	}
 }
 
@@ -934,13 +936,14 @@ export class ArrayInterval implements Interval {
 		
 		VisitorHelper.visitAndFinalize(pv, this); 
 		
-		// TODO: Massaging the data here to show in minutes
+		// TODO: Process the data doing 2 things:
+		// - Grouping by data with the same tag into different series
+		// - Massaging the time componetn
 		return pv.data.map(function(item) {
 			return {
 				x: item.x.getSeconds() / 60,
 				y: Math.round(item.y.getValue() * 100),
-			};
-		});
+			}});
 	}
 	
 	getTimeInZones(sportType: SportType) {
@@ -1729,25 +1732,33 @@ export class DataPointVisitor extends BaseVisitor {
 		this.x = Duration.combine(this.x, duration);
 	}
 
+	getIntervalTag(interval : Interval) : string {
+		if (interval.getIntensity().getOriginalUnit() == IntensityUnit.FreeRide) {
+			return "free-ride";
+		} else {
+			return "if";
+		}
+	}
+
 	visitSimpleInterval(interval: SimpleInterval) {
 		var title = WorkoutTextVisitor.getIntervalTitle(interval);
 		// Work interval
 		this.initX(interval.getWorkDuration());
-		this.data.push(new Point(this.x, interval.getIntensity(), title));
+		this.data.push(new Point(this.x, interval.getIntensity(), title, this.getIntervalTag(interval)));
 		this.incrementX(interval.getWorkDuration());
-		this.data.push(new Point(this.x, interval.getIntensity(), title));
+		this.data.push(new Point(this.x, interval.getIntensity(), title, this.getIntervalTag(interval)));
 		// Rest interval
 		this.initX(interval.getRestDuration());
-		this.data.push(new Point(this.x, Intensity.ZeroIntensity, title));
+		this.data.push(new Point(this.x, Intensity.ZeroIntensity, title, this.getIntervalTag(interval)));
 		this.incrementX(interval.getRestDuration());
-		this.data.push(new Point(this.x, Intensity.ZeroIntensity, title));
+		this.data.push(new Point(this.x, Intensity.ZeroIntensity, title, this.getIntervalTag(interval)));
 	}
 	visitRampBuildInterval(interval: RampBuildInterval) {
 		var title = WorkoutTextVisitor.getIntervalTitle(interval);
 		this.initX(interval.getWorkDuration());
-		this.data.push(new Point(this.x, interval.getStartIntensity(), title));
+		this.data.push(new Point(this.x, interval.getStartIntensity(), title, this.getIntervalTag(interval)));
 		this.incrementX(interval.getWorkDuration());
-		this.data.push(new Point(this.x, interval.getEndIntensity(), title));
+		this.data.push(new Point(this.x, interval.getEndIntensity(), title, this.getIntervalTag(interval)));
 	}
 }
 
@@ -2201,14 +2212,6 @@ export class WorkoutTextVisitor implements Visitor {
 		}
 	}
 
-	getDurationForWork(durationWork : Duration) : Duration {
-		if (durationWork.getUnit() == DistanceUnit.Yards) {
-			return new Duration(TimeUnit.Seconds, durationWork.getSeconds() + 10 * durationWork.getValue() / 100, 0, 0);
-		} else {
-			return durationWork;
-		}
-	}
-
 	// SimpleInterval
 	visitSimpleInterval(interval: SimpleInterval) : any {
 		this.result += interval.getWorkDuration().toStringShort();		
@@ -2248,20 +2251,19 @@ export class WorkoutTextVisitor implements Visitor {
 			// is 1:30 /100yards and you are doing 200 yards, we want to add
 			// that you are touching the wall on 3 min.
 			if (this.sportType == SportType.Swim) {
-				var total_duration = this.getDurationForWork(interval.getWorkDuration());
+				var total_duration = interval.getTotalDuration();
 				if (total_duration.getSeconds() != interval.getWorkDuration().getSeconds()) {
 					this.result += " on " + interval.getWorkDuration().toTimeStringShort() + " off " + total_duration.toTimeStringShort();
 				} else {
 					this.result += " on " + interval.getWorkDuration().toTimeStringShort();
 				}
-				
 			} else {
 				this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
-			}
-		}
 
-		if (interval.getRestDuration().getSeconds() > 0) {
-			return this.result += " w/ " + interval.getRestDuration().toStringShort() + " rest";
+				if (interval.getRestDuration().getSeconds() > 0) {
+					return this.result += " w/ " + interval.getRestDuration().toStringShort() + " rest";
+				}				
+			}
 		}
 	}
 

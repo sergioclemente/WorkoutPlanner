@@ -163,7 +163,8 @@ declare module Model {
         x: Duration;
         y: Intensity;
         label: string;
-        constructor(x: Duration, y: Intensity, label: string);
+        tag: string;
+        constructor(x: Duration, y: Intensity, label: string, tag: string);
     }
     class ArrayInterval implements Interval {
         protected title: string;
@@ -316,6 +317,7 @@ declare module Model {
         data: Point[];
         initX(duration: Duration): void;
         incrementX(duration: Duration): void;
+        getIntervalTag(interval: Interval): string;
         visitSimpleInterval(interval: SimpleInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
     }
@@ -381,7 +383,6 @@ declare module Model {
         visitRepeatInterval(interval: RepeatInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): any;
         visitStepBuildInterval(interval: StepBuildInterval): void;
-        getDurationForWork(durationWork: Duration): Duration;
         visitSimpleInterval(interval: SimpleInterval): any;
         getIntensityPretty(intensity: Intensity): string;
         getIntervalTitle(interval: Interval): string;

@@ -49,9 +49,10 @@ To install the protocol handler:
 
 # Bugs/Feature requests
 Hi-Pri
-- Clutterness in swimming
-- Add rest support built in into interval. Make it a first class citizen in the Interval/BaseInterval base.
+- Clutterness in swimming (can i remove the text yards from the text?)
 - Add first letter upper case
+- Add lapcount complexity
+- Update graph for freeride
 
 Client JS
 * Bundle JS more efficiently
