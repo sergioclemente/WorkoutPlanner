@@ -109,7 +109,7 @@ function handleSaveWorkout(req, res, uri, params) {
   w.title = params.t;
   w.value = params.w;
   w.tags = "";
-  w.duration_sec = builder.getInterval().getDuration().getSeconds();
+  w.duration_sec = builder.getInterval().getTotalDuration().getSeconds();
   w.tss = builder.getInterval().getTSS();
   w.sport_type = params.st;
 
