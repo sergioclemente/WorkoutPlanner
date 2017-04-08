@@ -35,7 +35,7 @@ export default class Workout extends React.Component<any, any> {
 	componentDidMount() {
 		// Put here which is guaranteed for the DOM tree to be created
 		this.refreshUrls();
-	}	
+	}
 
 	refresh() {
 		var view: WorkoutView = this.refs['view'] as WorkoutView;
@@ -59,7 +59,7 @@ export default class Workout extends React.Component<any, any> {
 		var anchor = this.refs[element_ref] as HTMLAnchorElement;
 		anchor.href = url;
 	}
-	
+
 	_setVisibility(element_ref: string, visible: boolean) {
 		var anchor = this.refs[element_ref] as HTMLAnchorElement;
 		anchor.hidden = !visible;
@@ -69,10 +69,10 @@ export default class Workout extends React.Component<any, any> {
 		var req = new XMLHttpRequest();
 		req.addEventListener("load", this._onWorkoutSaved.bind(this, req));
 		req.open("GET", "/save_workout" + this.params.getURL());
-		req.send();		
+		req.send();
 	}
 
-	_onWorkoutSaved(req : XMLHttpRequest) {
+	_onWorkoutSaved(req: XMLHttpRequest) {
 		if (req.status == 200) {
 			alert("Workout saved");
 		} else {
@@ -98,10 +98,10 @@ export default class Workout extends React.Component<any, any> {
 			let fileName = builder.getPPSMRXFileName();
 			let content = builder.getPPSMRXFile();
 			this._downloadFile(fileName, content);
-		}		
+		}
 	}
 
-	_downloadFile(fileName : string, content : string) {
+	_downloadFile(fileName: string, content: string) {
 		let uriContent = "data:application/octet-stream," + encodeURIComponent(content);
 
 		var link = document.createElement('a');
@@ -112,20 +112,20 @@ export default class Workout extends React.Component<any, any> {
 
 	render() {
 		return (<div>
-					<UserSettings {...this.props} ref='settings' onChange={ (f,t,c,e,ef) => this._onUserSettingsChanged(f,t,c,e,ef) }></UserSettings>
-					<WorkoutInput {...this.props} ref='input' onChange={ (s, o, t, w) => this._onWorkoutInputChanged(s,o,t,w) }></WorkoutInput>
-					<table>
-						<tbody>
-							<tr>
-								<td><a href="#" onClick={(e) => this._onClickLink()}>Download Files</a></td>
-								<td><a ref="player_link">Player</a></td>
-								<td><a ref="email_send_workout" >Email Workout</a></td>
-								<td><a ref="save_workout" href="#" onClick={(e) => this._onSaveWorkout()}>Save Workout</a></td>
-								<td><a href="workouts_view.html">List Workouts</a></td>
-							</tr>
-							</tbody>
-						</table>
-					<WorkoutView {...this.props} ref='view'></WorkoutView>					
-				</div>);
+			<UserSettings {...this.props} ref='settings' onChange={(f, t, c, e, ef) => this._onUserSettingsChanged(f, t, c, e, ef)}></UserSettings>
+			<WorkoutInput {...this.props} ref='input' onChange={(s, o, t, w) => this._onWorkoutInputChanged(s, o, t, w)}></WorkoutInput>
+			<table>
+				<tbody>
+					<tr>
+						<td><a href="#" onClick={(e) => this._onClickLink()}>Download Files</a></td>
+						<td><a ref="player_link">Player</a></td>
+						<td><a ref="email_send_workout" >Email Workout</a></td>
+						<td><a ref="save_workout" href="#" onClick={(e) => this._onSaveWorkout()}>Save Workout</a></td>
+						<td><a href="workouts_view.html">List Workouts</a></td>
+					</tr>
+				</tbody>
+			</table>
+			<WorkoutView {...this.props} ref='view'></WorkoutView>
+		</div>);
 	}
 }

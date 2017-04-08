@@ -16,13 +16,13 @@ export default class WorkoutView extends React.Component<any, any> {
 		this.setState({ value: '' + nextProps.value })
 	}
 
-	getState(params: UI.QueryParams) : any {
+	getState(params: UI.QueryParams): any {
 		try {
 			var userProfile = params.createUserProfile();
 			var builder = params.createWorkoutBuilder();
-			
+
 			var time_in_zones_data = builder.getInterval().getTimeInZones(builder.getSportType()).map(
-				function(zone) {
+				function (zone) {
 					return {
 						y: zone.duration.getSeconds(),
 						legendText: zone.name + "(" + zone.duration.toString() + ")",
@@ -31,7 +31,7 @@ export default class WorkoutView extends React.Component<any, any> {
 				}
 			);
 
-			var workout_steps = builder.getInterval().getIntervals().map(function(value: Model.Interval, index: number) {
+			var workout_steps = builder.getInterval().getIntervals().map(function (value: Model.Interval, index: number) {
 				return builder.getIntervalPretty(value);
 			}.bind(this));
 
@@ -91,9 +91,9 @@ export default class WorkoutView extends React.Component<any, any> {
 	renderPower() {
 		if (this.state.sport_type == Model.SportType.Bike) {
 			return (<tr>
-						<td>Average Power</td>
-						<td>{this.state.avg_power}</td>
-					</tr>);
+				<td>Average Power</td>
+				<td>{this.state.avg_power}</td>
+			</tr>);
 		} else {
 			return;
 		}
@@ -101,24 +101,24 @@ export default class WorkoutView extends React.Component<any, any> {
 
 	renderDistance() {
 		return (<tr>
-					<td>Distance</td>
-					<td>{this.state.distance}</td>
-				</tr>);
+			<td>Distance</td>
+			<td>{this.state.distance}</td>
+		</tr>);
 	}
 
 	renderPace() {
 		if (this.state.sport_type == Model.SportType.Run) {
 			return (<tr>
-						<td>Pace</td>
-						<td>{this.state.avg_pace}</td>
-					</tr>);
+				<td>Pace</td>
+				<td>{this.state.avg_pace}</td>
+			</tr>);
 		} else {
 			return;
 		}
 	}
 
 	renderWorkoutSteps() {
-		return this.state.workout_steps.map(function(step: string, index: number) {
+		return this.state.workout_steps.map(function (step: string, index: number) {
 			return <li key={index}>{step}</li>;
 		}.bind(this));
 	}
@@ -127,7 +127,7 @@ export default class WorkoutView extends React.Component<any, any> {
 		// Put here which is guaranteed for the DOM tree to be created
 		this.renderCharts(this.state);
 
-		document.getElementById("id_clipboard").addEventListener('click',function() {
+		document.getElementById("id_clipboard").addEventListener('click', function () {
 			UI.ClipboardHelper.copyText(this.state.workout_pretty);
 		}.bind(this));
 	}
@@ -181,43 +181,43 @@ export default class WorkoutView extends React.Component<any, any> {
 
 	render() {
 		return (<div>
-					<h2>Steps</h2>
-					<ul>
-						{this.renderWorkoutSteps()}
-					</ul>
-					<h2>Summary</h2>
-					<button id="id_clipboard">Copy to clipboard</button>
-					<table>
-						<tbody>
-							<tr>
-								<td><b>Metric</b></td>
-								<td><b>Value</b></td>
-								</tr>
-							<tr>
-								<td>TSS</td>
-								<td>{this.state.tss }</td>
-							</tr>
-							<tr>
-								<td>TSS From IF</td>
-								<td>{this.state.tss_from_if }</td>
-							</tr>
-							<tr>
-								<td>Time</td>
-								<td>{this.state.time }</td>
-							</tr>
-							<tr>
-								<td>IF</td>
-								<td>{this.state.intensity }</td>
-							</tr>
-							{ this.renderPower() }
-							{ this.renderDistance() }
-							{ this.renderPace() }
-						</tbody>
-					</table>
-					<div id="chartTimeline" style={{ height: "300px", width: "100%" }}>
-					</div>
-					<div id="chartZones" style={{ height: "200px", width: "100%" }}>
-					</div>
-				</div>);
+			<h2>Steps</h2>
+			<ul>
+				{this.renderWorkoutSteps()}
+			</ul>
+			<h2>Summary</h2>
+			<button id="id_clipboard">Copy to clipboard</button>
+			<table>
+				<tbody>
+					<tr>
+						<td><b>Metric</b></td>
+						<td><b>Value</b></td>
+					</tr>
+					<tr>
+						<td>TSS</td>
+						<td>{this.state.tss}</td>
+					</tr>
+					<tr>
+						<td>TSS From IF</td>
+						<td>{this.state.tss_from_if}</td>
+					</tr>
+					<tr>
+						<td>Time</td>
+						<td>{this.state.time}</td>
+					</tr>
+					<tr>
+						<td>IF</td>
+						<td>{this.state.intensity}</td>
+					</tr>
+					{this.renderPower()}
+					{this.renderDistance()}
+					{this.renderPace()}
+				</tbody>
+			</table>
+			<div id="chartTimeline" style={{ height: "300px", width: "100%" }}>
+			</div>
+			<div id="chartZones" style={{ height: "200px", width: "100%" }}>
+			</div>
+		</div>);
 	}
 }

@@ -68,17 +68,17 @@ export default class UserProperty extends React.Component<any, any> {
 	fireOnChange() {
 		if (this.props.onChange) {
 			this.props.onChange(this.ftp, this.t_pace, this.swim_css, this.email, this.efficiency_factor);
-		}		
+		}
 	}
 	render() {
 		return (
 			<div>
 				<h1> User Settings </h1>
-				Swim CSS: <TextInput ref="swim_css" width="20" placeholder="1:30 min/100yards" value={this.swim_css} onChange={this.onSwimCSSChange.bind(this) }></TextInput> <br />				
-				Bike FTP: <NumberInput ref="ftp" width="20" placeholder="245" value={this.ftp} onChange={this.onFtpChange.bind(this) }></NumberInput><br />
-				Run T-Pace: <TextInput ref="t_pace" width="20" placeholder="7:30 min/mi" value={this.t_pace} onChange={this.onTPaceChange.bind(this) }></TextInput> <br />
-				Email: <EmailInput ref="email" width="20" placeholder="foo@gmail.com" value={this.email} onChange={this.onEmailChange.bind(this) }></EmailInput> <br />
-				Efficiency Factor: <NumberInput ref="efficiency_factor" width="20" placeholder="1.2" value={this.efficiency_factor} onChange={this.onEfficiencyFactorChange.bind(this) }></NumberInput> <br />
+				Swim CSS: <TextInput ref="swim_css" width="20" placeholder="1:30 min/100yards" value={this.swim_css} onChange={this.onSwimCSSChange.bind(this)}></TextInput> <br />
+				Bike FTP: <NumberInput ref="ftp" width="20" placeholder="245" value={this.ftp} onChange={this.onFtpChange.bind(this)}></NumberInput><br />
+				Run T-Pace: <TextInput ref="t_pace" width="20" placeholder="7:30 min/mi" value={this.t_pace} onChange={this.onTPaceChange.bind(this)}></TextInput> <br />
+				Email: <EmailInput ref="email" width="20" placeholder="foo@gmail.com" value={this.email} onChange={this.onEmailChange.bind(this)}></EmailInput> <br />
+				Efficiency Factor: <NumberInput ref="efficiency_factor" width="20" placeholder="1.2" value={this.efficiency_factor} onChange={this.onEfficiencyFactorChange.bind(this)}></NumberInput> <br />
 				<br />
 			</div>);
 	}

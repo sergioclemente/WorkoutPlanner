@@ -5,9 +5,9 @@ import * as React from 'react';
 export default class Select extends React.Component<any, any> {
 
 	render() {
-		return (<select ref="sel" {...this.props} onChange={e => this._change(e) }>
-						{ this.props.children }
-			</select>);
+		return (<select ref="sel" {...this.props} onChange={e => this._change(e)}>
+			{this.props.children}
+		</select>);
 	}
 
 	_change(e) {

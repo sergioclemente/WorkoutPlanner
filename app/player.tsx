@@ -7,10 +7,10 @@ import * as Model from '../model';
 import WorkoutView from './workout_view';
 
 export default class PlayerView extends React.Component<any, any> {
-	private stopWatch_ : Model.StopWatch = null;
-	private params_ : UI.QueryParams = null;	
-	private playerHelper_ : Model.PlayerHelper = null;
-	private intervalId_ : number = null;	
+	private stopWatch_: Model.StopWatch = null;
+	private params_: UI.QueryParams = null;
+	private playerHelper_: Model.PlayerHelper = null;
+	private intervalId_: number = null;
 
 	constructor(params: any) {
 		super(params);
@@ -28,29 +28,29 @@ export default class PlayerView extends React.Component<any, any> {
 		this.setState({ value: '' + nextProps.value })
 	}
 
-	getState() : any {
-		let bei : Model.AbsoluteTimeInterval = this.playerHelper_.get(this._getElapsedTimeSeconds());
+	getState(): any {
+		let bei: Model.AbsoluteTimeInterval = this.playerHelper_.get(this._getElapsedTimeSeconds());
 		if (bei == null) {
 			return {};
 		}
 		return {
-			current_title : bei.getInterval().getTitle(),
-			elapsed_time : Model.FormatterHelper.formatTime(this._getElapsedTimeMilliseconds(bei)),
+			current_title: bei.getInterval().getTitle(),
+			elapsed_time: Model.FormatterHelper.formatTime(this._getElapsedTimeMilliseconds(bei)),
 			remaining_time: Model.FormatterHelper.formatTime(this._getRemainingTimeMilliseconds(bei)),
-			total_time_elapsed : Model.FormatterHelper.formatTime(this.stopWatch_.getElapsedTime()),
-			total_time_workout : Model.FormatterHelper.formatTime(this.playerHelper_.getDurationTotalSeconds() * 1000)
+			total_time_elapsed: Model.FormatterHelper.formatTime(this.stopWatch_.getElapsedTime()),
+			total_time_workout: Model.FormatterHelper.formatTime(this.playerHelper_.getDurationTotalSeconds() * 1000)
 		};
 	}
 
-	_getElapsedTimeMilliseconds(bei : Model.AbsoluteTimeInterval) : number {
+	_getElapsedTimeMilliseconds(bei: Model.AbsoluteTimeInterval): number {
 		return this.stopWatch_.getElapsedTime() - bei.getBeginSeconds() * 1000;
 	}
 
-	_getRemainingTimeMilliseconds(bei : Model.AbsoluteTimeInterval) : number {
+	_getRemainingTimeMilliseconds(bei: Model.AbsoluteTimeInterval): number {
 		return bei.getEndSeconds() * 1000 - this.stopWatch_.getElapsedTime();
-	}	
+	}
 
-	_getElapsedTimeSeconds() : number {
+	_getElapsedTimeSeconds(): number {
 		return this.stopWatch_.getElapsedTime() / 1000;
 	}
 
@@ -62,7 +62,7 @@ export default class PlayerView extends React.Component<any, any> {
 		}
 	}
 
-	_pauseAudioElement(elementName : string, pause: boolean) {
+	_pauseAudioElement(elementName: string, pause: boolean) {
 		var element = this.refs[elementName] as HTMLAudioElement;
 		if (pause) {
 			if (!element.paused) {
@@ -85,7 +85,7 @@ export default class PlayerView extends React.Component<any, any> {
 			return;
 		}
 
-		let durationIntervalMilliseconds = bei.getDurationSeconds()*1000;
+		let durationIntervalMilliseconds = bei.getDurationSeconds() * 1000;
 		// If the interval lasts more than 20s, we will plan the countdown, otherwise the ding (for rest).
 		if (durationIntervalMilliseconds > 20000 && this._getRemainingTimeMilliseconds(bei) < 11600) {
 			this._pauseAudioElement("countdown", false);
@@ -118,7 +118,7 @@ export default class PlayerView extends React.Component<any, any> {
 	}
 
 	_onKeyPress(e) {
-		switch(e.which) {
+		switch (e.which) {
 			case 115: // s
 				this._start(e);
 				break;
@@ -132,7 +132,7 @@ export default class PlayerView extends React.Component<any, any> {
 				this._reset(e);
 				break;
 		}
-	}	
+	}
 
 	componentDidMount() {
 		window.addEventListener("keypress", this._onKeyPress.bind(this));
@@ -144,28 +144,28 @@ export default class PlayerView extends React.Component<any, any> {
 
 	render() {
 		return (<div>
-					<h1> Title: <span>{this.state.current_title}</span></h1>
-					<h2> Elapsed: <span>{this.state.elapsed_time}</span></h2>
-					<h2> Remaining: <span>{this.state.remaining_time}</span></h2>
-					<hr/>
-					<div> Total workout duration: <span/>{this.state.total_time_workout}</div>
-					<div> Total workout elapsed: <span>{this.state.total_time_elapsed}</span></div>
-					<table ref="workout_summary" ></table>
-					<form>
-						<input type="button" value="Start" onClick={e => this._start(e)} />
-						<input type="button" value="Pause" onClick={e => this._pause(e)} />
-						<input type="button" value="Next Set" onClick={e => this._next(e)} />
-						<input type="button" value="Reset" onClick={e => this._reset(e)} />
-						<br/>
-					</form>
-					<WorkoutView {...this.props} ref='view'></WorkoutView>	
-					<audio ref="countdown" hidden={false}>
-						<source src="countdown.wav" type="audio/wav" preload="auto" />
-						Your browser does not support the audio element.
+			<h1> Title: <span>{this.state.current_title}</span></h1>
+			<h2> Elapsed: <span>{this.state.elapsed_time}</span></h2>
+			<h2> Remaining: <span>{this.state.remaining_time}</span></h2>
+			<hr />
+			<div> Total workout duration: <span />{this.state.total_time_workout}</div>
+			<div> Total workout elapsed: <span>{this.state.total_time_elapsed}</span></div>
+			<table ref="workout_summary" ></table>
+			<form>
+				<input type="button" value="Start" onClick={e => this._start(e)} />
+				<input type="button" value="Pause" onClick={e => this._pause(e)} />
+				<input type="button" value="Next Set" onClick={e => this._next(e)} />
+				<input type="button" value="Reset" onClick={e => this._reset(e)} />
+				<br />
+			</form>
+			<WorkoutView {...this.props} ref='view'></WorkoutView>
+			<audio ref="countdown" hidden={false}>
+				<source src="countdown.wav" type="audio/wav" preload="auto" />
+				Your browser does not support the audio element.
 					</audio>
-					<audio ref="ding" hidden={false}>
-						<source src="ding.wav" type="audio/wav" preload="auto" />
-					</audio>
-				</div>);
+			<audio ref="ding" hidden={false}>
+				<source src="ding.wav" type="audio/wav" preload="auto" />
+			</audio>
+		</div>);
 	}
 }
