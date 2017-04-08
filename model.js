@@ -2089,6 +2089,9 @@ var Model;
                         this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
                     }
                 }
+                if (interval.getRestDuration().getSeconds() > 0) {
+                    return this.result += " w/ " + interval.getRestDuration().toStringShort() + " rest";
+                }
             }
             else {
                 // Handle swim differently
