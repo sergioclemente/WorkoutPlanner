@@ -239,6 +239,19 @@ module Model {
 				}
 			}
 		}
+
+		static areDurationUnitsSame(durationUnits: DurationUnit[]): boolean {
+			if (durationUnits == null || durationUnits.length <= 1) {
+				return true;
+			}
+			let durationUnit: DurationUnit = durationUnits[0];
+			for (let i = 1; i < durationUnits.length; ++i) {
+				if (durationUnits[i] != durationUnit) {
+					return false;
+				}
+			}
+			return true;
+		}
 	}
 
 	export class FormatterHelper {
@@ -342,21 +355,25 @@ module Model {
 			return this.estimatedDistanceInMiles;
 		}
 
-		toStringDistance(unitTo: DistanceUnit = DistanceUnit.Unknown): string {
+		getDistance(unitTo: DistanceUnit = DistanceUnit.Unknown): number {
 			if (DurationUnitHelper.isDistance(this.unit)) {
 				if (unitTo == DistanceUnit.Unknown) {
-					return MyMath.round10(this.value, -1) + getStringFromDurationUnit(this.unit);
+					return MyMath.round10(this.value, -1);
 				} else {
 					if (unitTo == DistanceUnit.Yards) {
 						var yards = DistanceUnitHelper.convertTo(this.getDistanceInMiles(), DistanceUnit.Miles, DistanceUnit.Yards);
-						return MyMath.round10(yards, -1) + getStringFromDurationUnit(DistanceUnit.Yards);
+						return MyMath.round10(yards, -1);
 					} else {
-						return MyMath.round10(this.value, -1) + getStringFromDurationUnit(this.unit);
+						return MyMath.round10(this.value, -1);
 					}
 				}
 			} else {
-				return MyMath.round10(this.estimatedDistanceInMiles, -1) + getStringFromDurationUnit(DistanceUnit.Miles);
+				return MyMath.round10(this.estimatedDistanceInMiles, -1);
 			}
+		}
+
+		toStringDistance(unitTo: DistanceUnit = DistanceUnit.Unknown): string {
+			return this.getDistance(unitTo) + getStringFromDurationUnit(this.unit);
 		}
 
 		getTimeComponents(): any {
@@ -462,6 +479,12 @@ module Model {
 				}
 			}
 		}
+
+		static combineArray(durations : Duration[]) : Duration {
+			return durations.reduce(function(prev, cur) {
+				return Duration.combine(prev, cur);
+			});
+		}		
 	}
 
 	function getStringFromIntensityUnit(unit: IntensityUnit) {
@@ -901,7 +924,10 @@ module Model {
 			return res.getWorkDuration();
 		}
 		getRestDuration(): Duration {
-			return Duration.ZeroDuration;
+			var durations = this.intervals.map(function(cur) {
+				return cur.getRestDuration();
+			});
+			return Duration.combineArray(durations);
 		}
 		getTotalDuration(): Duration {
 			return Duration.combine(this.getWorkDuration(), this.getRestDuration());
@@ -1304,7 +1330,7 @@ module Model {
 									if (unit == IntensityUnit.OffsetSeconds) {
 										intensities.push(factory.createIntensity(nums[k], IntensityUnit.OffsetSeconds));
 									} else if (unit == IntensityUnit.FreeRide) {
-										intensities.push(factory.createIntensity(0, IntensityUnit.FreeRide));
+										intensities.push(factory.createIntensity(factory.getEasyThreshold(), IntensityUnit.FreeRide));
 									}
 								}
 							}
@@ -1321,7 +1347,7 @@ module Model {
 								// Will assume the former, since the latter is less common.
 								if (repeatInterval.getRepeatCount() > 1 &&
 									(intensities.length == repeatInterval.getRepeatCount()
-										|| durationValues.length == repeatInterval.getRepeatCount())) {
+										|| (DurationUnitHelper.areDurationUnitsSame(durationUnits) && durationValues.length == repeatInterval.getRepeatCount()))) {
 									// OK this should not be a RepeatInterval, it should be
 									// a StepBuildInterval instead
 
@@ -1371,12 +1397,7 @@ module Model {
 								// Two types of interval here:
 								// (10s) - means 10s rest
 								// (10min, easy) - means 10min at default interval pace
-								let intensity = null;
-								if (title.trim().length == 0) {
-									intensity = factory.createIntensity(0, IntensityUnit.IF);
-								} else {
-									intensity = factory.createIntensity(factory.getEasyThreshold(), IntensityUnit.IF);
-								}
+								let intensity = factory.createIntensity(0, IntensityUnit.IF);
 								let duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
 								if (durationUnits.length == 2 && durationValues.length == 2) {
 									restDuration = factory.createDuration(zeroIntensity, durationUnits[1], durationValues[1]);
@@ -1933,12 +1954,20 @@ module Model {
 			}
 		}
 
+		getIntensity(interval: Interval) : number {
+			if (interval.getIntensity().getOriginalUnit() == IntensityUnit.FreeRide) {
+				return 0;
+			} else {
+				return Math.round(interval.getIntensity().getValue() * 100);
+			}			
+		}
+
 		// ["description","seconds","start","finish","mode","intervals","group","autolap","targetcad"]
 		visitSimpleInterval(interval: SimpleInterval) {
 			this.content += stringFormat(`\t\t["{0}",{1},{2},{2},"{3}",1,{4},0,90],\n`,
 				this.getTitlePretty(interval),
 				interval.getWorkDuration().getSeconds(),
-				Math.round(interval.getIntensity().getValue() * 100),
+				this.getIntensity(interval),
 				this.getMode(interval),
 				this.getGroupId()
 			);
@@ -2241,14 +2270,14 @@ module Model {
 						this.result += " easy";
 					}
 				} else {
-					// Remove intensity from easy swim intervals
-					if (this.sportType != SportType.Swim) {
+					// Remove intensity from intervals without specified intensity.
+					if (interval.getIntensity().getValue() != 0) {
 						this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
 					}
 				}
 				if (interval.getRestDuration().getSeconds() > 0) {
 					return this.result += " w/ " + interval.getRestDuration().toStringShort() + " rest";
-				}				
+				}
 			} else {
 				// Handle swim differently
 				// We want to add the total touch time on the swim. For example, if you CSS
@@ -2487,7 +2516,7 @@ module Model {
 
 			// HACK here for now
 			if (unit == IntensityUnit.FreeRide) {
-				return new Intensity(0, 0, IntensityUnit.FreeRide);
+				return new Intensity(value, 0, IntensityUnit.FreeRide);
 			}
 
 			if (this.sportType == SportType.Bike) {

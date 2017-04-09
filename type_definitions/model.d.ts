@@ -69,6 +69,7 @@ declare module Model {
         static isDistance(durationUnit: DurationUnit): boolean;
         static getDistanceMiles(unit: DurationUnit, value: number): number;
         static getDurationSeconds(unit: DurationUnit, value: number): number;
+        static areDurationUnitsSame(durationUnits: DurationUnit[]): boolean;
     }
     class FormatterHelper {
         static roundNumberUp(value: number, round_val?: number): number;
@@ -88,6 +89,7 @@ declare module Model {
         getValue(): number;
         getSeconds(): number;
         getDistanceInMiles(): number;
+        getDistance(unitTo?: DistanceUnit): number;
         toStringDistance(unitTo?: DistanceUnit): string;
         getTimeComponents(): any;
         toTimeStringLong(): string;
@@ -95,6 +97,7 @@ declare module Model {
         toStringShort(): string;
         toString(): string;
         static combine(dur1: Duration, dur2: Duration): Duration;
+        static combineArray(durations: Duration[]): Duration;
     }
     class IntensityUnitHelper {
         static convertTo(value: number, unitFrom: IntensityUnit, unitTo: IntensityUnit): number;
@@ -357,6 +360,7 @@ declare module Model {
         getTitlePretty(interval: BaseInterval): string;
         getGroupId(): number;
         getMode(interval: Interval): string;
+        getIntensity(interval: Interval): number;
         visitSimpleInterval(interval: SimpleInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
