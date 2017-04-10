@@ -144,16 +144,16 @@ describe('IntervalParser', function () {
     });
     it('1min @ 85%', function () {
         var simple1min85 = Model.IntervalParser.parse(of_bike, "(1, 85)");
-        expect_eq_nbr(0.85, simple1min85.getIntensities()[0].getValue());
+        expect_eq_nbr(0.85, simple1min85.getIntervals()[0].getIntensity().getOriginalValue());
     });
     it('1min @ 55%-85%', function () {
-        var build1min5585 = Model.IntervalParser.parse(of_bike, "(1, 55, 85)");
-        expect_eq_nbr(0.55, build1min5585.getIntensities()[0].getValue());
-        expect_eq_nbr(0.85, build1min5585.getIntensities()[1].getValue());
+        var build1min5585 = Model.IntervalParser.parse(of_bike, "(1, 60, 80)");
+        expect_eq_nbr(0.70, build1min5585.getIntervals()[0].getIntensity().getOriginalValue());
     });
     it('Mixed time and distance', function () {
         var int_par_bug = Model.IntervalParser.parse(of_bike, "(1hr, 75), (20mi, 85)");
-        expect_eq_nbr(2, int_par_bug.getIntensities().length);
+        expect_eq_nbr(0.75, int_par_bug.getIntervals()[0].getIntensity().getOriginalValue());
+        expect_eq_nbr(0.85, int_par_bug.getIntervals()[1].getIntensity().getOriginalValue());
     });
     it('Mixed watts and percentage', function () {
         var int_par_unit_bike = Model.IntervalParser.parse(of_bike, "(1s, 50), (2s, 155w), (3s, 50%)");
@@ -549,7 +549,7 @@ describe('Swim', function () {
         expect_eq_str("100m strong on 1'32''", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(100m, 100, strong)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Meters));
         expect_eq_nbr(2.48, Model.IntensityUnitHelper.convertTo(1.5, Model.IntensityUnit.Per100Meters, Model.IntensityUnit.Mph));
         expect_eq_nbr(1.5, Model.IntensityUnitHelper.convertTo(2.48, Model.IntensityUnit.Mph, Model.IntensityUnit.Per100Meters));
-        expect_eq_str("1:30/100m", new Model.Intensity(1, 1.5, Model.IntensityUnit.Per100Meters).toString());
+        expect_eq_str("1:30/100meters", new Model.Intensity(1, 1.5, Model.IntensityUnit.Per100Meters).toString());
         var swim_visitor_mph = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Mph);
         var swim_visitor_per100 = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Per100Meters);
         expect_eq_str("2.4mi/h", swim_visitor_mph.getIntensityPretty(intensity_100_pct));

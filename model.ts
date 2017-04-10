@@ -32,7 +32,7 @@ module Model {
 	// We use the | definition of typescript, but we have to be careful
 	// so that the enums don't overlap. 
 	export type DurationUnit = TimeUnit | DistanceUnit;
-	const MIN_TIME: number = 10;
+	const MIN_TIME: number = 11;
 	const MAX_DISTANCE: number = 10;
 
 	export enum IntensityUnit {
@@ -173,28 +173,6 @@ module Model {
 		}
 	}
 
-	function getStringFromDurationUnit(unit: DurationUnit) {
-		switch (unit) {
-			case DistanceUnit.Miles:
-				return "mi";
-			case DistanceUnit.Kilometers:
-				return "km";
-			case DistanceUnit.Meters:
-				return "m";
-			case DistanceUnit.Yards:
-				return "yards";
-			case TimeUnit.Hours:
-				return "h";
-			case TimeUnit.Minutes:
-				return "min";
-			case TimeUnit.Seconds:
-				return "s";
-			default:
-				console.assert(false, stringFormat("unkown duration {0}", unit));
-				return "unknown";
-		}
-	}
-
 	export class DurationUnitHelper {
 		public static isTime(durationUnit: DurationUnit): boolean {
 			return durationUnit >= MIN_TIME;
@@ -202,6 +180,10 @@ module Model {
 
 		public static isDistance(durationUnit: DurationUnit): boolean {
 			return durationUnit <= MAX_DISTANCE;
+		}
+
+		public static isDurationUnit(unit : string) : boolean {
+			return DurationUnitHelper.toDurationUnit(unit) != TimeUnit.Unknown;
 		}
 
 		static getDistanceMiles(unit: DurationUnit, value: number) {
@@ -251,6 +233,53 @@ module Model {
 				}
 			}
 			return true;
+		}
+
+		static toString(unit : DurationUnit) : string {
+			switch (unit) {
+				case DistanceUnit.Miles:
+					return "mi";
+				case DistanceUnit.Kilometers:
+					return "km";
+				case DistanceUnit.Meters:
+					return "m";
+				case DistanceUnit.Yards:
+					return "yards";
+				case TimeUnit.Hours:
+					return "h";
+				case TimeUnit.Minutes:
+					return "min";
+				case TimeUnit.Seconds:
+					return "s";
+				default:
+					console.assert(false, stringFormat("unkown duration {0}", unit));
+					return "unknown";
+			}
+		}
+
+		static toDurationUnit(unit : string) : DurationUnit {
+			var conversionMap = {
+				"mi": DistanceUnit.Miles,
+				"km": DistanceUnit.Kilometers,
+				"m": DistanceUnit.Meters,
+				"meter": DistanceUnit.Meters,
+				"meters": DistanceUnit.Meters,
+				"h": TimeUnit.Hours,
+				"hr": TimeUnit.Hours,
+				"hour": TimeUnit.Hours,
+				"hours": TimeUnit.Hours,
+				"min": TimeUnit.Minutes,
+				"sec": TimeUnit.Seconds,
+				"s": TimeUnit.Seconds,
+				"yards": DistanceUnit.Yards,
+				"y": DistanceUnit.Yards,
+				"yrd": DistanceUnit.Yards,
+			};
+			if (unit in conversionMap) {
+				return conversionMap[unit];
+			} else {
+				return TimeUnit.Unknown;
+			}			
 		}
 	}
 
@@ -373,7 +402,7 @@ module Model {
 		}
 
 		toStringDistance(unitTo: DistanceUnit = DistanceUnit.Unknown): string {
-			return this.getDistance(unitTo) + getStringFromDurationUnit(this.unit);
+			return this.getDistance(unitTo) + DurationUnitHelper.toString(this.unit);
 		}
 
 		getTimeComponents(): any {
@@ -487,120 +516,6 @@ module Model {
 		}		
 	}
 
-	function getStringFromIntensityUnit(unit: IntensityUnit) {
-		switch (unit) {
-			case IntensityUnit.Watts:
-				return "w";
-			case IntensityUnit.IF:
-				return "%";
-			case IntensityUnit.MinMi:
-				return "min/mi";
-			case IntensityUnit.Mph:
-				return "mi/hr";
-			case IntensityUnit.Kmh:
-				return "km/hr";
-			case IntensityUnit.MinKm:
-				return "min/km";
-			case IntensityUnit.Per100Yards:
-				return "/100yards";
-			case IntensityUnit.Per100Meters:
-				return "/100meters";
-			case IntensityUnit.HeartRate:
-				return "hr";
-			case IntensityUnit.FreeRide:
-				return "free-ride";
-			default:
-				console.assert(false, stringFormat("Unknown intensity unit {0}", unit));
-				return "unknown";
-		}
-	}
-
-	function getDurationUnitFromString(unit: string): DurationUnit {
-		var conversionMap = {
-			"mi": DistanceUnit.Miles,
-			"km": DistanceUnit.Kilometers,
-			"m": DistanceUnit.Meters,
-			"meter": DistanceUnit.Meters,
-			"meters": DistanceUnit.Meters,
-			"h": TimeUnit.Hours,
-			"hr": TimeUnit.Hours,
-			"hour": TimeUnit.Hours,
-			"hours": TimeUnit.Hours,
-			"min": TimeUnit.Minutes,
-			"sec": TimeUnit.Seconds,
-			"s": TimeUnit.Seconds,
-			"yards": DistanceUnit.Yards,
-			"y": DistanceUnit.Yards,
-			"yrd": DistanceUnit.Yards,
-		};
-		if (unit in conversionMap) {
-			return conversionMap[unit];
-		} else {
-			return TimeUnit.Unknown;
-		}
-	}
-
-	function getIntensityUnitFromString(unit: string): IntensityUnit {
-		var conversionMap = {
-			"w": IntensityUnit.Watts,
-			"watts": IntensityUnit.Watts,
-			"%": IntensityUnit.IF,
-			"min/mi": IntensityUnit.MinMi,
-			"mi/hr": IntensityUnit.Mph,
-			"mph": IntensityUnit.Mph,
-			"km/hr": IntensityUnit.Kmh,
-			"min/km": IntensityUnit.MinKm,
-			"/100yards": IntensityUnit.Per100Yards,
-			"/100meters": IntensityUnit.Per100Meters,
-			"offset": IntensityUnit.OffsetSeconds,
-			"hr": IntensityUnit.HeartRate,
-			"heart rate": IntensityUnit.HeartRate,
-			"bpm": IntensityUnit.HeartRate,
-			"free-ride": IntensityUnit.FreeRide,
-			"fr": IntensityUnit.FreeRide,
-		};
-		if (unit in conversionMap) {
-			return conversionMap[unit];
-		} else {
-			return IntensityUnit.Unknown;
-		}
-	}
-
-
-	function getIntensityUnit(unit: IntensityUnit) {
-		if (unit == IntensityUnit.Watts) {
-			return "w";
-		} else if (unit == IntensityUnit.IF) {
-			return "%";
-		} else if (unit == IntensityUnit.MinMi) {
-			return "min/mi";
-		} else if (unit == IntensityUnit.Mph) {
-			return "mi/h";
-		} else if (unit == IntensityUnit.MinKm) {
-			return "min/km";
-		} else if (unit == IntensityUnit.Kmh) {
-			return "km/h";
-		} else if (unit == IntensityUnit.Per100Yards) {
-			return "/100yards";
-		} else if (unit == IntensityUnit.Per100Meters) {
-			return "/100m";
-		} else if (unit == IntensityUnit.HeartRate) {
-			return "hr";
-		} else if (unit == IntensityUnit.FreeRide) {
-			return "free-ride";
-		} else {
-			console.assert(false, stringFormat("Invalid intensity unit {0}", unit));
-		}
-	}
-
-	function isDurationUnit(value: string) {
-		return getDurationUnitFromString(value) != TimeUnit.Unknown;
-	}
-
-	function isIntensityUnit(value: string) {
-		return getIntensityUnitFromString(value) != IntensityUnit.Unknown;
-	}
-
 	function stringFormat(format: string, ...args: any[]) {
 		return format.replace(/{(\d+)}/g, function (match, number) {
 			return typeof args[number] != 'undefined'
@@ -662,6 +577,64 @@ module Model {
 
 			return result;
 		}
+
+		static toString(unit: IntensityUnit): string {
+			switch (unit) {
+				case IntensityUnit.Watts:
+					return "w";
+				case IntensityUnit.IF:
+					return "%";
+				case IntensityUnit.MinMi:
+					return "min/mi";
+				case IntensityUnit.Mph:
+					return "mi/h";
+				case IntensityUnit.Kmh:
+					return "km/h";
+				case IntensityUnit.MinKm:
+					return "min/km";
+				case IntensityUnit.Per100Yards:
+					return "/100yards";
+				case IntensityUnit.Per100Meters:
+					return "/100meters";
+				case IntensityUnit.HeartRate:
+					return "hr";
+				case IntensityUnit.FreeRide:
+					return "free-ride";
+				default:
+					console.assert(false, stringFormat("Unknown intensity unit {0}", unit));
+					return "unknown";
+			}
+		}
+
+		static toIntensityUnit(unit: string): IntensityUnit {
+			var conversionMap = {
+				"w": IntensityUnit.Watts,
+				"watts": IntensityUnit.Watts,
+				"%": IntensityUnit.IF,
+				"min/mi": IntensityUnit.MinMi,
+				"mi/hr": IntensityUnit.Mph,
+				"mph": IntensityUnit.Mph,
+				"km/hr": IntensityUnit.Kmh,
+				"min/km": IntensityUnit.MinKm,
+				"/100yards": IntensityUnit.Per100Yards,
+				"/100meters": IntensityUnit.Per100Meters,
+				"offset": IntensityUnit.OffsetSeconds,
+				"hr": IntensityUnit.HeartRate,
+				"heart rate": IntensityUnit.HeartRate,
+				"bpm": IntensityUnit.HeartRate,
+				"free-ride": IntensityUnit.FreeRide,
+				"fr": IntensityUnit.FreeRide,
+			};
+			if (unit in conversionMap) {
+				return conversionMap[unit];
+			} else {
+				return IntensityUnit.Unknown;
+			}
+		}
+
+		static isIntensityUnit(unit : string) : boolean {
+			return IntensityUnitHelper.toIntensityUnit(unit) != IntensityUnit.Unknown;
+		}
 	};
 
 	export class DefaultIntensity {
@@ -686,10 +659,6 @@ module Model {
 			return easyThreshold;
 		}
 	}
-
-
-
-
 
 	export class Intensity {
 		private ifValue: number;
@@ -738,9 +707,9 @@ module Model {
 				return MyMath.round10(100 * this.originalValue, -1) + "%";
 			} else {
 				if (this.originalUnit == IntensityUnit.MinMi) {
-					return FormatterHelper.formatNumber(this.originalValue, 60, ":", getIntensityUnit(IntensityUnit.MinMi));
+					return FormatterHelper.formatNumber(this.originalValue, 60, ":", IntensityUnitHelper.toString(IntensityUnit.MinMi));
 				} else if (this.originalUnit == IntensityUnit.Per100Yards || this.originalUnit == IntensityUnit.Per100Meters) {
-					return FormatterHelper.formatNumber(this.originalValue, 60, ":", getIntensityUnit(this.originalUnit));
+					return FormatterHelper.formatNumber(this.originalValue, 60, ":", IntensityUnitHelper.toString(this.originalUnit));
 				} else {
 
 					if (this.originalUnit == IntensityUnit.OffsetSeconds) {
@@ -752,7 +721,7 @@ module Model {
 							return "CSS";
 						}
 					} else {
-						return MyMath.round10(this.originalValue, -1) + getStringFromIntensityUnit(this.originalUnit);
+						return MyMath.round10(this.originalValue, -1) + IntensityUnitHelper.toString(this.originalUnit);
 					}
 				}
 			}
@@ -951,12 +920,6 @@ module Model {
 			return MyMath.round10(tss_from_if, -1);
 		}
 
-		getIntensities(): Intensity[] {
-			var iv = new IntensitiesVisitor();
-			VisitorHelper.visitAndFinalize(iv, this);
-			return iv.getIntensities();
-		}
-
 		getTimeSeries(): any {
 			var pv = new DataPointVisitor();
 
@@ -969,6 +932,7 @@ module Model {
 				return {
 					x: item.x.getSeconds() / 60,
 					y: Math.round(item.y.getValue() * 100),
+					tag: item.tag
 				}
 			});
 		}
@@ -1076,9 +1040,16 @@ module Model {
 	}
 
 	export interface Parser {
+		// Returns the last valid char.
+		// On success: Returns a position higher than |pos|.
 		evaluate(input: string, pos: number): number;
 	}
 
+	// TODO: Refactor this to accept time as well.
+	// For example:
+	// "10" => 10
+	// 10:30 => 10.5
+	// "10.5" => 10.5
 	export class NumberParser implements Parser {
 		private value: number;
 
@@ -1126,7 +1097,6 @@ module Model {
 			this.delimiters = delimiters;
 		}
 
-
 		evaluate(input: string, i: number): number {
 			this.value = "";
 
@@ -1152,6 +1122,9 @@ module Model {
 		}
 	}
 
+	// For a string like: "10min"
+	// It will set |value| to 10
+	// and unit to "min"
 	export class NumberAndUnitParser implements Parser {
 		private value: number;
 		private unit: string;
@@ -1164,6 +1137,7 @@ module Model {
 
 			// - Check for another number after the current cursor.
 			// - Skip any white spaces as well
+			// TODO: Move this into number parser
 			if (i + 1 < input.length && input[i + 1] == ":") {
 				i = i + 2; // skip : and go to the next char
 				var res_temp = IntervalParser.parseDouble(input, i);
@@ -1313,19 +1287,19 @@ module Model {
 
 							// (2) Create the duration units and intensities
 							for (var k = 0; k < Object.keys(units).length; k++) {
-								if (isDurationUnit(units[k])) {
-									durationUnits.push(getDurationUnitFromString(units[k]));
+								if (DurationUnitHelper.isDurationUnit(units[k])) {
+									durationUnits.push(DurationUnitHelper.toDurationUnit(units[k]));
 									durationValues.push(nums[k]);
 								} else if (nums[k] > 0) {
 									var intensityUnit = IntensityUnit.IF;
-									if (isIntensityUnit(units[k])) {
-										intensityUnit = getIntensityUnitFromString(units[k]);
+									if (IntensityUnitHelper.isIntensityUnit(units[k])) {
+										intensityUnit = IntensityUnitHelper.toIntensityUnit(units[k]);
 									}
 									intensities.push(factory.createIntensity(nums[k], intensityUnit));
 								} else {
 									// Most of the times here means we didn't have a intensity
 									// Free ride or offset mode for example.
-									var unit = getIntensityUnitFromString(units[k]);
+									var unit = IntensityUnitHelper.toIntensityUnit(units[k]);
 
 									if (unit == IntensityUnit.OffsetSeconds) {
 										intensities.push(factory.createIntensity(nums[k], IntensityUnit.OffsetSeconds));
@@ -1424,7 +1398,7 @@ module Model {
 								// If we have a value from the intensity parser and
 								// If there is not unit (implict) or the unit is known
 								if (intensity_value != null &&
-									(unit.length == 0 || isIntensityUnit(unit) || isDurationUnit(unit))) {
+									(unit.length == 0 || IntensityUnitHelper.isIntensityUnit(unit) || DurationUnitHelper.isDurationUnit(unit))) {
 									nums[numIndex] = intensity_value;
 									units[numIndex] = unit;
 								} else {
@@ -1713,29 +1687,6 @@ module Model {
 					});
 				}
 			}
-			return result;
-		}
-	}
-
-	export class IntensitiesVisitor extends BaseVisitor {
-		private intensities = {};
-
-		visitSimpleInterval(interval: SimpleInterval): void {
-			this.intensities[interval.getIntensity().getValue()] = interval.getIntensity();
-		}
-		visitRampBuildInterval(interval: RampBuildInterval): void {
-			this.intensities[interval.getStartIntensity().getValue()] = interval.getStartIntensity();
-			this.intensities[interval.getEndIntensity().getValue()] = interval.getEndIntensity();
-		}
-
-		getIntensities(): Intensity[] {
-			var result = [];
-			for (var intensityValue in this.intensities) {
-				result.push(this.intensities[intensityValue]);
-			}
-			result.sort(function (left: Intensity, right: Intensity) {
-				return left.getValue() - right.getValue();
-			});
 			return result;
 		}
 	}
@@ -2332,16 +2283,16 @@ module Model {
 				var minMi = this.userProfile.getPaceMinMi(intensity);
 				var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, this.outputUnit);
 				if (this.outputUnit == IntensityUnit.Kmh || this.outputUnit == IntensityUnit.Mph) {
-					return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
+					return MyMath.round10(outputValue, -1) + IntensityUnitHelper.toString(this.outputUnit);
 				} else {
-					return FormatterHelper.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit), 5);
+					return FormatterHelper.formatNumber(outputValue, 60, ":", IntensityUnitHelper.toString(this.outputUnit), 5);
 				}
 			} else if (this.sportType == SportType.Swim) {
 				if (this.outputUnit == IntensityUnit.Mph) {
-					return MyMath.round10(this.userProfile.getSwimPaceMph(intensity), -1) + getIntensityUnit(this.outputUnit);
+					return MyMath.round10(this.userProfile.getSwimPaceMph(intensity), -1) + IntensityUnitHelper.toString(this.outputUnit);
 				} else if (this.outputUnit == IntensityUnit.Per100Yards || this.outputUnit == IntensityUnit.Per100Meters) {
 					var swim_pace_per_100 = this.userProfile.getSwimPace(this.outputUnit, intensity);
-					return FormatterHelper.formatNumber(swim_pace_per_100, 60, ":", "") + getStringFromIntensityUnit(this.outputUnit);
+					return FormatterHelper.formatNumber(swim_pace_per_100, 60, ":", "") + IntensityUnitHelper.toString(this.outputUnit);
 				} else {
 					console.assert(false, stringFormat("Invalid output unit {0}", this.outputUnit));
 				}
@@ -2578,6 +2529,7 @@ module Model {
 				console.assert(unit == IntensityUnit.IF);
 				ifValue = value;
 			}
+
 			return new Intensity(ifValue, value, unit);
 		}
 
@@ -2751,9 +2703,9 @@ module Model {
 			var minMi = this.userProfile.getPaceMinMi(this.intervals.getIntensity());
 			var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, this.outputUnit);
 			if (this.outputUnit == IntensityUnit.Kmh || this.outputUnit == IntensityUnit.Mph) {
-				return MyMath.round10(outputValue, -1) + getIntensityUnit(this.outputUnit);
+				return MyMath.round10(outputValue, -1) + IntensityUnitHelper.toString(this.outputUnit);
 			} else {
-				return FormatterHelper.formatNumber(outputValue, 60, ":", getIntensityUnit(this.outputUnit));
+				return FormatterHelper.formatNumber(outputValue, 60, ":", IntensityUnitHelper.toString(this.outputUnit));
 			}
 		}
 
@@ -2780,8 +2732,6 @@ module Model {
 		}
 
 		getPrettyPrint(new_line: string = "\n"): string {
-			var intensities = this.intervals.getIntensities();
-
 			let workout_text = this.getStepsList(new_line);
 
 			var result = workout_text;

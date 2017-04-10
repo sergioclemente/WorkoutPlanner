@@ -53,7 +53,6 @@ Hi-Pri
 - Add first letter upper case
 - Add lapcount complexity
 - Update graph for freeride
-- bug 2[(200yards, neg split, 20s)]
 
 Client JS
 * Bundle JS more efficiently

@@ -67,9 +67,12 @@ declare module Model {
     class DurationUnitHelper {
         static isTime(durationUnit: DurationUnit): boolean;
         static isDistance(durationUnit: DurationUnit): boolean;
+        static isDurationUnit(unit: string): boolean;
         static getDistanceMiles(unit: DurationUnit, value: number): number;
         static getDurationSeconds(unit: DurationUnit, value: number): number;
         static areDurationUnitsSame(durationUnits: DurationUnit[]): boolean;
+        static toString(unit: DurationUnit): string;
+        static toDurationUnit(unit: string): DurationUnit;
     }
     class FormatterHelper {
         static roundNumberUp(value: number, round_val?: number): number;
@@ -101,6 +104,9 @@ declare module Model {
     }
     class IntensityUnitHelper {
         static convertTo(value: number, unitFrom: IntensityUnit, unitTo: IntensityUnit): number;
+        static toString(unit: IntensityUnit): string;
+        static toIntensityUnit(unit: string): IntensityUnit;
+        static isIntensityUnit(unit: string): boolean;
     }
     class DefaultIntensity {
         static isEasy(intensity: Intensity, sportType: SportType): boolean;
@@ -181,7 +187,6 @@ declare module Model {
         getIntervals(): Interval[];
         getTSS(): number;
         getTSSFromIF(): number;
-        getIntensities(): Intensity[];
         getTimeSeries(): any;
         getTimeInZones(sportType: SportType): any[];
     }
@@ -308,12 +313,6 @@ declare module Model {
         visitSimpleInterval(interval: SimpleInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
         getTimeInZones(): any[];
-    }
-    class IntensitiesVisitor extends BaseVisitor {
-        private intensities;
-        visitSimpleInterval(interval: SimpleInterval): void;
-        visitRampBuildInterval(interval: RampBuildInterval): void;
-        getIntensities(): Intensity[];
     }
     class DataPointVisitor extends BaseVisitor {
         private x;
