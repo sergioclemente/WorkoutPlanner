@@ -49,7 +49,7 @@ class DurationCell extends React.Component<any, any> {
 		let duration = new Model.Duration(Model.TimeUnit.Seconds, durationSec, durationSec, 0);
 		return (
 			<Cell {...this.props}>
-				{duration.toStringShort()}
+				{duration.toStringShort(false)}
 			</Cell>
 		);
 	}

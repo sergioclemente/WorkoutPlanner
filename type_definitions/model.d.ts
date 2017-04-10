@@ -97,7 +97,7 @@ declare module Model {
         getTimeComponents(): any;
         toTimeStringLong(): string;
         toTimeStringShort(): string;
-        toStringShort(): string;
+        toStringShort(omitUnit: boolean): string;
         toString(): string;
         static combine(dur1: Duration, dur2: Duration): Duration;
         static combineArray(durations: Duration[]): Duration;

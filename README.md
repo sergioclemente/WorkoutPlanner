@@ -49,10 +49,8 @@ To install the protocol handler:
 
 # Bugs/Feature requests
 Hi-Pri
-- Clutterness in swimming (can i remove the text yards from the text?)
-- Add first letter upper case
 - Add lapcount complexity
-- Update graph for freeride
+- Make long repeated series easier to read
 
 Client JS
 * Bundle JS more efficiently
@@ -79,14 +77,7 @@ Player:
 * Add some sort of highlight or next
 
 * Refactor Intensity
-* refactor 
-        getStringFromDurationUnit
-        getStringFromIntensityUnit
-        getDurationUnitFromString
-        getIntensityUnitFromString
-        getIntensityUnit
-        isDurationUnit
-        isIntensityUnit
+* refactor
         stringFormat
         DateHelper
         SpeedParser

@@ -132,6 +132,23 @@ export default class WorkoutView extends React.Component<any, any> {
 		}.bind(this));
 	}
 
+	getChartData(state: any) {
+		var result = [];
+
+		for (let key in state.time_series_data) {
+			result.push(
+				{
+					type: "area",
+					fillOpacity: 0.3,
+					markerType: "none",
+					dataPoints: state.time_series_data[key]
+				}
+			);
+		}
+
+		return result;
+	}
+
 	renderCharts(state: any) {
 		// Timeline chart
 		if (state.time_series_data.length != 0) {
@@ -152,12 +169,7 @@ export default class WorkoutView extends React.Component<any, any> {
 					suffix: "%",
 					gridThickness: 0,
 				},
-				data: [{
-					type: "area",
-					fillOpacity: 0.3,
-					markerType: "none",
-					dataPoints: state.time_series_data
-				}]
+				data: this.getChartData(state)
 			});
 
 			chartTimeline.render();

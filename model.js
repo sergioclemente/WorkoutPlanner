@@ -442,9 +442,14 @@ var Model;
             }
             return result;
         }
-        toStringShort() {
+        toStringShort(omitUnit) {
             if (!DurationUnitHelper.isTime(this.unit)) {
-                return this.toStringDistance();
+                if (omitUnit) {
+                    return this.getDistance(this.unit) + "";
+                }
+                else {
+                    return this.toStringDistance();
+                }
             }
             return this.toTimeStringShort();
         }
@@ -869,15 +874,32 @@ var Model;
         getTimeSeries() {
             var pv = new DataPointVisitor();
             VisitorHelper.visitAndFinalize(pv, this);
-            // TODO: Process the data doing 2 things:
-            // - Grouping by data with the same tag into different series
-            // - Massaging the time componetn
-            return pv.data.map(function (item) {
+            // - Massaging the time component
+            var list = pv.data.map(function (item) {
                 return {
                     x: item.x.getSeconds() / 60,
                     y: Math.round(item.y.getValue() * 100),
+                    tag: item.tag
                 };
             });
+            // Separate into one list per tag
+            var tagToPoints = {};
+            var lastItemTag = null;
+            for (let i = 0; i < list.length; ++i) {
+                let item = list[i];
+                if (tagToPoints[item.tag] == null) {
+                    tagToPoints[item.tag] = [];
+                }
+                if (lastItemTag != null) {
+                    if (item.tag != lastItemTag) {
+                        tagToPoints[lastItemTag].push({ x: item.x, y: 0 });
+                        tagToPoints[item.tag].push({ x: item.x, y: 0 });
+                    }
+                }
+                tagToPoints[item.tag].push(item);
+                lastItemTag = item.tag;
+            }
+            return tagToPoints;
         }
         getTimeInZones(sportType) {
             var zv = new ZonesVisitor(sportType);
@@ -1607,11 +1629,13 @@ var Model;
             this.data.push(new Point(this.x, interval.getIntensity(), title, this.getIntervalTag(interval)));
             this.incrementX(interval.getWorkDuration());
             this.data.push(new Point(this.x, interval.getIntensity(), title, this.getIntervalTag(interval)));
-            // Rest interval
-            this.initX(interval.getRestDuration());
-            this.data.push(new Point(this.x, Intensity.ZeroIntensity, title, this.getIntervalTag(interval)));
-            this.incrementX(interval.getRestDuration());
-            this.data.push(new Point(this.x, Intensity.ZeroIntensity, title, this.getIntervalTag(interval)));
+            if (interval.getRestDuration().getValue() > 0) {
+                // Rest interval
+                this.initX(interval.getRestDuration());
+                this.data.push(new Point(this.x, Intensity.ZeroIntensity, title, this.getIntervalTag(interval)));
+                this.incrementX(interval.getRestDuration());
+                this.data.push(new Point(this.x, Intensity.ZeroIntensity, title, this.getIntervalTag(interval)));
+            }
         }
         visitRampBuildInterval(interval) {
             var title = WorkoutTextVisitor.getIntervalTitle(interval);
@@ -1905,11 +1929,11 @@ var Model;
                 if (title == null || title.trim().length == 0) {
                     title = "easy";
                 }
-                this.result += interval.getWorkDuration().toStringShort() + " " + title;
+                this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " " + title;
                 ;
             }
             else {
-                this.result += interval.getWorkDuration().toStringShort() + " @ " + this.getIntensityPretty(interval.getIntensity());
+                this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " @ " + this.getIntensityPretty(interval.getIntensity());
             }
         }
         // ArrayInterval
@@ -1982,14 +2006,14 @@ var Model;
         // RampBuildInterval
         visitRampBuildInterval(interval) {
             if (interval.getStartIntensity().getValue() <= DefaultIntensity.getEasyThreshold(this.sportType)) {
-                this.result += interval.getWorkDuration().toStringShort() + " warm up to " + this.getIntensityPretty(interval.getEndIntensity());
+                this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " warm up to " + this.getIntensityPretty(interval.getEndIntensity());
             }
             else {
                 if (interval.getStartIntensity().getValue() < interval.getEndIntensity().getValue()) {
-                    this.result += interval.getWorkDuration().toStringShort() + " build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());
+                    this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " build from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());
                 }
                 else {
-                    this.result += interval.getWorkDuration().toStringShort() + " warm down from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());
+                    this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " warm down from " + this.getIntensityPretty(interval.getStartIntensity()) + " to " + this.getIntensityPretty(interval.getEndIntensity());
                 }
             }
         }
@@ -2005,7 +2029,7 @@ var Model;
                 this.visitRestInterval(interval.getRestInterval());
                 this.result += " (";
                 for (var i = 0; i < interval.getRepeatCount(); i++) {
-                    this.result += interval.getStepInterval(i).getWorkDuration().toStringShort();
+                    this.result += interval.getStepInterval(i).getWorkDuration().toStringShort(this.sportType == SportType.Swim);
                     this.result += ", ";
                 }
                 // remove extra ", "
@@ -2013,7 +2037,7 @@ var Model;
                 this.result += ")";
             }
             else {
-                this.result += interval.getStepInterval(0).getWorkDuration().toStringShort();
+                this.result += interval.getStepInterval(0).getWorkDuration().toStringShort(this.sportType == SportType.Swim);
                 this.result += " - w/ ";
                 this.visitRestInterval(interval.getRestInterval());
                 this.result += " (";
@@ -2028,7 +2052,7 @@ var Model;
         }
         // SimpleInterval
         visitSimpleInterval(interval) {
-            this.result += interval.getWorkDuration().toStringShort();
+            this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim);
             let title = this.getIntervalTitle(interval);
             if (title != null && title.length > 0) {
                 this.result += " " + title;
@@ -2060,7 +2084,7 @@ var Model;
                     }
                 }
                 if (interval.getRestDuration().getSeconds() > 0) {
-                    return this.result += " w/ " + interval.getRestDuration().toStringShort() + " rest";
+                    return this.result += " w/ " + interval.getRestDuration().toStringShort(this.sportType == SportType.Swim) + " rest";
                 }
             }
             else {
@@ -2080,7 +2104,7 @@ var Model;
                 else {
                     this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
                     if (interval.getRestDuration().getSeconds() > 0) {
-                        return this.result += " w/ " + interval.getRestDuration().toStringShort() + " rest";
+                        return this.result += " w/ " + interval.getRestDuration().toStringShort(false) + " rest";
                     }
                 }
             }
@@ -2147,7 +2171,6 @@ var Model;
             if (title == null || title.length == 0) {
                 return null;
             }
-            // TODO: Do some camel casing
             return title;
         }
         finalize() {
