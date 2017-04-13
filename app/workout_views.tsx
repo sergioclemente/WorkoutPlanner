@@ -120,13 +120,6 @@ export default class WorkoutViews extends React.Component<any, any> {
 
 		// HACK: Lets override the output unit to IF since we want to get the IF
 		params.output_unit = Model.IntensityUnit.IF.toString();
-		let intervals = Model.IntervalParser.parse(
-			new Model.ObjectFactory(params.createUserProfile(), rows[i].sport_type),
-			params.workout_text
-		);
-		rows[i].if = intervals.getIntensity().toString();
-		rows[i].tss = intervals.getTSS().toString();
-		// TODO: Compute required data for charts
 	}
 
 	_onSportTypeChange(sportTypeStr: string) {
@@ -167,16 +160,11 @@ export default class WorkoutViews extends React.Component<any, any> {
 				rowsCount={filteredRows.length}
 				rowHeight={50}
 				headerHeight={50}
-				width={1000}
+				width={900}
 				height={800}>
 				<Column
 					header={<Cell>Type</Cell>}
 					cell={<SportTypeCell data={filteredRows} field="sport_type"> </SportTypeCell>}
-					width={100}
-				/>
-				<Column
-					header={<Cell>IF</Cell>}
-					cell={<CustomCell data={filteredRows} field="if"> </CustomCell>}
 					width={100}
 				/>
 				<Column

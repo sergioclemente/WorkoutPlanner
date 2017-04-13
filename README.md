@@ -54,7 +54,6 @@ Hi-Pri
 
 Client JS
 * Bundle JS more efficiently
-* Fix minification
 
 Server
 * Add authentication
