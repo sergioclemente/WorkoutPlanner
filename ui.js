@@ -2,6 +2,7 @@
 /// <reference path="type_definitions/mysql.d.ts" />
 "use strict";
 const Model = require('./model');
+var zlib = require('zlib');
 var UI;
 (function (UI) {
     class PersistedItem {
@@ -51,9 +52,8 @@ var UI;
     class QueryParams {
         constructor() {
             if (!this.validate()) {
-                if (!this.loadFromURL()) {
-                    this.loadFromStorage();
-                }
+                this.loadFromStorage();
+                this.loadFromURL();
             }
         }
         static createCopy(params) {
@@ -71,56 +71,104 @@ var UI;
         }
         loadFromURL() {
             var params = getQueryParams();
-            this.workout_title = params.t;
-            this.workout_text = params.w;
-            this.ftp_watts = params.ftp;
-            this.t_pace = params.tpace;
-            this.swim_css = params.css;
-            this.efficiency_factor = params.ef;
-            this.sport_type = params.st;
-            this.output_unit = params.ou;
-            this.email = params.email;
+            if (params.t != null && params.t.trim() != 0) {
+                this.workout_title = params.t;
+            }
+            if (params.w != null && params.w.trim() != 0) {
+                this.workout_text = params.w;
+            }
+            if (params.ftp != null && params.ftp.trim() != 0) {
+                this.ftp_watts = params.ftp;
+            }
+            if (params.tpace != null && params.tpace.trim() != 0) {
+                this.t_pace = params.tpace;
+            }
+            if (params.css != null && params.css.trim() != 0) {
+                this.swim_css = params.css;
+            }
+            if (params.ef != null && params.ef.trim() != 0) {
+                this.efficiency_factor = params.ef;
+            }
+            if (params.st != null && params.st.trim() != 0) {
+                this.sport_type = params.st;
+            }
+            if (params.ou != null && params.ou.trim() != 0) {
+                this.output_unit = params.ou;
+            }
+            if (params.email != null && params.email.trim() != 0) {
+                this.email = params.email;
+            }
             // Load the workout when its encoded
             if (params.wh != null) {
                 if (params.wh.startsWith("web+wp://")) {
-                    this.workout_text = window.atob(params.wh.substr(9, params.wh.length));
+                    var workout_hash = params.wh.substr(9, params.wh.length);
+                    var buffer = zlib.inflateSync(new Buffer(workout_hash, 'base64')).toString('utf8');
+                    console.assert(buffer != null);
+                    this.workout_text = buffer;
                 }
             }
-            return this.validate();
         }
         loadFromStorage() {
-            if (this.workout_title == null || this.workout_title == "") {
-                this.workout_title = new PersistedItem("title").load();
+            {
+                let value = new PersistedItem("title").load();
+                if (value != null && value.trim().length != 0) {
+                    this.workout_title = value;
+                }
             }
-            if (this.workout_text == null || this.workout_text == "") {
-                this.workout_text = new PersistedItem("workout").load();
+            {
+                let value = new PersistedItem("workout").load();
+                if (value != null && value.trim().length != 0) {
+                    this.workout_text = value;
+                }
             }
-            if (this.ftp_watts == null || this.ftp_watts == "") {
-                this.ftp_watts = new PersistedItem("ftp_watts").load();
+            {
+                let value = new PersistedItem("ftp_watts").load();
+                if (value != null && value.trim().length != 0) {
+                    this.ftp_watts = value;
+                }
             }
-            if (this.t_pace == null || this.t_pace == "") {
-                this.t_pace = new PersistedItem("t_pace").load();
+            {
+                let value = new PersistedItem("t_pace").load();
+                if (value != null && value.trim().length != 0) {
+                    this.t_pace = value;
+                }
             }
-            if (this.swim_css == null || this.swim_css == "") {
-                this.swim_css = new PersistedItem("swim_css").load();
+            {
+                let value = new PersistedItem("swim_css").load();
+                if (value != null && value.trim().length != 0) {
+                    this.swim_css = value;
+                }
             }
-            if (this.efficiency_factor == null && this.efficiency_factor == "") {
-                this.efficiency_factor = new PersistedItem("ef").load() || "1";
+            {
+                let value = new PersistedItem("ef").load();
+                if (value != null && value.trim().length != 0) {
+                    this.efficiency_factor = value;
+                }
             }
-            if (this.sport_type == null || this.sport_type == "") {
-                this.sport_type = new PersistedItem("sport_type").load();
+            {
+                let value = new PersistedItem("sport_type").load();
+                if (value != null && value.trim().length != 0) {
+                    this.sport_type = value;
+                }
             }
-            if (this.output_unit == null || this.output_unit == "") {
-                this.output_unit = new PersistedItem("output_unit").load();
+            {
+                let value = new PersistedItem("output_unit").load();
+                if (value != null && value.trim().length != 0) {
+                    this.output_unit = value;
+                }
             }
-            if (this.email == null || this.email == "") {
-                this.email = new PersistedItem("email").load();
+            {
+                let value = new PersistedItem("email").load();
+                if (value != null && value.trim().length != 0) {
+                    this.email = value;
+                }
             }
-            if (this.efficiency_factor == null || this.efficiency_factor == "") {
-                this.efficiency_factor = new PersistedItem("efficiency_factor").load();
+            {
+                let value = new PersistedItem("efficiency_factor").load();
+                if (value != null && value.trim().length != 0) {
+                    this.efficiency_factor = value;
+                }
             }
-            // do not load experimental
-            return this.validate();
         }
         saveToStorage() {
             new PersistedItem("title").save(this.workout_title);

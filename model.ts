@@ -1,6 +1,6 @@
 module Model {
 
-	var btoa = require('btoa');
+	var zlib = require('zlib');
 
 	export enum SportType {
 		Unknown = -1,
@@ -2761,7 +2761,7 @@ module Model {
 			result += new_line;
 			result += new_line;
 			result += "web+wp://";
-			result += btoa(this.workoutDefinition);
+			result += zlib.deflateSync(this.workoutDefinition).toString('base64');
 
 			return result
 		}

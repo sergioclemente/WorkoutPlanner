@@ -1,7 +1,7 @@
 "use strict";
 var Model;
 (function (Model) {
-    var btoa = require('btoa');
+    var zlib = require('zlib');
     (function (SportType) {
         SportType[SportType["Unknown"] = -1] = "Unknown";
         SportType[SportType["Swim"] = 0] = "Swim";
@@ -2531,7 +2531,7 @@ var Model;
             result += new_line;
             result += new_line;
             result += "web+wp://";
-            result += btoa(this.workoutDefinition);
+            result += zlib.deflateSync(this.workoutDefinition).toString('base64');
             return result;
         }
         getMRCFile() {

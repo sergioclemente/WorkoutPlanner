@@ -38,6 +38,8 @@ echo Built JSX files
 set js_files=none
 call:get_files app\*.js js_files 
 
+rem set NODE_ENV=production
+
 call browserify model.js ui.js index.js %js_files% -o index.min.js
 if  %ERRORLEVEL% NEQ 0 (goto build_fail)
 
