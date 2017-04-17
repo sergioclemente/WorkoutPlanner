@@ -107,6 +107,8 @@ var UI;
                     this.workout_text = buffer;
                 }
             }
+            console.log("Loading from url");
+            console.log(JSON.stringify(this));
         }
         loadFromStorage() {
             {
@@ -169,6 +171,8 @@ var UI;
                     this.efficiency_factor = value;
                 }
             }
+            console.log("Loading froms storage");
+            console.log(JSON.stringify(this));
         }
         saveToStorage() {
             new PersistedItem("title").save(this.workout_title);
