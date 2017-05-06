@@ -379,6 +379,9 @@ var Model;
             return this.value;
         }
         getSeconds() {
+            if (isNaN(this.estimatedDurationInSeconds) || !isFinite(this.estimatedDurationInSeconds)) {
+                return 0;
+            }
             return this.estimatedDurationInSeconds;
         }
         getDistanceInMiles() {
@@ -865,7 +868,11 @@ var Model;
         getTSS() {
             var tssVisitor = new TSSVisitor();
             VisitorHelper.visitAndFinalize(tssVisitor, this);
-            return tssVisitor.getTSS();
+            let tss = tssVisitor.getTSS();
+            if (isNaN(tss) || !isFinite(tss)) {
+                return 0;
+            }
+            return tss;
         }
         getTSSFromIF() {
             var tss_from_if = (this.getIntensity().getValue() * this.getIntensity().getValue() * this.getWorkDuration().getSeconds()) / 36;

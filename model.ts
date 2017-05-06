@@ -377,6 +377,9 @@ module Model {
 		}
 
 		getSeconds(): number {
+			if (isNaN(this.estimatedDurationInSeconds) || !isFinite(this.estimatedDurationInSeconds)) {
+				return 0;
+			}
 			return this.estimatedDurationInSeconds;
 		}
 
@@ -916,7 +919,11 @@ module Model {
 		getTSS(): number {
 			var tssVisitor = new TSSVisitor();
 			VisitorHelper.visitAndFinalize(tssVisitor, this);
-			return tssVisitor.getTSS();
+			let tss = tssVisitor.getTSS();
+			if (isNaN(tss) || !isFinite(tss)) {
+				return 0;
+			}
+			return tss;
 		}
 
 		getTSSFromIF(): number {

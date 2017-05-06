@@ -103,7 +103,6 @@ function handleSaveWorkout(req, res, uri, params) {
   logRequest(req, 200);
   var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
   var builder = new model.WorkoutBuilder(userProfile, params.st, params.ou).withDefinition(params.t, params.w);
-
   var db = new model_server.WorkoutDB(config.mysql);
   var w = new model_server.Workout();
   w.title = params.t;
