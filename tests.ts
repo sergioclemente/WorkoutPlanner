@@ -435,6 +435,31 @@ Desc9=20' @ 75%
 		let mrx_visitor = new Model.PPSMRXCourseDataVisitor("untitled_workout");
 		Model.VisitorHelper.visitAndFinalize(mrx_visitor, file_interval);
 		let expected_content = `{
+	"type":"json",
+	"createdby":"PerfPRO Studio v5.80.25",
+	"version":5.00,
+	"name":"manual mode",
+	"workoutType":"",
+	"comments":"",
+	"isLocked":0,
+	"videoFile":"",
+	"showCountDown":0,
+	"showStep":0,
+	"movieMode":0,
+	"startMinute":0,
+	"set_fields":["description","seconds","start","finish","mode","intervals","group","autolap","targetcad"],
+	"sets":[
+		["10' warm up to 75%",600,55,75,"M",1,75,0,90],
+		["1hr @ 80% (1/4)",3600,80,80,"M",1,1,0,90],
+		["5' easy (1/4)",300,55,55,"M",1,1,0,90],
+		["1hr @ 80% (2/4)",3600,80,80,"M",1,1,0,90],
+		["5' easy (2/4)",300,55,55,"M",1,1,0,90],
+		["1hr @ 80% (3/4)",3600,80,80,"M",1,1,0,90],
+		["5' easy (3/4)",300,55,55,"M",1,1,0,90],
+		["1hr @ 80% (4/4)",3600,80,80,"M",1,1,0,90],
+		["5' easy (4/4)",300,55,55,"M",1,1,0,90],
+		["20' @ 75%",1200,75,75,"M",1,0,0,90]
+	]
 }`;
 		expect_eq_str(expected_content, mrx_visitor.getContent());
 	});
