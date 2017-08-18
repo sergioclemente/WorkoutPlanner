@@ -738,6 +738,9 @@ var Model;
                 sum1 += Math.pow(intensities[i].ifValue, 2) * weights[i];
                 sum2 += weights[i];
             }
+            if (sum1 == 0) {
+                return Intensity.ZeroIntensity;
+            }
             return new Intensity(Math.sqrt(sum1 / sum2));
         }
     }

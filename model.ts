@@ -755,6 +755,10 @@ module Model {
 				sum2 += weights[i];
 			}
 
+			if (sum1 == 0) {
+				return Intensity.ZeroIntensity;
+			}
+
 			return new Intensity(Math.sqrt(sum1 / sum2));
 		}
 	}
