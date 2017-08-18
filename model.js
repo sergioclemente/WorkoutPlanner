@@ -1787,7 +1787,8 @@ var Model;
             this.fileName = "";
             this.content = "";
             this.groupId = 1;
-            this.isGroupActive = false;
+            this.currentRepeatIteration = [];
+            this.repeatCountMax = [];
             this.fileName = fileName;
         }
         getTitlePretty(interval) {
@@ -1795,10 +1796,13 @@ var Model;
             if (title.length == 0) {
                 title = WorkoutTextVisitor.getIntervalTitle(interval);
             }
+            if (this.isGroupActive()) {
+                title += " (" + (this.currentRepeatIteration[this.currentRepeatIteration.length - 1] + 1) + "/" + this.repeatCountMax[this.repeatCountMax.length - 1] + ")";
+            }
             return title;
         }
         getGroupId() {
-            if (this.isGroupActive) {
+            if (this.isGroupActive()) {
                 return this.groupId;
             }
             else {
@@ -1830,10 +1834,17 @@ var Model;
             this.content += stringFormat(`\t\t["{0}",{1},{2},{3},"M",1,{3},0,90],\n`, this.getTitlePretty(interval), interval.getWorkDuration().getSeconds(), Math.round(interval.getStartIntensity().getValue() * 100), Math.round(interval.getEndIntensity().getValue() * 100), this.getGroupId());
         }
         visitRepeatInterval(interval) {
-            this.isGroupActive = true;
-            super.visitRepeatInterval(interval);
-            this.isGroupActive = false;
+            this.repeatCountMax.push(interval.getRepeatCount());
+            for (var i = 0; i < interval.getRepeatCount(); i++) {
+                this.currentRepeatIteration.push(i);
+                this.visitArrayInterval(interval);
+                this.currentRepeatIteration.pop();
+            }
+            this.repeatCountMax.pop();
             this.groupId++;
+        }
+        isGroupActive() {
+            return this.repeatCountMax.length > 0;
         }
         finalize() {
             if (this.content.length > 0) {

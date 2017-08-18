@@ -430,6 +430,14 @@ Desc9=20' @ 75%
 }`;
 		expect_eq_str(expected_content, zwift.getContent());
 	});
+	it('PPSMRX More Complex', function () {
+		let file_interval = Model.IntervalParser.parse(of_bike, "(10min, 55, 75), 4[(1hr, 80), (5min, 55)], (20min, 75)");		
+		let mrx_visitor = new Model.PPSMRXCourseDataVisitor("untitled_workout");
+		Model.VisitorHelper.visitAndFinalize(mrx_visitor, file_interval);
+		let expected_content = `{
+}`;
+		expect_eq_str(expected_content, mrx_visitor.getContent());
+	});
 });
 
 // StepBuildInterval basic tests

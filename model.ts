@@ -1905,7 +1905,8 @@ module Model {
 		private fileName: string = "";
 		private content = "";
 		private groupId = 1;
-		private isGroupActive = false;
+		private currentRepeatIteration = []
+		private repeatCountMax = [];
 
 		constructor(fileName: string) {
 			super();
@@ -1917,11 +1918,14 @@ module Model {
 			if (title.length == 0) {
 				title = WorkoutTextVisitor.getIntervalTitle(interval);
 			}
+			if (this.isGroupActive()) {
+				title += " (" + (this.currentRepeatIteration[this.currentRepeatIteration.length-1]+1) + "/" + this.repeatCountMax[this.repeatCountMax.length-1] + ")";
+			}
 			return title;
 		}
 
 		getGroupId(): number {
-			if (this.isGroupActive) {
+			if (this.isGroupActive()) {
 				return this.groupId;
 			} else {
 				return 0;
@@ -1966,10 +1970,18 @@ module Model {
 		}
 
 		visitRepeatInterval(interval: RepeatInterval) {
-			this.isGroupActive = true;
-			super.visitRepeatInterval(interval);
-			this.isGroupActive = false;
+			this.repeatCountMax.push(interval.getRepeatCount());
+			for (var i = 0; i < interval.getRepeatCount(); i++) {
+				this.currentRepeatIteration.push(i);
+				this.visitArrayInterval(interval);
+				this.currentRepeatIteration.pop();
+			}
+			this.repeatCountMax.pop();
 			this.groupId++;
+		}
+
+		isGroupActive() : boolean {
+			return this.repeatCountMax.length > 0;
 		}
 
 		finalize() {

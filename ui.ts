@@ -136,6 +136,7 @@ module UI {
 					var buffer = zlib.inflateSync(new Buffer(workout_hash, 'base64')).toString('utf8');
 					console.assert(buffer != null);
 					this.workout_text = buffer;
+					console.log("Loading from web+wp://");
 				}
 			}
 
@@ -144,77 +145,78 @@ module UI {
 		}
 
 		loadFromStorage(): void {
+			var params : UI.QueryParams;
 			{
 				let value = new PersistedItem("title").load();
 				if (value != null && value.trim().length != 0) {
-					this.workout_title = value;
+					params.workout_title = value;
 				}
 			}
 
 			{
 				let value = new PersistedItem("workout").load();
 				if (value != null && value.trim().length != 0) {
-					this.workout_text = value;
+					params.workout_text = value;
 				}
 			}
 
 			{
 				let value = new PersistedItem("ftp_watts").load();
 				if (value != null && value.trim().length != 0) {
-					this.ftp_watts = value;
+					params.ftp_watts = value;
 				}
 			}
 
 			{
 				let value = new PersistedItem("t_pace").load();
 				if (value != null && value.trim().length != 0) {
-					this.t_pace = value;
+					params.t_pace = value;
 				}
 			}
 
 			{
 				let value = new PersistedItem("swim_css").load();
 				if (value != null && value.trim().length != 0) {
-					this.swim_css = value;
+					params.swim_css = value;
 				}
 			}
 
 			{
 				let value = new PersistedItem("ef").load();
 				if (value != null && value.trim().length != 0) {
-					this.efficiency_factor = value;
+					params.efficiency_factor = value;
 				}
 			}
 
 			{
 				let value = new PersistedItem("sport_type").load();
 				if (value != null && value.trim().length != 0) {
-					this.sport_type = value;
+					params.sport_type = value;
 				}
 			}
 
 			{
 				let value = new PersistedItem("output_unit").load();
 				if (value != null && value.trim().length != 0) {
-					this.output_unit = value;
+					params.output_unit = value;
 				}
 			}
 
 			{
 				let value = new PersistedItem("email").load();
 				if (value != null && value.trim().length != 0) {
-					this.email = value;
+					params.email = value;
 				}
 			}
 
 			{
 				let value = new PersistedItem("efficiency_factor").load();
 				if (value != null && value.trim().length != 0) {
-					this.efficiency_factor = value;
+					params.efficiency_factor = value;
 				}
 			}
 			console.log("Loading froms storage");
-			console.log(JSON.stringify(this));			
+			console.log(JSON.stringify(params));			
 		}
 
 		saveToStorage(): void {

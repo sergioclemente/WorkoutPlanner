@@ -48,11 +48,8 @@ To install the protocol handler:
 -- navigator.registerProtocolHandler("web+wp", "http://workoutplanner.herokuapp.com/?wh=%s", "Workout Planner handler");
 
 # Bugs/Feature requests
-Hi-Pri
 - Add lapcount complexity
 - Make long repeated series easier to read
-
-Client JS
 * Bundle JS more efficiently
 
 Server
@@ -63,12 +60,7 @@ Server
 
 Workout View
 * Don't require a title for validating
-* add profiles - workaround today is links
 * add the hability for named groups (warmup/mainset/cooldown) - workaround today is comments
-
-List Workouts:
-* Add filtering (to text and duration)
-* Add histogram of zones
 
 Player:
 * Fix play of music on iphone

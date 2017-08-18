@@ -354,7 +354,8 @@ declare module Model {
         private fileName;
         private content;
         private groupId;
-        private isGroupActive;
+        private currentRepeatIteration;
+        private repeatCountMax;
         constructor(fileName: string);
         getTitlePretty(interval: BaseInterval): string;
         getGroupId(): number;
@@ -363,6 +364,7 @@ declare module Model {
         visitSimpleInterval(interval: SimpleInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
         visitRepeatInterval(interval: RepeatInterval): void;
+        isGroupActive(): boolean;
         finalize(): void;
         getContent(): string;
     }
