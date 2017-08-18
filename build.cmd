@@ -48,10 +48,9 @@ if  %ERRORLEVEL% NEQ 0 (goto build_fail)
 
 call browserify model.js ui.js player.js %js_files% -o player.min.js
 if  %ERRORLEVEL% NEQ 0 (goto build_fail)
-
 echo Combined javascript files
 
-rm app/*.js
+del "app\*.js"
 echo Removed intermediate files
 
 REM Minified files
