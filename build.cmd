@@ -53,7 +53,7 @@ echo Combined javascript files
 del "app\*.js"
 echo Removed intermediate files
 
-REM Minified files
+echo DID NOT MINIFY FILES
 
 echo Build succeeded
 exit /b 0
