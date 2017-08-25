@@ -114,7 +114,7 @@ var ModelServer;
             }
         }
         getAll(callback) {
-            var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id";
+            var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id DESC";
             var connection = mysql.createConnection(this.connection_string);
             try {
                 connection.query(sql, function (err, rows, fields) {

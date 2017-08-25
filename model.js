@@ -45,14 +45,14 @@ var Model;
         IntensityUnit[IntensityUnit["FreeRide"] = 10] = "FreeRide";
     })(Model.IntensityUnit || (Model.IntensityUnit = {}));
     var IntensityUnit = Model.IntensityUnit;
+    var RunningPaceUnit;
     (function (RunningPaceUnit) {
         RunningPaceUnit[RunningPaceUnit["Unknown"] = 0] = "Unknown";
         RunningPaceUnit[RunningPaceUnit["MinMi"] = 1] = "MinMi";
         RunningPaceUnit[RunningPaceUnit["Mph"] = 2] = "Mph";
         RunningPaceUnit[RunningPaceUnit["MinKm"] = 3] = "MinKm";
         RunningPaceUnit[RunningPaceUnit["KmHr"] = 4] = "KmHr";
-    })(Model.RunningPaceUnit || (Model.RunningPaceUnit = {}));
-    var RunningPaceUnit = Model.RunningPaceUnit;
+    })(RunningPaceUnit || (RunningPaceUnit = {}));
     class MyMath {
         /**
          * Decimal adjustment of a number.
@@ -90,7 +90,6 @@ var Model;
             return MyMath.decimalAdjust('ceil', value, exp);
         }
     }
-    Model.MyMath = MyMath;
     class SportTypeHelper {
         static convertToString(sportType) {
             if (sportType == SportType.Bike) {
@@ -295,7 +294,6 @@ var Model;
             }
         }
     }
-    Model.DurationUnitHelper = DurationUnitHelper;
     class FormatterHelper {
         static roundNumberUp(value, round_val = 0) {
             if (round_val != 0) {
@@ -659,7 +657,6 @@ var Model;
             return easyThreshold;
         }
     }
-    Model.DefaultIntensity = DefaultIntensity;
     class Intensity {
         constructor(ifValue = 0, value = 0, unit = IntensityUnit.IF) {
             // HACK: Find a better way of doing this

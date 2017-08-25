@@ -153,7 +153,7 @@ module ModelServer {
 		}
 
 		getAll(callback: (err: string, w: Workout[]) => void): void {
-			var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id";
+			var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id DESC";
 
 			var connection = mysql.createConnection(this.connection_string);
 

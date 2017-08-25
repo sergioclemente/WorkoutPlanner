@@ -50,7 +50,7 @@ module Model {
 		FreeRide = 10,
 	}
 
-	export enum RunningPaceUnit {
+	enum RunningPaceUnit {
 		Unknown,
 		MinMi,
 		Mph,
@@ -58,7 +58,7 @@ module Model {
 		KmHr,
 	}
 
-	export class MyMath {
+	class MyMath {
 		/**
 		 * Decimal adjustment of a number.
 		 *
@@ -173,7 +173,7 @@ module Model {
 		}
 	}
 
-	export class DurationUnitHelper {
+	class DurationUnitHelper {
 		public static isTime(durationUnit: DurationUnit): boolean {
 			return durationUnit >= MIN_TIME;
 		}
@@ -644,7 +644,7 @@ module Model {
 		}
 	};
 
-	export class DefaultIntensity {
+	class DefaultIntensity {
 		static isEasy(intensity: Intensity, sportType: SportType): boolean {
 			// If the pace is swim based and its on offset relative to the CSS, lets handle it 
 			// differently. 10s from CSS is the threshold for easy.

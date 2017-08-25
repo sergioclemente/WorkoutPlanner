@@ -51,6 +51,7 @@ if  %ERRORLEVEL% NEQ 0 (goto build_fail)
 echo Combined javascript files
 
 del "app\*.js"
+if  %ERRORLEVEL% NEQ 0 (goto build_fail)
 echo Removed intermediate files
 
 echo DID NOT MINIFY FILES

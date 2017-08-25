@@ -34,27 +34,6 @@ declare module Model {
         HeartRate = 9,
         FreeRide = 10,
     }
-    enum RunningPaceUnit {
-        Unknown = 0,
-        MinMi = 1,
-        Mph = 2,
-        MinKm = 3,
-        KmHr = 4,
-    }
-    class MyMath {
-        /**
-         * Decimal adjustment of a number.
-         *
-         * @param   {String}    type    The type of adjustment.
-         * @param   {Number}    value   The number.
-         * @param   {Integer}   exp     The exponent (the 10 logarithm of the adjustment base).
-         * @returns {Number}            The adjusted value.
-         */
-        static decimalAdjust(type: any, value: any, exp: any): any;
-        static round10(value: number, exp: number): number;
-        static floor10(value: number, exp: number): number;
-        static ceil10(value: number, exp: number): number;
-    }
     class SportTypeHelper {
         static convertToString(sportType: SportType): string;
     }
@@ -63,16 +42,6 @@ declare module Model {
     }
     class TimeUnitHelper {
         static convertTo(value: number, unitFrom: TimeUnit, unitTo: TimeUnit): number;
-    }
-    class DurationUnitHelper {
-        static isTime(durationUnit: DurationUnit): boolean;
-        static isDistance(durationUnit: DurationUnit): boolean;
-        static isDurationUnit(unit: string): boolean;
-        static getDistanceMiles(unit: DurationUnit, value: number): number;
-        static getDurationSeconds(unit: DurationUnit, value: number): number;
-        static areDurationUnitsSame(durationUnits: DurationUnit[]): boolean;
-        static toString(unit: DurationUnit): string;
-        static toDurationUnit(unit: string): DurationUnit;
     }
     class FormatterHelper {
         static roundNumberUp(value: number, round_val?: number): number;
@@ -107,10 +76,6 @@ declare module Model {
         static toString(unit: IntensityUnit): string;
         static toIntensityUnit(unit: string): IntensityUnit;
         static isIntensityUnit(unit: string): boolean;
-    }
-    class DefaultIntensity {
-        static isEasy(intensity: Intensity, sportType: SportType): boolean;
-        static getEasyThreshold(sportType: SportType): number;
     }
     class Intensity {
         private ifValue;

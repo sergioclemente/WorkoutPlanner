@@ -13,7 +13,8 @@ function logRequest(req, code) {
 }
 
 function handleExistentFile(req, res, fs, filename) {
-  if (fs.statSync(filename).isDirectory()) {
+  let stat = fs.statSync(filename);
+  if (stat.isDirectory()) {
     filename += '/index.html';
   }
   fs.readFile(filename, "binary", function(err, file) {
