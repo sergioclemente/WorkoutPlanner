@@ -1,4 +1,5 @@
 var http = require('http');
+var zlib = require('zlib');
 var path = require("path");
 var fs = require("fs");
 var url = require("url");
@@ -13,24 +14,45 @@ function logRequest(req, code) {
 }
 
 function handleExistentFile(req, res, fs, filename) {
+  let accept_encoding = req.headers['accept-encoding'];
+  if (!accept_encoding) {
+    accept_encoding = '';
+  }
   let stat = fs.statSync(filename);
   if (stat.isDirectory()) {
     filename += '/index.html';
   }
-  fs.readFile(filename, "binary", function(err, file) {
-    if(err) {
-      logRequest(req, 500);
-      res.writeHead(500, {"Content-Type": "text/plain"});
-      res.write(err + "\n");
+  var req_mod_date = req.headers["if-modified-since"];
+  var mtime = stat.mtime;
+  if (req_mod_date != null) {
+    req_mod_date = new Date(req_mod_date);
+    if (req_mod_date.toUTCString() == mtime.toUTCString()) {
+      res.writeHead(304, {
+          "Last-Modified": mtime.toUTCString()
+      });
       res.end();
       return;
     }
-
-    logRequest(req, 200);
-    res.writeHead(200);
-    res.write(file, "binary");
-    res.end();
-  });
+  }  
+  const raw = fs.createReadStream(filename);
+  // Note: This is not a conformant accept-encoding parser.
+  // See http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.3
+  if (/\bdeflate\b/.test(accept_encoding)) {
+    res.writeHead(200, { 
+      'Content-Encoding': 'deflate',
+      'Last-Modified': mtime.toUTCString()
+    });
+    raw.pipe(zlib.createDeflate()).pipe(res);
+  } else if (/\bgzip\b/.test(accept_encoding)) {
+    res.writeHead(200, { 
+      'Content-Encoding': 'gzip',
+      'Last-Modified': mtime.toUTCString()
+    });
+    raw.pipe(zlib.createGzip()).pipe(res);
+  } else {
+    res.writeHead(200, {});
+    raw.pipe(res);
+  }
 }
 
 function handleSendEmail(req, res, uri, params) {
