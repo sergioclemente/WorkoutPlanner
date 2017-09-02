@@ -1,6 +1,6 @@
-/// <reference path="../type_definitions/react.d.ts" />
+/// <reference path="../node_modules/@types/react/index.d.ts" />
+/// <reference path="../node_modules/@types/fixed-data-table/index.d.ts" />
 /// <reference path="../type_definitions/canvasjs.d.ts" />
-/// <reference path="../type_definitions/fixed-data-table.d.ts" />
 
 import * as React from 'react';
 import { Table, Column, Cell } from 'fixed-data-table';

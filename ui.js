@@ -1,7 +1,7 @@
-/// <reference path="./node_modules/@types/node/index.d.ts"/>
-/// <reference path="type_definitions/mysql.d.ts" />
 "use strict";
-const Model = require('./model');
+/// <reference path="./node_modules/@types/node/index.d.ts"/>
+/// <reference path="./node_modules/@types/mysql/index.d.ts"/>
+const Model = require("./model");
 var zlib = require('zlib');
 var UI;
 (function (UI) {

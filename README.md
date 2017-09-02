@@ -10,16 +10,6 @@ https://workoutplanner.herokuapp.com
 2. Then install the following dependencies (as an administrator):
 
 ```
-npm install -g typescript
-npm install -g nodemailer
-npm install -g browserify
-npm install -g react
-npm install -g react-dom
-npm install -g btoa
-npm install -g minifier
-npm install -g mysql
-npm install -g mocha
-npm install -g fixed-data-table
 npm install
 ```
 
@@ -28,13 +18,13 @@ npm install
 * Compile and run tests
 
 ```
-./build.sh
+./build.cmd
 ```
 
 * Starting the node server
 
 ```
-node ./server.js
+npm start
 ```
 
 * Pushing live

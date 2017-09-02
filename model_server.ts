@@ -1,5 +1,5 @@
-/// <reference path="type_definitions/nodemailer.d.ts" />
-/// <reference path="type_definitions/mysql.d.ts" />
+/// <reference path="./node_modules/@types/nodemailer/index.d.ts"/>
+/// <reference path="./node_modules/@types/mysql/index.d.ts"/>
 
 var mysql = require('mysql');
 

@@ -2,34 +2,35 @@
 var Model;
 (function (Model) {
     var zlib = require('zlib');
+    let SportType;
     (function (SportType) {
         SportType[SportType["Unknown"] = -1] = "Unknown";
         SportType[SportType["Swim"] = 0] = "Swim";
         SportType[SportType["Bike"] = 1] = "Bike";
         SportType[SportType["Run"] = 2] = "Run";
         SportType[SportType["Other"] = 3] = "Other";
-    })(Model.SportType || (Model.SportType = {}));
-    var SportType = Model.SportType;
+    })(SportType = Model.SportType || (Model.SportType = {}));
     // If you add another distance, make sure you update the MAX_DISTANCE
     // and that it doesn't overlap with TimeUnit
+    let DistanceUnit;
     (function (DistanceUnit) {
         DistanceUnit[DistanceUnit["Unknown"] = 0] = "Unknown";
         DistanceUnit[DistanceUnit["Miles"] = 1] = "Miles";
         DistanceUnit[DistanceUnit["Kilometers"] = 2] = "Kilometers";
         DistanceUnit[DistanceUnit["Meters"] = 3] = "Meters";
         DistanceUnit[DistanceUnit["Yards"] = 4] = "Yards";
-    })(Model.DistanceUnit || (Model.DistanceUnit = {}));
-    var DistanceUnit = Model.DistanceUnit;
+    })(DistanceUnit = Model.DistanceUnit || (Model.DistanceUnit = {}));
     // If you add another time unit, be careful not adding one before MIN_TIME
+    let TimeUnit;
     (function (TimeUnit) {
         TimeUnit[TimeUnit["Unknown"] = 11] = "Unknown";
         TimeUnit[TimeUnit["Seconds"] = 12] = "Seconds";
         TimeUnit[TimeUnit["Minutes"] = 13] = "Minutes";
         TimeUnit[TimeUnit["Hours"] = 14] = "Hours";
-    })(Model.TimeUnit || (Model.TimeUnit = {}));
-    var TimeUnit = Model.TimeUnit;
+    })(TimeUnit = Model.TimeUnit || (Model.TimeUnit = {}));
     const MIN_TIME = 11;
     const MAX_DISTANCE = 10;
+    let IntensityUnit;
     (function (IntensityUnit) {
         IntensityUnit[IntensityUnit["Unknown"] = -1] = "Unknown";
         IntensityUnit[IntensityUnit["IF"] = 0] = "IF";
@@ -43,9 +44,8 @@ var Model;
         IntensityUnit[IntensityUnit["OffsetSeconds"] = 8] = "OffsetSeconds";
         IntensityUnit[IntensityUnit["HeartRate"] = 9] = "HeartRate";
         IntensityUnit[IntensityUnit["FreeRide"] = 10] = "FreeRide";
-    })(Model.IntensityUnit || (Model.IntensityUnit = {}));
-    var IntensityUnit = Model.IntensityUnit;
-    var RunningPaceUnit;
+    })(IntensityUnit = Model.IntensityUnit || (Model.IntensityUnit = {}));
+    let RunningPaceUnit;
     (function (RunningPaceUnit) {
         RunningPaceUnit[RunningPaceUnit["Unknown"] = 0] = "Unknown";
         RunningPaceUnit[RunningPaceUnit["MinMi"] = 1] = "MinMi";
@@ -1364,6 +1364,7 @@ var Model;
                             }
                         }
                     }
+                    // end simple workout
                 }
                 else if (ch == "[") {
                     var ai = new ArrayInterval("", []);

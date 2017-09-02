@@ -35,7 +35,7 @@ declare module Model {
         FreeRide = 10,
     }
     class SportTypeHelper {
-        static convertToString(sportType: SportType): string;
+        static convertToString(sportType: SportType): "" | "Bike" | "Run" | "Swim" | "Other";
     }
     class DistanceUnitHelper {
         static convertTo(value: number, unitFrom: DistanceUnit, unitTo: DistanceUnit): number;

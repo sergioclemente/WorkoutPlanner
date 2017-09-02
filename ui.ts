@@ -1,5 +1,5 @@
 /// <reference path="./node_modules/@types/node/index.d.ts"/>
-/// <reference path="type_definitions/mysql.d.ts" />
+/// <reference path="./node_modules/@types/mysql/index.d.ts"/>
 
 import * as Model from './model';
 

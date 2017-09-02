@@ -1,4 +1,4 @@
-/// <reference path="../type_definitions/react.d.ts" />
+/// <reference path="../node_modules/@types/react/index.d.ts" />
 /// <reference path="../type_definitions/canvasjs.d.ts" />
 
 import * as React from 'react';
@@ -160,11 +160,11 @@ export default class PlayerView extends React.Component<any, any> {
 			</form>
 			<WorkoutView {...this.props} ref='view'></WorkoutView>
 			<audio ref="countdown" hidden={false}>
-				<source src="countdown.wav" type="audio/wav" preload="auto" />
+				<source src="countdown.wav" type="audio/wav" />
 				Your browser does not support the audio element.
 					</audio>
 			<audio ref="ding" hidden={false}>
-				<source src="ding.wav" type="audio/wav" preload="auto" />
+				<source src="ding.wav" type="audio/wav" />
 			</audio>
 		</div>);
 	}
