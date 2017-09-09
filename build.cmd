@@ -1,6 +1,9 @@
 @set JS_TARGET=ES6
 
-call tsc --moduleResolution node --m commonjs --target %JS_TARGET% --removeComments model.ts ui.ts model_server.ts
+rem --noUnusedLocals
+@set TSC_OPTS=--noUnusedParameters --noImplicitReturns
+
+call tsc --moduleResolution node --m commonjs %TSC_OPTS% --target %JS_TARGET% --removeComments model.ts ui.ts model_server.ts
 @if  %ERRORLEVEL% NEQ 0 (goto build_fail)
 @echo Compiled TSC files
 
@@ -38,12 +41,6 @@ call tsc --moduleResolution node --m commonjs --target %JS_TARGET% --jsx react %
 @call :get_files app\*.js js_files 
 
 call browserify model.js ui.js index.js %js_files% -o index.min.js
-@if  %ERRORLEVEL% NEQ 0 (goto build_fail)
-
-call browserify model.js ui.js workouts_view.js %js_files% -o workouts_view.min.js
-@if  %ERRORLEVEL% NEQ 0 (goto build_fail)
-
-call browserify model.js ui.js player.js %js_files% -o player.min.js
 @if  %ERRORLEVEL% NEQ 0 (goto build_fail)
 @echo Combined javascript files
 

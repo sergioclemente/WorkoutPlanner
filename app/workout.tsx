@@ -24,7 +24,9 @@ export default class Workout extends React.Component<any, any> {
 	}
 
 	_onUserSettingsChanged(ftp: number, t_pace: string, swim_css: string, email: string, efficiency_factor: string) {
-		this.params.ftp_watts = ftp.toString();
+		if (!isNaN(ftp)) {
+			this.params.ftp_watts = ftp.toString();	
+		}
 		this.params.t_pace = t_pace;
 		this.params.swim_css = swim_css;
 		this.params.email = email;
@@ -48,11 +50,14 @@ export default class Workout extends React.Component<any, any> {
 
 	refreshUrls() {
 		// TODO: Merge pushing into the history with the UI.QueryParams
-		var url_parameters = this.params.getURL();
-		this._setHref("email_send_workout", "send_mail" + url_parameters);
-		this._setHref("player_link", "player.html" + url_parameters);
+		this._setHref("email_send_workout", "send_mail" + this.params.getURL());
 
-		window.history.pushState('Object', 'Title', url_parameters);
+		let params = UI.QueryParams.createCopy(this.params);
+		params.page = "player";
+		
+		this._setHref("player_link", params.getURL());
+
+		window.history.pushState('Object', 'Title', this.params.getURL());
 	}
 
 	_setHref(element_ref: string, url: string) {
@@ -121,7 +126,7 @@ export default class Workout extends React.Component<any, any> {
 						<td><a ref="player_link">Player</a></td>
 						<td><a ref="email_send_workout" >Email Workout</a></td>
 						<td><a ref="save_workout" href="#" onClick={(e) => this._onSaveWorkout()}>Save Workout</a></td>
-						<td><a href="workouts_view.html">List Workouts</a></td>
+						<td><a href="?page=list">List Workouts</a></td>
 					</tr>
 				</tbody>
 			</table>

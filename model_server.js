@@ -49,10 +49,6 @@ var ModelServer;
     }
     ModelServer.MailSender = MailSender;
     class Workout {
-        static load(id) {
-            var ret = new Workout();
-            return ret;
-        }
     }
     ModelServer.Workout = Workout;
     function stringFormat(format, ...args) {
@@ -94,7 +90,7 @@ var ModelServer;
             var connection = mysql.createConnection(this.connection_string);
             try {
                 sql = stringFormat(connection.escape(id));
-                connection.query(sql, function (err, rows, fields) {
+                connection.query(sql, function (err, rows) {
                     if (!err) {
                         if (rows.length == 0) {
                             callback("", null);
@@ -117,7 +113,7 @@ var ModelServer;
             var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id DESC";
             var connection = mysql.createConnection(this.connection_string);
             try {
-                connection.query(sql, function (err, rows, fields) {
+                connection.query(sql, function (err, rows) {
                     var workouts = [];
                     if (!err) {
                         if (rows.length == 0) {

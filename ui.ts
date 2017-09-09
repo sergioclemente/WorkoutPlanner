@@ -70,6 +70,7 @@ module UI {
 		public workout_text: string;
 		public sport_type: string;
 		public output_unit: string;
+		public page: string;
 
 		constructor() {
 			if (!this.validate()) {
@@ -89,6 +90,7 @@ module UI {
 			ret.sport_type = params.sport_type;
 			ret.output_unit = params.output_unit;
 			ret.email = params.email;
+			ret.page = params.page;
 			return ret;
 		}
 
@@ -136,12 +138,12 @@ module UI {
 					var buffer = zlib.inflateSync(new Buffer(workout_hash, 'base64')).toString('utf8');
 					console.assert(buffer != null);
 					this.workout_text = buffer;
-					console.log("Loading from web+wp://");
 				}
 			}
 
-			console.log("Loading from url");
-			console.log(JSON.stringify(this));
+			if (params.page != null && params.page.trim() != 0) {
+				this.page = params.page;
+			}
 		}
 
 		loadFromStorage(): void {
@@ -213,44 +215,161 @@ module UI {
 				if (value != null && value.trim().length != 0) {
 					this.efficiency_factor = value;
 				}
-			}	
+			}
+
+			{
+				let value = new PersistedItem("page").load();
+				if (value != null && value.trim().length != 0) {
+					this.page = value;
+				}
+			}
 		}
 
 		saveToStorage(): void {
-			new PersistedItem("title").save(this.workout_title);
-			new PersistedItem("workout").save(this.workout_text);
-			new PersistedItem("ftp_watts").save(this.ftp_watts);
-			new PersistedItem("t_pace").save(this.t_pace);
-			new PersistedItem("swim_css").save(this.swim_css);
-			new PersistedItem("ef").save(this.efficiency_factor);
-			new PersistedItem("sport_type").save(this.sport_type);
-			new PersistedItem("output_unit").save(this.output_unit);
-			new PersistedItem("email").save(this.email);
-			new PersistedItem("efficiency_factor").save(this.efficiency_factor);
+			if (this.hasWorkoutTitle()) {
+				new PersistedItem("title").save(this.workout_title);
+			}
+
+			if (this.hasWorkoutText()) {
+				new PersistedItem("workout").save(this.workout_text);
+			}
+
+			if (this.hasFtpWatts()) {
+				new PersistedItem("ftp_watts").save(this.ftp_watts);
+			}
+
+			if (this.hasTPace()) {
+				new PersistedItem("t_pace").save(this.t_pace);
+			}
+
+			if (this.hasSwimCSS()) {
+				new PersistedItem("swim_css").save(this.swim_css);
+			}
+
+ 			if (this.hasEfficiencyFactor()) {
+				new PersistedItem("ef").save(this.efficiency_factor);
+			}
+
+			if (this.hasSportType()) {
+				new PersistedItem("sport_type").save(this.sport_type);
+			}
+
+
+			if (this.hasOutputUnit()) {
+				new PersistedItem("output_unit").save(this.output_unit);
+			}
+
+			if (this.hasEmail()) {
+				new PersistedItem("email").save(this.email);
+			}
+
+			if (this.hasEfficiencyFactor()) {
+				new PersistedItem("efficiency_factor").save(this.efficiency_factor);
+			}
+				
+
+			if (this.hasPage()) {
+				new PersistedItem("page").save(this.page);
+			}
+		}
+
+		hasWorkoutTitle() : boolean {
+			return typeof (this.workout_title) != 'undefined' && this.workout_title != "";
+		}
+
+		hasWorkoutText() : boolean {
+			return typeof (this.workout_text) != 'undefined' && this.workout_text != "";
+		}
+
+		hasFtpWatts() : boolean {
+			return typeof (this.ftp_watts) != 'undefined' && this.ftp_watts != "";
+		}
+
+		hasTPace() : boolean {
+			return typeof (this.t_pace) != 'undefined' && this.t_pace != "";
+		}
+
+		hasSwimCSS() : boolean {
+			return typeof (this.swim_css) != 'undefined' && this.swim_css != "";
+		}
+
+		hasEfficiencyFactor() : boolean {
+			return typeof (this.efficiency_factor) != 'undefined' && this.efficiency_factor != "";
+		}
+
+		hasSportType() : boolean {
+			return typeof (this.sport_type) != 'undefined' && this.sport_type != "";
+		}
+
+		hasOutputUnit() : boolean {
+			return typeof (this.output_unit) != 'undefined' && this.output_unit != "";
+		}
+
+		hasEmail() : boolean {
+			return typeof (this.email) != 'undefined' && this.email != "";
+		}
+
+		hasPage() : boolean {
+			return typeof (this.page) != 'undefined' && this.page != "";
 		}
 
 		validate(): boolean {
-			return typeof (this.workout_title) != 'undefined' && this.workout_title != "" &&
-				typeof (this.workout_text) != 'undefined' && this.workout_text != "" &&
-				typeof (this.ftp_watts) != 'undefined' && this.ftp_watts != "" &&
-				typeof (this.t_pace) != 'undefined' && this.t_pace != "" &&
-				typeof (this.swim_css) != 'undefined' && this.swim_css != "" &&
-				typeof (this.efficiency_factor) != 'undefined' && this.efficiency_factor != "" &&
-				typeof (this.sport_type) != 'undefined' && this.sport_type != "" &&
-				typeof (this.output_unit) != 'undefined' && this.output_unit != "" &&
-				typeof (this.email) != 'undefined' && this.email != "";
+			return this.hasWorkoutTitle() &&
+				this.hasWorkoutText() &&
+				this.hasFtpWatts() &&
+				this.hasTPace() &&
+				this.hasSwimCSS() &&
+				this.hasEfficiencyFactor() &&
+				this.hasSportType() &&
+				this.hasOutputUnit() &&
+				this.hasEmail();
+				// intentially missed the page. the default will be the main page
 		}
 
 		getURL(): string {
-			return "?t=" + encodeURIComponent(this.workout_title) +
-				"&w=" + encodeURIComponent(this.workout_text) +
-				"&st=" + encodeURIComponent(this.sport_type) +
-				"&ftp=" + encodeURIComponent(this.ftp_watts) +
-				"&tpace=" + encodeURIComponent(this.t_pace) +
-				"&css=" + encodeURIComponent(this.swim_css) +
-				"&ef=" + encodeURIComponent(this.efficiency_factor) +
-				"&ou=" + encodeURIComponent(this.output_unit) +
-				"&email=" + encodeURIComponent(this.email);
+			let res = "?";
+
+			if (this.hasWorkoutTitle()) {
+				res += "t=" + encodeURIComponent(this.workout_title);
+			}
+
+			if (this.hasWorkoutText()) {
+				res += "&w=" + encodeURIComponent(this.workout_text);
+			}
+
+			if (this.hasSportType()) {
+				res += "&st=" + encodeURIComponent(this.sport_type);
+			}
+
+			if (this.hasFtpWatts()) {
+				res += "&ftp=" + encodeURIComponent(this.ftp_watts);
+			}
+
+			if (this.hasTPace()) {
+				res += "&tpace=" + encodeURIComponent(this.t_pace);
+			}
+
+			if (this.hasSwimCSS()) {
+				res += "&css=" + encodeURIComponent(this.swim_css);
+			}
+
+			if (this.hasEfficiencyFactor()) {
+				res += "&ef=" + encodeURIComponent(this.efficiency_factor);
+			}
+
+			if (this.hasOutputUnit()) {
+				res += "&ou=" + encodeURIComponent(this.output_unit);
+			}
+
+			if (this.hasEmail()) {
+				res += "&email=" + encodeURIComponent(this.email);
+			}
+
+			if (this.hasPage()) {
+				res += "&page=" + encodeURIComponent(this.page);
+			}
+
+			return res;
 		}
 
 		createUserProfile(): Model.UserProfile {

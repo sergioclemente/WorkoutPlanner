@@ -218,7 +218,7 @@ declare module Model {
         finalize(): void;
     }
     abstract class BaseVisitor implements Visitor {
-        visitCommentInterval(interval: CommentInterval): void;
+        visitCommentInterval(): void;
         abstract visitSimpleInterval(interval: SimpleInterval): void;
         visitStepBuildInterval(interval: StepBuildInterval): void;
         abstract visitRampBuildInterval(interval: RampBuildInterval): void;
@@ -267,7 +267,7 @@ declare module Model {
                 low: number;
                 high: number;
             };
-        };
+        } | {};
     }
     class ZonesVisitor extends BaseVisitor {
         private zones;
@@ -351,9 +351,9 @@ declare module Model {
         visitArrayInterval(interval: ArrayInterval): void;
         visitArrayIntervalInternal(interval: ArrayInterval, always_add_parenthesis: boolean): void;
         visitRepeatInterval(interval: RepeatInterval): void;
-        visitRampBuildInterval(interval: RampBuildInterval): any;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
         visitStepBuildInterval(interval: StepBuildInterval): void;
-        visitSimpleInterval(interval: SimpleInterval): any;
+        visitSimpleInterval(interval: SimpleInterval): void;
         getIntensityPretty(intensity: Intensity): string;
         getIntervalTitle(interval: Interval): string;
         finalize(): void;

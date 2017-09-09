@@ -93,6 +93,7 @@ export default class WorkoutViews extends React.Component<any, any> {
 				params.workout_text = rows[i].value;
 				params.workout_title = rows[i].title;
 				params.sport_type = rows[i].sport_type.toString();
+				params.page = "wv";
 				rows[i].link = "/" + params.getURL();
 				if (params.validate()) {
 					this._setExtraRowFields(rows, params, i);

@@ -40,7 +40,7 @@ To install the protocol handler:
 # Bugs/Feature requests
 - Add lapcount complexity
 - Make long repeated series easier to read
-* Bundle JS more efficiently
+- Derek+ is not properly calculating distance
 
 Server
 * Add authentication

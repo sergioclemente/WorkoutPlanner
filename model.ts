@@ -50,14 +50,6 @@ module Model {
 		FreeRide = 10,
 	}
 
-	enum RunningPaceUnit {
-		Unknown,
-		MinMi,
-		Mph,
-		MinKm,
-		KmHr,
-	}
-
 	class MyMath {
 		/**
 		 * Decimal adjustment of a number.
@@ -877,10 +869,10 @@ module Model {
 		}
 
 		getIntensity(): Intensity {
-			var intensities: Intensity[] = this.intervals.map(function (value, index, array) {
+			var intensities: Intensity[] = this.intervals.map(function (value) {
 				return value.getIntensity();
 			});
-			var weights: number[] = this.intervals.map(function (value, index, array) {
+			var weights: number[] = this.intervals.map(function (value) {
 				return value.getWorkDuration().getSeconds();
 			});
 
@@ -1021,11 +1013,11 @@ module Model {
 			super(title, intervals);
 		}
 		getIntensity(): Intensity {
-			var intensities: Intensity[] = this.intervals.map(function (value, index, array) {
+			var intensities: Intensity[] = this.intervals.map(function (value) {
 				return value.getIntensity();
 			});
 			var repeatCount = this.getRepeatCount();
-			var weights: number[] = this.intervals.map(function (value, index, array) {
+			var weights: number[] = this.intervals.map(function (value) {
 				return value.getWorkDuration().getSeconds() * repeatCount;
 			});
 
@@ -1537,7 +1529,7 @@ module Model {
 
 	export abstract class BaseVisitor implements Visitor {
 
-		visitCommentInterval(interval: CommentInterval): void {
+		visitCommentInterval(/*interval: CommentInterval*/): void {
 			// nothing to do
 		}
 
@@ -1644,6 +1636,8 @@ module Model {
 					5: { name: "z5", low: 1.01, high: 1.05 },
 					6: { name: "z6", low: 1.05, high: 10 },
 				};
+			} else {
+				return {};
 			}
 		}
 	}
@@ -2118,11 +2112,11 @@ module Model {
 		}
 
 		// ArrayInterval
-		visitArrayInterval(interval: ArrayInterval) {
+		visitArrayInterval(interval: ArrayInterval) : void {
 			this.visitArrayIntervalInternal(interval, false);
 		}
 
-		visitArrayIntervalInternal(interval: ArrayInterval, always_add_parenthesis: boolean) {
+		visitArrayIntervalInternal(interval: ArrayInterval, always_add_parenthesis: boolean) : void {
 			var length = interval.getIntervals().length;
 			var firstInterval = interval.getIntervals()[0];
 			var lastInterval = interval.getIntervals()[length - 1];
@@ -2184,13 +2178,13 @@ module Model {
 		}
 
 		// RepeatInterval
-		visitRepeatInterval(interval: RepeatInterval) {
+		visitRepeatInterval(interval: RepeatInterval) : void {
 			this.result += interval.getRepeatCount() + " x ";
 			this.visitArrayIntervalInternal(interval, true);
 		}
 
 		// RampBuildInterval
-		visitRampBuildInterval(interval: RampBuildInterval): any {
+		visitRampBuildInterval(interval: RampBuildInterval) : void {
 			if (interval.getStartIntensity().getValue() <= DefaultIntensity.getEasyThreshold(this.sportType)) {
 				this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " warm up to " + this.getIntensityPretty(interval.getEndIntensity());
 			} else {
@@ -2202,7 +2196,7 @@ module Model {
 			}
 		}
 
-		visitStepBuildInterval(interval: StepBuildInterval): void {
+		visitStepBuildInterval(interval: StepBuildInterval) : void {
 			this.result += interval.getRepeatCount() + " x ";
 
 			// There are two types of step build interval
@@ -2241,7 +2235,7 @@ module Model {
 		}
 
 		// SimpleInterval
-		visitSimpleInterval(interval: SimpleInterval): any {
+		visitSimpleInterval(interval: SimpleInterval) : void {
 			this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim);
 			let title = this.getIntervalTitle(interval);
 			if (title != null && title.length > 0) {
@@ -2274,7 +2268,8 @@ module Model {
 					}
 				}
 				if (interval.getRestDuration().getSeconds() > 0) {
-					return this.result += " w/ " + interval.getRestDuration().toStringShort(this.sportType == SportType.Swim) + " rest";
+					this.result += " w/ " + interval.getRestDuration().toStringShort(this.sportType == SportType.Swim) + " rest";
+					return;
 				}
 			} else {
 				// Handle swim differently
@@ -2292,7 +2287,8 @@ module Model {
 					this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
 
 					if (interval.getRestDuration().getSeconds() > 0) {
-						return this.result += " w/ " + interval.getRestDuration().toStringShort(false) + " rest";
+						this.result += " w/ " + interval.getRestDuration().toStringShort(false) + " rest";
+						return;
 					}
 				}
 			}
@@ -2342,6 +2338,7 @@ module Model {
 					return FormatterHelper.formatNumber(swim_pace_per_100, 60, ":", "") + IntensityUnitHelper.toString(this.outputUnit);
 				} else {
 					console.assert(false, stringFormat("Invalid output unit {0}", this.outputUnit));
+					return "";
 				}
 			} else {
 				console.assert(this.sportType == SportType.Other);

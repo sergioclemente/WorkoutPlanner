@@ -71,11 +71,6 @@ module ModelServer {
 		public duration_sec: number;
 		public tss: number;
 		public sport_type: number;
-
-		static load(id: number): Workout {
-			var ret = new Workout();
-			return ret;
-		}
 	}
 
 	function stringFormat(format: string, ...args: any[]) {
@@ -135,7 +130,7 @@ module ModelServer {
 				sql = stringFormat(
 					connection.escape(id)
 				);
-				connection.query(sql, function (err, rows, fields) {
+				connection.query(sql, function (err, rows) {
 					if (!err) {
 						if (rows.length == 0) {
 							callback("", null);
@@ -158,7 +153,7 @@ module ModelServer {
 			var connection = mysql.createConnection(this.connection_string);
 
 			try {
-				connection.query(sql, function (err, rows, fields) {
+				connection.query(sql, function (err, rows) {
 					var workouts = [];
 					if (!err) {
 						if (rows.length == 0) {

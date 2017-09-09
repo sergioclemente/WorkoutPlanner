@@ -45,14 +45,6 @@ var Model;
         IntensityUnit[IntensityUnit["HeartRate"] = 9] = "HeartRate";
         IntensityUnit[IntensityUnit["FreeRide"] = 10] = "FreeRide";
     })(IntensityUnit = Model.IntensityUnit || (Model.IntensityUnit = {}));
-    let RunningPaceUnit;
-    (function (RunningPaceUnit) {
-        RunningPaceUnit[RunningPaceUnit["Unknown"] = 0] = "Unknown";
-        RunningPaceUnit[RunningPaceUnit["MinMi"] = 1] = "MinMi";
-        RunningPaceUnit[RunningPaceUnit["Mph"] = 2] = "Mph";
-        RunningPaceUnit[RunningPaceUnit["MinKm"] = 3] = "MinKm";
-        RunningPaceUnit[RunningPaceUnit["KmHr"] = 4] = "KmHr";
-    })(RunningPaceUnit || (RunningPaceUnit = {}));
     class MyMath {
         /**
          * Decimal adjustment of a number.
@@ -827,10 +819,10 @@ var Model;
             this.intervals = intervals;
         }
         getIntensity() {
-            var intensities = this.intervals.map(function (value, index, array) {
+            var intensities = this.intervals.map(function (value) {
                 return value.getIntensity();
             });
-            var weights = this.intervals.map(function (value, index, array) {
+            var weights = this.intervals.map(function (value) {
                 return value.getWorkDuration().getSeconds();
             });
             return Intensity.combine(intensities, weights);
@@ -954,11 +946,11 @@ var Model;
             super(title, intervals);
         }
         getIntensity() {
-            var intensities = this.intervals.map(function (value, index, array) {
+            var intensities = this.intervals.map(function (value) {
                 return value.getIntensity();
             });
             var repeatCount = this.getRepeatCount();
-            var weights = this.intervals.map(function (value, index, array) {
+            var weights = this.intervals.map(function (value) {
                 return value.getWorkDuration().getSeconds() * repeatCount;
             });
             return Intensity.combine(intensities, weights);
@@ -1433,7 +1425,7 @@ var Model;
     }
     Model.VisitorHelper = VisitorHelper;
     class BaseVisitor {
-        visitCommentInterval(interval) {
+        visitCommentInterval() {
             // nothing to do
         }
         visitStepBuildInterval(interval) {
@@ -1536,6 +1528,9 @@ var Model;
                     5: { name: "z5", low: 1.01, high: 1.05 },
                     6: { name: "z6", low: 1.05, high: 10 },
                 };
+            }
+            else {
+                return {};
             }
         }
     }
@@ -2103,7 +2098,8 @@ var Model;
                     }
                 }
                 if (interval.getRestDuration().getSeconds() > 0) {
-                    return this.result += " w/ " + interval.getRestDuration().toStringShort(this.sportType == SportType.Swim) + " rest";
+                    this.result += " w/ " + interval.getRestDuration().toStringShort(this.sportType == SportType.Swim) + " rest";
+                    return;
                 }
             }
             else {
@@ -2123,7 +2119,8 @@ var Model;
                 else {
                     this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
                     if (interval.getRestDuration().getSeconds() > 0) {
-                        return this.result += " w/ " + interval.getRestDuration().toStringShort(false) + " rest";
+                        this.result += " w/ " + interval.getRestDuration().toStringShort(false) + " rest";
+                        return;
                     }
                 }
             }
@@ -2178,6 +2175,7 @@ var Model;
                 }
                 else {
                     console.assert(false, stringFormat("Invalid output unit {0}", this.outputUnit));
+                    return "";
                 }
             }
             else {
