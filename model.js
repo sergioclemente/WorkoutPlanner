@@ -2151,11 +2151,12 @@ var Model;
             }
             if (this.sportType == SportType.Bike) {
                 if (this.outputUnit == IntensityUnit.Watts) {
+                    let value = Math.round(this.userProfile.getBikeFTP() * intensity.getValue());
                     if (this.roundValues) {
-                        return FormatterHelper.roundNumberUp(Math.round(this.userProfile.getBikeFTP() * intensity.getValue()), 5) + "w";
+                        return FormatterHelper.roundNumberUp(value, 5) + "w";
                     }
                     else {
-                        return Math.round(this.userProfile.getBikeFTP() * intensity.getValue()) + "w";
+                        return value + "w";
                     }
                 }
                 else {
@@ -2169,7 +2170,11 @@ var Model;
                     return MyMath.round10(outputValue, -1) + IntensityUnitHelper.toString(this.outputUnit);
                 }
                 else {
-                    return FormatterHelper.formatNumber(outputValue, 60, ":", IntensityUnitHelper.toString(this.outputUnit), 5);
+                    let roundIncrement = 5;
+                    if (!this.roundValues) {
+                        roundIncrement = 0;
+                    }
+                    return FormatterHelper.formatNumber(outputValue, 60, ":", IntensityUnitHelper.toString(this.outputUnit), roundIncrement);
                 }
             }
             else if (this.sportType == SportType.Swim) {
