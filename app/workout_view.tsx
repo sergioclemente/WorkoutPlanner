@@ -32,7 +32,7 @@ export default class WorkoutView extends React.Component<any, any> {
 			);
 
 			var workout_steps = builder.getInterval().getIntervals().map(function (value: Model.Interval, index: number) {
-				return builder.getIntervalPretty(value);
+				return builder.getIntervalPretty(value, params.should_round == "true");
 			}.bind(this));
 
 			var avg_pace = builder.getSportType() == Model.SportType.Run ?

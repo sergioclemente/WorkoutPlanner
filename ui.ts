@@ -71,6 +71,7 @@ module UI {
 		public sport_type: string;
 		public output_unit: string;
 		public page: string;
+		public should_round : string;
 
 		constructor() {
 			if (!this.validate()) {
@@ -91,6 +92,7 @@ module UI {
 			ret.output_unit = params.output_unit;
 			ret.email = params.email;
 			ret.page = params.page;
+			ret.should_round = params.should_round;
 			return ret;
 		}
 
@@ -143,6 +145,10 @@ module UI {
 
 			if (params.page != null && params.page.trim() != 0) {
 				this.page = params.page;
+			}
+
+			if (params.should_round != null && params.should_round.trim() != 0) {
+				this.should_round = params.should_round;
 			}
 		}
 
@@ -223,6 +229,13 @@ module UI {
 					this.page = value;
 				}
 			}
+
+			{
+				let value = new PersistedItem("should_round").load();
+				if (value != null && value.trim().length != 0) {
+					this.should_round = value;
+				}
+			}			
 		}
 
 		saveToStorage(): void {
@@ -267,10 +280,13 @@ module UI {
 				new PersistedItem("efficiency_factor").save(this.efficiency_factor);
 			}
 				
-
 			if (this.hasPage()) {
 				new PersistedItem("page").save(this.page);
 			}
+
+			if (this.hasShouldRound()) {
+				new PersistedItem("should_round").save(this.should_round);
+			}			
 		}
 
 		hasWorkoutTitle() : boolean {
@@ -313,6 +329,10 @@ module UI {
 			return typeof (this.page) != 'undefined' && this.page != "";
 		}
 
+		hasShouldRound() : boolean {
+			return typeof (this.should_round) != 'undefined' && this.should_round != "";
+		}		
+
 		validate(): boolean {
 			return this.hasWorkoutTitle() &&
 				this.hasWorkoutText() &&
@@ -323,7 +343,7 @@ module UI {
 				this.hasSportType() &&
 				this.hasOutputUnit() &&
 				this.hasEmail();
-				// intentially missed the page. the default will be the main page
+				// intentially missed the page and should_round. the default will be the main page
 		}
 
 		getURL(): string {
@@ -367,6 +387,10 @@ module UI {
 
 			if (this.hasPage()) {
 				res += "&page=" + encodeURIComponent(this.page);
+			}
+
+			if (this.hasShouldRound()) {
+				res += "&sr=" + encodeURIComponent(this.should_round);
 			}
 
 			return res;

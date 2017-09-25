@@ -344,8 +344,9 @@ declare module Model {
         sportType: SportType;
         outputUnit: IntensityUnit;
         disableEasyTitle: boolean;
-        constructor(userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit);
-        static getIntervalTitle(interval: Interval, userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit): string;
+        roundValues: boolean;
+        constructor(userProfile: UserProfile, sportType: SportType, outputUnit: IntensityUnit, roundValues: boolean);
+        static getIntervalTitle(interval: Interval, userProfile?: UserProfile, sportType?: SportType, outputUnit?: IntensityUnit, roundValues?: boolean): string;
         visitCommentInterval(interval: CommentInterval): void;
         visitRestInterval(interval: Interval): void;
         visitArrayInterval(interval: ArrayInterval): void;
@@ -413,13 +414,13 @@ declare module Model {
         getSportType(): SportType;
         getWorkoutTitle(): string;
         withDefinition(workoutTitle: string, workoutDefinition: string): WorkoutBuilder;
-        getIntensityFriendly(intensity: Intensity): string;
+        getIntensityFriendly(intensity: Intensity, roundValues: boolean): string;
         getTSS(): number;
         getTSSFromIF(): number;
         getTimePretty(): string;
         getIF(): number;
         getAveragePower(): number;
-        getIntervalPretty(interval: Interval): string;
+        getIntervalPretty(interval: Interval, roundValues: boolean): string;
         getEstimatedDistancePretty(): string;
         getAveragePace(): string;
         getStepsList(new_line: any): string;

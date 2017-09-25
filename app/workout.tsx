@@ -106,6 +106,15 @@ export default class Workout extends React.Component<any, any> {
 		}
 	}
 
+	_shouldRound() : boolean {
+		return (this.refs["round"] as HTMLInputElement).checked;
+	}
+
+	_onCheckedChanged() : void {
+		this.params.should_round = "" + this._shouldRound();
+		this.refresh();
+	}
+
 	_downloadFile(fileName: string, content: string) {
 		let uriContent = "data:application/octet-stream," + encodeURIComponent(content);
 
@@ -130,6 +139,7 @@ export default class Workout extends React.Component<any, any> {
 					</tr>
 				</tbody>
 			</table>
+			<input type="checkbox" ref="round" onChange={this._onCheckedChanged.bind(this)} />Round intensities <br />			
 			<WorkoutView {...this.props} ref='view'></WorkoutView>
 		</div>);
 	}

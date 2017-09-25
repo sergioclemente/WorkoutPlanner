@@ -2074,21 +2074,25 @@ module Model {
 		sportType: SportType = SportType.Unknown;
 		outputUnit: IntensityUnit = IntensityUnit.Unknown;
 		disableEasyTitle: boolean = false;
+		roundValues : boolean = false;
 
-		constructor(userProfile: UserProfile = null,
-			sportType: SportType = SportType.Unknown,
-			outputUnit: IntensityUnit = IntensityUnit.Unknown) {
+		constructor(userProfile: UserProfile,
+			sportType: SportType,
+			outputUnit: IntensityUnit,
+		    roundValues : boolean) {
 			this.userProfile = userProfile;
 			this.sportType = sportType;
 			this.outputUnit = outputUnit;
+			this.roundValues = roundValues;
 		}
 
 		static getIntervalTitle(interval: Interval,
 			userProfile: UserProfile = null,
 			sportType: SportType = SportType.Unknown,
-			outputUnit: IntensityUnit = IntensityUnit.Unknown): string {
+			outputUnit: IntensityUnit = IntensityUnit.Unknown,
+			roundValues: boolean = true): string {
 			// TODO: instantiating visitor is a bit clowny
-			var f = new WorkoutTextVisitor(userProfile, sportType, outputUnit);
+			var f = new WorkoutTextVisitor(userProfile, sportType, outputUnit, roundValues);
 			VisitorHelper.visitAndFinalize(f, interval);
 
 			return f.result;
@@ -2318,7 +2322,11 @@ module Model {
 			}
 			if (this.sportType == SportType.Bike) {
 				if (this.outputUnit == IntensityUnit.Watts) {
-					return FormatterHelper.roundNumberUp(Math.round(this.userProfile.getBikeFTP() * intensity.getValue()), 5) + "w";
+					if (this.roundValues) {
+						return FormatterHelper.roundNumberUp(Math.round(this.userProfile.getBikeFTP() * intensity.getValue()), 5) + "w";
+					} else {
+						return Math.round(this.userProfile.getBikeFTP() * intensity.getValue()) + "w";
+					}
 				} else {
 					return intensity.toString();
 				}
@@ -2705,8 +2713,8 @@ module Model {
 			return this;
 		}
 
-		getIntensityFriendly(intensity: Intensity) {
-			var f = new WorkoutTextVisitor(this.userProfile, this.sportType, this.outputUnit);
+		getIntensityFriendly(intensity: Intensity, roundValues: boolean) {
+			var f = new WorkoutTextVisitor(this.userProfile, this.sportType, this.outputUnit, roundValues);
 			return f.getIntensityPretty(intensity);
 		}
 
@@ -2730,8 +2738,8 @@ module Model {
 			return MyMath.round10(this.userProfile.getBikeFTP() * this.intervals.getIntensity().getValue(), -1);
 		}
 
-		getIntervalPretty(interval: Interval) {
-			return WorkoutTextVisitor.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit);
+		getIntervalPretty(interval: Interval, roundValues: boolean) {
+			return WorkoutTextVisitor.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit, roundValues);
 		}
 
 		getEstimatedDistancePretty(): string {
