@@ -56,7 +56,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 
 		// Disable all options.
 		// TODO: Not sure how to fix this hack.
-		var units =  ["yards", "meters", "watts", "if", "hr", "minmi", "mih", "minkm", "kmh", "hr"];
+		var units =  ["yards", "meters", "watts", "if", "hr", "minmi", "mih", "minkm", "kmh", "hr", "per400m"];
 		for (let idx in units) {
 			let selectOption : SelectOption = this.refs[units[idx]] as SelectOption;
 			selectOption.setEnabled(false);
@@ -66,7 +66,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 		let map = {};
 		map[Model.SportType.Swim.toString()] = ["yards", "meters"];
 		map[Model.SportType.Bike.toString()] = ["watts", "if", "hr"];
-		map[Model.SportType.Run.toString()] = ["minmi", "mih", "minkm", "kmh", "hr"];
+		map[Model.SportType.Run.toString()] = ["minmi", "mih", "minkm", "kmh", "hr", "per400m"];
 		map[Model.SportType.Other.toString()] = ["if", "hr"];
 		for (let idx in map[sportType]) {
 			let selectOption : SelectOption = this.refs[map[sportType][idx]] as SelectOption;
@@ -121,6 +121,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 						<SelectOption ref="yards" value={Model.IntensityUnit.Per100Yards}>/100yards</SelectOption>
 						<SelectOption ref="meters" value={Model.IntensityUnit.Per100Meters}>/100m</SelectOption>
 						<SelectOption ref="hr" value={Model.IntensityUnit.HeartRate}>Heart rate</SelectOption>
+						<SelectOption ref="per400m" value={Model.IntensityUnit.Per400Meters}>/400m</SelectOption>
 					</Select>
 					<br />	
 					<textarea ref="workout_text" defaultValue={this.props.workout_text} style={{ height: "200px", width: "100%" }} onChange={e => this._onWorkoutTextChange(e) }>

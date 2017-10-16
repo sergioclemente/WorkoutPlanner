@@ -2,7 +2,6 @@
 /// <reference path="./node_modules/@types/jasmine/index.d.ts"/>
 /// <reference path="./type_definitions/model.d.ts" />
 
-
 var Model = require("./model");
 var UI = require("./ui");
 
@@ -512,6 +511,7 @@ describe('UI field validator', function () {
 		expect_eq_nbr(8, Model.SpeedParser.getSpeedInMph("7:30min/mi"))
 		expect_eq_nbr(8, Model.SpeedParser.getSpeedInMph("8mi/h"))
 		expect_eq_nbr(8.44, Model.SpeedParser.getSpeedInMph("4:25min/km"))
+		expect_eq_nbr(9.94, Model.SpeedParser.getSpeedInMph("1:30/400meters"));
 	});
 });
 
@@ -524,6 +524,7 @@ describe('Interval title', function () {
 		expect_eq_str("10' @ 205w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 65)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 		expect_eq_str("10' LC @ 235w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 75, LC)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
 		expect_eq_str("10' @ 65%", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 65)`), up, Model.SportType.Bike, Model.IntensityUnit.IF));
+		expect_eq_str("1mi threshold @ 1:29/400meters", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(1mi, 100, threshold)`), up, Model.SportType.Run, Model.IntensityUnit.Per400Meters));
 	});
 	it('warmup/build/warm down', function () {
 		expect_eq_str("10' warm up to 235w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(55, 75, 10min)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
@@ -683,5 +684,14 @@ describe('rest interval ride', function () {
 		expect_eq_nbr(1, free_ride_interval.getIntensity().getValue());
 		expect_eq_nbr(10 * 60 + 2 * 60, free_ride_interval.getTotalDuration().getSeconds());
 		expect_eq_str("FTP", free_ride_interval.getTitle());
+	});
+});
+
+describe('NumberAndUnitParser', function () {
+	it('Per400m', function () {
+		let p = new Model.NumberAndUnitParser();
+		p.evaluate("1:30/400m", 0);
+		expect_eq_nbr(1.5, p.getValue());
+		expect_eq_str("/400m", p.getUnit());
 	});
 });

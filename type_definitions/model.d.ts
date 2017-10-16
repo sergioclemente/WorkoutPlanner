@@ -30,9 +30,10 @@ declare module Model {
         MinKm = 5,
         Per100Yards = 6,
         Per100Meters = 7,
-        OffsetSeconds = 8,
-        HeartRate = 9,
-        FreeRide = 10,
+        Per400Meters = 8,
+        OffsetSeconds = 9,
+        HeartRate = 10,
+        FreeRide = 11,
     }
     class SportTypeHelper {
         static convertToString(sportType: SportType): "" | "Bike" | "Run" | "Swim" | "Other";
@@ -377,6 +378,7 @@ declare module Model {
         getRunnintTPaceMph(): number;
         getEmail(): string;
         getPaceMph(intensity: Intensity): number;
+        getRunningPace(intensity: Intensity, outputUnit: IntensityUnit): number;
         getPaceMinMi(intensity: Intensity): number;
         getSwimCSSMph(): number;
         getSwimPaceMph(intensity: Intensity): number;

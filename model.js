@@ -41,9 +41,10 @@ var Model;
         IntensityUnit[IntensityUnit["MinKm"] = 5] = "MinKm";
         IntensityUnit[IntensityUnit["Per100Yards"] = 6] = "Per100Yards";
         IntensityUnit[IntensityUnit["Per100Meters"] = 7] = "Per100Meters";
-        IntensityUnit[IntensityUnit["OffsetSeconds"] = 8] = "OffsetSeconds";
-        IntensityUnit[IntensityUnit["HeartRate"] = 9] = "HeartRate";
-        IntensityUnit[IntensityUnit["FreeRide"] = 10] = "FreeRide";
+        IntensityUnit[IntensityUnit["Per400Meters"] = 8] = "Per400Meters";
+        IntensityUnit[IntensityUnit["OffsetSeconds"] = 9] = "OffsetSeconds";
+        IntensityUnit[IntensityUnit["HeartRate"] = 10] = "HeartRate";
+        IntensityUnit[IntensityUnit["FreeRide"] = 11] = "FreeRide";
     })(IntensityUnit = Model.IntensityUnit || (Model.IntensityUnit = {}));
     class MyMath {
         /**
@@ -540,6 +541,9 @@ var Model;
             else if (unitFrom == IntensityUnit.Per100Meters) {
                 speedMph = DistanceUnitHelper.convertTo(6000 / value, DistanceUnit.Meters, DistanceUnit.Miles);
             }
+            else if (unitFrom == IntensityUnit.Per400Meters) {
+                speedMph = DistanceUnitHelper.convertTo((4 * 6000) / value, DistanceUnit.Meters, DistanceUnit.Miles);
+            }
             else {
                 console.assert(false, stringFormat("Unknown intensity unit {0}", unitFrom));
                 throw new Error("Unknown IntensityUnit!");
@@ -562,6 +566,9 @@ var Model;
             }
             else if (unitTo == IntensityUnit.Per100Meters) {
                 result = 6000 / DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Meters);
+            }
+            else if (unitTo == IntensityUnit.Per400Meters) {
+                result = 400 / (DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Meters) / 60);
             }
             else {
                 console.assert(false, stringFormat("Unknown intensity unit {0}", unitTo));
@@ -587,6 +594,8 @@ var Model;
                     return "/100yards";
                 case IntensityUnit.Per100Meters:
                     return "/100meters";
+                case IntensityUnit.Per400Meters:
+                    return "/400meters";
                 case IntensityUnit.HeartRate:
                     return "hr";
                 case IntensityUnit.FreeRide:
@@ -608,6 +617,8 @@ var Model;
                 "min/km": IntensityUnit.MinKm,
                 "/100yards": IntensityUnit.Per100Yards,
                 "/100meters": IntensityUnit.Per100Meters,
+                "/400meters": IntensityUnit.Per400Meters,
+                "/400m": IntensityUnit.Per400Meters,
                 "offset": IntensityUnit.OffsetSeconds,
                 "hr": IntensityUnit.HeartRate,
                 "heart rate": IntensityUnit.HeartRate,
@@ -688,7 +699,7 @@ var Model;
                 if (this.originalUnit == IntensityUnit.MinMi) {
                     return FormatterHelper.formatNumber(this.originalValue, 60, ":", IntensityUnitHelper.toString(IntensityUnit.MinMi));
                 }
-                else if (this.originalUnit == IntensityUnit.Per100Yards || this.originalUnit == IntensityUnit.Per100Meters) {
+                else if (this.originalUnit == IntensityUnit.Per100Yards || this.originalUnit == IntensityUnit.Per100Meters || this.originalUnit == IntensityUnit.Per400Meters) {
                     return FormatterHelper.formatNumber(this.originalValue, 60, ":", IntensityUnitHelper.toString(this.originalUnit));
                 }
                 else {
@@ -1092,38 +1103,61 @@ var Model;
                 }
                 i--;
             }
-            // - Check the unit
-            this.unit = "";
+            // - Check the unit. 
+            // TODO: Find a better way to represent this
+            var unitMap = {
+                "w": 1,
+                "watts": 1,
+                "%": 1,
+                "min/mi": 1,
+                "mi/hr": 1,
+                "mph": 1,
+                "km/hr": 1,
+                "min/km": 1,
+                "/100yards": 1,
+                "/100meters": 1,
+                "/100m": 1,
+                "/400meters": 1,
+                "/400m": 1,
+                "hr": 1,
+                "heart rate": 1,
+                "bpm": 1,
+                "min": 1,
+                "m": 1,
+                "sec": 1,
+                "s": 1,
+                "km": 1,
+                "meters": 1,
+                "miles": 1,
+                "yards": 1,
+                "yrs": 1,
+                "mi": 1,
+                "": 1,
+            };
+            // Get the next token
+            let nextToken = "";
             for (i++; i < input.length; i++) {
-                // check for letters or (slashes/percent)
-                // this will cover for example: 
-                // 210w
-                // 75w
-                // 10mph
-                // 6min/mi
-                if (IntervalParser.isLetter(input[i])
-                    || input[i] == "%"
-                    || input[i] == "/") {
-                    this.unit += input[i];
-                }
-                else {
-                    break;
-                }
-            }
-            // We do a sanity check now. We want to make sure there is nothing that is not
-            // a whitespace after the unit. For example: 2% incline should not parse as
-            // a intensity
-            while (i < input.length) {
                 if (input[i] == ',' || input[i] == ")") {
                     break;
                 }
-                if (!IntervalParser.isWhitespace(input[i])) {
-                    this.value = null;
-                    this.unit = "";
-                    i = original_i;
-                    break;
+                else {
+                    // Assuming here if it sees a whitespace it can bail out as its an invalid unit
+                    if (IntervalParser.isWhitespace(input[i])) {
+                        nextToken = "<<invalid>>";
+                        break;
+                    }
+                    nextToken += input[i];
                 }
-                i++;
+            }
+            // Validate the token. We want to make sure the unit is valid otherwise
+            // we might parse "2% incline" as a intensity unit for instance.
+            if (unitMap[nextToken] == undefined) {
+                this.value = null;
+                this.unit = "";
+                i = original_i;
+            }
+            else {
+                this.unit = nextToken;
             }
             return i - 1;
         }
@@ -2170,11 +2204,17 @@ var Model;
                     return MyMath.round10(outputValue, -1) + IntensityUnitHelper.toString(this.outputUnit);
                 }
                 else {
-                    let roundIncrement = 5;
-                    if (!this.roundValues) {
-                        roundIncrement = 0;
+                    if (this.outputUnit == IntensityUnit.MinMi || this.outputUnit == IntensityUnit.MinKm) {
+                        let roundIncrement = 5;
+                        if (!this.roundValues) {
+                            roundIncrement = 0;
+                        }
+                        return FormatterHelper.formatNumber(outputValue, 60, ":", IntensityUnitHelper.toString(this.outputUnit), roundIncrement);
                     }
-                    return FormatterHelper.formatNumber(outputValue, 60, ":", IntensityUnitHelper.toString(this.outputUnit), roundIncrement);
+                    else {
+                        let pace_per_400m = this.userProfile.getRunningPace(intensity, this.outputUnit);
+                        return FormatterHelper.formatNumber(pace_per_400m, 60, ":", "") + IntensityUnitHelper.toString(this.outputUnit);
+                    }
                 }
             }
             else if (this.sportType == SportType.Swim) {
@@ -2222,8 +2262,12 @@ var Model;
                 else if (speed.indexOf("min/km") != -1) {
                     res = (60 / (this._extractNumber(speed, 60, ":", "min/km") * 1.609344));
                 }
-                else if (speed.indexOf("min/400m") != -1) {
-                    res = (60 / (this._extractNumber(speed, 60, ":", "min/400m") * 2.5 * 1.609344));
+                else if (speed.indexOf("/400meters") != -1 || speed.indexOf("/400m") != -1) {
+                    let suffix = "/400meters";
+                    if (speed.indexOf("/400m") != -1) {
+                        suffix = "/400m";
+                    }
+                    res = (60 / (this._extractNumber(speed, 60, ":", suffix) * 2.5 * 1.609344));
                 }
                 else if (speed.indexOf("/100yards") != -1) {
                     var pace_per_100_yards = this._extractNumber(speed, 60, ":", "/100yards");
@@ -2232,6 +2276,9 @@ var Model;
                 else if (speed.indexOf("/100meters") != -1) {
                     var pace_per_100_meters = this._extractNumber(speed, 60, ":", "/100meters");
                     res = IntensityUnitHelper.convertTo(pace_per_100_meters, IntensityUnit.Per100Meters, IntensityUnit.Mph);
+                }
+                else {
+                    console.assert(false);
                 }
             }
             catch (e) {
@@ -2287,6 +2334,10 @@ var Model;
         getPaceMph(intensity) {
             var estPaceMinMi = this.getPaceMinMi(intensity);
             return 60 / estPaceMinMi;
+        }
+        getRunningPace(intensity, outputUnit) {
+            let pace_mph = this.getPaceMph(intensity);
+            return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, outputUnit);
         }
         getPaceMinMi(intensity) {
             var pace_mph = IntensityUnitHelper.convertTo(this.getRunningTPaceMinMi(), IntensityUnit.MinMi, IntensityUnit.Mph) * intensity.getValue();
@@ -2355,6 +2406,10 @@ var Model;
                 }
                 else if (unit == IntensityUnit.MinKm) {
                     var running_mph = IntensityUnitHelper.convertTo(value, IntensityUnit.MinKm, IntensityUnit.Mph);
+                    ifValue = running_mph / running_tpace_mph;
+                }
+                else if (unit == IntensityUnit.Per400Meters) {
+                    var running_mph = IntensityUnitHelper.convertTo(value, IntensityUnit.Per400Meters, IntensityUnit.Mph);
                     ifValue = running_mph / running_tpace_mph;
                 }
                 else {
@@ -2530,12 +2585,16 @@ var Model;
         }
         getAveragePace() {
             var minMi = this.userProfile.getPaceMinMi(this.intervals.getIntensity());
-            var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, this.outputUnit);
-            if (this.outputUnit == IntensityUnit.Kmh || this.outputUnit == IntensityUnit.Mph) {
-                return MyMath.round10(outputValue, -1) + IntensityUnitHelper.toString(this.outputUnit);
+            let outputUnit = this.outputUnit;
+            if (outputUnit == IntensityUnit.HeartRate) {
+                outputUnit = IntensityUnit.MinMi;
+            }
+            var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, outputUnit);
+            if (outputUnit == IntensityUnit.Kmh || outputUnit == IntensityUnit.Mph) {
+                return MyMath.round10(outputValue, -1) + IntensityUnitHelper.toString(outputUnit);
             }
             else {
-                return FormatterHelper.formatNumber(outputValue, 60, ":", IntensityUnitHelper.toString(this.outputUnit));
+                return FormatterHelper.formatNumber(outputValue, 60, ":", IntensityUnitHelper.toString(outputUnit));
             }
         }
         getStepsList(new_line) {

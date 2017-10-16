@@ -21,6 +21,12 @@ npm install
 ./build.cmd
 ```
 
+* Minify (Just before submit)
+
+```
+./minify.cmd
+```
+
 * Starting the node server
 
 ```
@@ -67,5 +73,3 @@ Player:
         factory for UserProfile from UI.QueryParams
         refactor file generation to just depend on the workout.
 
-# Where to find type definition files:
-** https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/node/node.d.ts
