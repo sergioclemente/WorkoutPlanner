@@ -43,10 +43,16 @@ To install the protocol handler:
 - Run this in a developer console window 
 -- navigator.registerProtocolHandler("web+wp", "http://workoutplanner.herokuapp.com/?wh=%s", "Workout Planner handler");
 
+# Things that should be fixed soon:
+- Derek+ is not properly calculating distance
+- Normalize workout to IF if in a different unit
+- Add a text representation of the workout to make sure it got parsed properly
+- Cannot email run workout (Getting a ERR_INCOMPLETE_CHUNKED_ENCODING error)
+
 # Bugs/Feature requests
 - Add lapcount complexity
 - Make long repeated series easier to read
-- Derek+ is not properly calculating distance
+- Can we add a "hint" for * intervals so that it computes IF better?
 
 Server
 * Add authentication
@@ -57,6 +63,9 @@ Server
 Workout View
 * Don't require a title for validating
 * add the hability for named groups (warmup/mainset/cooldown) - workaround today is comments
+
+On saving
+* Precompute some suff for display: Data required for workout view? make sure to include version
 
 Player:
 * Fix play of music on iphone
