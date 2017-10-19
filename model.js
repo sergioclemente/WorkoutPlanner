@@ -601,7 +601,7 @@ var Model;
                 case IntensityUnit.FreeRide:
                     return "free-ride";
                 default:
-                    console.assert(false, stringFormat("Unknown intensity unit {0}", unit));
+                    //console.assert(false, stringFormat("Unknown intensity unit {0}", unit));
                     return "unknown";
             }
         }
