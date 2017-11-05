@@ -2287,7 +2287,7 @@ var Model;
                 return "+" + i.getOriginalValue() + "s";
             }
             else {
-                return (i.getValue() * 100).toString();
+                return MyMath.round10(i.getValue() * 100, -1).toString();
             }
         }
         getTitlePretty(i) {

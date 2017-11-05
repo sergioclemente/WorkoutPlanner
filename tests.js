@@ -649,6 +649,9 @@ function parseAndNormalize(of, text, expected_text = null) {
         expected_text = text;
     }
     expect_eq_str(expected_text, normalized_text);
+    // Normalize again and it should be an identity function.
+    let normalized_text2 = Model.IntervalParser.normalize(of, normalized_text);
+    expect_eq_str(normalized_text, normalized_text2);
 }
 describe('parse and unparse', function () {
     it('simple', function () {
@@ -659,6 +662,7 @@ describe('parse and unparse', function () {
         parseAndNormalize(of_bike, "4[(1min, 100, hard), (30sec, 50, easy)]");
         parseAndNormalize(of_swim, "(400yards, +10s, 30sec, warmup)");
         parseAndNormalize(of_run, "(2mi, 80)");
+        parseAndNormalize(of_run, "(2mi, 7:00min/mi)", "(2mi, 85.7)");
         parseAndNormalize(of_bike, "2[(1min, 85, 95), (30sec, 50)]");
         parseAndNormalize(of_bike, "2[(100, 30sec, 45sec), (30sec, 50)]");
     });
