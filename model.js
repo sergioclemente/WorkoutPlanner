@@ -2656,8 +2656,13 @@ var Model;
         getWorkoutTitle() {
             return this.workoutTitle;
         }
+        getNormalizedWorkoutDefinition() {
+            return this.normalizedWorkoutDefinition;
+        }
         withDefinition(workoutTitle, workoutDefinition) {
-            this.intervals = IntervalParser.parse(new ObjectFactory(this.userProfile, this.sportType), workoutDefinition);
+            let object_factory = new ObjectFactory(this.userProfile, this.sportType);
+            this.intervals = IntervalParser.parse(object_factory, workoutDefinition);
+            this.normalizedWorkoutDefinition = IntervalParser.normalize(object_factory, workoutDefinition);
             this.workoutTitle = workoutTitle;
             this.workoutDefinition = workoutDefinition;
             return this;

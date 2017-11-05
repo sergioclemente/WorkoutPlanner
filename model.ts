@@ -2858,6 +2858,7 @@ module Model {
 		private outputUnit: IntensityUnit;
 		private intervals: ArrayInterval;
 		private workoutDefinition: string;
+		private normalizedWorkoutDefinition : string;
 		private workoutTitle: string;
 
 		constructor(userProfile: UserProfile, sportType: SportType, outputUnit: IntensityUnit) {
@@ -2878,11 +2879,17 @@ module Model {
 			return this.workoutTitle;
 		}
 
+		getNormalizedWorkoutDefinition() : string {
+			return this.normalizedWorkoutDefinition;
+		}
+
 		withDefinition(workoutTitle: string, workoutDefinition: string): WorkoutBuilder {
+			let object_factory = new ObjectFactory(this.userProfile, this.sportType);
 			this.intervals = IntervalParser.parse(
-				new ObjectFactory(this.userProfile, this.sportType),
+				object_factory,
 				workoutDefinition
 			);
+			this.normalizedWorkoutDefinition = IntervalParser.normalize(object_factory, workoutDefinition);
 			this.workoutTitle = workoutTitle;
 			this.workoutDefinition = workoutDefinition;
 			return this;

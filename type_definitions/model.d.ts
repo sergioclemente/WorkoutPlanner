@@ -428,11 +428,13 @@ declare module Model {
         private outputUnit;
         private intervals;
         private workoutDefinition;
+        private normalizedWorkoutDefinition;
         private workoutTitle;
         constructor(userProfile: UserProfile, sportType: SportType, outputUnit: IntensityUnit);
         getInterval(): ArrayInterval;
         getSportType(): SportType;
         getWorkoutTitle(): string;
+        getNormalizedWorkoutDefinition(): string;
         withDefinition(workoutTitle: string, workoutDefinition: string): WorkoutBuilder;
         getIntensityFriendly(intensity: Intensity, roundValues: boolean): string;
         getTSS(): number;
