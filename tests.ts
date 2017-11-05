@@ -22,14 +22,14 @@ function expect_true(condition: boolean, message: string = "Expect true failed")
 
 function expect_eq_str(expected: string, actual: string) {
 	if (expected !== actual) {
-		expect_true(false, string_format("expected: {0} - actual: {1}", JSON.stringify(expected), JSON.stringify(actual)));
+		expect_true(false, string_format("\nexpected: [{0}] \nactual: [{1}]", expected, actual));
 	}
 }
 
 function expect_eq_nbr(expected: number, actual: number, error: number = 0.01) {
 	var delta = Math.abs(expected - actual);
 	if (delta > error) {
-		expect_true(false, string_format("expected: {0} - actual: {1}", JSON.stringify(expected), JSON.stringify(actual)));
+		expect_true(false, string_format("\nexpected: [{0}] \nactual: [{1}]", JSON.stringify(expected), JSON.stringify(actual)));
 	}
 }
 
@@ -145,9 +145,14 @@ describe('Combine duration', function () {
 		expect_eq_nbr(300, dur.getValue());
 	});
 	it('Combine distance and time', function () {
-		let dur = Model.Duration.combine(new Model.Duration(Model.DistanceUnit.Yards, 100, 0, 0), new Model.Duration(Model.TimeUnit.Seconds, 10, 0, 0));
-		expect_eq_nbr(Model.DistanceUnit.Yards, dur.getUnit());
-		expect_eq_nbr(100, dur.getValue());
+        let interval = Model.IntervalParser.parse(of_swim, `(100yards, 100)(10s, 0)`);
+        expect_eq_nbr(100, interval.getTotalDuration().getDistance(Model.DistanceUnit.Yards));
+        expect_eq_nbr(95, interval.getTotalDuration().getSeconds(), 1);
+	});
+	it('Combine durations in a run', function() {
+		let interval = Model.IntervalParser.parse(of_run, `(200m, 100)(45s, 100)`);
+		expect_eq_nbr(400, interval.getTotalDuration().getDistance(Model.DistanceUnit.Meters), 2);
+		expect_eq_nbr(90, interval.getTotalDuration().getSeconds(), 1);
 	});
 });
 
@@ -304,7 +309,7 @@ describe('File Generation', function () {
 	<workout>
 		<Warmup Duration="600" PowerLow="0.55" PowerHigh="0.75"/>
 		<SteadyState Duration="3600" Power="0.8">
-			<textevent timeoffset="0" message="1hr%20@%2080%25"/>
+			<textevent timeoffset="0" message="1hr @ 80%"/>
 		</SteadyState>
 		<Cooldown Duration="300" PowerLow="0.75" PowerHigh="0.55"/>
 	</workout>
@@ -693,5 +698,27 @@ describe('NumberAndUnitParser', function () {
 		p.evaluate("1:30/400m", 0);
 		expect_eq_nbr(1.5, p.getValue());
 		expect_eq_str("/400m", p.getUnit());
+	});
+});
+
+function parseAndNormalize(of: any, text: string, expected_text : string = null) {
+	let normalized_text = Model.IntervalParser.normalize(of, text);
+	if (expected_text == null) {
+		expected_text = text;
+	} 
+	expect_eq_str(expected_text, normalized_text);
+}
+
+describe('parse and unparse', function () {
+	it('simple', function () {
+		parseAndNormalize(of_bike, "(10min, 100, FTP)");
+		parseAndNormalize(of_run, "(2mi, 6:00min/mi, threshold)", "(2mi, 100, threshold)");
+		parseAndNormalize(of_swim, "\"Comment 123\"");
+		parseAndNormalize(of_bike, "(155w, 310w, 1min, build to ftp)", "(50, 100, 1min, build to ftp)");
+		parseAndNormalize(of_bike, "4[(1min, 100, hard), (30sec, 50, easy)]");
+		parseAndNormalize(of_swim, "(400yards, +10s, 30sec, warmup)");
+		parseAndNormalize(of_run, "(2mi, 80)");
+		parseAndNormalize(of_bike, "2[(1min, 85, 95), (30sec, 50)]");
+		parseAndNormalize(of_bike, "2[(100, 30sec, 45sec), (30sec, 50)]");
 	});
 });

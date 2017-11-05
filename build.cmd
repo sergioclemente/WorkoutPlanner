@@ -44,7 +44,7 @@ call browserify model.js ui.js index.js %js_files% -o index.min.js
 @if  %ERRORLEVEL% NEQ 0 (goto build_fail)
 @echo Combined javascript files
 
-del "app\*.js" "tests.js" "ui.js"
+del "app\*.js"
 @if  %ERRORLEVEL% NEQ 0 (goto build_fail)
 @echo Removed intermediate files
 

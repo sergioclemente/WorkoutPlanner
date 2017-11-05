@@ -44,8 +44,6 @@ To install the protocol handler:
 -- navigator.registerProtocolHandler("web+wp", "http://workoutplanner.herokuapp.com/?wh=%s", "Workout Planner handler");
 
 # Things that should be fixed soon:
-- Derek+ is not properly calculating distance
-- Normalize workout to IF if in a different unit
 - Add a text representation of the workout to make sure it got parsed properly
 - Cannot email run workout (Getting a ERR_INCOMPLETE_CHUNKED_ENCODING error)
 

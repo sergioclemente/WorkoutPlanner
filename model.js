@@ -394,7 +394,7 @@ var Model;
                 }
             }
             else {
-                return MyMath.round10(this.estimatedDistanceInMiles, -1);
+                return MyMath.round10(DistanceUnitHelper.convertTo(this.estimatedDistanceInMiles, DistanceUnit.Miles, unitTo), -1);
             }
         }
         toStringDistance(unitTo = DistanceUnit.Unknown) {
@@ -479,15 +479,19 @@ var Model;
                 }
                 else {
                     // Use the distance unit in case they are different.
-                    return new Duration(dur2.getUnit(), dur2.getValue(), estTime, estDistance);
+                    // Convert to time
+                    var time_sum = dur1.getSeconds() + dur2.getSeconds();
+                    return new Duration(TimeUnit.Seconds, time_sum, estTime, estDistance);
                 }
             }
             else {
                 if (DurationUnitHelper.isTime(dur2.getUnit())) {
-                    // Use the distance unit in case they are different.
-                    return new Duration(dur1.getUnit(), dur1.getValue(), estTime, estDistance);
+                    var time_sum = dur1.getSeconds() + dur2.getSeconds();
+                    return new Duration(TimeUnit.Seconds, time_sum, estTime, estDistance);
                 }
                 else {
+                    // Both are NOT time
+                    // Convert to miles
                     var distance1 = DurationUnitHelper.getDistanceMiles(dur1.getUnit(), dur1.getValue());
                     var distance2 = DurationUnitHelper.getDistanceMiles(dur2.getUnit(), dur2.getValue());
                     return new Duration(DistanceUnit.Miles, distance1 + distance2, estTime, estDistance);
@@ -601,7 +605,7 @@ var Model;
                 case IntensityUnit.FreeRide:
                     return "free-ride";
                 default:
-                    //console.assert(false, stringFormat("Unknown intensity unit {0}", unit));
+                    console.assert(false, stringFormat("Unknown intensity unit {0}", unit));
                     return "unknown";
             }
         }
@@ -980,6 +984,16 @@ var Model;
             for (var i = 1; i < this.intervals.length - 1; i++) {
                 var cur_intensity = this.intervals[i].getIntensity().getValue();
                 if (cur_intensity != first_intensity) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        areAllDurationsSame() {
+            let first_duration = this.intervals[0].getWorkDuration().getSeconds();
+            for (var i = 1; i < this.intervals.length - 1; i++) {
+                var cur_duration = this.intervals[i].getWorkDuration();
+                if (cur_duration.getSeconds() != first_duration) {
                     return false;
                 }
             }
@@ -1425,6 +1439,15 @@ var Model;
             }
             return result;
         }
+        // Parses the string, converts into the object, then convert back into the
+        // default units. For example: if the unit is in min/km it will be converted
+        // to IF so that its independent of thresholds.
+        static normalize(factory, input) {
+            let interval = IntervalParser.parse(factory, input);
+            let visitor = new InputTextWorkoutVisitor();
+            VisitorHelper.visit(visitor, interval);
+            return visitor.output;
+        }
     }
     Model.IntervalParser = IntervalParser;
     class VisitorHelper {
@@ -1707,9 +1730,12 @@ var Model;
             }
             return title;
         }
+        escapeString(input) {
+            return input.replace("\"", "\\\"");
+        }
         visitSimpleInterval(interval) {
             var duration = interval.getWorkDuration().getSeconds();
-            var title = encodeURI(this.getIntervalTitle(interval));
+            var title = this.escapeString(this.getIntervalTitle(interval));
             if (interval.getIntensity().getOriginalUnit() == IntensityUnit.FreeRide) {
                 this.content += `\t\t<FreeRide Duration="${duration}">\n`;
                 this.content += `\t\t\t<textevent timeoffset="0" message="${title}"/>\n`;
@@ -2246,6 +2272,94 @@ var Model;
         }
     }
     Model.WorkoutTextVisitor = WorkoutTextVisitor;
+    class InputTextWorkoutVisitor {
+        constructor() {
+            this.output = "";
+        }
+        getDurationPretty(d) {
+            if (DurationUnitHelper.isDistance(d.getUnit())) {
+                return d.toString();
+            }
+            return d.toTimeStringLong();
+        }
+        getIntensityPretty(i) {
+            if (i.getOriginalUnit() == IntensityUnit.OffsetSeconds) {
+                return "+" + i.getOriginalValue() + "s";
+            }
+            else {
+                return (i.getValue() * 100).toString();
+            }
+        }
+        getTitlePretty(i) {
+            if (i.getTitle().length != 0) {
+                return ", " + i.getTitle();
+            }
+            else {
+                return "";
+            }
+        }
+        visitCommentInterval(interval) {
+            this.output += stringFormat("\"{0}\"", interval.getTitle());
+        }
+        visitSimpleInterval(interval) {
+            if (interval.getRestDuration().getValue() != 0) {
+                this.output += stringFormat("({0}, {1}, {2}{3})", this.getDurationPretty(interval.getWorkDuration()), this.getIntensityPretty(interval.getIntensity()), this.getDurationPretty(interval.getRestDuration()), this.getTitlePretty(interval));
+            }
+            else {
+                this.output += stringFormat("({0}, {1}{2})", this.getDurationPretty(interval.getWorkDuration()), this.getIntensityPretty(interval.getIntensity()), this.getTitlePretty(interval));
+            }
+        }
+        visitStepBuildInterval(interval) {
+            this.output += interval.getRepeatCount().toString();
+            this.output += "[";
+            if (interval.areAllIntensitiesSame()) {
+                this.output += "(";
+                // Get any step as all the durations are the same.
+                this.output += this.getIntensityPretty(interval.getStepInterval(0).getIntensity());
+                for (let i = 0; i < interval.getRepeatCount(); i++) {
+                    this.output += ", ";
+                    this.output += this.getDurationPretty(interval.getStepInterval(i).getTotalDuration());
+                }
+                this.output += "), ";
+                VisitorHelper.visit(this, interval.getRestInterval());
+            }
+            else {
+                console.assert(interval.areAllDurationsSame());
+                this.output += "(";
+                // Get any step as all the durations are the same.
+                this.output += this.getDurationPretty(interval.getStepInterval(0).getTotalDuration());
+                for (let i = 0; i < interval.getRepeatCount(); i++) {
+                    this.output += ", ";
+                    this.output += this.getIntensityPretty(interval.getStepInterval(i).getIntensity());
+                }
+                this.output += "), ";
+                VisitorHelper.visit(this, interval.getRestInterval());
+            }
+            this.output += "]";
+        }
+        visitRampBuildInterval(interval) {
+            this.output += stringFormat("({0}, {1}, {2}{3})", this.getIntensityPretty(interval.getStartIntensity()), this.getIntensityPretty(interval.getEndIntensity()), this.getDurationPretty(interval.getWorkDuration()), this.getTitlePretty(interval));
+        }
+        visitRepeatInterval(interval) {
+            this.output += interval.getRepeatCount().toString();
+            this.output += "[";
+            for (let i = 0; i < interval.getIntervals().length; i++) {
+                VisitorHelper.visit(this, interval.getIntervals()[i]);
+                if (i != interval.getIntervals().length - 1) {
+                    this.output += ", ";
+                }
+            }
+            this.output += "]";
+        }
+        visitArrayInterval(interval) {
+            for (var i = 0; i < interval.getIntervals().length; i++) {
+                VisitorHelper.visit(this, interval.getIntervals()[i]);
+            }
+        }
+        finalize() {
+        }
+    }
+    Model.InputTextWorkoutVisitor = InputTextWorkoutVisitor;
     class SpeedParser {
         static getSpeedInMph(speed) {
             var res = null;
@@ -2510,25 +2624,20 @@ var Model;
             return zwift.getContent();
         }
         getZWOFileName() {
-            if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
-                return this.workoutTitle + ".zwo";
-            }
-            var fileNameHelper = new FileNameHelper(this.intervals);
-            return fileNameHelper.getFileName() + ".zwo";
+            return this.getBaseFileName() + ".zwo";
         }
         getMRCFileName() {
-            if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
-                return this.workoutTitle + ".mrc";
-            }
-            var fileNameHelper = new FileNameHelper(this.intervals);
-            return fileNameHelper.getFileName() + ".mrc";
+            return this.getBaseFileName() + ".mrc";
         }
         getPPSMRXFileName() {
+            return this.getBaseFileName() + ".ppsmrx";
+        }
+        getBaseFileName() {
             if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
-                return this.workoutTitle + ".ppsmrx";
+                return this.workoutTitle;
             }
             var fileNameHelper = new FileNameHelper(this.intervals);
-            return fileNameHelper.getFileName() + ".mrc";
+            return fileNameHelper.getFileName();
         }
     }
     Model.WorkoutFileGenerator = WorkoutFileGenerator;

@@ -129,7 +129,7 @@ function handleSaveWorkout(req, res, uri, params) {
   var db = new model_server.WorkoutDB(config.mysql);
   var w = new model_server.Workout();
   w.title = params.t;
-  w.value = params.w;
+  w.value = model.IntervalParser.normalize(params.w);
   w.tags = "";
   w.duration_sec = builder.getInterval().getTotalDuration().getSeconds();
   w.tss = builder.getInterval().getTSS();

@@ -169,6 +169,7 @@ declare module Model {
         getStepInterval(idx: number): Interval;
         getRestInterval(): Interval;
         areAllIntensitiesSame(): boolean;
+        areAllDurationsSame(): boolean;
         getWorkDuration(): Duration;
     }
     interface Parser {
@@ -204,6 +205,7 @@ declare module Model {
         static isWhitespace(ch: string): boolean;
         static throwParserError(column: number, msg: string): void;
         static parse(factory: ObjectFactory, input: string): ArrayInterval;
+        static normalize(factory: ObjectFactory, input: string): string;
     }
     class VisitorHelper {
         static visitAndFinalize(visitor: Visitor, interval: Interval): any;
@@ -294,6 +296,7 @@ declare module Model {
         constructor(name: string);
         finalize(): void;
         getIntervalTitle(interval: Interval): string;
+        escapeString(input: string): string;
         visitSimpleInterval(interval: SimpleInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
         getContent(): string;
@@ -360,6 +363,20 @@ declare module Model {
         getIntervalTitle(interval: Interval): string;
         finalize(): void;
     }
+    class InputTextWorkoutVisitor implements Visitor {
+        output: string;
+        constructor();
+        getDurationPretty(d: Duration): string;
+        getIntensityPretty(i: Intensity): string;
+        getTitlePretty(i: Interval): string;
+        visitCommentInterval(interval: CommentInterval): void;
+        visitSimpleInterval(interval: SimpleInterval): void;
+        visitStepBuildInterval(interval: StepBuildInterval): void;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
+        visitRepeatInterval(interval: RepeatInterval): void;
+        visitArrayInterval(interval: ArrayInterval): void;
+        finalize(): void;
+    }
     class SpeedParser {
         static getSpeedInMph(speed: string): number;
         static _extractNumber(numberString: any, decimalMultiplier: any, strSeparator: any, strSuffix: any): number;
@@ -403,6 +420,7 @@ declare module Model {
         getZWOFileName(): string;
         getMRCFileName(): string;
         getPPSMRXFileName(): string;
+        getBaseFileName(): string;
     }
     class WorkoutBuilder {
         private userProfile;
