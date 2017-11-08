@@ -282,15 +282,6 @@ declare module Model {
         visitRampBuildInterval(interval: RampBuildInterval): void;
         getTimeInZones(): any[];
     }
-    class DataPointVisitor extends BaseVisitor {
-        private x;
-        data: Point[];
-        initX(duration: Duration): void;
-        incrementX(duration: Duration): void;
-        getIntervalTag(interval: Interval): string;
-        visitSimpleInterval(interval: SimpleInterval): void;
-        visitRampBuildInterval(interval: RampBuildInterval): void;
-    }
     class ZwiftDataVisitor extends BaseVisitor {
         private content;
         constructor(name: string);
@@ -337,11 +328,6 @@ declare module Model {
         finalize(): void;
         getContent(): string;
     }
-    class FileNameHelper {
-        private intervals;
-        constructor(intervals: ArrayInterval);
-        getFileName(): string;
-    }
     class WorkoutTextVisitor implements Visitor {
         result: string;
         userProfile: UserProfile;
@@ -361,20 +347,6 @@ declare module Model {
         visitSimpleInterval(interval: SimpleInterval): void;
         getIntensityPretty(intensity: Intensity): string;
         getIntervalTitle(interval: Interval): string;
-        finalize(): void;
-    }
-    class InputTextWorkoutVisitor implements Visitor {
-        output: string;
-        constructor();
-        getDurationPretty(d: Duration): string;
-        getIntensityPretty(i: Intensity): string;
-        getTitlePretty(i: Interval): string;
-        visitCommentInterval(interval: CommentInterval): void;
-        visitSimpleInterval(interval: SimpleInterval): void;
-        visitStepBuildInterval(interval: StepBuildInterval): void;
-        visitRampBuildInterval(interval: RampBuildInterval): void;
-        visitRepeatInterval(interval: RepeatInterval): void;
-        visitArrayInterval(interval: ArrayInterval): void;
         finalize(): void;
     }
     class SpeedParser {
@@ -405,22 +377,10 @@ declare module Model {
         private userProfile;
         private sportType;
         constructor(userProfile: UserProfile, sportType: SportType);
-        getBikeSpeedMphForIntensity(intensity: Intensity): number;
+        private getBikeSpeedMphForIntensity(intensity);
         createIntensity(value: number, unit: IntensityUnit): Intensity;
         createDuration(intensity: Intensity, unit: DurationUnit, value: number): Duration;
         getEasyThreshold(): number;
-    }
-    class WorkoutFileGenerator {
-        private workoutTitle;
-        private intervals;
-        constructor(workoutTitle: string, intervals: ArrayInterval);
-        getMRCFile(): string;
-        getZWOFile(): string;
-        getPPSMRXFile(): string;
-        getZWOFileName(): string;
-        getMRCFileName(): string;
-        getPPSMRXFileName(): string;
-        getBaseFileName(): string;
     }
     class WorkoutBuilder {
         private userProfile;

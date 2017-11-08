@@ -208,6 +208,7 @@ var Model;
                 }
             }
         }
+        // TODO: Move this to duration.
         static getDurationSeconds(unit, value) {
             if (DurationUnitHelper.isDistance(unit)) {
                 return 0;
@@ -1103,6 +1104,10 @@ var Model;
             // - Check for another number after the current cursor.
             // - Skip any white spaces as well
             // TODO: Move this into number parser
+            // Think on how to fix this code. There are a couple of options:
+            // - 1) Make the Unparser generate 01:30 min style notation
+            // - 2) Fix this parsing so that it parses something like 1hr30min10s
+            // 
             if (i + 1 < input.length && input[i + 1] == ":") {
                 i = i + 2; // skip : and go to the next char
                 var res_temp = IntervalParser.parseDouble(input, i);
@@ -1444,7 +1449,7 @@ var Model;
         // to IF so that its independent of thresholds.
         static normalize(factory, input) {
             let interval = IntervalParser.parse(factory, input);
-            let visitor = new InputTextWorkoutVisitor();
+            let visitor = new UnparserVisitor();
             VisitorHelper.visit(visitor, interval);
             return visitor.output;
         }
@@ -1705,7 +1710,6 @@ var Model;
             this.data.push(new Point(this.x, interval.getEndIntensity(), title, this.getIntervalTag(interval)));
         }
     }
-    Model.DataPointVisitor = DataPointVisitor;
     class ZwiftDataVisitor extends BaseVisitor {
         constructor(name) {
             super();
@@ -1975,7 +1979,6 @@ var Model;
             }
         }
     }
-    Model.FileNameHelper = FileNameHelper;
     class WorkoutTextVisitor {
         constructor(userProfile, sportType, outputUnit, roundValues) {
             this.result = "";
@@ -2272,7 +2275,7 @@ var Model;
         }
     }
     Model.WorkoutTextVisitor = WorkoutTextVisitor;
-    class InputTextWorkoutVisitor {
+    class UnparserVisitor {
         constructor() {
             this.output = "";
         }
@@ -2285,6 +2288,9 @@ var Model;
         getIntensityPretty(i) {
             if (i.getOriginalUnit() == IntensityUnit.OffsetSeconds) {
                 return "+" + i.getOriginalValue() + "s";
+            }
+            else if (i.getOriginalUnit() == IntensityUnit.FreeRide) {
+                return "*";
             }
             else {
                 return MyMath.round10(i.getValue() * 100, -1).toString();
@@ -2359,7 +2365,6 @@ var Model;
         finalize() {
         }
     }
-    Model.InputTextWorkoutVisitor = InputTextWorkoutVisitor;
     class SpeedParser {
         static getSpeedInMph(speed) {
             var res = null;
@@ -2640,7 +2645,6 @@ var Model;
             return fileNameHelper.getFileName();
         }
     }
-    Model.WorkoutFileGenerator = WorkoutFileGenerator;
     class WorkoutBuilder {
         constructor(userProfile, sportType, outputUnit) {
             this.userProfile = userProfile;

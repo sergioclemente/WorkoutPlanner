@@ -136,6 +136,11 @@ describe('Bugs', function () {
 		expect_eq_nbr(0.55, first_interval.getIntensity().getOriginalValue());
 		expect_eq_str("2% grade", first_interval.getTitle());
 	});
+	// Uncomment this bug
+	// it('90s duration', function () {
+	// 	var interval = Model.IntervalParser.parse(of_bike, "(1min30s, 55)");
+	// 	expect_eq_nbr(90, interval.getTotalDuration().getSeconds());
+	// });	
 });
 
 describe('Combine duration', function () {
@@ -722,6 +727,7 @@ describe('parse and unparse', function () {
 		parseAndNormalize(of_bike, "4[(1min, 100, hard), (30sec, 50, easy)]");
 		parseAndNormalize(of_swim, "(400yards, +10s, 30sec, warmup)");
 		parseAndNormalize(of_run, "(2mi, 80)");
+		parseAndNormalize(of_bike, "(10sec, *)");
 		parseAndNormalize(of_run, "(2mi, 7:00min/mi)", "(2mi, 85.7)");
 		parseAndNormalize(of_bike, "2[(1min, 85, 95), (30sec, 50)]");
 		parseAndNormalize(of_bike, "2[(100, 30sec, 45sec), (30sec, 50)]");

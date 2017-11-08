@@ -198,6 +198,7 @@ module Model {
 			}
 		}
 
+		// TODO: Move this to duration.
 		static getDurationSeconds(unit: DurationUnit, value: number): number {
 			if (DurationUnitHelper.isDistance(unit)) {
 				return 0;
@@ -1186,6 +1187,10 @@ module Model {
 			// - Check for another number after the current cursor.
 			// - Skip any white spaces as well
 			// TODO: Move this into number parser
+			// Think on how to fix this code. There are a couple of options:
+			// - 1) Make the Unparser generate 01:30 min style notation
+			// - 2) Fix this parsing so that it parses something like 1hr30min10s
+			// 
 			if (i + 1 < input.length && input[i + 1] == ":") {
 				i = i + 2; // skip : and go to the next char
 				var res_temp = IntervalParser.parseDouble(input, i);
@@ -1542,7 +1547,7 @@ module Model {
 		// to IF so that its independent of thresholds.
 		static normalize(factory: ObjectFactory, input: string) : string {
 			let interval = IntervalParser.parse(factory, input);
-			let visitor = new InputTextWorkoutVisitor();
+			let visitor = new UnparserVisitor();
 			VisitorHelper.visit(visitor, interval);
 			return visitor.output;	
 		}
@@ -1774,7 +1779,7 @@ module Model {
 		}
 	}
 
-	export class DataPointVisitor extends BaseVisitor {
+	class DataPointVisitor extends BaseVisitor {
 		private x: Duration = null;
 		data: Point[] = [];
 
@@ -2074,7 +2079,7 @@ module Model {
 		}
 	}
 
-	export class FileNameHelper {
+	class FileNameHelper {
 		private intervals: ArrayInterval;
 
 		constructor(intervals: ArrayInterval) {
@@ -2435,7 +2440,7 @@ module Model {
 		}
 	}
 
-	export class InputTextWorkoutVisitor implements Visitor {
+	class UnparserVisitor implements Visitor {
 		output: string;
 
 		constructor() {
@@ -2452,6 +2457,8 @@ module Model {
 		getIntensityPretty(i: Intensity): string {
 			if (i.getOriginalUnit() == IntensityUnit.OffsetSeconds) {
 				return "+" + i.getOriginalValue() + "s";
+			} else if (i.getOriginalUnit() == IntensityUnit.FreeRide) {
+				return "*";
 			} else {
 				return MyMath.round10(i.getValue() * 100, -1).toString();
 			}
@@ -2672,7 +2679,7 @@ module Model {
 			this.sportType = sportType;
 		}
 
-		getBikeSpeedMphForIntensity(intensity: Intensity): number {
+		private getBikeSpeedMphForIntensity(intensity: Intensity): number {
 			// TODO: very simple for now
 			// its either 20 or 15mph
 			var actualSpeedMph = 0;
@@ -2798,7 +2805,7 @@ module Model {
 		}
 	}
 
-	export class WorkoutFileGenerator {
+	class WorkoutFileGenerator {
 		private workoutTitle: string;
 		private intervals: ArrayInterval;
 
