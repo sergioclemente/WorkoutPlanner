@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "btoa": "1.1.2",
-    "ejs": "2.5.2",
+    "ejs": "2.5.5",
     "express": "4.14.0",
     "fixed-data-table": "0.6.3",
     "gmail-send": "^1.2.11",
