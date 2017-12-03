@@ -1,61 +1,65 @@
-/// <reference path="./node_modules/@types/nodemailer/index.d.ts"/>
 /// <reference path="./node_modules/@types/mysql/index.d.ts"/>
 
 var mysql = require('mysql');
+var fs = require('fs');
 
 module ModelServer {
+	class ScopedFilename {
+		name: string;
+
+		constructor(name : string, content : string) {
+			this.name = name;
+			fs.writeFileSync(this.name, content);
+		}
+	
+		dispose() : void {
+			fs.unlinkSync(this.name);
+		}
+	};
 
 	export class MailSender {
-		host: string;
-		port: number;
-		use_ssl: boolean;
 		user: string;
 		password: string;
 
-		constructor(host: string,
-			port: number,
-			use_ssl: boolean,
-			user: string,
+		constructor(user: string,
 			password: string) {
-			this.host = host;
-			this.port = port;
-			this.use_ssl = use_ssl;
 			this.user = user;
 			this.password = password;
 		}
 
 		send(to: string, subject: string, body: string, attachments: any, callback: any): void {
-			var smtpConfig = {
-				host: this.host,
-				port: this.port,
-				secure: this.use_ssl,
-				auth: {
-					user: this.user,
-					pass: this.password
-				}
-			};
-			var mailAttachments = [];
+			var send = require('gmail-send')({});
+
+			// The gmail-send api is a bit silly in the sense that it requires an
+			// actual file to be present. Because of this, we will create a temporary
+			// file and destroy once the send email callback is called.
+			let files = [];
+			let scoped_files = [];
+			let rand = Math.floor(Math.random()*1000);
 			for (var i = 0; i < attachments.length; i++) {
-				var attachment = attachments[i];
-				mailAttachments[i] = { 'filename': attachment.name, 'content': attachment.data };
+				let attachment = attachments[i];
+				var filename = rand + "." + attachment.extension;				
+				scoped_files[i] = new ScopedFilename(filename, attachment.data);
+				files.push(filename);
 			}
-			var mailOptions = {
-				from: this.user, // sender address
-				to: to, // list of receivers
-				subject: subject, // Subject line
-				text: body, // plaintext body
-				html: body, // html body
-				attachments: mailAttachments
+
+			// Overriding default parameters.
+			var data = {
+				user: this.user,
+				pass: this.password,				
+				to: to,
+				subject: subject,
+				html: body,
+				files: files,
 			};
 
-			// send mail with defined transport object
-			var nodemailer = require('nodemailer');
-			var transporter = nodemailer.createTransport(smtpConfig);
-			transporter.sendMail(mailOptions, function (error, info) {
-				console.log(JSON.stringify(error));
-				console.log(JSON.stringify(info));
-				if (error) {
-					callback(false, error);
+			// Call the actual API that will send the data.
+			send(data, function (err) {			
+				for (let i = 0; i < scoped_files.length; i++) {
+					scoped_files[i].dispose();
+				}
+				if (err) {
+					callback(false, err);
 				} else {
 					callback(true, "");
 				}

@@ -262,8 +262,7 @@ var UI;
             return typeof (this.should_round) != 'undefined' && this.should_round != "";
         }
         validate() {
-            return this.hasWorkoutTitle() &&
-                this.hasWorkoutText() &&
+            return this.hasWorkoutText() &&
                 this.hasFtpWatts() &&
                 this.hasTPace() &&
                 this.hasSwimCSS() &&
@@ -271,7 +270,7 @@ var UI;
                 this.hasSportType() &&
                 this.hasOutputUnit() &&
                 this.hasEmail();
-            // intentially missed the page and should_round. the default will be the main page
+            // intentially missed the title, page and should_round. the default will be the main page
         }
         getURL() {
             let res = "?";

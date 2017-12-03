@@ -205,7 +205,7 @@ declare module Model {
         static isWhitespace(ch: string): boolean;
         static throwParserError(column: number, msg: string): void;
         static parse(factory: ObjectFactory, input: string): ArrayInterval;
-        static normalize(factory: ObjectFactory, input: string): string;
+        static normalize(factory: ObjectFactory, input: string, unparser_format: UnparserFormat): string;
     }
     class VisitorHelper {
         static visitAndFinalize(visitor: Visitor, interval: Interval): any;
@@ -349,6 +349,10 @@ declare module Model {
         getIntervalTitle(interval: Interval): string;
         finalize(): void;
     }
+    enum UnparserFormat {
+        NoWhitespaces = 0,
+        Whitespaces = 1,
+    }
     class SpeedParser {
         static getSpeedInMph(speed: string): number;
         static _extractNumber(numberString: any, decimalMultiplier: any, strSeparator: any, strSuffix: any): number;
@@ -388,7 +392,6 @@ declare module Model {
         private outputUnit;
         private intervals;
         private workoutDefinition;
-        private normalizedWorkoutDefinition;
         private workoutTitle;
         constructor(userProfile: UserProfile, sportType: SportType, outputUnit: IntensityUnit);
         getInterval(): ArrayInterval;

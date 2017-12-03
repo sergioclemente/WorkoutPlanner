@@ -707,14 +707,14 @@ describe('NumberAndUnitParser', function () {
 });
 
 function parseAndNormalize(of: any, text: string, expected_text : string = null) {
-	let normalized_text = Model.IntervalParser.normalize(of, text);
+	let normalized_text = Model.IntervalParser.normalize(of, text, Model.UnparserFormat.NoWhitespaces);
 	if (expected_text == null) {
 		expected_text = text;
 	}
 	expect_eq_str(expected_text, normalized_text);
 
 	// Normalize again and it should be an identity function.
-	let normalized_text2 = Model.IntervalParser.normalize(of, normalized_text);
+	let normalized_text2 = Model.IntervalParser.normalize(of, normalized_text, text, Model.UnparserFormat.NoWhitespaces);
 	expect_eq_str(normalized_text, normalized_text2);
 }
 

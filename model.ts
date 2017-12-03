@@ -1545,9 +1545,9 @@ module Model {
 		// Parses the string, converts into the object, then convert back into the
 		// default units. For example: if the unit is in min/km it will be converted
 		// to IF so that its independent of thresholds.
-		static normalize(factory: ObjectFactory, input: string) : string {
+		static normalize(factory: ObjectFactory, input: string, unparser_format: UnparserFormat) : string {
 			let interval = IntervalParser.parse(factory, input);
-			let visitor = new UnparserVisitor();
+			let visitor = new UnparserVisitor(unparser_format);
 			VisitorHelper.visit(visitor, interval);
 			return visitor.output;	
 		}
@@ -2439,12 +2439,17 @@ module Model {
 		finalize(): void {
 		}
 	}
-
+	export enum UnparserFormat {
+		NoWhitespaces,
+		Whitespaces
+	}
 	class UnparserVisitor implements Visitor {
 		output: string;
+		format : UnparserFormat;
 
-		constructor() {
+		constructor(format : UnparserFormat) {
 			this.output = "";
+			this.format = format;
 		}
 
 		getDurationPretty(d: Duration): string {
@@ -2472,8 +2477,15 @@ module Model {
 			}
 		}
 
+		addNewLine() : void {
+			if (this.format == UnparserFormat.Whitespaces) {
+				this.output += "\n";
+			}
+		}
+
 		visitCommentInterval(interval: CommentInterval): void {
 			this.output += stringFormat("\"{0}\"", interval.getTitle());
+			this.addNewLine();
 		}
 		visitSimpleInterval(interval: SimpleInterval): void {
 			if (interval.getRestDuration().getValue() != 0) {
@@ -2481,6 +2493,7 @@ module Model {
 			} else {
 				this.output += stringFormat("({0}, {1}{2})", this.getDurationPretty(interval.getWorkDuration()), this.getIntensityPretty(interval.getIntensity()), this.getTitlePretty(interval));
 			}
+			this.addNewLine();
 		}
 		visitStepBuildInterval(interval: StepBuildInterval): void {
 			this.output += interval.getRepeatCount().toString();
@@ -2508,9 +2521,11 @@ module Model {
 				VisitorHelper.visit(this, interval.getRestInterval());
 			}
 			this.output += "]";
+			this.addNewLine();
 		}
 		visitRampBuildInterval(interval: RampBuildInterval): void {
 			this.output += stringFormat("({0}, {1}, {2}{3})", this.getIntensityPretty(interval.getStartIntensity()), this.getIntensityPretty(interval.getEndIntensity()), this.getDurationPretty(interval.getWorkDuration()), this.getTitlePretty(interval));
+			this.addNewLine();
 		}
 		visitRepeatInterval(interval: RepeatInterval): void {
 			this.output += interval.getRepeatCount().toString();
@@ -2522,6 +2537,7 @@ module Model {
 				}
 			}
 			this.output += "]";
+			this.addNewLine();
 		}
 		visitArrayInterval(interval: ArrayInterval): void {
 			for (var i = 0; i < interval.getIntervals().length; i++) {
@@ -2865,7 +2881,6 @@ module Model {
 		private outputUnit: IntensityUnit;
 		private intervals: ArrayInterval;
 		private workoutDefinition: string;
-		private normalizedWorkoutDefinition : string;
 		private workoutTitle: string;
 
 		constructor(userProfile: UserProfile, sportType: SportType, outputUnit: IntensityUnit) {
@@ -2887,7 +2902,8 @@ module Model {
 		}
 
 		getNormalizedWorkoutDefinition() : string {
-			return this.normalizedWorkoutDefinition;
+			let object_factory = new ObjectFactory(this.userProfile, this.sportType);
+			return IntervalParser.normalize(object_factory, this.workoutDefinition, UnparserFormat.Whitespaces);;
 		}
 
 		withDefinition(workoutTitle: string, workoutDefinition: string): WorkoutBuilder {
@@ -2896,7 +2912,6 @@ module Model {
 				object_factory,
 				workoutDefinition
 			);
-			this.normalizedWorkoutDefinition = IntervalParser.normalize(object_factory, workoutDefinition);
 			this.workoutTitle = workoutTitle;
 			this.workoutDefinition = workoutDefinition;
 			return this;

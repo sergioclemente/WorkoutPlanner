@@ -334,8 +334,7 @@ module UI {
 		}		
 
 		validate(): boolean {
-			return this.hasWorkoutTitle() &&
-				this.hasWorkoutText() &&
+			return this.hasWorkoutText() &&
 				this.hasFtpWatts() &&
 				this.hasTPace() &&
 				this.hasSwimCSS() &&
@@ -343,7 +342,7 @@ module UI {
 				this.hasSportType() &&
 				this.hasOutputUnit() &&
 				this.hasEmail();
-				// intentially missed the page and should_round. the default will be the main page
+				// intentially missed the title, page and should_round. the default will be the main page
 		}
 
 		getURL(): string {

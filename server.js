@@ -62,7 +62,7 @@ function handleSendEmail(req, res, uri, params) {
     logRequest(req, 200);
 
     // sending email
-    var ms = new model_server.MailSender(config.smtp.server_host, config.smtp.server_port, config.smtp.use_ssl, config.smtp.login, config.smtp.password);
+    var ms = new model_server.MailSender(config.smtp.login, config.smtp.password);
 
     var attachments = [];
 
@@ -70,15 +70,18 @@ function handleSendEmail(req, res, uri, params) {
     if (builder.getSportType() == model.SportType.Bike) {
       var attachment_mrc = {
         name : builder.getMRCFileName(),
-        data : builder.getMRCFile()
+        data : builder.getMRCFile(),
+        extension: "mrc",
       };
       var attachment_zwo = {
         name : builder.getZWOFileName(),
-        data : builder.getZWOFile()
+        data : builder.getZWOFile(),
+        extension : "zwo",
       };       
       var attachment_ppsmrx = {
         name : builder.getPPSMRXFileName(),
-        data : builder.getPPSMRXFile()
+        data : builder.getPPSMRXFile(),
+        extension : "ppsmrx",
       };                
       attachments.push(attachment_zwo);
       attachments.push(attachment_mrc);
@@ -92,6 +95,7 @@ function handleSendEmail(req, res, uri, params) {
             res.write("Email successfully sent.\n");
           } else {
             res.write("Error while sending email.\n");
+            console.log(message);
           }
           res.end();
       });

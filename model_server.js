@@ -1,45 +1,48 @@
 "use strict";
 var mysql = require('mysql');
+var fs = require('fs');
 var ModelServer;
 (function (ModelServer) {
+    class ScopedFilename {
+        constructor(name, content) {
+            this.name = name;
+            fs.writeFileSync(this.name, content);
+        }
+        dispose() {
+            fs.unlinkSync(this.name);
+        }
+    }
+    ;
     class MailSender {
-        constructor(host, port, use_ssl, user, password) {
-            this.host = host;
-            this.port = port;
-            this.use_ssl = use_ssl;
+        constructor(user, password) {
             this.user = user;
             this.password = password;
         }
         send(to, subject, body, attachments, callback) {
-            var smtpConfig = {
-                host: this.host,
-                port: this.port,
-                secure: this.use_ssl,
-                auth: {
-                    user: this.user,
-                    pass: this.password
-                }
-            };
-            var mailAttachments = [];
+            var send = require('gmail-send')({});
+            let files = [];
+            let scoped_files = [];
+            let rand = Math.floor(Math.random() * 1000);
             for (var i = 0; i < attachments.length; i++) {
-                var attachment = attachments[i];
-                mailAttachments[i] = { 'filename': attachment.name, 'content': attachment.data };
+                let attachment = attachments[i];
+                var filename = rand + "." + attachment.extension;
+                scoped_files[i] = new ScopedFilename(filename, attachment.data);
+                files.push(filename);
             }
-            var mailOptions = {
-                from: this.user,
+            var data = {
+                user: this.user,
+                pass: this.password,
                 to: to,
                 subject: subject,
-                text: body,
                 html: body,
-                attachments: mailAttachments
+                files: files,
             };
-            var nodemailer = require('nodemailer');
-            var transporter = nodemailer.createTransport(smtpConfig);
-            transporter.sendMail(mailOptions, function (error, info) {
-                console.log(JSON.stringify(error));
-                console.log(JSON.stringify(info));
-                if (error) {
-                    callback(false, error);
+            send(data, function (err) {
+                for (let i = 0; i < scoped_files.length; i++) {
+                    scoped_files[i].dispose();
+                }
+                if (err) {
+                    callback(false, err);
                 }
                 else {
                     callback(true, "");

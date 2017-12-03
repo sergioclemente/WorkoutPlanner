@@ -43,40 +43,20 @@ To install the protocol handler:
 - Run this in a developer console window 
 -- navigator.registerProtocolHandler("web+wp", "http://workoutplanner.herokuapp.com/?wh=%s", "Workout Planner handler");
 
-# Things that should be fixed soon:
-- Add a text representation of the workout to make sure it got parsed properly
-- Cannot email run workout (Getting a ERR_INCOMPLETE_CHUNKED_ENCODING error)
-
 # Bugs/Feature requests
-- Add lapcount complexity
-- Make long repeated series easier to read
+- Cannot email run workout (Getting a ERR_INCOMPLETE_CHUNKED_ENCODING error)
+- 1min30sec not being parsed properly. e.g. (1min30sec, 105)
 - Can we add a "hint" for * intervals so that it computes IF better?
 
 Server
 * Add authentication
-* Refactor validation of parameters on server.js
-* Make node.js a typescript file
-* Move to kubernetes
-
-Workout View
-* Don't require a title for validating
-* add the hability for named groups (warmup/mainset/cooldown) - workaround today is comments
-
-On saving
-* Precompute some suff for display: Data required for workout view? make sure to include version
+* Refactor validation of parameters on server.js (params.w && params.ftp && params.tpace ...)
+* Make server.js a typescript file
+* Reduce dependencies (mailgun, sql) to make move to kubernetes easier
 
 Player:
 * Fix play of music on iphone
 * Implement next
 * Add some sort of highlight or next
 
-* Refactor Intensity
-* refactor
-        stringFormat
-        DateHelper
-        SpeedParser
-        remove StopWatch
-        remove ArrayIterator
-        factory for UserProfile from UI.QueryParams
-        refactor file generation to just depend on the workout.
 
