@@ -1,0 +1,15 @@
+Workout text:
+(10min, 3:40min/km)
+(5min, 55)
+
+Stacktrace: 
+
+2017-12-03T03:32:37.793731+00:00 app[web.1]: Invalid unit 5
+2017-12-03T03:32:37.796104+00:00 app[web.1]:     at Console.assert (console.js:95:23)
+2017-12-03T03:32:37.796101+00:00 app[web.1]: AssertionError: Invalid unit 5
+2017-12-03T03:32:37.796105+00:00 app[web.1]:     at ObjectFactory.createIntensity (/app/model.js:2526:29)
+2017-12-03T03:32:37.796106+00:00 app[web.1]:     at WorkoutBuilder.withDefinition (/app/model.js:2686:45)
+2017-12-03T03:32:37.796105+00:00 app[web.1]:     at Function.parse (/app/model.js:1277:62)
+2017-12-03T03:32:37.796108+00:00 app[web.1]:     at /app/server.js:177:34
+2017-12-03T03:32:37.796107+00:00 app[web.1]:     at Object.handleSaveWorkout [as /save_workout] (/app/server.js:132:77)
+2017-12-03T03:32:37.796108+00:00 app[web.1]:     at FSReqWrap.cb [as oncomplete] (fs.js:257:19)
