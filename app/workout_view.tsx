@@ -165,7 +165,7 @@ export default class WorkoutView extends React.Component<any, any> {
 				axisY: {
 					title: "intensity",
 					labelAngle: 45,
-					minimum: 45,
+					minimum: 40,
 					suffix: "%",
 					gridThickness: 0,
 				},
