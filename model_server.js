@@ -25,7 +25,10 @@ var ModelServer;
             let rand = Math.floor(Math.random() * 1000);
             for (var i = 0; i < attachments.length; i++) {
                 let attachment = attachments[i];
-                var filename = rand + "." + attachment.extension;
+                var filename = attachment.name;
+                if (fs.existsSync(filename)) {
+                    filename = rand + "." + attachment.extension;
+                }
                 scoped_files[i] = new ScopedFilename(filename, attachment.data);
                 files.push(filename);
             }

@@ -44,15 +44,15 @@ To install the protocol handler:
 -- navigator.registerProtocolHandler("web+wp", "http://workoutplanner.herokuapp.com/?wh=%s", "Workout Planner handler");
 
 # Bugs/Feature requests
-- Cannot email run workout (Getting a ERR_INCOMPLETE_CHUNKED_ENCODING error)
 - 1min30sec not being parsed properly. e.g. (1min30sec, 105)
+- pretty print on the intervals is not very good for repeat and complex intervals
 - Can we add a "hint" for * intervals so that it computes IF better?
 
 Server
 * Add authentication
 * Refactor validation of parameters on server.js (params.w && params.ftp && params.tpace ...)
 * Make server.js a typescript file
-* Reduce dependencies (mailgun, sql) to make move to kubernetes easier
+* Reduce dependencies (sql) to make move to kubernetes easier
 
 Player:
 * Fix play of music on iphone

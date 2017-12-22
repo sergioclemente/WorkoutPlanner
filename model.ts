@@ -51,6 +51,16 @@ module Model {
 		FreeRide = 11,
 	}
 
+	class PreconditionsCheck {
+		static assertIsNumber(v: number, name: string) {
+			console.assert(typeof(v) == "number", stringFormat("{0} must be a number, it was {1}", name, typeof(v)));
+		}
+
+		static assertIsBoolean(v: boolean, name: string) {
+			console.assert(typeof(v) == "boolean", stringFormat("{0} must be a boolean, it was {1}", name, typeof(v)));
+		}		
+	};
+
 	class MyMath {
 		/**
 		 * Decimal adjustment of a number.
@@ -348,6 +358,11 @@ module Model {
 		public static ZeroDuration: Duration = new Duration(TimeUnit.Seconds, 0, 0, 0);
 
 		constructor(unit: DurationUnit, value: number, estimatedDurationInSeconds: number, estimatedDistanceInMiles: number) {
+			PreconditionsCheck.assertIsNumber(unit, "unit");
+			PreconditionsCheck.assertIsNumber(value, "value");
+			PreconditionsCheck.assertIsNumber(estimatedDurationInSeconds, "estimatedDurationInSeconds");
+			PreconditionsCheck.assertIsNumber(estimatedDistanceInMiles, "estimatedDistanceInMiles");
+			
 			this.unit = unit;
 			this.value = value;
 			if (estimatedDistanceInMiles == 0 && DurationUnitHelper.isDistance(unit)) {
@@ -588,6 +603,8 @@ module Model {
 		}
 
 		static toString(unit: IntensityUnit): string {
+			PreconditionsCheck.assertIsNumber(unit, "unit");
+
 			switch (unit) {
 				case IntensityUnit.Watts:
 					return "w";
@@ -682,6 +699,10 @@ module Model {
 		public static ZeroIntensity: Intensity = new Intensity(0, 0, IntensityUnit.IF);
 
 		constructor(ifValue: number = 0, value: number = 0, unit: IntensityUnit = IntensityUnit.IF) {
+			PreconditionsCheck.assertIsNumber(ifValue, "ifValue");
+			PreconditionsCheck.assertIsNumber(value, "value");
+			PreconditionsCheck.assertIsNumber(unit, "unit");
+
 			// HACK: Find a better way of doing this
 			if (ifValue > 10) {
 				ifValue = ifValue / 100;
@@ -2144,6 +2165,9 @@ module Model {
 			sportType: SportType,
 			outputUnit: IntensityUnit,
 		    roundValues : boolean) {
+			PreconditionsCheck.assertIsNumber(sportType, "sportType");
+			PreconditionsCheck.assertIsNumber(outputUnit, "outputUnit");
+
 			this.userProfile = userProfile;
 			this.sportType = sportType;
 			this.outputUnit = outputUnit;
@@ -2884,6 +2908,9 @@ module Model {
 		private workoutTitle: string;
 
 		constructor(userProfile: UserProfile, sportType: SportType, outputUnit: IntensityUnit) {
+			PreconditionsCheck.assertIsNumber(sportType, "sportType");
+			PreconditionsCheck.assertIsNumber(outputUnit, "outputUnit");
+
 			this.userProfile = userProfile;
 			this.sportType = sportType;
 			this.outputUnit = outputUnit;

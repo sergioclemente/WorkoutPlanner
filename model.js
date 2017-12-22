@@ -46,6 +46,15 @@ var Model;
         IntensityUnit[IntensityUnit["HeartRate"] = 10] = "HeartRate";
         IntensityUnit[IntensityUnit["FreeRide"] = 11] = "FreeRide";
     })(IntensityUnit = Model.IntensityUnit || (Model.IntensityUnit = {}));
+    class PreconditionsCheck {
+        static assertIsNumber(v, name) {
+            console.assert(typeof (v) == "number", stringFormat("{0} must be a number, it was {1}", name, typeof (v)));
+        }
+        static assertIsBoolean(v, name) {
+            console.assert(typeof (v) == "boolean", stringFormat("{0} must be a boolean, it was {1}", name, typeof (v)));
+        }
+    }
+    ;
     class MyMath {
         /**
          * Decimal adjustment of a number.
@@ -349,6 +358,10 @@ var Model;
     Model.FormatterHelper = FormatterHelper;
     class Duration {
         constructor(unit, value, estimatedDurationInSeconds, estimatedDistanceInMiles) {
+            PreconditionsCheck.assertIsNumber(unit, "unit");
+            PreconditionsCheck.assertIsNumber(value, "value");
+            PreconditionsCheck.assertIsNumber(estimatedDurationInSeconds, "estimatedDurationInSeconds");
+            PreconditionsCheck.assertIsNumber(estimatedDistanceInMiles, "estimatedDistanceInMiles");
             this.unit = unit;
             this.value = value;
             if (estimatedDistanceInMiles == 0 && DurationUnitHelper.isDistance(unit)) {
@@ -582,6 +595,7 @@ var Model;
             return result;
         }
         static toString(unit) {
+            PreconditionsCheck.assertIsNumber(unit, "unit");
             switch (unit) {
                 case IntensityUnit.Watts:
                     return "w";
@@ -667,6 +681,9 @@ var Model;
     }
     class Intensity {
         constructor(ifValue = 0, value = 0, unit = IntensityUnit.IF) {
+            PreconditionsCheck.assertIsNumber(ifValue, "ifValue");
+            PreconditionsCheck.assertIsNumber(value, "value");
+            PreconditionsCheck.assertIsNumber(unit, "unit");
             // HACK: Find a better way of doing this
             if (ifValue > 10) {
                 ifValue = ifValue / 100;
@@ -1987,6 +2004,9 @@ var Model;
             this.outputUnit = IntensityUnit.Unknown;
             this.disableEasyTitle = false;
             this.roundValues = false;
+            PreconditionsCheck.assertIsNumber(sportType, "sportType");
+            PreconditionsCheck.assertIsNumber(outputUnit, "outputUnit");
+            // skip roundValues intentionally since undefined == false.
             this.userProfile = userProfile;
             this.sportType = sportType;
             this.outputUnit = outputUnit;
@@ -2663,6 +2683,8 @@ var Model;
     }
     class WorkoutBuilder {
         constructor(userProfile, sportType, outputUnit) {
+            PreconditionsCheck.assertIsNumber(sportType, "sportType");
+            PreconditionsCheck.assertIsNumber(outputUnit, "outputUnit");
             this.userProfile = userProfile;
             this.sportType = sportType;
             this.outputUnit = outputUnit;
