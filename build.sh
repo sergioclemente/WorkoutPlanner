@@ -15,12 +15,12 @@ if [[ "$?" != 0 ]]; then
 fi
 echo Compiled Tests
 
-# mocha tests.js
-# if [[ "$?" != 0 ]]; then
-# 	echo "Build error." 1>&2
-# 	exit 1
-# fi
-# echo Ran Tests
+node_modules/mocha/bin/mocha tests.js
+if [[ "$?" != 0 ]]; then
+	echo "Build error." 1>&2
+	exit 1
+fi
+echo Ran Tests
 
 tsc --module commonjs --target ${JS_TARGET} ./model.ts -d
 if [[ "$?" != 0 ]]; then
@@ -42,6 +42,13 @@ if [[ "$?" != 0 ]]; then
 	exit 1
 fi
 echo Fixing reference - Applying regex
+
+rm type_definitions/model.d.ts.bak
+if [[ "$?" != 0 ]]; then
+	echo "Build error." 1>&2
+	exit 1
+fi
+echo Fixing reference - Deleting backup file
 
 tsc --moduleResolution node --m commonjs --target ${JS_TARGET} --jsx react app/*.tsx
 if [[ "$?" != 0 ]]; then

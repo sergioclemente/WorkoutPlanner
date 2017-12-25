@@ -2006,7 +2006,6 @@ var Model;
             this.roundValues = false;
             PreconditionsCheck.assertIsNumber(sportType, "sportType");
             PreconditionsCheck.assertIsNumber(outputUnit, "outputUnit");
-            // skip roundValues intentionally since undefined == false.
             this.userProfile = userProfile;
             this.sportType = sportType;
             this.outputUnit = outputUnit;
