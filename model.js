@@ -53,6 +53,9 @@ var Model;
         static assertIsBoolean(v, name) {
             console.assert(typeof (v) == "boolean", stringFormat("{0} must be a boolean, it was {1}", name, typeof (v)));
         }
+        static assertTrue(v) {
+            console.assert(v, "Precondition failed");
+        }
     }
     ;
     class MyMath {
@@ -392,27 +395,24 @@ var Model;
         getDistanceInMiles() {
             return this.estimatedDistanceInMiles;
         }
-        getDistance(unitTo = DistanceUnit.Unknown) {
-            if (DurationUnitHelper.isDistance(this.unit)) {
-                if (unitTo == DistanceUnit.Unknown) {
-                    return MyMath.round10(this.value, -1);
-                }
-                else {
-                    if (unitTo == DistanceUnit.Yards) {
-                        var yards = DistanceUnitHelper.convertTo(this.getDistanceInMiles(), DistanceUnit.Miles, DistanceUnit.Yards);
-                        return MyMath.round10(yards, -1);
-                    }
-                    else {
-                        return MyMath.round10(this.value, -1);
-                    }
-                }
+        getValueInUnit(unitTo) {
+            PreconditionsCheck.assertTrue(unitTo != DistanceUnit.Unknown);
+            if (unitTo == DistanceUnit.Unknown) {
+                return MyMath.round10(this.value, -1);
             }
             else {
-                return MyMath.round10(DistanceUnitHelper.convertTo(this.estimatedDistanceInMiles, DistanceUnit.Miles, unitTo), -1);
+                if (DurationUnitHelper.isDistance(unitTo)) {
+                    var value = DistanceUnitHelper.convertTo(this.getDistanceInMiles(), DistanceUnit.Miles, unitTo);
+                    return MyMath.round10(value, -1);
+                }
+                else {
+                    // TODO: Not doing anything here for now.
+                    return MyMath.round10(this.value, -1);
+                }
             }
         }
-        toStringDistance(unitTo = DistanceUnit.Unknown) {
-            return this.getDistance(unitTo) + DurationUnitHelper.toString(this.unit);
+        toStringDistance(unitTo) {
+            return this.getValueInUnit(unitTo) + DurationUnitHelper.toString(this.unit);
         }
         getTimeComponents() {
             var hours = (this.estimatedDurationInSeconds / 3600) | 0;
@@ -453,10 +453,10 @@ var Model;
         toStringShort(omitUnit) {
             if (!DurationUnitHelper.isTime(this.unit)) {
                 if (omitUnit) {
-                    return this.getDistance(this.unit) + "";
+                    return this.getValueInUnit(this.unit) + "";
                 }
                 else {
-                    return this.toStringDistance();
+                    return this.toStringDistance(this.unit);
                 }
             }
             return this.toTimeStringShort();
@@ -466,7 +466,7 @@ var Model;
                 return this.toTimeStringLong();
             }
             else {
-                return this.toStringDistance();
+                return this.toStringDistance(this.unit);
             }
         }
         static combine(dur1, dur2) {

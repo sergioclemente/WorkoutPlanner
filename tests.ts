@@ -151,12 +151,12 @@ describe('Combine duration', function () {
 	});
 	it('Combine distance and time', function () {
         let interval = Model.IntervalParser.parse(of_swim, `(100yards, 100)(10s, 0)`);
-        expect_eq_nbr(100, interval.getTotalDuration().getDistance(Model.DistanceUnit.Yards));
+        expect_eq_nbr(100, interval.getTotalDuration().getValueInUnit(Model.DistanceUnit.Yards));
         expect_eq_nbr(95, interval.getTotalDuration().getSeconds(), 1);
 	});
 	it('Combine durations in a run', function() {
 		let interval = Model.IntervalParser.parse(of_run, `(200m, 100)(45s, 100)`);
-		expect_eq_nbr(400, interval.getTotalDuration().getDistance(Model.DistanceUnit.Meters), 2);
+		expect_eq_nbr(400, interval.getTotalDuration().getValueInUnit(Model.DistanceUnit.Meters), 2);
 		expect_eq_nbr(90, interval.getTotalDuration().getSeconds(), 1);
 	});
 });
@@ -661,7 +661,7 @@ describe('Swim', function () {
 	});
 	it('distance and rest interval', function () {
 		let interval = Model.IntervalParser.parse(of_swim, `2[(200yards, neg split, 30s)]`);
-		expect_eq_nbr(400, interval.getTotalDuration().getDistance(Model.DistanceUnit.Yards));
+		expect_eq_nbr(400, interval.getTotalDuration().getValueInUnit(Model.DistanceUnit.Yards));
 		expect_eq_nbr(30, interval.getRestDuration().getSeconds());
 	});	
 });

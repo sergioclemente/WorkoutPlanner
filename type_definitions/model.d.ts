@@ -62,8 +62,8 @@ declare module Model {
         getValue(): number;
         getSeconds(): number;
         getDistanceInMiles(): number;
-        getDistance(unitTo?: DistanceUnit): number;
-        toStringDistance(unitTo?: DistanceUnit): string;
+        getValueInUnit(unitTo: DistanceUnit): number;
+        toStringDistance(unitTo: DistanceUnit): string;
         getTimeComponents(): any;
         toTimeStringLong(): string;
         toTimeStringShort(): string;
