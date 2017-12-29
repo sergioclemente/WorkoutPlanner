@@ -648,29 +648,44 @@ describe('NumberAndUnitParser', function () {
         expect_eq_str("/400m", p.getUnit());
     });
 });
-function parseAndNormalize(of, text, expected_text = null) {
-    let normalized_text = Model.IntervalParser.normalize(of, text, Model.UnparserFormat.NoWhitespaces);
+function parseAndNormalize(of, insert_whitespaces, text, expected_text = null) {
+    let format_mode = Model.UnparserFormat.NoWhitespaces;
+    if (insert_whitespaces) {
+        format_mode = Model.UnparserFormat.Whitespaces;
+    }
+    let normalized_text = Model.IntervalParser.normalize(of, text, format_mode);
     if (expected_text == null) {
         expected_text = text;
     }
     expect_eq_str(expected_text, normalized_text);
-    // Normalize again and it should be an identity function.
-    let normalized_text2 = Model.IntervalParser.normalize(of, normalized_text, text, Model.UnparserFormat.NoWhitespaces);
-    expect_eq_str(normalized_text, normalized_text2);
 }
 describe('parse and unparse', function () {
-    it('simple', function () {
-        parseAndNormalize(of_bike, "(10min, 100, FTP)");
-        parseAndNormalize(of_run, "(2mi, 6:00min/mi, threshold)", "(2mi, 100, threshold)");
-        parseAndNormalize(of_swim, "\"Comment 123\"");
-        parseAndNormalize(of_bike, "(155w, 310w, 1min, build to ftp)", "(50, 100, 1min, build to ftp)");
-        parseAndNormalize(of_bike, "4[(1min, 100, hard), (30sec, 50, easy)]");
-        parseAndNormalize(of_swim, "(400yards, +10s, 30sec, warmup)");
-        parseAndNormalize(of_run, "(2mi, 80)");
-        parseAndNormalize(of_bike, "(10sec, *)");
-        parseAndNormalize(of_run, "(2mi, 7:00min/mi)", "(2mi, 85.7)");
-        parseAndNormalize(of_bike, "2[(1min, 85, 95), (30sec, 50)]");
-        parseAndNormalize(of_bike, "2[(100, 30sec, 45sec), (30sec, 50)]");
+    it('no whitespace', function () {
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "(10min, 100, FTP)");
+        parseAndNormalize(of_run, /*insert_whitespaces=*/ false, "(2mi, 6:00min/mi, threshold)", "(2mi, 100, threshold)");
+        parseAndNormalize(of_swim, /*insert_whitespaces=*/ false, "\"Comment 123\"");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "(155w, 310w, 1min, build to ftp)", "(50, 100, 1min, build to ftp)");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "4[(1min, 100, hard), (30sec, 50, easy)]");
+        parseAndNormalize(of_swim, /*insert_whitespaces=*/ false, "(400yards, +10s, 30sec, warmup)");
+        parseAndNormalize(of_run, /*insert_whitespaces=*/ false, "(2mi, 80)");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "(10sec, *)");
+        parseAndNormalize(of_run, /*insert_whitespaces=*/ false, "(2mi, 7:00min/mi)", "(2mi, 85.7)");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "2[(1min, 85, 95), (30sec, 50)]");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "2[(100, 30sec, 45sec), (30sec, 50)]");
+    });
+    it('with whitespace', function () {
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "(10min, 100, FTP)");
+        parseAndNormalize(of_run, /*insert_whitespaces=*/ true, "(2mi, 6:00min/mi, threshold)", "(2mi, 100, threshold)");
+        parseAndNormalize(of_swim, /*insert_whitespaces=*/ true, "\"Comment 123\"");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "(155w, 310w, 1min, build to ftp)", "(50, 100, 1min, build to ftp)");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "4[(1min, 100, hard), (30sec, 50, easy)]");
+        parseAndNormalize(of_swim, /*insert_whitespaces=*/ true, "(400yards, +10s, 30sec, warmup)");
+        parseAndNormalize(of_run, /*insert_whitespaces=*/ true, "(2mi, 80)");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "(10sec, *)");
+        parseAndNormalize(of_run, /*insert_whitespaces=*/ true, "(2mi, 7:00min/mi)", "(2mi, 85.7)");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "2[(1min, 85, 95), (30sec, 50)]");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "2[(100, 30sec, 45sec), (30sec, 50)]");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "(10min, 100, FTP), (5min, 55, easy)", "(10min, 100, FTP)\n(5min, 55, easy)");
     });
 });
 function textPrerocessor(input, expected) {

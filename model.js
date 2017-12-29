@@ -1467,7 +1467,7 @@ var Model;
         static normalize(factory, input, unparser_format) {
             let interval = IntervalParser.parse(factory, input);
             let visitor = new UnparserVisitor(unparser_format);
-            VisitorHelper.visit(visitor, interval);
+            VisitorHelper.visitAndFinalize(visitor, interval);
             return visitor.output;
         }
     }
@@ -2303,6 +2303,7 @@ var Model;
         constructor(format) {
             this.output = "";
             this.format = format;
+            this.level = 0;
         }
         getDurationPretty(d) {
             if (DurationUnitHelper.isDistance(d.getUnit())) {
@@ -2330,7 +2331,7 @@ var Model;
             }
         }
         addNewLine() {
-            if (this.format == UnparserFormat.Whitespaces) {
+            if (this.format == UnparserFormat.Whitespaces && this.level == 0) {
                 this.output += "\n";
             }
         }
@@ -2348,6 +2349,7 @@ var Model;
             this.addNewLine();
         }
         visitStepBuildInterval(interval) {
+            this.level++;
             this.output += interval.getRepeatCount().toString();
             this.output += "[";
             if (interval.areAllIntensitiesSame()) {
@@ -2374,13 +2376,17 @@ var Model;
                 VisitorHelper.visit(this, interval.getRestInterval());
             }
             this.output += "]";
+            this.level--;
             this.addNewLine();
         }
         visitRampBuildInterval(interval) {
+            this.level++;
             this.output += stringFormat("({0}, {1}, {2}{3})", this.getIntensityPretty(interval.getStartIntensity()), this.getIntensityPretty(interval.getEndIntensity()), this.getDurationPretty(interval.getWorkDuration()), this.getTitlePretty(interval));
+            this.level--;
             this.addNewLine();
         }
         visitRepeatInterval(interval) {
+            this.level++;
             this.output += interval.getRepeatCount().toString();
             this.output += "[";
             for (let i = 0; i < interval.getIntervals().length; i++) {
@@ -2390,6 +2396,7 @@ var Model;
                 }
             }
             this.output += "]";
+            this.level--;
             this.addNewLine();
         }
         visitArrayInterval(interval) {
@@ -2398,6 +2405,9 @@ var Model;
             }
         }
         finalize() {
+            if (this.output.endsWith("\n")) {
+                this.output = this.output.slice(0, this.output.length - 1);
+            }
         }
     }
     class SpeedParser {

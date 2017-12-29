@@ -1571,7 +1571,7 @@ module Model {
 		static normalize(factory: ObjectFactory, input: string, unparser_format: UnparserFormat) : string {
 			let interval = IntervalParser.parse(factory, input);
 			let visitor = new UnparserVisitor(unparser_format);
-			VisitorHelper.visit(visitor, interval);
+			VisitorHelper.visitAndFinalize(visitor, interval);
 			return visitor.output;	
 		}
 	}
@@ -2472,10 +2472,12 @@ module Model {
 	class UnparserVisitor implements Visitor {
 		output: string;
 		format : UnparserFormat;
+		level: number;
 
 		constructor(format : UnparserFormat) {
 			this.output = "";
 			this.format = format;
+			this.level = 0;
 		}
 
 		getDurationPretty(d: Duration): string {
@@ -2504,7 +2506,7 @@ module Model {
 		}
 
 		addNewLine() : void {
-			if (this.format == UnparserFormat.Whitespaces) {
+			if (this.format == UnparserFormat.Whitespaces && this.level == 0) {
 				this.output += "\n";
 			}
 		}
@@ -2522,6 +2524,7 @@ module Model {
 			this.addNewLine();
 		}
 		visitStepBuildInterval(interval: StepBuildInterval): void {
+			this.level++;
 			this.output += interval.getRepeatCount().toString();
 			this.output += "[";
 			if (interval.areAllIntensitiesSame()) {
@@ -2547,13 +2550,17 @@ module Model {
 				VisitorHelper.visit(this, interval.getRestInterval());
 			}
 			this.output += "]";
+			this.level--;
 			this.addNewLine();
 		}
 		visitRampBuildInterval(interval: RampBuildInterval): void {
+			this.level++;
 			this.output += stringFormat("({0}, {1}, {2}{3})", this.getIntensityPretty(interval.getStartIntensity()), this.getIntensityPretty(interval.getEndIntensity()), this.getDurationPretty(interval.getWorkDuration()), this.getTitlePretty(interval));
+			this.level--;
 			this.addNewLine();
 		}
 		visitRepeatInterval(interval: RepeatInterval): void {
+			this.level++;
 			this.output += interval.getRepeatCount().toString();
 			this.output += "[";
 			for (let i = 0; i < interval.getIntervals().length; i++) {
@@ -2563,6 +2570,7 @@ module Model {
 				}
 			}
 			this.output += "]";
+			this.level--;
 			this.addNewLine();
 		}
 		visitArrayInterval(interval: ArrayInterval): void {
@@ -2571,7 +2579,9 @@ module Model {
 			}
 		}
 		finalize(): void {
-
+			if (this.output.endsWith("\n")) {
+				this.output = this.output.slice(0, this.output.length-1);
+			}
 		}
 	}
 
