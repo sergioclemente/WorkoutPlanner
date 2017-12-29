@@ -673,3 +673,15 @@ describe('parse and unparse', function () {
         parseAndNormalize(of_bike, "2[(100, 30sec, 45sec), (30sec, 50)]");
     });
 });
+function textPrerocessor(input, expected) {
+    let tp = new Model.TextPreprocessor();
+    let actual = tp.process(input);
+    expect_eq_str(expected, actual);
+}
+describe('text processor', function () {
+    it('simple', function () {
+        textPrerocessor("#sl(4,40)", "4[(40s,45,Left Leg), (15s,45,Both), (40s,45,Right Leg), (15s,45,Both)]");
+        textPrerocessor("#o(4,40)", "4[(40s,*,Build), (40s,55,Relaxed)]");
+        textPrerocessor("#sl(4,40) #o(4,40)", "4[(40s,45,Left Leg), (15s,45,Both), (40s,45,Right Leg), (15s,45,Both)] 4[(40s,*,Build), (40s,55,Relaxed)]");
+    });
+});

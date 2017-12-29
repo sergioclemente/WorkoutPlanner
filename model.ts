@@ -3174,6 +3174,152 @@ module Model {
 		}
 	}
 
+	enum ArgType {
+		Number,
+		String
+	};
+
+	// Class that processes the input like #wu and replaces with macros.
+	export class TextPreprocessor {
+		sport_type: SportType;
+
+		constructor(sport_type: SportType) {
+			this.sport_type = sport_type;
+		}
+
+		private _rand(min: number, max: number): number {
+			return Math.floor(Math.random() * (max - min) + min);
+		}
+
+		private _randElement(array: any): string {
+			if (array.length > 0) {
+				return array[this._rand(0, array.length)] + "\n";
+			} else {
+				return "";
+			}
+		}
+
+		// TODO: total_duration_min: number
+		private _warmup(): string {
+			let warmup_text = "";
+			let warmup_groups = [];
+			if (this.sport_type == Model.SportType.Bike) {
+				warmup_groups = [
+					// 9 min (warmup)
+					[
+						"(3min, 55), (3min, 65), (3min, 75)",
+						"(9min, 55, 75)"
+					],
+					// 4 min (drill)
+					[
+						"2[(45s, 45, Single leg - left), (15s, 45, both), (45s, 45, Single leg - right), (15s, 45, both)]",
+						"8[(15s, 55, spin ups), (15s, 55)]",
+						"4[(30s, cadence 80/90/100/110, 55), (30s, 55)]"
+					],
+					// 4 min (build)
+					[
+						"4[(15s, *, build), (45s, 55)]",
+						"4[(5s, *, MAX), (55s, 55)]",
+						"4[(45s, 75, 100), (15s, 55)]",
+						"4[(30s, 85, 90, 95, 100), (30s, 55)]"
+					],
+					// static (3min)
+					["(3min, 55)"]
+				];
+			} else if (this.sport_type == Model.SportType.Run) {
+				warmup_groups = [
+					[
+						"3[(10s, 0, arm swings)]",
+						"3[(10s, 0, high knees)]",
+						"3[(10s, 0, ham kicks)]",
+						"3[(10s, 0, a-skips)]",
+						"3[(10s, 0, crossover side to sides)]",
+					],
+					[
+						"3[(10s, 0, 10 lunges - 5 each side)]",
+						"3[(10s, 0, 10 reverse lunges - 5 each side)]",
+						"3[(10s, 0, 10 lunges with rotation - 5 each side)]",
+						"3[(10s, 0, sumo squat)]",
+					]
+				];
+			}
+			for (let i = 0; i < warmup_groups.length; i++) {
+				warmup_text += this._randElement(warmup_groups[i]);
+			}
+			return warmup_text;
+		}
+
+		private _single_leg(number_repeats: number, single_leg_duration_secs: number): string {
+			console.assert(single_leg_duration_secs >= 0);
+			console.assert(single_leg_duration_secs <= 90);
+			return number_repeats + "[(" + single_leg_duration_secs + "s,45,Left Leg), (15s,45,Both), (" + single_leg_duration_secs + "s,45,Right Leg), (15s,45,Both)]"
+		}
+
+		private _open_intervals(number_repeats: number, work_duration_sec: number): string {
+			console.assert(work_duration_sec >= 0);
+			console.assert(work_duration_sec <= 60);
+			let title = work_duration_sec <= 10 ? "Max efforts" : "Build";
+			let rest_duration_sec = work_duration_sec <= 30 ? 60 - work_duration_sec : work_duration_sec;
+			return number_repeats + "[(" + work_duration_sec + "s,*," + title + "), (" + rest_duration_sec + "s,55,Relaxed)]"
+		}
+
+		// TODO: number_repeats: number, work_duration_sec: number, rest_duration_sec: number
+		private _cadence_intervals(): string {
+			// Not sure yet how to model this.
+			// 2x(2-2-1 Spin Ups @ 75% 90-100-110 rpm)
+			// 5x30s Highest Sustainable Cadence @ L2 - rest 30s very easy
+			// 4[(4min, 60, cadence 80rpm), (3min, 65, cadence 90rpm), (2min, 70, cadence 100rpm), (1min, 75, cadence 110rpm)]
+			//
+			// (3min, 55, cadence @ 65rpm)
+			// (2min, 55, cadence @ 95rpm)
+			// (3min, 55, cadence @ 70rpm)
+			// (2min, 55, cadence @ 100rpm)
+			//
+			// (3min, 55, cadence @ 75rpm)
+			// (2min, 55, cadence @ 105rpm)
+			// (3min, 55, cadence @ 80rpm)
+			// (2min, 55, cadence @ 110rpm)
+			return "<cd>";
+		}
+
+		processOne(input: string): string {
+			let funcs = [
+				{ regex: /#wu\((\d*)\)/, callback: this._warmup, params: [], description: "Warm up" },
+				{ regex: /#sl\((\d*),(\d*)\)/, callback: this._single_leg, params: [ArgType.Number, ArgType.Number], description: "Single Leg Drills." },
+				{ regex: /#o\((\d*),(\d*)\)/, callback: this._open_intervals, params: [ArgType.Number, ArgType.Number], description: "Open Power Intervals." },
+				{ regex: /#c\((\d*),(\d*)\)/, callback: this._cadence_intervals, params: [ArgType.Number, ArgType.Number], description: "Cadence Intervals." }
+			];
+
+			for (let i = 0; i < funcs.length; i++) {
+				let regex = funcs[i].regex;
+				// Try seeing if this function matches the input.
+				if (regex.test(input)) {
+					var instance_params = input.match(regex);
+					// Parse all parameters from the regex.
+					var func_params = [];
+					if (instance_params.length - 1 != funcs[i].params.length) {
+						console.log("Function call " + input + " is not matching definition.");
+					}
+					for (let j = 1; j < instance_params.length; j++) {
+						let instance_param = instance_params[j];
+						if (funcs[i].params[j - 1] == ArgType.Number) {
+							func_params.push(parseInt(instance_param));
+						} else {
+							func_params.push(instance_param);
+						}
+					}
+					return funcs[i].callback.apply(this, func_params);
+				} else {
+					console.log("regex " + regex + " failed to match " + input);
+				}
+			}
+			return input;
+		}
+
+		process(input: string): string {
+			return input.replace(new RegExp(/(#\w+\(\d*(?:,\d*)*\)())/, "g"), this.processOne.bind(this));
+		}
+	}
 }
 
 export = Model;

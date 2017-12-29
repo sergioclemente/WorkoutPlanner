@@ -49,9 +49,6 @@ export default class Workout extends React.Component<any, any> {
 	}
 
 	refreshUrls() {
-		// TODO: Merge pushing into the history with the UI.QueryParams
-		this._setHref("email_send_workout", "send_mail" + this.params.getURL());
-
 		let params = UI.QueryParams.createCopy(this.params);
 		params.page = "player";
 		
@@ -70,6 +67,22 @@ export default class Workout extends React.Component<any, any> {
 		anchor.hidden = !visible;
 	}
 
+	_onEmailWorkout() {
+		var req = new XMLHttpRequest();
+		req.addEventListener("load", this._onEmailSent.bind(this, req));
+		req.open("GET", "/send_mail" + this.params.getURL());
+		req.send();
+	}
+
+	_onEmailSent(req: XMLHttpRequest) {
+		if (req.status == 200) {
+			alert("Email sent");
+		} else {
+			alert("Error while sending email");
+			console.log(req.responseText);
+		}
+	}
+
 	_onSaveWorkout() {
 		var req = new XMLHttpRequest();
 		req.addEventListener("load", this._onWorkoutSaved.bind(this, req));
@@ -81,7 +94,8 @@ export default class Workout extends React.Component<any, any> {
 		if (req.status == 200) {
 			alert("Workout saved");
 		} else {
-			alert("Error while fetching workouts");
+			alert("Error while saving workouts");
+			console.log(req.responseText);
 		}
 	}
 
@@ -133,7 +147,7 @@ export default class Workout extends React.Component<any, any> {
 					<tr>
 						<td><a href="#" onClick={(e) => this._onClickLink()}>Download Files</a></td>
 						<td><a ref="player_link">Player</a></td>
-						<td><a ref="email_send_workout" >Email Workout</a></td>
+						<td><a ref="email_send_workout" href="#" onClick={(e) => this._onEmailWorkout()}>Email Workout</a></td>
 						<td><a ref="save_workout" href="#" onClick={(e) => this._onSaveWorkout()}>Save Workout</a></td>
 						<td><a href="?page=list">List Workouts</a></td>
 					</tr>

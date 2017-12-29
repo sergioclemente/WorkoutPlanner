@@ -81,7 +81,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 
 	_onWorkoutTextChange(e) {
 		var workoutText = this.refs['workout_text'] as HTMLTextAreaElement;
-		let wp = new UI.TextPreprocessor(this.getSportType());
+		let wp = new Model.TextPreprocessor(this.getSportType());
 		workoutText.value = wp.process(workoutText.value);
 		this._loadWorkout();
 	}

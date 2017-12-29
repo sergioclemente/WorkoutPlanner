@@ -452,5 +452,17 @@ declare module Model {
         get(ts: number): AbsoluteTimeInterval;
         getDurationTotalSeconds(): number;
     }
+    class TextPreprocessor {
+        sport_type: SportType;
+        constructor(sport_type: SportType);
+        private _rand(min, max);
+        private _randElement(array);
+        private _warmup();
+        private _single_leg(number_repeats, single_leg_duration_secs);
+        private _open_intervals(number_repeats, work_duration_sec);
+        private _cadence_intervals();
+        processOne(input: string): string;
+        process(input: string): string;
+    }
 }
 export = Model;
