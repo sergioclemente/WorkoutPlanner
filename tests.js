@@ -695,6 +695,9 @@ function textPrerocessor(input, expected) {
 }
 describe('text processor', function () {
     it('simple', function () {
+        let tp = new Model.TextPreprocessor();
+        let actual = tp.process("#wu");
+        console.assert(actual.indexOf("#wu") == -1);
         textPrerocessor("#sl(4,40)", "4[(40s,45,Left Leg), (15s,45,Both), (40s,45,Right Leg), (15s,45,Both)]");
         textPrerocessor("#o(4,40)", "4[(40s,*,Build), (40s,55,Relaxed)]");
         textPrerocessor("#sl(4,40) #o(4,40)", "4[(40s,45,Left Leg), (15s,45,Both), (40s,45,Right Leg), (15s,45,Both)] 4[(40s,*,Build), (40s,55,Relaxed)]");

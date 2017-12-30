@@ -3211,7 +3211,6 @@ module Model {
 			}
 		}
 
-		// TODO: total_duration_min: number
 		private _warmup(): string {
 			let warmup_text = "";
 			let warmup_groups = [];
@@ -3296,7 +3295,7 @@ module Model {
 
 		processOne(input: string): string {
 			let funcs = [
-				{ regex: /#wu\((\d*)\)/, callback: this._warmup, params: [], description: "Warm up" },
+				{ regex: /#wu/, callback: this._warmup, params: [], description: "Warm up" },
 				{ regex: /#sl\((\d*),(\d*)\)/, callback: this._single_leg, params: [ArgType.Number, ArgType.Number], description: "Single Leg Drills." },
 				{ regex: /#o\((\d*),(\d*)\)/, callback: this._open_intervals, params: [ArgType.Number, ArgType.Number], description: "Open Power Intervals." },
 				{ regex: /#c\((\d*),(\d*)\)/, callback: this._cadence_intervals, params: [ArgType.Number, ArgType.Number], description: "Cadence Intervals." }
@@ -3329,7 +3328,11 @@ module Model {
 		}
 
 		process(input: string): string {
-			return input.replace(new RegExp(/(#\w+\(\d*(?:,\d*)*\)())/, "g"), this.processOne.bind(this));
+			let main_regexes = [/(#\w+\(\d*(?:,\d*)*\)())/, /(#\w+)/];
+			for(let i = 0; i < main_regexes.length; i++) {
+				input = input.replace(new RegExp(main_regexes[i], "g"), this.processOne.bind(this));
+			}
+			return input;
 		}
 	}
 }
