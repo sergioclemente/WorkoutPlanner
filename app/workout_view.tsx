@@ -210,7 +210,7 @@ export default class WorkoutView extends React.Component<any, any> {
 						<td>{this.state.tss}</td>
 					</tr>
 					<tr>
-						<td>TSS From IF</td>
+						<td>TSS&reg;</td>
 						<td>{this.state.tss_from_if}</td>
 					</tr>
 					<tr>
