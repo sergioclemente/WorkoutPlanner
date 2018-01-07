@@ -53,11 +53,11 @@ module Model {
 
 	class PreconditionsCheck {
 		static assertIsNumber(v: number, name: string) {
-			console.assert(typeof(v) == "number", stringFormat("{0} must be a number, it was {1}", name, typeof(v)));
+			console.assert(typeof (v) == "number", stringFormat("{0} must be a number, it was {1}", name, typeof (v)));
 		}
 
 		static assertIsBoolean(v: boolean, name: string) {
-			console.assert(typeof(v) == "boolean", stringFormat("{0} must be a boolean, it was {1}", name, typeof(v)));
+			console.assert(typeof (v) == "boolean", stringFormat("{0} must be a boolean, it was {1}", name, typeof (v)));
 		}
 
 		static assertTrue(v: boolean) {
@@ -189,7 +189,7 @@ module Model {
 			return durationUnit <= MAX_DISTANCE;
 		}
 
-		public static isDurationUnit(unit : string) : boolean {
+		public static isDurationUnit(unit: string): boolean {
 			return DurationUnitHelper.toDurationUnit(unit) != TimeUnit.Unknown;
 		}
 
@@ -243,7 +243,7 @@ module Model {
 			return true;
 		}
 
-		static toString(unit : DurationUnit) : string {
+		static toString(unit: DurationUnit): string {
 			switch (unit) {
 				case DistanceUnit.Miles:
 					return "mi";
@@ -265,7 +265,7 @@ module Model {
 			}
 		}
 
-		static toDurationUnit(unit : string) : DurationUnit {
+		static toDurationUnit(unit: string): DurationUnit {
 			var conversionMap = {
 				"mi": DistanceUnit.Miles,
 				"km": DistanceUnit.Kilometers,
@@ -287,7 +287,7 @@ module Model {
 				return conversionMap[unit];
 			} else {
 				return TimeUnit.Unknown;
-			}			
+			}
 		}
 	}
 
@@ -366,7 +366,7 @@ module Model {
 			PreconditionsCheck.assertIsNumber(value, "value");
 			PreconditionsCheck.assertIsNumber(estimatedDurationInSeconds, "estimatedDurationInSeconds");
 			PreconditionsCheck.assertIsNumber(estimatedDistanceInMiles, "estimatedDistanceInMiles");
-			
+
 			this.unit = unit;
 			this.value = value;
 			if (estimatedDistanceInMiles == 0 && DurationUnitHelper.isDistance(unit)) {
@@ -467,7 +467,7 @@ module Model {
 			return result;
 		}
 
-		toStringShort(omitUnit : boolean): string {
+		toStringShort(omitUnit: boolean): string {
 			if (!DurationUnitHelper.isTime(this.unit)) {
 				if (omitUnit) {
 					return this.getValueInUnit(<DistanceUnit>this.unit) + "";
@@ -531,11 +531,11 @@ module Model {
 			}
 		}
 
-		static combineArray(durations : Duration[]) : Duration {
-			return durations.reduce(function(prev, cur) {
+		static combineArray(durations: Duration[]): Duration {
+			return durations.reduce(function (prev, cur) {
 				return Duration.combine(prev, cur);
 			});
-		}		
+		}
 	}
 
 	function stringFormat(format: string, ...args: any[]) {
@@ -649,7 +649,7 @@ module Model {
 				"/100yards": IntensityUnit.Per100Yards,
 				"/100meters": IntensityUnit.Per100Meters,
 				"/400meters": IntensityUnit.Per400Meters,
-				"/400m" : IntensityUnit.Per400Meters,
+				"/400m": IntensityUnit.Per400Meters,
 				"offset": IntensityUnit.OffsetSeconds,
 				"hr": IntensityUnit.HeartRate,
 				"heart rate": IntensityUnit.HeartRate,
@@ -664,7 +664,7 @@ module Model {
 			}
 		}
 
-		static isIntensityUnit(unit : string) : boolean {
+		static isIntensityUnit(unit: string): boolean {
 			return IntensityUnitHelper.toIntensityUnit(unit) != IntensityUnit.Unknown;
 		}
 	};
@@ -933,7 +933,7 @@ module Model {
 			return res.getWorkDuration();
 		}
 		getRestDuration(): Duration {
-			var durations = this.intervals.map(function(cur) {
+			var durations = this.intervals.map(function (cur) {
 				return cur.getRestDuration();
 			});
 			return Duration.combineArray(durations);
@@ -959,9 +959,8 @@ module Model {
 			return tss;
 		}
 
-		getTSSFromIF(): number {
-			var tss_from_if = (this.getIntensity().getValue() * this.getIntensity().getValue() * this.getWorkDuration().getSeconds()) / 36;
-			return MyMath.round10(tss_from_if, -1);
+		getTSS2(): number {
+			return TSSCalculator.compute(this);
 		}
 
 		getTimeSeries(): any {
@@ -988,8 +987,8 @@ module Model {
 				}
 				if (lastItemTag != null) {
 					if (item.tag != lastItemTag) {
-						tagToPoints[lastItemTag].push({x: item.x, y:0});
-						tagToPoints[item.tag].push({x: item.x, y:0})
+						tagToPoints[lastItemTag].push({ x: item.x, y: 0 });
+						tagToPoints[item.tag].push({ x: item.x, y: 0 })
 					}
 				}
 				tagToPoints[item.tag].push(item);
@@ -1087,7 +1086,7 @@ module Model {
 					return false;
 				}
 			}
-			return true;			
+			return true;
 		}
 		getWorkDuration(): Duration {
 			var durations = [];
@@ -1233,7 +1232,7 @@ module Model {
 			// - Check the unit. 
 			// TODO: Find a better way to represent this
 			var unitMap = {
-				"w" : 1,
+				"w": 1,
 				"watts": 1,
 				"%": 1,
 				"min/mi": 1,
@@ -1242,10 +1241,10 @@ module Model {
 				"km/hr": 1,
 				"min/km": 1,
 				"/100yards": 1,
-                "/100meters": 1,
-                "/100m": 1,
-                "/400meters": 1,                
-                "/400m": 1,
+				"/100meters": 1,
+				"/100m": 1,
+				"/400meters": 1,
+				"/400m": 1,
 				"hr": 1,
 				"heart rate": 1,
 				"bpm": 1,
@@ -1253,9 +1252,9 @@ module Model {
 				"m": 1,
 				"sec": 1,
 				"s": 1,
-				"km" : 1,
+				"km": 1,
 				"meters": 1,
-				"miles" : 1,
+				"miles": 1,
 				"yards": 1,
 				"yrs": 1,
 				"mi": 1,
@@ -1278,7 +1277,7 @@ module Model {
 
 			// Validate the token. We want to make sure the unit is valid otherwise
 			// we might parse "2% incline" as a intensity unit for instance.
-			
+
 			if (unitMap[nextToken] == undefined) {
 				this.value = null;
 				this.unit = "";
@@ -1568,11 +1567,11 @@ module Model {
 		// Parses the string, converts into the object, then convert back into the
 		// default units. For example: if the unit is in min/km it will be converted
 		// to IF so that its independent of thresholds.
-		static normalize(factory: ObjectFactory, input: string, unparser_format: UnparserFormat) : string {
+		static normalize(factory: ObjectFactory, input: string, unparser_format: UnparserFormat): string {
 			let interval = IntervalParser.parse(factory, input);
 			let visitor = new UnparserVisitor(unparser_format);
 			VisitorHelper.visitAndFinalize(visitor, interval);
-			return visitor.output;	
+			return visitor.output;
 		}
 	}
 
@@ -1641,6 +1640,127 @@ module Model {
 			}
 		}
 		finalize(): void {
+		}
+	}
+
+	// Moving average class.
+	// 
+	// The constructor receives the window size which is used to compute the average.
+	// The behavior should be similar to a sliding window as old values are discarded
+	// once the number of elements is equal to the window_size.
+	//
+	// Simply call insert(value) with the values
+	// and whenever needed the moving average then
+	// call get_moving_average()
+	export class MovingAverage {
+		private values = [];
+		private window_size = 0;
+		private end = 0;
+
+		constructor(window_size: number) {
+			PreconditionsCheck.assertTrue(window_size > 0);
+			this.window_size = window_size;
+		}
+
+		insert(v: number): void {
+			if (this.values.length < this.window_size) {
+				this.values.push(v);
+			} else {
+				this.values[this.end] = v;
+				this.end = (this.end + 1) % this.values.length;
+			}
+		}
+
+		get_moving_average(): number {
+			if (this.values.length == 0) {
+				return null;
+			}
+
+			let sum = 0;
+			for (let i = 0; i < this.values.length; i++) {
+				sum += this.values[i];
+			}
+
+			return sum / this.values.length;
+		}
+
+		is_full(): boolean {
+			return this.values.length == this.window_size;
+		}
+	}
+
+	// Because IF are usually > 0 and < 1, using IF directly creates
+	// incorrect results for the AVG IF, so we use a artificial FTP here
+	// in order to compute the NP Power, since the only exposed member
+	// from this class is the IF.
+	let FTP : number = 256;
+
+	// Calculate the IF similar to how the NP is calculated.
+	// 
+	// Calculate a 30-second rolling average of the power data
+	// * Raise these values to the fourth power
+	// * Average the resulting values
+	// * Take the fourth root of the result
+	export class NPVisitor extends BaseVisitor {
+		private sum: number = 0;
+		private count: number = 0;
+		private ma: MovingAverage = new MovingAverage(/*window_size=*/30);
+		private ftp: number = 0;
+		private np: number = 0;
+
+		visitSimpleInterval(interval: SimpleInterval): void {
+			var duration = interval.getWorkDuration().getSeconds();
+			var watts_pow_4 = Math.pow(interval.getIntensity().getValue() * FTP, 4);
+
+			for (let t = 0; t < duration; t++) {
+				this._insert_and_flush(watts_pow_4);
+			}
+		}
+		visitRampBuildInterval(interval: RampBuildInterval): void {
+			var start_watts = interval.getStartIntensity().getValue() * FTP;
+			var end_watts = interval.getEndIntensity().getValue() * FTP;
+			var duration = interval.getWorkDuration().getSeconds();
+
+			// Right way to estimate the intensity is by doing incremental of 1 sec
+			for (var t = 0; t < duration; t++) {
+				var current_watts = start_watts + (end_watts - start_watts) * (t / duration);
+				var current_watts_pow_4 = 1 * Math.pow(current_watts, 4);
+				this._insert_and_flush(current_watts_pow_4);
+			}
+		}
+
+		_insert_and_flush(value: number): void {
+			this.ma.insert(value);
+			if (this.ma.is_full()) {
+				this.sum += this.ma.get_moving_average();
+				this.count += 1;
+			}
+		}
+
+		finalize(): void {
+			this.np = MyMath.round10(Math.sqrt(Math.sqrt(this.sum / this.count)), -1);
+		}
+
+		getIF() : number {
+			return MyMath.round10(this.np / FTP, -1);
+		}
+	}
+
+	// TSS = [(s x NP x IF) / (FTP x 3600)] x 100
+	// TSS = [(s x NP x IF) / (FTP x 36)]
+	// IF = AVG_POWER / FTP
+	// TSS = [s x NP x (AVG_POWER / FTP)] / (FTP x 36)
+	// TSS = [(s x NP x AVG_POWER) / FTP] / (FTP x 36)
+	// TSS = (s x NP x AVG_POWER) / (36 * FTP^2)
+	// 
+	// 
+	export class TSSCalculator {
+		static compute(interval: Interval): number {
+			let np = new NPVisitor();
+			VisitorHelper.visitAndFinalize(np, interval);
+			let avg = interval.getIntensity().getValue() * FTP;
+			let s = interval.getTotalDuration().getSeconds();
+			return MyMath.round10((s * np.getIF() * FTP * avg) / (36 * FTP * FTP), -1);
 		}
 	}
 
@@ -2004,7 +2124,7 @@ module Model {
 				title = WorkoutTextVisitor.getIntervalTitle(interval);
 			}
 			if (this.isGroupActive()) {
-				title += " (" + (this.currentRepeatIteration[this.currentRepeatIteration.length-1]+1) + "/" + this.repeatCountMax[this.repeatCountMax.length-1] + ")";
+				title += " (" + (this.currentRepeatIteration[this.currentRepeatIteration.length - 1] + 1) + "/" + this.repeatCountMax[this.repeatCountMax.length - 1] + ")";
 			}
 			return title;
 		}
@@ -2025,12 +2145,12 @@ module Model {
 			}
 		}
 
-		getIntensity(interval: Interval) : number {
+		getIntensity(interval: Interval): number {
 			if (interval.getIntensity().getOriginalUnit() == IntensityUnit.FreeRide) {
 				return 0;
 			} else {
 				return Math.round(interval.getIntensity().getValue() * 100);
-			}			
+			}
 		}
 
 		// ["description","seconds","start","finish","mode","intervals","group","autolap","targetcad"]
@@ -2065,7 +2185,7 @@ module Model {
 			this.groupId++;
 		}
 
-		isGroupActive() : boolean {
+		isGroupActive(): boolean {
 			return this.repeatCountMax.length > 0;
 		}
 
@@ -2161,12 +2281,12 @@ module Model {
 		sportType: SportType = SportType.Unknown;
 		outputUnit: IntensityUnit = IntensityUnit.Unknown;
 		disableEasyTitle: boolean = false;
-		roundValues : boolean = false;
+		roundValues: boolean = false;
 
 		constructor(userProfile: UserProfile,
 			sportType: SportType,
 			outputUnit: IntensityUnit,
-		    roundValues : boolean) {
+			roundValues: boolean) {
 			PreconditionsCheck.assertIsNumber(sportType, "sportType");
 			PreconditionsCheck.assertIsNumber(outputUnit, "outputUnit");
 
@@ -2206,11 +2326,11 @@ module Model {
 		}
 
 		// ArrayInterval
-		visitArrayInterval(interval: ArrayInterval) : void {
+		visitArrayInterval(interval: ArrayInterval): void {
 			this.visitArrayIntervalInternal(interval, false);
 		}
 
-		visitArrayIntervalInternal(interval: ArrayInterval, always_add_parenthesis: boolean) : void {
+		visitArrayIntervalInternal(interval: ArrayInterval, always_add_parenthesis: boolean): void {
 			var length = interval.getIntervals().length;
 			var firstInterval = interval.getIntervals()[0];
 			var lastInterval = interval.getIntervals()[length - 1];
@@ -2272,13 +2392,13 @@ module Model {
 		}
 
 		// RepeatInterval
-		visitRepeatInterval(interval: RepeatInterval) : void {
+		visitRepeatInterval(interval: RepeatInterval): void {
 			this.result += interval.getRepeatCount() + " x ";
 			this.visitArrayIntervalInternal(interval, true);
 		}
 
 		// RampBuildInterval
-		visitRampBuildInterval(interval: RampBuildInterval) : void {
+		visitRampBuildInterval(interval: RampBuildInterval): void {
 			if (interval.getStartIntensity().getValue() <= DefaultIntensity.getEasyThreshold(this.sportType)) {
 				this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " warm up to " + this.getIntensityPretty(interval.getEndIntensity());
 			} else {
@@ -2290,7 +2410,7 @@ module Model {
 			}
 		}
 
-		visitStepBuildInterval(interval: StepBuildInterval) : void {
+		visitStepBuildInterval(interval: StepBuildInterval): void {
 			this.result += interval.getRepeatCount() + " x ";
 
 			// There are two types of step build interval
@@ -2329,7 +2449,7 @@ module Model {
 		}
 
 		// SimpleInterval
-		visitSimpleInterval(interval: SimpleInterval) : void {
+		visitSimpleInterval(interval: SimpleInterval): void {
 			this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim);
 			let title = this.getIntervalTitle(interval);
 			if (title != null && title.length > 0) {
@@ -2430,13 +2550,13 @@ module Model {
 					if (this.outputUnit == IntensityUnit.MinMi || this.outputUnit == IntensityUnit.MinKm) {
 						let roundIncrement = 5;
 						if (!this.roundValues) {
-							roundIncrement = 0;	
+							roundIncrement = 0;
 						}
-						return FormatterHelper.formatNumber(outputValue, 60, ":", IntensityUnitHelper.toString(this.outputUnit), roundIncrement);						
+						return FormatterHelper.formatNumber(outputValue, 60, ":", IntensityUnitHelper.toString(this.outputUnit), roundIncrement);
 					} else {
 						let pace_per_400m = this.userProfile.getRunningPace(intensity, this.outputUnit);
-						return FormatterHelper.formatNumber(pace_per_400m, 60, ":", "") + IntensityUnitHelper.toString(this.outputUnit);		
-					}					
+						return FormatterHelper.formatNumber(pace_per_400m, 60, ":", "") + IntensityUnitHelper.toString(this.outputUnit);
+					}
 				}
 			} else if (this.sportType == SportType.Swim) {
 				if (this.outputUnit == IntensityUnit.Mph) {
@@ -2471,10 +2591,10 @@ module Model {
 	}
 	class UnparserVisitor implements Visitor {
 		output: string;
-		format : UnparserFormat;
+		format: UnparserFormat;
 		level: number;
 
-		constructor(format : UnparserFormat) {
+		constructor(format: UnparserFormat) {
 			this.output = "";
 			this.format = format;
 			this.level = 0;
@@ -2497,7 +2617,7 @@ module Model {
 			}
 		}
 
-		getTitlePretty(i: Interval) : string {
+		getTitlePretty(i: Interval): string {
 			if (i.getTitle().length != 0) {
 				return ", " + i.getTitle();
 			} else {
@@ -2505,7 +2625,7 @@ module Model {
 			}
 		}
 
-		addNewLine() : void {
+		addNewLine(): void {
 			if (this.format == UnparserFormat.Whitespaces && this.level == 0) {
 				this.output += "\n";
 			}
@@ -2530,9 +2650,9 @@ module Model {
 			if (interval.areAllIntensitiesSame()) {
 				this.output += "(";
 				// Get any step as all the durations are the same.
-				this.output += this.getIntensityPretty(interval.getStepInterval(0).getIntensity());				
+				this.output += this.getIntensityPretty(interval.getStepInterval(0).getIntensity());
 				for (let i = 0; i < interval.getRepeatCount(); i++) {
-					this.output += ", ";					
+					this.output += ", ";
 					this.output += this.getDurationPretty(interval.getStepInterval(i).getTotalDuration());
 				}
 				this.output += "), ";
@@ -2541,9 +2661,9 @@ module Model {
 				console.assert(interval.areAllDurationsSame())
 				this.output += "(";
 				// Get any step as all the durations are the same.
-				this.output += this.getDurationPretty(interval.getStepInterval(0).getTotalDuration());				
+				this.output += this.getDurationPretty(interval.getStepInterval(0).getTotalDuration());
 				for (let i = 0; i < interval.getRepeatCount(); i++) {
-					this.output += ", ";					
+					this.output += ", ";
 					this.output += this.getIntensityPretty(interval.getStepInterval(i).getIntensity());
 				}
 				this.output += "), ";
@@ -2580,7 +2700,7 @@ module Model {
 		}
 		finalize(): void {
 			if (this.output.endsWith("\n")) {
-				this.output = this.output.slice(0, this.output.length-1);
+				this.output = this.output.slice(0, this.output.length - 1);
 			}
 		}
 	}
@@ -2693,7 +2813,7 @@ module Model {
 
 		getRunningPace(intensity: Intensity, outputUnit: IntensityUnit) {
 			let pace_mph = this.getPaceMph(intensity);
-			return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, outputUnit);			
+			return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, outputUnit);
 		}
 
 		getPaceMinMi(intensity: Intensity) {
@@ -2787,7 +2907,7 @@ module Model {
 						value,
 						IntensityUnit.Per400Meters,
 						IntensityUnit.Mph);
-					ifValue = running_mph / running_tpace_mph;					
+					ifValue = running_mph / running_tpace_mph;
 				} else {
 					console.assert(false, stringFormat("Unit {0} is not implemented"));
 					throw new Error("Not implemented");
@@ -2902,12 +3022,12 @@ module Model {
 			return this.getBaseFileName() + ".ppsmrx";
 		}
 
-		getBaseFileName() : string {
+		getBaseFileName(): string {
 			if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
 				return this.workoutTitle;
 			}
 			var fileNameHelper = new FileNameHelper(this.intervals);
-			return fileNameHelper.getFileName();			
+			return fileNameHelper.getFileName();
 		}
 	}
 
@@ -2940,7 +3060,7 @@ module Model {
 			return this.workoutTitle;
 		}
 
-		getNormalizedWorkoutDefinition() : string {
+		getNormalizedWorkoutDefinition(): string {
 			let object_factory = new ObjectFactory(this.userProfile, this.sportType);
 			return IntervalParser.normalize(object_factory, this.workoutDefinition, UnparserFormat.Whitespaces);;
 		}
@@ -2965,8 +3085,8 @@ module Model {
 			return this.intervals.getTSS();
 		}
 
-		getTSSFromIF(): number {
-			return this.intervals.getTSSFromIF();
+		getTSS2(): number {
+			return this.intervals.getTSS2();
 		}
 
 		getTimePretty(): string {
@@ -3329,7 +3449,7 @@ module Model {
 
 		process(input: string): string {
 			let main_regexes = [/(#\w+\(\d*(?:,\d*)*\)())/, /(#\w+)/];
-			for(let i = 0; i < main_regexes.length; i++) {
+			for (let i = 0; i < main_regexes.length; i++) {
 				input = input.replace(new RegExp(main_regexes[i], "g"), this.processOne.bind(this));
 			}
 			return input;

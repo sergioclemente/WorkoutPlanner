@@ -899,9 +899,8 @@ var Model;
             }
             return tss;
         }
-        getTSSFromIF() {
-            var tss_from_if = (this.getIntensity().getValue() * this.getIntensity().getValue() * this.getWorkDuration().getSeconds()) / 36;
-            return MyMath.round10(tss_from_if, -1);
+        getTSS2() {
+            return TSSCalculator.compute(this);
         }
         getTimeSeries() {
             var pv = new DataPointVisitor();
@@ -1530,6 +1529,118 @@ var Model;
         }
     }
     Model.BaseVisitor = BaseVisitor;
+    // Moving average class.
+    // 
+    // The constructor receives the window size which is used to compute the average.
+    // The behavior should be similar to a sliding window as old values are discarded
+    // once the number of elements is equal to the window_size.
+    //
+    // Simply call insert(value) with the values
+    // and whenever needed the moving average then
+    // call get_moving_average()
+    class MovingAverage {
+        constructor(window_size) {
+            this.values = [];
+            this.window_size = 0;
+            this.end = 0;
+            PreconditionsCheck.assertTrue(window_size > 0);
+            this.window_size = window_size;
+        }
+        insert(v) {
+            if (this.values.length < this.window_size) {
+                this.values.push(v);
+            }
+            else {
+                this.values[this.end] = v;
+                this.end = (this.end + 1) % this.values.length;
+            }
+        }
+        get_moving_average() {
+            if (this.values.length == 0) {
+                return null;
+            }
+            let sum = 0;
+            for (let i = 0; i < this.values.length; i++) {
+                sum += this.values[i];
+            }
+            return sum / this.values.length;
+        }
+        is_full() {
+            return this.values.length == this.window_size;
+        }
+    }
+    Model.MovingAverage = MovingAverage;
+    // Because IF are usually > 0 and < 1, using IF directly creates
+    // incorrect results for the AVG IF, so we use a artificial FTP here
+    // in order to compute the NP Power, since the only exposed member
+    // from this class is the IF.
+    let FTP = 256;
+    // Calculate the IF similar to how the NP is calculated.
+    // 
+    // Calculate a 30-second rolling average of the power data
+    // * Raise these values to the fourth power
+    // * Average the resulting values
+    // * Take the fourth root of the result
+    class NPVisitor extends BaseVisitor {
+        constructor() {
+            super(...arguments);
+            this.sum = 0;
+            this.count = 0;
+            this.ma = new MovingAverage(/*window_size=*/ 30);
+            this.ftp = 0;
+            this.np = 0;
+        }
+        visitSimpleInterval(interval) {
+            var duration = interval.getWorkDuration().getSeconds();
+            var watts_pow_4 = Math.pow(interval.getIntensity().getValue() * FTP, 4);
+            for (let t = 0; t < duration; t++) {
+                this._insert_and_flush(watts_pow_4);
+            }
+        }
+        visitRampBuildInterval(interval) {
+            var start_watts = interval.getStartIntensity().getValue() * FTP;
+            var end_watts = interval.getEndIntensity().getValue() * FTP;
+            var duration = interval.getWorkDuration().getSeconds();
+            // Right way to estimate the intensity is by doing incremental of 1 sec
+            for (var t = 0; t < duration; t++) {
+                var current_watts = start_watts + (end_watts - start_watts) * (t / duration);
+                var current_watts_pow_4 = 1 * Math.pow(current_watts, 4);
+                this._insert_and_flush(current_watts_pow_4);
+            }
+        }
+        _insert_and_flush(value) {
+            this.ma.insert(value);
+            if (this.ma.is_full()) {
+                this.sum += this.ma.get_moving_average();
+                this.count += 1;
+            }
+        }
+        finalize() {
+            this.np = MyMath.round10(Math.sqrt(Math.sqrt(this.sum / this.count)), -1);
+        }
+        getIF() {
+            return MyMath.round10(this.np / FTP, -1);
+        }
+    }
+    Model.NPVisitor = NPVisitor;
+    // TSS = [(s x NP x IF) / (FTP x 3600)] x 100
+    // TSS = [(s x NP x IF) / (FTP x 36)]
+    // IF = AVG_POWER / FTP
+    // TSS = [s x NP x (AVG_POWER / FTP)] / (FTP x 36)
+    // TSS = [(s x NP x AVG_POWER) / FTP] / (FTP x 36)
+    // TSS = (s x NP x AVG_POWER) / (36 * FTP^2)
+    // 
+    // 
+    class TSSCalculator {
+        static compute(interval) {
+            let np = new NPVisitor();
+            VisitorHelper.visitAndFinalize(np, interval);
+            let avg = interval.getIntensity().getValue() * FTP;
+            let s = interval.getTotalDuration().getSeconds();
+            return MyMath.round10((s * np.getIF() * FTP * avg) / (36 * FTP * FTP), -1);
+        }
+    }
+    Model.TSSCalculator = TSSCalculator;
     // TSS = [(s x NP x IF) / (FTP x 3600)] x 100
     // IF = NP / FTP
     // TSS = [(s x NP x NP/FTP) / (FTP x 3600)] x 100
@@ -2726,8 +2837,8 @@ var Model;
         getTSS() {
             return this.intervals.getTSS();
         }
-        getTSSFromIF() {
-            return this.intervals.getTSSFromIF();
+        getTSS2() {
+            return this.intervals.getTSS2();
         }
         getTimePretty() {
             return this.intervals.getTotalDuration().toTimeStringLong();

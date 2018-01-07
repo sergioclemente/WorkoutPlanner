@@ -152,7 +152,7 @@ declare module Model {
         getTitle(): string;
         getIntervals(): Interval[];
         getTSS(): number;
-        getTSSFromIF(): number;
+        getTSS2(): number;
         getTimeSeries(): any;
         getTimeInZones(sportType: SportType): any[];
     }
@@ -228,6 +228,30 @@ declare module Model {
         visitRepeatInterval(interval: RepeatInterval): void;
         visitArrayInterval(interval: ArrayInterval): void;
         finalize(): void;
+    }
+    class MovingAverage {
+        private values;
+        private window_size;
+        private end;
+        constructor(window_size: number);
+        insert(v: number): void;
+        get_moving_average(): number;
+        is_full(): boolean;
+    }
+    class NPVisitor extends BaseVisitor {
+        private sum;
+        private count;
+        private ma;
+        private ftp;
+        private np;
+        visitSimpleInterval(interval: SimpleInterval): void;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
+        _insert_and_flush(value: number): void;
+        finalize(): void;
+        getIF(): number;
+    }
+    class TSSCalculator {
+        static compute(interval: Interval): number;
     }
     class TSSVisitor extends BaseVisitor {
         private tss;
@@ -401,7 +425,7 @@ declare module Model {
         withDefinition(workoutTitle: string, workoutDefinition: string): WorkoutBuilder;
         getIntensityFriendly(intensity: Intensity, roundValues: boolean): string;
         getTSS(): number;
-        getTSSFromIF(): number;
+        getTSS2(): number;
         getTimePretty(): string;
         getIF(): number;
         getAveragePower(): number;

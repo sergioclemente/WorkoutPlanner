@@ -41,7 +41,7 @@ export default class WorkoutView extends React.Component<any, any> {
 			return (
 				{
 					tss: builder.getTSS(),
-					tss_from_if: builder.getTSSFromIF(),
+					tss_from_if: builder.getTSS2(),
 					time: builder.getTimePretty(),
 					intensity: builder.getIF(),
 					avg_power: builder.getAveragePower(),
