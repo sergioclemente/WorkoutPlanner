@@ -127,11 +127,11 @@ export default class WorkoutViews extends React.Component<any, any> {
 		var sportTypeEnum: Model.SportType = parseInt(sportTypeStr);
 		var filteredRows = [];
 
-		// Nothing to be filtered if its unknown (All)
+		// Nothing to be filtered if its unknown (All)	
 		if (sportTypeEnum != Model.SportType.Unknown) {
 			for (let i = 0; i < this._rows.length; i++) {
 				var row = this._rows[i];
-				if (row.sport_type == sportTypeStr) {
+				if (row.sport_type == sportTypeEnum) {
 					filteredRows.push(row);
 				}
 			}

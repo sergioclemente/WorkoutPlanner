@@ -1,5 +1,4 @@
 /// <reference path="./node_modules/@types/node/index.d.ts"/>
-/// <reference path="./node_modules/@types/jasmine/index.d.ts"/>
 /// <reference path="./type_definitions/model.d.ts" />
 
 var Model = require("./model");

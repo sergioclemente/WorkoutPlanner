@@ -113,8 +113,9 @@ function handleGetWorkouts(req, res, uri, params) {
     if (err) {
       res.write("Error: " + err);
     } else {
+      res.writeHead(200, {"Content-Type": "application/json"});
       res.write(JSON.stringify(workouts));
-      res.end();            
+      res.end();
     }
   });
   return true;

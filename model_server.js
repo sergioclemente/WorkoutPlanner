@@ -1,5 +1,5 @@
 "use strict";
-var mysql = require('mysql');
+var sqlite3 = require('sqlite3').verbose();
 var fs = require('fs');
 var ModelServer;
 (function (ModelServer) {
@@ -70,14 +70,14 @@ var ModelServer;
             this.connection_string = connection_string;
         }
         add(workout) {
-            var sql = "INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES ({0}, {1}, {2}, {3}, {4}, {5})";
-            var connection = mysql.createConnection(this.connection_string);
+            var db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READWRITE);
             try {
-                sql = stringFormat(sql, connection.escape(workout.title), connection.escape(workout.value), connection.escape(workout.tags), connection.escape(workout.duration_sec), connection.escape(workout.tss), connection.escape(workout.sport_type));
-                connection.query(sql);
+                var stmt = db.prepare("INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES (?, ?, ?, ?, ?, ?)");
+                stmt.run(workout.title, workout.value, workout.tags, workout.duration_sec, workout.tss, workout.sport_type);
+                stmt.finalize();
             }
             finally {
-                connection.end({ timeout: 60000 });
+                db.close();
             }
         }
         _createWorkout(row) {
@@ -91,56 +91,23 @@ var ModelServer;
             workout.sport_type = row.sport_type;
             return workout;
         }
-        get(id, callback) {
-            var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts where id={0}";
-            var connection = mysql.createConnection(this.connection_string);
-            try {
-                sql = stringFormat(connection.escape(id));
-                connection.query(sql, function (err, rows) {
-                    if (!err) {
-                        if (rows.length == 0) {
-                            callback("", null);
-                        }
-                        else {
-                            callback("", this._createWorkout(rows[0]));
-                        }
-                    }
-                    else {
-                        console.log(err);
-                        callback("Error while reading from db", null);
-                    }
-                }.bind(this));
-            }
-            finally {
-                connection.end({ timeout: 60000 });
-            }
-        }
         getAll(callback) {
+            var db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READONLY);
             var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id DESC";
-            var connection = mysql.createConnection(this.connection_string);
-            try {
-                connection.query(sql, function (err, rows) {
-                    var workouts = [];
-                    if (!err) {
-                        if (rows.length == 0) {
-                            callback("", workouts);
-                        }
-                        else {
-                            for (var i = 0; i < rows.length; i++) {
-                                workouts.push(this._createWorkout(rows[i]));
-                            }
-                            callback("", workouts);
-                        }
+            db.all(sql, function (err, rows) {
+                if (err) {
+                    console.log(err);
+                    callback("Error while reading row from db", null);
+                }
+                else {
+                    let result = [];
+                    for (let i = 0; i < rows.length; i++) {
+                        result.push(this._createWorkout(rows[i]));
                     }
-                    else {
-                        console.log(err);
-                        callback("Error while reading from db", null);
-                    }
-                }.bind(this));
-            }
-            finally {
-                connection.end({ timeout: 60000 });
-            }
+                    callback("", result);
+                }
+                db.close();
+            }.bind(this));
         }
     }
     ModelServer.WorkoutDB = WorkoutDB;

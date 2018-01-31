@@ -1,18 +1,18 @@
-/// <reference path="./node_modules/@types/mysql/index.d.ts"/>
+/// <reference path="./node_modules/@types/sqlite3/index.d.ts"/>
 
-var mysql = require('mysql');
+var sqlite3 = require('sqlite3').verbose();
 var fs = require('fs');
 
 module ModelServer {
 	class ScopedFilename {
 		name: string;
 
-		constructor(name : string, content : string) {
+		constructor(name: string, content: string) {
 			this.name = name;
 			fs.writeFileSync(this.name, content);
 		}
-	
-		dispose() : void {
+
+		dispose(): void {
 			fs.unlinkSync(this.name);
 		}
 	};
@@ -35,13 +35,13 @@ module ModelServer {
 			// file and destroy once the send email callback is called.
 			let files = [];
 			let scoped_files = [];
-			let rand = Math.floor(Math.random()*1000);
+			let rand = Math.floor(Math.random() * 1000);
 			for (var i = 0; i < attachments.length; i++) {
 				let attachment = attachments[i];
 				var filename = attachment.name;
 				if (fs.existsSync(filename)) {
 					filename = rand + "." + attachment.extension;
-				}				
+				}
 				scoped_files[i] = new ScopedFilename(filename, attachment.data);
 				files.push(filename);
 			}
@@ -49,14 +49,14 @@ module ModelServer {
 			// Overriding default parameters.
 			var data = {
 				user: this.user,
-				pass: this.password,				
+				pass: this.password,
 				to: to,
 				subject: subject,
 				html: body,
 				files: files,
 			};
 			// Call the actual API that will send the data.
-			send(data, function (err) {			
+			send(data, function (err) {
 				for (let i = 0; i < scoped_files.length; i++) {
 					scoped_files[i].dispose();
 				}
@@ -96,22 +96,14 @@ module ModelServer {
 		}
 
 		add(workout: Workout): void {
-			var sql = "INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES ({0}, {1}, {2}, {3}, {4}, {5})"
-
-			var connection = mysql.createConnection(this.connection_string);
-
+			var db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READWRITE);
 			try {
-				sql = stringFormat(sql,
-					connection.escape(workout.title),
-					connection.escape(workout.value),
-					connection.escape(workout.tags),
-					connection.escape(workout.duration_sec),
-					connection.escape(workout.tss),
-					connection.escape(workout.sport_type));
-
-				connection.query(sql);
+				// Use prepared statements since it takes care of escaping the parameters.
+				var stmt = db.prepare("INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES (?, ?, ?, ?, ?, ?)");
+				stmt.run(workout.title, workout.value, workout.tags, workout.duration_sec, workout.tss, workout.sport_type);
+				stmt.finalize();
 			} finally {
-				connection.end({ timeout: 60000 });
+				db.close();
 			}
 		}
 
@@ -127,57 +119,23 @@ module ModelServer {
 			return workout;
 		}
 
-		get(id: number, callback: (err: string, w: Workout) => void): void {
-			var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts where id={0}";
-
-			var connection = mysql.createConnection(this.connection_string);
-
-			try {
-				sql = stringFormat(
-					connection.escape(id)
-				);
-				connection.query(sql, function (err, rows) {
-					if (!err) {
-						if (rows.length == 0) {
-							callback("", null);
-						} else {
-							callback("", this._createWorkout(rows[0]));
-						}
-					} else {
-						console.log(err);
-						callback("Error while reading from db", null);
-					}
-				}.bind(this));
-			} finally {
-				connection.end({ timeout: 60000 });
-			}
-		}
-
 		getAll(callback: (err: string, w: Workout[]) => void): void {
+			var db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READONLY);
 			var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id DESC";
 
-			var connection = mysql.createConnection(this.connection_string);
-
-			try {
-				connection.query(sql, function (err, rows) {
-					var workouts = [];
-					if (!err) {
-						if (rows.length == 0) {
-							callback("", workouts);
-						} else {
-							for (var i = 0; i < rows.length; i++) {
-								workouts.push(this._createWorkout(rows[i]));
-							}
-							callback("", workouts);
-						}
-					} else {
-						console.log(err);
-						callback("Error while reading from db", null);
+			db.all(sql, function (err, rows) {
+				if (err) {
+					console.log(err);
+					callback("Error while reading row from db", null);
+				} else {
+					let result = [];
+					for (let i = 0 ; i < rows.length; i++) {
+						result.push(this._createWorkout(rows[i]));
 					}
-				}.bind(this));
-			} finally {
-				connection.end({ timeout: 60000 });
-			}
+					callback("", result);
+				}
+				db.close();
+			}.bind(this));
 		}
 	}
 

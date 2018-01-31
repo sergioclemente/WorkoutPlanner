@@ -1,6 +1,5 @@
 "use strict";
 /// <reference path="./node_modules/@types/node/index.d.ts"/>
-/// <reference path="./node_modules/@types/mysql/index.d.ts"/>
 const Model = require("./model");
 var zlib = require('zlib');
 var UI;
