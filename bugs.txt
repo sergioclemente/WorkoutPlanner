@@ -1,8 +1,0 @@
-Bug: Distance improperty computed
-
-(3km, 80)
-(4km, 4:47min/km), (3km, 4:37min/km) (2km, 4:15min/km) (1km, 4:05min/km)
-(2km, 80)
-
-Distance	9.3km
------------------------------

@@ -124,11 +124,6 @@ describe('Bugs', function () {
 		expect_eq_nbr(Model.DistanceUnit.Yards, cd2.getUnit());
 		expect_eq_nbr(400, cd2.getValue());
 	});
-});
-
-// TODO: Add test for half MINUTES
-
-describe('Bugs', function () {
 	it('Low cadence intervals being parsed as intensity', function () {
 		var low_cadence = Model.IntervalParser.parse(of_bike, "(1min, 55, 70rpm)");
 		let first_interval = low_cadence.getIntervals()[0];
@@ -141,12 +136,22 @@ describe('Bugs', function () {
 		expect_eq_nbr(0.55, first_interval.getIntensity().getOriginalValue());
 		expect_eq_str("2% grade", first_interval.getTitle());
 	});
-	// Uncomment this bug
+	it('Mixed time and distance', function () {
+		var int_par_bug = Model.IntervalParser.parse(of_bike, "(1hr, 75), (20mi, 85)");
+		expect_eq_nbr(0.75, int_par_bug.getIntervals()[0].getIntensity().getOriginalValue());
+		expect_eq_nbr(0.85, int_par_bug.getIntervals()[1].getIntensity().getOriginalValue());
+	});
+	it('Incorrect distance', function () {
+		let interval = Model.IntervalParser.parse(of_run, "(1km, 100), (1km, 5min/km)");
+		expect_eq_str("1.2mi", interval.getWorkDuration().toStringDistance(Model.DistanceUnit.Miles));
+	});
 	// it('90s duration', function () {
 	// 	var interval = Model.IntervalParser.parse(of_bike, "(1min30s, 55)");
 	// 	expect_eq_nbr(90, interval.getTotalDuration().getSeconds());
-	// });	
+	// });
 });
+
+// TODO: Add test for half MINUTES
 
 describe('Combine duration', function () {
 	it('Combine two distances', function () {
@@ -188,11 +193,6 @@ describe('IntervalParser', function () {
 	it('1min @ 55%-85%', function () {
 		var build1min5585 = Model.IntervalParser.parse(of_bike, "(1, 60, 80)");
 		expect_eq_nbr(0.70, build1min5585.getIntervals()[0].getIntensity().getOriginalValue());
-	});
-	it('Mixed time and distance', function () {
-		var int_par_bug = Model.IntervalParser.parse(of_bike, "(1hr, 75), (20mi, 85)");
-		expect_eq_nbr(0.75, int_par_bug.getIntervals()[0].getIntensity().getOriginalValue());
-		expect_eq_nbr(0.85, int_par_bug.getIntervals()[1].getIntensity().getOriginalValue());
 	});
 	it('Mixed watts and percentage', function () {
 		var int_par_unit_bike = Model.IntervalParser.parse(of_bike, "(1s, 50), (2s, 155w), (3s, 50%)");

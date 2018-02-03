@@ -416,7 +416,7 @@ module Model {
 		}
 
 		toStringDistance(unitTo: DistanceUnit): string {
-			return this.getValueInUnit(unitTo) + DurationUnitHelper.toString(this.unit);
+			return this.getValueInUnit(unitTo) + DurationUnitHelper.toString(unitTo);
 		}
 
 		getTimeComponents(): any {
