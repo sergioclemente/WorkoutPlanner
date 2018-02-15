@@ -1,4 +1,5 @@
 "use strict";
+/// <reference path="./node_modules/@types/node/index.d.ts"/>
 const Model = require("./model");
 var zlib = require('zlib');
 var UI;
@@ -98,6 +99,7 @@ var UI;
             if (params.email != null && params.email.trim() != 0) {
                 this.email = params.email;
             }
+            // Load the workout when its encoded
             if (params.wh != null) {
                 if (params.wh.startsWith("web+wp://")) {
                     var workout_hash = params.wh.substr(9, params.wh.length);
@@ -267,6 +269,7 @@ var UI;
                 this.hasSportType() &&
                 this.hasOutputUnit() &&
                 this.hasEmail();
+            // intentially missed the title, page and should_round. the default will be the main page
         }
         getURL() {
             let res = "?";
@@ -355,6 +358,7 @@ var UI;
     class ClipboardHelper {
         static copyText(text) {
             var textArea = document.createElement("textarea");
+            // Place in top-left corner of screen regardless of scroll position.
             textArea.style.position = 'fixed';
             textArea.style.top = "0";
             textArea.style.left = "0";

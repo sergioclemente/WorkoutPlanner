@@ -10,6 +10,8 @@ var Model;
         SportType[SportType["Run"] = 2] = "Run";
         SportType[SportType["Other"] = 3] = "Other";
     })(SportType = Model.SportType || (Model.SportType = {}));
+    // If you add another distance, make sure you update the MAX_DISTANCE
+    // and that it doesn't overlap with TimeUnit
     let DistanceUnit;
     (function (DistanceUnit) {
         DistanceUnit[DistanceUnit["Unknown"] = 0] = "Unknown";
@@ -18,6 +20,7 @@ var Model;
         DistanceUnit[DistanceUnit["Meters"] = 3] = "Meters";
         DistanceUnit[DistanceUnit["Yards"] = 4] = "Yards";
     })(DistanceUnit = Model.DistanceUnit || (Model.DistanceUnit = {}));
+    // If you add another time unit, be careful not adding one before MIN_TIME
     let TimeUnit;
     (function (TimeUnit) {
         TimeUnit[TimeUnit["Unknown"] = 11] = "Unknown";
@@ -56,17 +59,29 @@ var Model;
     }
     ;
     class MyMath {
+        /**
+         * Decimal adjustment of a number.
+         *
+         * @param   {String}    type    The type of adjustment.
+         * @param   {Number}    value   The number.
+         * @param   {Integer}   exp     The exponent (the 10 logarithm of the adjustment base).
+         * @returns {Number}            The adjusted value.
+         */
         static decimalAdjust(type, value, exp) {
+            // If the exp is undefined or zero...
             if (typeof exp === 'undefined' || +exp === 0) {
                 return Math[type](value);
             }
             value = +value;
             exp = +exp;
+            // If the value is not a number or the exp is not an integer...
             if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
                 return NaN;
             }
+            // Shift
             value = value.toString().split('e');
             value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
+            // Shift back
             value = value.toString().split('e');
             return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
         }
@@ -103,6 +118,7 @@ var Model;
     Model.SportTypeHelper = SportTypeHelper;
     class DistanceUnitHelper {
         static convertTo(value, unitFrom, unitTo) {
+            // convert first to meters
             var distanceInMeters = 0;
             if (unitFrom == DistanceUnit.Kilometers) {
                 distanceInMeters = value * 1000;
@@ -120,6 +136,7 @@ var Model;
                 console.assert(false, stringFormat("Unknown unitFrom {0}", unitFrom));
                 throw new Error("Unknown distance unit");
             }
+            // convert to final unit
             if (unitTo == DistanceUnit.Kilometers) {
                 return distanceInMeters / 1000;
             }
@@ -154,6 +171,7 @@ var Model;
                 console.assert(false, "Unknown unitFrom {0}", unitFrom);
                 throw new Error("Unknown time unit");
             }
+            // convert to final unit
             if (unitTo == TimeUnit.Seconds) {
                 return timeInSeconds;
             }
@@ -202,6 +220,7 @@ var Model;
                 }
             }
         }
+        // TODO: Move this to duration.
         static getDurationSeconds(unit, value) {
             if (DurationUnitHelper.isDistance(unit)) {
                 return 0;
@@ -321,6 +340,7 @@ var Model;
             var hours = ((milliseconds / 3600000) % 60) | 0;
             var minutes = ((milliseconds / 60000) % 60) | 0;
             var seconds = ((milliseconds % 60000) / 1000) | 0;
+            // Round up
             var ms = (milliseconds % 1000) | 0;
             if (ms > 500) {
                 seconds++;
@@ -386,6 +406,7 @@ var Model;
                     return MyMath.round10(value, -1);
                 }
                 else {
+                    // TODO: Not doing anything here for now.
                     return MyMath.round10(this.value, -1);
                 }
             }
@@ -451,9 +472,11 @@ var Model;
         static combine(dur1, dur2) {
             var estTime = dur1.getSeconds() + dur2.getSeconds();
             var estDistance = dur1.getDistanceInMiles() + dur2.getDistanceInMiles();
+            // Combine the units directly if they are the same
             if (dur1.getUnit() == dur2.getUnit()) {
                 return new Duration(dur1.getUnit(), dur1.getValue() + dur2.getValue(), estTime, estDistance);
             }
+            // Check if either is 0
             if (dur1.getValue() == 0) {
                 return dur2;
             }
@@ -462,11 +485,15 @@ var Model;
             }
             if (DurationUnitHelper.isTime(dur1.getUnit())) {
                 if (DurationUnitHelper.isTime(dur2.getUnit())) {
+                    // Both are Time
+                    // Convert both to seconds
                     var time1 = DurationUnitHelper.getDurationSeconds(dur1.getUnit(), dur1.getValue());
                     var time2 = DurationUnitHelper.getDurationSeconds(dur2.getUnit(), dur2.getValue());
                     return new Duration(TimeUnit.Seconds, time1 + time2, estTime, estDistance);
                 }
                 else {
+                    // Use the distance unit in case they are different.
+                    // Convert to time
                     var time_sum = dur1.getSeconds() + dur2.getSeconds();
                     return new Duration(TimeUnit.Seconds, time_sum, estTime, estDistance);
                 }
@@ -477,6 +504,8 @@ var Model;
                     return new Duration(TimeUnit.Seconds, time_sum, estTime, estDistance);
                 }
                 else {
+                    // Both are NOT time
+                    // Convert to miles
                     var distance1 = DurationUnitHelper.getDistanceMiles(dur1.getUnit(), dur1.getValue());
                     var distance2 = DurationUnitHelper.getDistanceMiles(dur2.getUnit(), dur2.getValue());
                     return new Duration(DistanceUnit.Miles, distance1 + distance2, estTime, estDistance);
@@ -631,6 +660,8 @@ var Model;
     ;
     class DefaultIntensity {
         static isEasy(intensity, sportType) {
+            // If the pace is swim based and its on offset relative to the CSS, lets handle it 
+            // differently. 10s from CSS is the threshold for easy.
             if (sportType == SportType.Swim
                 && intensity.getOriginalUnit() == IntensityUnit.OffsetSeconds) {
                 return intensity.getOriginalValue() > 10;
@@ -653,11 +684,13 @@ var Model;
             PreconditionsCheck.assertIsNumber(ifValue, "ifValue");
             PreconditionsCheck.assertIsNumber(value, "value");
             PreconditionsCheck.assertIsNumber(unit, "unit");
+            // HACK: Find a better way of doing this
             if (ifValue > 10) {
                 ifValue = ifValue / 100;
             }
             console.assert(ifValue <= 2 && ifValue >= 0, stringFormat("Invalid if {0}", ifValue));
             if (unit == IntensityUnit.IF) {
+                // HACK: Find a better way of doing this
                 if (value > 10) {
                     value = value / 100;
                 }
@@ -674,6 +707,9 @@ var Model;
                 this.originalValue = value;
             }
         }
+        /**
+         * A value between 0 and 1 that represents the intensity of the interval
+         */
         getValue() {
             return this.ifValue;
         }
@@ -717,6 +753,7 @@ var Model;
                 console.assert(false, "The size of intensities and weights should be the same");
                 throw new Error("The size of intensities and weights should be the same");
             }
+            // do a weighed sum
             var sum1 = 0;
             var sum2 = 0;
             for (var i = 0; i < intensities.length; i++) {
@@ -824,11 +861,16 @@ var Model;
             return Intensity.combine(intensities, weights);
         }
         getWorkDuration() {
+            // If the interval is empty lets bail right away otherwise reducing the array will cause an
+            // exception
             if (this.intervals.length == 0) {
                 return Duration.ZeroDuration;
             }
+            // It will create dummy intervals along the way so that I can use
+            // the reduce abstraction		
             var res = this.intervals.reduce(function (previousValue, currentValue) {
                 var duration = Duration.combine(previousValue.getWorkDuration(), currentValue.getWorkDuration());
+                // Create a dummy interval with the proper duration
                 return new SimpleInterval("", Intensity.ZeroIntensity, duration, Duration.ZeroDuration);
             });
             return res.getWorkDuration();
@@ -863,6 +905,7 @@ var Model;
         getTimeSeries() {
             var pv = new DataPointVisitor();
             VisitorHelper.visitAndFinalize(pv, this);
+            // - Massaging the time component
             var list = pv.data.map(function (item) {
                 return {
                     x: item.x.getSeconds() / 60,
@@ -870,6 +913,7 @@ var Model;
                     tag: item.tag
                 };
             });
+            // Separate into one list per tag
             var tagToPoints = {};
             var lastItemTag = null;
             for (let i = 0; i < list.length; ++i) {
@@ -919,7 +963,17 @@ var Model;
         }
     }
     Model.RepeatInterval = RepeatInterval;
+    // Step is defined as follows
+    // 2[(1min, 85, 95), (30s, 55)]
+    // Which in fact translates to:
+    // * 1min @ 85
+    // * 30s @ 55
+    // * 1min @ 95
+    // * 30s @ 55
     class StepBuildInterval extends ArrayInterval {
+        // The constructor receives the step intervals, the rest will be added later on
+        // so that for the above interval it will look like:
+        // [(1min, 85), (1min, 95), (30s, 55)]
         constructor(title, intervals) {
             super(title, intervals);
         }
@@ -986,6 +1040,11 @@ var Model;
         }
     }
     Model.StepBuildInterval = StepBuildInterval;
+    // TODO: Refactor this to accept time as well.
+    // For example:
+    // "10" => 10
+    // 10:30 => 10.5
+    // "10.5" => 10.5
     class NumberParser {
         evaluate(input, i) {
             this.value = 0;
@@ -1013,6 +1072,7 @@ var Model;
                     break;
                 }
             }
+            // Points to the last valid char
             return i - 1;
         }
         getValue() {
@@ -1020,6 +1080,10 @@ var Model;
         }
     }
     Model.NumberParser = NumberParser;
+    // Retrieves the next token from the interval.
+    // For example:
+    // (10min, 75, free)
+    // Can return: "10min" or "75" or "free"
     class TokenParser {
         constructor(delimiters) {
             this.delimiters = delimiters;
@@ -1036,6 +1100,7 @@ var Model;
                 }
                 this.value += ch;
             }
+            // Points to the last valid char
             return i - 1;
         }
         getValue() {
@@ -1043,23 +1108,38 @@ var Model;
         }
     }
     Model.TokenParser = TokenParser;
+    // For a string like: "10min"
+    // It will set |value| to 10
+    // and unit to "min"
     class NumberAndUnitParser {
         evaluate(input, i) {
             var num_parser = new NumberParser();
             i = num_parser.evaluate(input, i);
             this.value = num_parser.getValue();
             let original_i = i;
+            // - Check for another number after the current cursor.
+            // - Skip any white spaces as well
+            // TODO: Move this into number parser
+            // Think on how to fix this code. There are a couple of options:
+            // - 1) Make the Unparser generate 01:30 min style notation
+            // - 2) Fix this parsing so that it parses something like 1hr30min10s
+            // 
             if (i + 1 < input.length && input[i + 1] == ":") {
-                i = i + 2;
+                i = i + 2; // skip : and go to the next char
                 var res_temp = IntervalParser.parseDouble(input, i);
                 i = res_temp.i;
                 this.value = this.value + res_temp.value / 60;
+                // consume any whitespaces
+                // i points to the current digit, so let's advance one
+                // than reverse one
                 i++;
                 while (i < input.length && input[i] == ' ') {
                     i++;
                 }
                 i--;
             }
+            // - Check the unit. 
+            // TODO: Find a better way to represent this
             var unitMap = {
                 "w": 1,
                 "watts": 1,
@@ -1089,12 +1169,14 @@ var Model;
                 "mi": 1,
                 "": 1,
             };
+            // Get the next token
             let nextToken = "";
             for (i++; i < input.length; i++) {
                 if (input[i] == ',' || input[i] == ")") {
                     break;
                 }
                 else {
+                    // Assuming here if it sees a whitespace it can bail out as its an invalid unit
                     if (IntervalParser.isWhitespace(input[i])) {
                         nextToken = "<<invalid>>";
                         break;
@@ -1102,6 +1184,8 @@ var Model;
                     nextToken += input[i];
                 }
             }
+            // Validate the token. We want to make sure the unit is valid otherwise
+            // we might parse "2% incline" as a intensity unit for instance.
             if (unitMap[nextToken] == undefined) {
                 this.value = null;
                 this.unit = "";
@@ -1169,6 +1253,9 @@ var Model;
                             var durationValues = [];
                             var durationUnits = [];
                             var intensities = [];
+                            // (1) Tries to guess where is the time and where is the intensity
+                            // The assumption here is that intensity will likely be bigger
+                            // than time. For example: 65% for 60min
                             var containsUnit = false;
                             var minIndex = -1;
                             var minValue = 9999999999999;
@@ -1179,6 +1266,7 @@ var Model;
                                     minIndex = k;
                                 }
                             }
+                            // Patch the missing units now.
                             if (!containsUnit) {
                                 for (var k = 0; k < Object.keys(units).length; k++) {
                                     if (units[k] == "") {
@@ -1191,6 +1279,7 @@ var Model;
                                     }
                                 }
                             }
+                            // (2) Create the duration units and intensities
                             for (var k = 0; k < Object.keys(units).length; k++) {
                                 if (DurationUnitHelper.isDurationUnit(units[k])) {
                                     durationUnits.push(DurationUnitHelper.toDurationUnit(units[k]));
@@ -1204,6 +1293,8 @@ var Model;
                                     intensities.push(factory.createIntensity(nums[k], intensityUnit));
                                 }
                                 else {
+                                    // Most of the times here means we didn't have a intensity
+                                    // Free ride or offset mode for example.
                                     var unit = IntensityUnitHelper.toIntensityUnit(units[k]);
                                     if (unit == IntensityUnit.OffsetSeconds) {
                                         intensities.push(factory.createIntensity(nums[k], IntensityUnit.OffsetSeconds));
@@ -1213,13 +1304,25 @@ var Model;
                                     }
                                 }
                             }
+                            // (3) Handle repeat interval by peaking at the stack
                             if (stack[stack.length - 1] instanceof RepeatInterval) {
                                 var repeatInterval = (stack[stack.length - 1]);
+                                // There is ambiguity in the following interval:
+                                // 2[(45s, 75, 100), (15s, 55)]
+                                // It could be two types of intervals:
+                                // 1) 2x (Ramp from 75% to 100% with 15s rest)
+                                // or
+                                // 2) 2x (45s @ 75% and 100% w/ 15s rest)
+                                // Will assume the former, since the latter is less common.
                                 if (repeatInterval.getRepeatCount() > 1 &&
                                     (intensities.length == repeatInterval.getRepeatCount()
                                         || (DurationUnitHelper.areDurationUnitsSame(durationUnits) && durationValues.length == repeatInterval.getRepeatCount()))) {
+                                    // OK this should not be a RepeatInterval, it should be
+                                    // a StepBuildInterval instead
+                                    // Remove the ArrayInterval from the top and from the parent
                                     stack.pop();
                                     stack[stack.length - 1].getIntervals().pop();
+                                    // add the new intervals
                                     var step_intervals = [];
                                     for (var k = 0; k < repeatInterval.getRepeatCount(); k++) {
                                         var durationUnit = k < durationUnits.length ? durationUnits[k] : durationUnits[0];
@@ -1229,6 +1332,7 @@ var Model;
                                         step_intervals.push(new SimpleInterval(title.trim(), intensity, step_duration, Duration.ZeroDuration));
                                     }
                                     var bsi = new StepBuildInterval(title.trim(), step_intervals);
+                                    // put back to the parent and top of the stack
                                     stack[stack.length - 1].getIntervals().push(bsi);
                                     stack.push(bsi);
                                     break;
@@ -1239,6 +1343,7 @@ var Model;
                             let restDuration = Duration.ZeroDuration;
                             let zeroIntensity = Intensity.ZeroIntensity;
                             if (intensities.length == 2) {
+                                // Ramp build interval
                                 let startIntensity = intensities[0];
                                 let endIntensity = intensities[1];
                                 let intensity = RampBuildInterval.computeAverageIntensity(startIntensity, endIntensity);
@@ -1246,6 +1351,7 @@ var Model;
                                 interval = new RampBuildInterval(title.trim(), startIntensity, endIntensity, duration);
                             }
                             else if (intensities.length == 1) {
+                                // Simple interval
                                 let intensity = intensities[0];
                                 let duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
                                 if (durationUnits.length == 2 && durationValues.length == 2) {
@@ -1254,6 +1360,9 @@ var Model;
                                 interval = new SimpleInterval(title.trim(), intensity, duration, restDuration);
                             }
                             else {
+                                // Two types of interval here:
+                                // (10s) - means 10s rest
+                                // (10min, easy) - means 10min at default interval pace
                                 let intensity = factory.createIntensity(0, IntensityUnit.IF);
                                 let duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
                                 if (durationUnits.length == 2 && durationValues.length == 2) {
@@ -1271,17 +1380,21 @@ var Model;
                             var string_parser = new TokenParser([',', ')']);
                             i = string_parser.evaluate(input, i);
                             var value = string_parser.getValue();
+                            // If its a number
                             if (IntervalParser.isDigit(value[0])) {
                                 var intensity_parser = new NumberAndUnitParser();
                                 intensity_parser.evaluate(value, 0);
                                 let unit = intensity_parser.getUnit().trim();
                                 let intensity_value = intensity_parser.getValue();
+                                // If we have a value from the intensity parser and
+                                // If there is not unit (implict) or the unit is known
                                 if (intensity_value != null &&
                                     (unit.length == 0 || IntensityUnitHelper.isIntensityUnit(unit) || DurationUnitHelper.isDurationUnit(unit))) {
                                     nums[numIndex] = intensity_value;
                                     units[numIndex] = unit;
                                 }
                                 else {
+                                    // If we don't recognize, fallback and set as a title
                                     title = value;
                                     units[numIndex] = "";
                                 }
@@ -1291,21 +1404,28 @@ var Model;
                                 integer_parser.evaluate(value, 1);
                                 nums[numIndex] = integer_parser.getValue();
                                 if (value[0] == "-") {
+                                    // TODO: This has a bug where -1 would be ambiguous, maybe use
+                                    // a bigger range like 1000 * X ?
                                     nums[numIndex] = -1 * nums[numIndex];
                                 }
+                                // HACK: we want to put the final unit here to avoid creating
+                                // imaginary units
                                 units[numIndex] = "offset";
                             }
                             else {
+                                // TODO: Use magic number for identifying free ride for now
                                 if (value == "*") {
                                     units[numIndex] = "free-ride";
                                 }
                                 else {
+                                    // Set the value for the title and a dummy value in the units
                                     title = value;
                                     units[numIndex] = "";
                                 }
                             }
                         }
                     }
+                    // end simple workout
                 }
                 else if (ch == "[") {
                     var ai = new ArrayInterval("", []);
@@ -1321,12 +1441,16 @@ var Model;
                     var ri = new RepeatInterval("", null, null, res.value);
                     stack[stack.length - 1].getIntervals().push(ri);
                     stack.push(ri);
+                    // Repeat interval format is something like
+                    // 4[(3,90),(3,55)], so let's consume the next bracket 
+                    // so that it goes into the regular main flow
                     while (i < input.length && input[i] != "[") {
                         i++;
                     }
                 }
                 else if (ch == "\"") {
                     var scp = new TokenParser(["\""]);
+                    // it returns the last valid char, so we want to skip that and the quotes
                     i = scp.evaluate(input, i + 1) + 2;
                     stack[stack.length - 1].getIntervals().push(new CommentInterval(scp.getValue()));
                 }
@@ -1336,6 +1460,9 @@ var Model;
             }
             return result;
         }
+        // Parses the string, converts into the object, then convert back into the
+        // default units. For example: if the unit is in min/km it will be converted
+        // to IF so that its independent of thresholds.
         static normalize(factory, input, unparser_format) {
             let interval = IntervalParser.parse(factory, input);
             let visitor = new UnparserVisitor(unparser_format);
@@ -1377,10 +1504,14 @@ var Model;
     Model.VisitorHelper = VisitorHelper;
     class BaseVisitor {
         visitCommentInterval() {
+            // nothing to do
         }
         visitStepBuildInterval(interval) {
+            // Generic implementation
             for (var i = 0; i < interval.getRepeatCount(); i++) {
+                // step interval
                 VisitorHelper.visit(this, interval.getStepInterval(i));
+                // rest interval
                 VisitorHelper.visit(this, interval.getRestInterval());
             }
         }
@@ -1398,6 +1529,15 @@ var Model;
         }
     }
     Model.BaseVisitor = BaseVisitor;
+    // Moving average class.
+    // 
+    // The constructor receives the window size which is used to compute the average.
+    // The behavior should be similar to a sliding window as old values are discarded
+    // once the number of elements is equal to the window_size.
+    //
+    // Simply call insert(value) with the values
+    // and whenever needed the moving average then
+    // call get_moving_average()
     class MovingAverage {
         constructor(window_size) {
             this.values = [];
@@ -1430,13 +1570,23 @@ var Model;
         }
     }
     Model.MovingAverage = MovingAverage;
+    // Because IF are usually > 0 and < 1, using IF directly creates
+    // incorrect results for the AVG IF, so we use a artificial FTP here
+    // in order to compute the NP Power, since the only exposed member
+    // from this class is the IF.
     let FTP = 256;
+    // Calculate the IF similar to how the NP is calculated.
+    // 
+    // Calculate a 30-second rolling average of the power data
+    // * Raise these values to the fourth power
+    // * Average the resulting values
+    // * Take the fourth root of the result
     class NPVisitor extends BaseVisitor {
         constructor() {
             super(...arguments);
             this.sum = 0;
             this.count = 0;
-            this.ma = new MovingAverage(30);
+            this.ma = new MovingAverage(/*window_size=*/ 30);
             this.ftp = 0;
             this.np = 0;
         }
@@ -1451,6 +1601,7 @@ var Model;
             var start_watts = interval.getStartIntensity().getValue() * FTP;
             var end_watts = interval.getEndIntensity().getValue() * FTP;
             var duration = interval.getWorkDuration().getSeconds();
+            // Right way to estimate the intensity is by doing incremental of 1 sec
             for (var t = 0; t < duration; t++) {
                 var current_watts = start_watts + (end_watts - start_watts) * (t / duration);
                 var current_watts_pow_4 = 1 * Math.pow(current_watts, 4);
@@ -1472,6 +1623,14 @@ var Model;
         }
     }
     Model.NPVisitor = NPVisitor;
+    // TSS = [(s x NP x IF) / (FTP x 3600)] x 100
+    // TSS = [(s x NP x IF) / (FTP x 36)]
+    // IF = AVG_POWER / FTP
+    // TSS = [s x NP x (AVG_POWER / FTP)] / (FTP x 36)
+    // TSS = [(s x NP x AVG_POWER) / FTP] / (FTP x 36)
+    // TSS = (s x NP x AVG_POWER) / (36 * FTP^2)
+    // 
+    // 
     class TSSCalculator {
         static compute(interval) {
             let np = new NPVisitor();
@@ -1482,6 +1641,10 @@ var Model;
         }
     }
     Model.TSSCalculator = TSSCalculator;
+    // TSS = [(s x NP x IF) / (FTP x 3600)] x 100
+    // IF = NP / FTP
+    // TSS = [(s x NP x NP/FTP) / (FTP x 3600)] x 100
+    // TSS = [s x (NP / FTP) ^ 2] / 36
     class TSSVisitor extends BaseVisitor {
         constructor() {
             super(...arguments);
@@ -1497,6 +1660,7 @@ var Model;
             var startIntensity = interval.getStartIntensity().getValue();
             var endIntensity = interval.getEndIntensity().getValue();
             var duration = interval.getWorkDuration().getSeconds();
+            // Right way to estimate the intensity is by doing incremental of 1 sec
             for (var t = 0; t < duration; t++) {
                 var intensity = startIntensity + (endIntensity - startIntensity) * (t / duration);
                 var val = 1 * Math.pow(intensity, 2);
@@ -1567,6 +1731,13 @@ var Model;
             this.zones = {};
             this.zones = {};
             this.sportType = sportType;
+            // Create the zones manually. Something like the following
+            // 1 : {name:"Z1", range:"(0,55%]", value:0},
+            // 2 : {name:"Z2", range:"(55%;75%]", value:0},
+            // 3 : {name:"Z3", range:"(75%;90%]", value:0},
+            // 4 : {name:"Z4", range:"(90%;105%]", value:0},
+            // 5 : {name:"Z5", range:"(105%;120%]", value:0},
+            // 6 : {name:"Z6+", range:"(120%;+oo)", value:0},
             var zone_map = ZonesMap.getZoneMap(this.sportType);
             for (var zone = 1; zone <= 6; zone++) {
                 var zone_obj = zone_map[zone];
@@ -1598,6 +1769,7 @@ var Model;
             var startIntensity = interval.getStartIntensity().getValue();
             var endIntensity = interval.getEndIntensity().getValue();
             var duration = interval.getWorkDuration().getSeconds();
+            // Go on 1 second increments 
             var intensity = startIntensity;
             var intensityIncrement = (endIntensity - startIntensity) / duration;
             for (var t = 0; t < duration; t++) {
@@ -1645,11 +1817,13 @@ var Model;
         }
         visitSimpleInterval(interval) {
             var title = WorkoutTextVisitor.getIntervalTitle(interval);
+            // Work interval
             this.initX(interval.getWorkDuration());
             this.data.push(new Point(this.x, interval.getIntensity(), title, this.getIntervalTag(interval)));
             this.incrementX(interval.getWorkDuration());
             this.data.push(new Point(this.x, interval.getIntensity(), title, this.getIntervalTag(interval)));
             if (interval.getRestDuration().getValue() > 0) {
+                // Rest interval
                 this.initX(interval.getRestDuration());
                 this.data.push(new Point(this.x, Intensity.ZeroIntensity, title, this.getIntervalTag(interval)));
                 this.incrementX(interval.getRestDuration());
@@ -1705,6 +1879,7 @@ var Model;
                 this.content += `\t\t\t<textevent timeoffset="0" message="${title}"/>\n`;
                 this.content += `\t\t</SteadyState>\n`;
             }
+            // TODO: Add rest duration here
         }
         visitRampBuildInterval(interval) {
             var duration = interval.getWorkDuration().getSeconds();
@@ -1737,6 +1912,7 @@ var Model;
         }
         processCourseData(intensity, durationInSeconds) {
             this.time += durationInSeconds;
+            // Course Data has to be in minutes
             this.courseData += (this.time / 60) + "\t" + Math.round(intensity.getValue() * 100) + "\n";
         }
         processTitle(interval) {
@@ -1757,6 +1933,7 @@ var Model;
             this.processCourseData(interval.getIntensity(), 0);
             this.processCourseData(interval.getIntensity(), interval.getWorkDuration().getSeconds());
             this.processTitle(interval);
+            // TODO: Add rest interval here
         }
         visitRampBuildInterval(interval) {
             this.processCourseData(interval.getStartIntensity(), 0);
@@ -1836,8 +2013,10 @@ var Model;
                 return Math.round(interval.getIntensity().getValue() * 100);
             }
         }
+        // ["description","seconds","start","finish","mode","intervals","group","autolap","targetcad"]
         visitSimpleInterval(interval) {
             this.content += stringFormat(`\t\t["{0}",{1},{2},{2},"{3}",1,{4},0,90],\n`, this.getTitlePretty(interval), interval.getWorkDuration().getSeconds(), this.getIntensity(interval), this.getMode(interval), this.getGroupId());
+            // TODO: Add rest interval here
         }
         visitRampBuildInterval(interval) {
             this.content += stringFormat(`\t\t["{0}",{1},{2},{3},"M",1,{3},0,90],\n`, this.getTitlePretty(interval), interval.getWorkDuration().getSeconds(), Math.round(interval.getStartIntensity().getValue() * 100), Math.round(interval.getEndIntensity().getValue() * 100), this.getGroupId());
@@ -1857,7 +2036,9 @@ var Model;
         }
         finalize() {
             if (this.content.length > 0) {
+                // Remove trailing ",\n"
                 this.content = this.content.substr(0, this.content.length - 2);
+                // Add just the "\n"
                 this.content += "\n";
             }
             this.content = stringFormat(`{
@@ -1899,10 +2080,13 @@ var Model;
             });
             if (mainInterval != null) {
                 var filename = intensity_string + WorkoutTextVisitor.getIntervalTitle(mainInterval);
+                // Avoid really long filenames since its not very helpful
                 if (filename.length < 50) {
                     return filename;
                 }
             }
+            // TODO: do something here if the main set its too big. Some ideas:
+            // 1) Long Ride
             var timeInZones = this.intervals.getTimeInZones(SportType.Bike);
             var zoneMaxTime = 0;
             var zoneMaxName = -1;
@@ -1939,6 +2123,7 @@ var Model;
             this.roundValues = roundValues;
         }
         static getIntervalTitle(interval, userProfile = null, sportType = SportType.Unknown, outputUnit = IntensityUnit.Unknown, roundValues = true) {
+            // TODO: instantiating visitor is a bit clowny
             var f = new WorkoutTextVisitor(userProfile, sportType, outputUnit, roundValues);
             VisitorHelper.visitAndFinalize(f, interval);
             return f.result;
@@ -1960,6 +2145,7 @@ var Model;
                 this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " @ " + this.getIntensityPretty(interval.getIntensity());
             }
         }
+        // ArrayInterval
         visitArrayInterval(interval) {
             this.visitArrayIntervalInternal(interval, false);
         }
@@ -1969,7 +2155,7 @@ var Model;
             var lastInterval = interval.getIntervals()[length - 1];
             var isRestIncluded = lastInterval.getIntensity().getValue() <
                 firstInterval.getIntensity().getValue() &&
-                !(lastInterval instanceof CommentInterval);
+                !(lastInterval instanceof CommentInterval); // its not a comment				
             if (length == 2) {
                 if (isRestIncluded) {
                     var oldFlag = this.disableEasyTitle;
@@ -1999,6 +2185,7 @@ var Model;
                         VisitorHelper.visit(this, subInterval);
                         this.result += ", ";
                     }
+                    // remove extra ", "
                     this.result = this.result.slice(0, this.result.length - 2);
                     this.result += ") - w/ ";
                     this.visitRestInterval(lastInterval);
@@ -2012,6 +2199,7 @@ var Model;
                         VisitorHelper.visit(this, subInterval);
                         this.result += ", ";
                     }
+                    // remove extra ", "
                     this.result = this.result.slice(0, this.result.length - 2);
                     if (length >= 2) {
                         this.result += ")";
@@ -2019,10 +2207,12 @@ var Model;
                 }
             }
         }
+        // RepeatInterval
         visitRepeatInterval(interval) {
             this.result += interval.getRepeatCount() + " x ";
             this.visitArrayIntervalInternal(interval, true);
         }
+        // RampBuildInterval
         visitRampBuildInterval(interval) {
             if (interval.getStartIntensity().getValue() <= DefaultIntensity.getEasyThreshold(this.sportType)) {
                 this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " warm up to " + this.getIntensityPretty(interval.getEndIntensity());
@@ -2038,6 +2228,10 @@ var Model;
         }
         visitStepBuildInterval(interval) {
             this.result += interval.getRepeatCount() + " x ";
+            // There are two types of step build interval
+            // 1) Same duration - different intensities
+            // 2) Different duration - same intensities
+            // case 1
             if (interval.areAllIntensitiesSame()) {
                 this.result += this.getIntensityPretty(interval.getStepInterval(0).getIntensity());
                 this.result += " - w/ ";
@@ -2047,6 +2241,7 @@ var Model;
                     this.result += interval.getStepInterval(i).getWorkDuration().toStringShort(this.sportType == SportType.Swim);
                     this.result += ", ";
                 }
+                // remove extra ", "
                 this.result = this.result.slice(0, this.result.length - 2);
                 this.result += ")";
             }
@@ -2059,21 +2254,29 @@ var Model;
                     this.result += this.getIntensityPretty(interval.getStepInterval(i).getIntensity());
                     this.result += ", ";
                 }
+                // remove extra ", "
                 this.result = this.result.slice(0, this.result.length - 2);
                 this.result += ")";
             }
         }
+        // SimpleInterval
         visitSimpleInterval(interval) {
             this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim);
             let title = this.getIntervalTitle(interval);
             if (title != null && title.length > 0) {
                 this.result += " " + title;
             }
+            // If its a Free ride we are done!
             if (interval.getIntensity().getOriginalUnit() == IntensityUnit.FreeRide) {
                 return;
             }
+            // 3 cases to cover:
+            // - warmup (usually IF around 50-60) - no title - easy peasy
+            // - drills with single leg (IF < 60) - title present - check for title
+            // - recovery interval, first interval in a repeat rest is something like 60. 
             let isEasyInterval = DefaultIntensity.isEasy(interval.getIntensity(), this.sportType);
             if (isEasyInterval && !this.disableEasyTitle) {
+                // If no title was provided, let's give one
                 let title = interval.getTitle();
                 if (title == null || title.trim().length == 0) {
                     if (interval.getIntensity().getValue() == 0) {
@@ -2084,6 +2287,7 @@ var Model;
                     }
                 }
                 else {
+                    // Remove intensity from intervals without specified intensity.
                     if (interval.getIntensity().getValue() != 0) {
                         this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
                     }
@@ -2094,6 +2298,10 @@ var Model;
                 }
             }
             else {
+                // Handle swim differently
+                // We want to add the total touch time on the swim. For example, if you CSS
+                // is 1:30 /100yards and you are doing 200 yards, we want to add
+                // that you are touching the wall on 3 min.
                 if (this.sportType == SportType.Swim) {
                     var total_duration = interval.getTotalDuration();
                     if (total_duration.getSeconds() != interval.getWorkDuration().getSeconds()) {
@@ -2112,6 +2320,7 @@ var Model;
                 }
             }
         }
+        // |intensity| : The intensity of the interval. For example 90%, 100%
         getIntensityPretty(intensity) {
             if (this.outputUnit == IntensityUnit.HeartRate) {
                 var bpm = 0;
@@ -2119,6 +2328,8 @@ var Model;
                     bpm = this.userProfile.getBikeFTP() / this.userProfile.getEfficiencyFactor();
                 }
                 else if (this.sportType == SportType.Run) {
+                    // 1760 yards
+                    // http://home.trainingpeaks.com/blog/article/the-efficiency-factor-in-running
                     bpm = (1760 * this.userProfile.getRunnintTPaceMph()) / (60 * this.userProfile.getEfficiencyFactor());
                 }
                 return Math.round(intensity.getValue() * bpm) + "bpm";
@@ -2254,6 +2465,7 @@ var Model;
             this.output += "[";
             if (interval.areAllIntensitiesSame()) {
                 this.output += "(";
+                // Get any step as all the durations are the same.
                 this.output += this.getIntensityPretty(interval.getStepInterval(0).getIntensity());
                 for (let i = 0; i < interval.getRepeatCount(); i++) {
                     this.output += ", ";
@@ -2265,6 +2477,7 @@ var Model;
             else {
                 console.assert(interval.areAllDurationsSame());
                 this.output += "(";
+                // Get any step as all the durations are the same.
                 this.output += this.getDurationPretty(interval.getStepInterval(0).getTotalDuration());
                 for (let i = 0; i < interval.getRepeatCount(); i++) {
                     this.output += ", ";
@@ -2425,6 +2638,8 @@ var Model;
             this.sportType = sportType;
         }
         getBikeSpeedMphForIntensity(intensity) {
+            // TODO: very simple for now
+            // its either 20 or 15mph
             var actualSpeedMph = 0;
             if (intensity.getValue() < 0.65) {
                 actualSpeedMph = 15;
@@ -2436,6 +2651,7 @@ var Model;
         }
         createIntensity(value, unit) {
             var ifValue = 0;
+            // HACK here for now
             if (unit == IntensityUnit.FreeRide) {
                 return new Intensity(value, 0, IntensityUnit.FreeRide);
             }
@@ -2477,6 +2693,7 @@ var Model;
                 }
             }
             else if (this.sportType == SportType.Swim) {
+                // For swimming we support 3 IntensityUnits
                 if (unit == IntensityUnit.IF) {
                     ifValue = value;
                 }
@@ -2489,6 +2706,7 @@ var Model;
                     ifValue = value / this.userProfile.getSwimCSSMph();
                 }
                 else if (unit == IntensityUnit.OffsetSeconds) {
+                    // TODO: not handling if user specified speed in profile / meters
                     var speed_per_100_yards = this.userProfile.getSwimPace(IntensityUnit.Per100Yards, new Intensity(1));
                     speed_per_100_yards += value / 60;
                     var speed_mph = IntensityUnitHelper.convertTo(speed_per_100_yards, IntensityUnit.Per100Yards, IntensityUnit.Mph);
@@ -2524,14 +2742,19 @@ var Model;
             }
             if (DurationUnitHelper.isTime(unit)) {
                 estimatedTimeInSeconds = DurationUnitHelper.getDurationSeconds(unit, value);
+                // v = s/t
+                // s = v * t
                 estimatedDistanceInMiles = estimatedSpeedMph * (estimatedTimeInSeconds / 3600);
             }
             else {
                 estimatedDistanceInMiles = DurationUnitHelper.getDistanceMiles(unit, value);
+                // v = s/t;
+                // t = s / v;
                 estimatedTimeInSeconds = 3600 * (estimatedDistanceInMiles / estimatedSpeedMph);
             }
             return new Duration(unit, value, estimatedTimeInSeconds, estimatedDistanceInMiles);
         }
+        // Returns the easy IF threshold
         getEasyThreshold() {
             return DefaultIntensity.getEasyThreshold(this.sportType);
         }
@@ -2736,6 +2959,8 @@ var Model;
         }
     }
     Model.StopWatch = StopWatch;
+    // Class that is created with the absolute begin and end times.
+    // |interval_| will be either SimpleInterval or RampBuildInterval.
     class AbsoluteTimeInterval {
         constructor(begin, end, interval) {
             this.begin_ = begin;
@@ -2781,12 +3006,14 @@ var Model;
         constructor(interval) {
             this.data_ = [];
             this.durationTotalSeconds_ = 0;
+            // Create the visitor for the AbsoluteTimeInterval.
             var pv = new AbsoluteTimeIntervalVisitor();
             VisitorHelper.visitAndFinalize(pv, interval);
             this.data_ = pv.getIntervalArray();
             this.durationTotalSeconds_ = interval.getTotalDuration().getSeconds();
         }
         get(ts) {
+            // TODO: Can potentially do a binary search here.
             for (let i = 0; i < this.data_.length; i++) {
                 let bei = this.data_[i];
                 if (ts >= bei.getBeginSeconds() && ts <= bei.getEndSeconds()) {
@@ -2806,6 +3033,7 @@ var Model;
         ArgType[ArgType["String"] = 1] = "String";
     })(ArgType || (ArgType = {}));
     ;
+    // Class that processes the input like #wu and replaces with macros.
     class TextPreprocessor {
         constructor(sport_type) {
             this.sport_type = sport_type;
@@ -2826,21 +3054,25 @@ var Model;
             let warmup_groups = [];
             if (this.sport_type == Model.SportType.Bike) {
                 warmup_groups = [
+                    // 9 min (warmup)
                     [
                         "(3min, 55), (3min, 65), (3min, 75)",
                         "(9min, 55, 75)"
                     ],
+                    // 4 min (drill)
                     [
                         "2[(45s, 45, Single leg - left), (15s, 45, both), (45s, 45, Single leg - right), (15s, 45, both)]",
                         "8[(15s, 55, spin ups), (15s, 55)]",
                         "4[(30s, cadence 80/90/100/110, 55), (30s, 55)]"
                     ],
+                    // 4 min (build)
                     [
                         "4[(15s, *, build), (45s, 55)]",
                         "4[(5s, *, MAX), (55s, 55)]",
                         "4[(45s, 75, 100), (15s, 55)]",
                         "4[(30s, 85, 90, 95, 100), (30s, 55)]"
                     ],
+                    // static (3min)
                     ["(3min, 55)"]
                 ];
             }
@@ -2878,7 +3110,22 @@ var Model;
             let rest_duration_sec = work_duration_sec <= 30 ? 60 - work_duration_sec : work_duration_sec;
             return number_repeats + "[(" + work_duration_sec + "s,*," + title + "), (" + rest_duration_sec + "s,55,Relaxed)]";
         }
+        // TODO: number_repeats: number, work_duration_sec: number, rest_duration_sec: number
         _cadence_intervals() {
+            // Not sure yet how to model this.
+            // 2x(2-2-1 Spin Ups @ 75% 90-100-110 rpm)
+            // 5x30s Highest Sustainable Cadence @ L2 - rest 30s very easy
+            // 4[(4min, 60, cadence 80rpm), (3min, 65, cadence 90rpm), (2min, 70, cadence 100rpm), (1min, 75, cadence 110rpm)]
+            //
+            // (3min, 55, cadence @ 65rpm)
+            // (2min, 55, cadence @ 95rpm)
+            // (3min, 55, cadence @ 70rpm)
+            // (2min, 55, cadence @ 100rpm)
+            //
+            // (3min, 55, cadence @ 75rpm)
+            // (2min, 55, cadence @ 105rpm)
+            // (3min, 55, cadence @ 80rpm)
+            // (2min, 55, cadence @ 110rpm)
             return "<cd>";
         }
         processOne(input) {
@@ -2890,8 +3137,10 @@ var Model;
             ];
             for (let i = 0; i < funcs.length; i++) {
                 let regex = funcs[i].regex;
+                // Try seeing if this function matches the input.
                 if (regex.test(input)) {
                     var instance_params = input.match(regex);
+                    // Parse all parameters from the regex.
                     var func_params = [];
                     if (instance_params.length - 1 != funcs[i].params.length) {
                         console.log("Function call " + input + " is not matching definition.");

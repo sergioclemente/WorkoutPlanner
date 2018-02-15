@@ -27,6 +27,7 @@ function handleExistentFile(req, res, fs, filename) {
   if (req_mod_date != null) {
     req_mod_date = new Date(req_mod_date);
     if (req_mod_date.toUTCString() == mtime.toUTCString()) {
+      console.log("Serving " + filename + " from cache. FileTS=" + mtime.toUTCString() + " HeaderTS=" + req_mod_date.toUTCString())
       res.writeHead(304, {
           "Last-Modified": mtime.toUTCString()
       });

@@ -76,7 +76,7 @@ export default class WorkoutViews extends React.Component<any, any> {
 	}
 
 	_fetchWorkouts() {
-		var url = "/workouts";
+		var url = "workouts";
 
 		var req = new XMLHttpRequest();
 		req.addEventListener("load", this._onWorkoutsLoaded.bind(this, req));
