@@ -12,10 +12,6 @@ export default class WorkoutView extends React.Component<any, any> {
 		this.state = this.getState(UI.QueryParams.createCopy(params));
 	}
 
-	componentWillReceiveProps(nextProps) {
-		this.setState({ value: '' + nextProps.value })
-	}
-
 	getState(params: UI.QueryParams): any {
 		try {
 			var userProfile = params.createUserProfile();

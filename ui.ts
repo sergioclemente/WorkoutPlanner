@@ -29,6 +29,7 @@ module UI {
 
 	export class QueryParamsList {
 		private sport_type_: string;
+		private title_ : string;
 
 		constructor() {
 			this.loadFromURL();
@@ -37,6 +38,7 @@ module UI {
 		loadFromURL(): boolean {
 			var params = getQueryParams();
 			this.sport_type_ = params.st;
+			this.title_ = params.title || "";
 			return this.validate();
 		}
 
@@ -45,7 +47,7 @@ module UI {
 		}
 
 		getURL(): string {
-			return "?st=" + encodeURIComponent(this.sport_type_);
+			return "?page=list&st=" + encodeURIComponent(this.sport_type_) + "&title=" + encodeURIComponent(this.title_);
 		}
 
 		getSportType(): string {
@@ -54,6 +56,17 @@ module UI {
 
 		setSportType(st: string): void {
 			this.sport_type_ = st;
+		}
+
+		setTitle(title: string) : void {
+			this.title_ = title;
+		}
+
+		getTitle() : string {
+			return this.title_;
+		}
+
+		pushToHistory() : void {
 			window.history.pushState('Object', 'Title', this.getURL());
 		}
 	}

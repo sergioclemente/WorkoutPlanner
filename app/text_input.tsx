@@ -13,13 +13,9 @@ export default class TextInput extends React.Component<any, any> {
 		};
 	}
 
-	componentWillReceiveProps(nextProps) {
-		this.setState({ value: '' + nextProps.value })
-	}
-
 	render() {
 		return (<span>
-			<input {...this.props} value={this.state.value} onChange={e => this._change(e)} onBlur={e => this._blur(e)} />
+			<input ref="input" {...this.props} value={this.state.value} onChange={e => this._change(e)} onBlur={e => this._blur(e)} />
 			<ErrorLabel ref='errorLabel' message=''></ErrorLabel>
 		</span>
 		);
@@ -36,5 +32,9 @@ export default class TextInput extends React.Component<any, any> {
 	setError(msg: string) {
 		var errorLabel: ErrorLabel = this.refs['errorLabel'] as ErrorLabel;
 		errorLabel.setError(msg);
+	}
+
+	getValue() {
+		return this.state.value;
 	}
 }

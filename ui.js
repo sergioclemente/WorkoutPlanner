@@ -31,19 +31,28 @@ var UI;
         loadFromURL() {
             var params = getQueryParams();
             this.sport_type_ = params.st;
+            this.title_ = params.title || "";
             return this.validate();
         }
         validate() {
             return typeof (this.sport_type_) != 'undefined' && this.sport_type_ != "";
         }
         getURL() {
-            return "?st=" + encodeURIComponent(this.sport_type_);
+            return "?page=list&st=" + encodeURIComponent(this.sport_type_) + "&title=" + encodeURIComponent(this.title_);
         }
         getSportType() {
             return this.sport_type_;
         }
         setSportType(st) {
             this.sport_type_ = st;
+        }
+        setTitle(title) {
+            this.title_ = title;
+        }
+        getTitle() {
+            return this.title_;
+        }
+        pushToHistory() {
             window.history.pushState('Object', 'Title', this.getURL());
         }
     }

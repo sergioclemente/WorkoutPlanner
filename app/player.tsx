@@ -24,10 +24,6 @@ export default class PlayerView extends React.Component<any, any> {
 		this.state = this.getState();
 	}
 
-	componentWillReceiveProps(nextProps) {
-		this.setState({ value: '' + nextProps.value })
-	}
-
 	getState(): any {
 		let bei: Model.AbsoluteTimeInterval = this.playerHelper_.get(this._getElapsedTimeSeconds());
 		if (bei == null) {

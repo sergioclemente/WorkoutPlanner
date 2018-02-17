@@ -10,7 +10,7 @@ https://workoutplanner.herokuapp.com
 2. Then install the following dependencies (as an administrator):
 
 ```
-npm install
+npm install --dev
 ```
 
 # Compiling and running
@@ -18,25 +18,13 @@ npm install
 * Compile and run tests
 
 ```
-./build.cmd
-```
-
-* Minify (Just before submit)
-
-```
-./minify.cmd
+./build.sh
 ```
 
 * Starting the node server
 
 ```
 npm start
-```
-
-* Pushing live
-
-```
-Its automatically pushed on every commit.
 ```
 
 To install the protocol handler:
@@ -49,10 +37,8 @@ To install the protocol handler:
 - Can we add a "hint" for * intervals so that it computes IF better?
 
 Server
-* Add authentication
 * Refactor validation of parameters on server.js (params.w && params.ftp && params.tpace ...)
 * Make server.js a typescript file
-* Reduce dependencies (sql) to make move to kubernetes easier
 
 Player:
 * Fix play of music on iphone

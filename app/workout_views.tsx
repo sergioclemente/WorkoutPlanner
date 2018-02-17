@@ -6,6 +6,7 @@ import * as React from 'react';
 import { Table, Column, Cell } from 'fixed-data-table';
 import Select from './select';
 import SelectOption from './select_option';
+import TextInput from './text_input';
 import * as UI from '../ui';
 import * as Model from '../model';
 
@@ -89,15 +90,13 @@ export default class WorkoutViews extends React.Component<any, any> {
 			var rows = JSON.parse(req.responseText);
 
 			for (let i = 0; i < rows.length; i++) {
-				var params = new UI.QueryParams();
+				let params = new UI.QueryParams();
 				params.workout_text = rows[i].value;
 				params.workout_title = rows[i].title;
 				params.sport_type = rows[i].sport_type.toString();
 				params.page = "wv";
-				rows[i].link = "/" + params.getURL();
-				if (params.validate()) {
-					this._setExtraRowFields(rows, params, i);
-				}
+
+				rows[i].link = params.getURL();
 			}
 
 			this._rows = rows;
@@ -116,31 +115,35 @@ export default class WorkoutViews extends React.Component<any, any> {
 		}
 	}
 
-	_setExtraRowFields(rows: any, params: UI.QueryParams, i: number): void {
-		console.assert(params.validate());
-
-		// HACK: Lets override the output unit to IF since we want to get the IF
-		params.output_unit = Model.IntensityUnit.IF.toString();
+	_onSportTypeChange(sportTypeStr: string) {
+		this._filterData();
 	}
 
-	_onSportTypeChange(sportTypeStr: string) {
-		var sportTypeEnum: Model.SportType = parseInt(sportTypeStr);
+	_onTextFilterChange(e: React.ChangeEvent<HTMLInputElement>) {
+		this._filterData();
+	}
+
+	_filterData() {
+		let sportTypeComp: Select = this.refs["sportType"] as Select;
+		let filterTextComp: HTMLInputElement = this.refs["text"] as HTMLInputElement;
+
+		var sportTypeEnum: Model.SportType = parseInt(sportTypeComp.getSelectedValue());
+		var filterText = filterTextComp.value;
 		var filteredRows = [];
 
-		// Nothing to be filtered if its unknown (All)	
-		if (sportTypeEnum != Model.SportType.Unknown) {
-			for (let i = 0; i < this._rows.length; i++) {
-				var row = this._rows[i];
-				if (row.sport_type == sportTypeEnum) {
-					filteredRows.push(row);
-				}
+		for (let i = 0; i < this._rows.length; i++) {
+			var row = this._rows[i];
+			if ((sportTypeEnum == Model.SportType.Unknown || row.sport_type == sportTypeEnum)
+				&& (filterText.length == 0 || row.title.indexOf(filterText) >= 0)) {
+				filteredRows.push(row);
 			}
-		} else {
-			filteredRows = this._rows;
 		}
 
 		// Update the sport type (And url)
-		this._params.setSportType(sportTypeStr);
+		this._params.setSportType(sportTypeEnum.toString());
+		this._params.setTitle(filterText);
+		this._params.pushToHistory();
+
 
 		this.setState({ filteredRows: filteredRows });
 	}
@@ -155,7 +158,8 @@ export default class WorkoutViews extends React.Component<any, any> {
 				<SelectOption value={Model.SportType.Bike}>Bike</SelectOption>
 				<SelectOption value={Model.SportType.Run}>Run</SelectOption>
 				<SelectOption value={Model.SportType.Other}>Other</SelectOption>
-			</Select>
+			</Select> <br />
+			Filter: <input ref="text" value={this._params.getTitle()} onChange={e => this._onTextFilterChange(e)}></input>
 			<Table
 				ref="tbl"
 				rowsCount={filteredRows.length}

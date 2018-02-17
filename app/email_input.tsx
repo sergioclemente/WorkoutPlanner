@@ -12,10 +12,6 @@ export default class EmailInput extends React.Component<any, any> {
 		};
 	}
 
-	componentWillReceiveProps(nextProps) {
-		this.setState({ value: '' + nextProps.value })
-	}
-
 	render() {
 		return (<span>
 			<input {...this.props} type='string' value={this.state.value} onChange={e => this._change(e)} onBlur={e => this._blur(e)} />
@@ -29,14 +25,14 @@ export default class EmailInput extends React.Component<any, any> {
 
 	_blur(e) {
 		if (!UI.FieldValidator.validateEmail(e.target.value)) {
-			this.setError("Enter a valid email");
+			this._setError("Enter a valid email");
 		} else {
-			this.setError("");
+			this._setError("");
 			this.props.onChange(e.target.value);
 		}
 	}
 
-	setError(msg: string) {
+	_setError(msg: string) {
 		var errorLabel: ErrorLabel = this.refs['errorLabel'] as ErrorLabel;
 		errorLabel.setError(msg);
 	}

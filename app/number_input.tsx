@@ -14,10 +14,6 @@ export default class NumberInput extends React.Component<any, any> {
 		};
 	}
 
-	componentWillReceiveProps(nextProps) {
-		this.setState({ value: '' + nextProps.value })
-	}
-
 	render() {
 		return (<span>
 			<input {...this.props} type='number' value={this.state.value} onChange={e => this._change(e)} onBlur={e => this._blur(e)} />

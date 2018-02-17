@@ -1,4 +1,4 @@
-export JS_TARGET=ES6
+export JS_TARGET=ES2017
 export TSC_OPTS="--noUnusedParameters --noImplicitReturns"
 
 tsc --moduleResolution node --m commonjs ${TSC_OPTS} --target ${JS_TARGET} --removeComments model.ts ui.ts model_server.ts
@@ -57,7 +57,7 @@ if [[ "$?" != 0 ]]; then
 fi
 echo Built JSX files
 
-browserify model.js ui.js index.js app/*.js -o index.min.js
+node_modules/browserify/bin/cmd.js model.js ui.js index.js app/*.js -o index.min.js
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
