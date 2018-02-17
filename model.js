@@ -53,6 +53,9 @@ var Model;
         static assertIsBoolean(v, name) {
             console.assert(typeof (v) == "boolean", stringFormat("{0} must be a boolean, it was {1}", name, typeof (v)));
         }
+        static assertIsString(v, name) {
+            console.assert(typeof (v) == "string", stringFormat("{0} must be a string, it was {1}", name, typeof (v)));
+        }
         static assertTrue(v) {
             console.assert(v, "Precondition failed");
         }

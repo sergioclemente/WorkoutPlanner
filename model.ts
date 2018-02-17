@@ -60,6 +60,10 @@ module Model {
 			console.assert(typeof (v) == "boolean", stringFormat("{0} must be a boolean, it was {1}", name, typeof (v)));
 		}
 
+		static assertIsString(v : string, name: string) {
+			console.assert(typeof (v) == "string", stringFormat("{0} must be a string, it was {1}", name, typeof (v)));
+		}
+
 		static assertTrue(v: boolean) {
 			console.assert(v, "Precondition failed");
 		}
