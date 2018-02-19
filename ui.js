@@ -4,26 +4,20 @@ const Model = require("./model");
 var zlib = require('zlib');
 var UI;
 (function (UI) {
-    class PersistedItem {
-        constructor(id) {
-            this.id = id;
+    function loadPersistedValue(id) {
+        if (window.localStorage) {
+            var result = window.localStorage.getItem(id);
+            return result ? result.trim() : "";
         }
-        save(value) {
-            if (window.localStorage) {
-                window.localStorage.setItem(this.id, value);
-            }
-        }
-        load() {
-            if (window.localStorage) {
-                var result = window.localStorage.getItem(this.id);
-                return result ? result.trim() : "";
-            }
-            else {
-                return null;
-            }
+        else {
+            return null;
         }
     }
-    UI.PersistedItem = PersistedItem;
+    function setPersistedValue(id, value) {
+        if (window.localStorage) {
+            window.localStorage.setItem(id, value);
+        }
+    }
     class QueryParamsList {
         constructor() {
             this.loadFromURL();
@@ -126,73 +120,73 @@ var UI;
         }
         loadFromStorage() {
             {
-                let value = new PersistedItem("title").load();
+                let value = loadPersistedValue("title");
                 if (value != null && value.trim().length != 0) {
                     this.workout_title = value;
                 }
             }
             {
-                let value = new PersistedItem("workout").load();
+                let value = loadPersistedValue("workout");
                 if (value != null && value.trim().length != 0) {
                     this.workout_text = value;
                 }
             }
             {
-                let value = new PersistedItem("ftp_watts").load();
+                let value = loadPersistedValue("ftp_watts");
                 if (value != null && value.trim().length != 0) {
                     this.ftp_watts = value;
                 }
             }
             {
-                let value = new PersistedItem("t_pace").load();
+                let value = loadPersistedValue("t_pace");
                 if (value != null && value.trim().length != 0) {
                     this.t_pace = value;
                 }
             }
             {
-                let value = new PersistedItem("swim_css").load();
+                let value = loadPersistedValue("swim_css");
                 if (value != null && value.trim().length != 0) {
                     this.swim_css = value;
                 }
             }
             {
-                let value = new PersistedItem("ef").load();
+                let value = loadPersistedValue("ef");
                 if (value != null && value.trim().length != 0) {
                     this.efficiency_factor = value;
                 }
             }
             {
-                let value = new PersistedItem("sport_type").load();
+                let value = loadPersistedValue("sport_type");
                 if (value != null && value.trim().length != 0) {
                     this.sport_type = value;
                 }
             }
             {
-                let value = new PersistedItem("output_unit").load();
+                let value = loadPersistedValue("output_unit");
                 if (value != null && value.trim().length != 0) {
                     this.output_unit = value;
                 }
             }
             {
-                let value = new PersistedItem("email").load();
+                let value = loadPersistedValue("email");
                 if (value != null && value.trim().length != 0) {
                     this.email = value;
                 }
             }
             {
-                let value = new PersistedItem("efficiency_factor").load();
+                let value = loadPersistedValue("efficiency_factor");
                 if (value != null && value.trim().length != 0) {
                     this.efficiency_factor = value;
                 }
             }
             {
-                let value = new PersistedItem("page").load();
+                let value = loadPersistedValue("page");
                 if (value != null && value.trim().length != 0) {
                     this.page = value;
                 }
             }
             {
-                let value = new PersistedItem("should_round").load();
+                let value = loadPersistedValue("should_round");
                 if (value != null && value.trim().length != 0) {
                     this.should_round = value;
                 }
@@ -200,40 +194,40 @@ var UI;
         }
         saveToStorage() {
             if (this.hasWorkoutTitle()) {
-                new PersistedItem("title").save(this.workout_title);
+                setPersistedValue("title", this.workout_title);
             }
             if (this.hasWorkoutText()) {
-                new PersistedItem("workout").save(this.workout_text);
+                setPersistedValue("workout", this.workout_text);
             }
             if (this.hasFtpWatts()) {
-                new PersistedItem("ftp_watts").save(this.ftp_watts);
+                setPersistedValue("ftp_watts", this.ftp_watts);
             }
             if (this.hasTPace()) {
-                new PersistedItem("t_pace").save(this.t_pace);
+                setPersistedValue("t_pace", this.t_pace);
             }
             if (this.hasSwimCSS()) {
-                new PersistedItem("swim_css").save(this.swim_css);
+                setPersistedValue("swim_css", this.swim_css);
             }
             if (this.hasEfficiencyFactor()) {
-                new PersistedItem("ef").save(this.efficiency_factor);
+                setPersistedValue("ef", this.efficiency_factor);
             }
             if (this.hasSportType()) {
-                new PersistedItem("sport_type").save(this.sport_type);
+                setPersistedValue("sport_type", this.sport_type);
             }
             if (this.hasOutputUnit()) {
-                new PersistedItem("output_unit").save(this.output_unit);
+                setPersistedValue("output_unit", this.output_unit);
             }
             if (this.hasEmail()) {
-                new PersistedItem("email").save(this.email);
+                setPersistedValue("email", this.email);
             }
             if (this.hasEfficiencyFactor()) {
-                new PersistedItem("efficiency_factor").save(this.efficiency_factor);
+                setPersistedValue("efficiency_factor", this.efficiency_factor);
             }
             if (this.hasPage()) {
-                new PersistedItem("page").save(this.page);
+                setPersistedValue("page", this.page);
             }
             if (this.hasShouldRound()) {
-                new PersistedItem("should_round").save(this.should_round);
+                setPersistedValue("should_round", this.should_round);
             }
         }
         hasWorkoutTitle() {
@@ -393,5 +387,5 @@ var UI;
         }
     }
     UI.ClipboardHelper = ClipboardHelper;
-})(UI || (UI = {}));
+})(UI || (UI = {})); // module UI
 module.exports = UI;

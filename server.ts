@@ -1,20 +1,20 @@
-var http = require('http');
-var zlib = require('zlib');
-var path = require("path");
-var fs = require("fs");
-var url = require("url");
+let http = require('http');
+let zlib = require('zlib');
+let path = require("path");
+let fs = require("fs");
+let url = require("url");
 
-var model = require("./model");
-var model_server = require("./model_server");
-var config = require('./config');
+let model = require("./model");
+let model_server = require("./model_server");
+let config = require('./config');
 
-function logRequest(req, code) {
-    var user_agent = req.headers['user-agent'];
+function logRequest(req, code : number) {
+    let user_agent : string = req.headers['user-agent'];
     console.log(new Date().toTimeString() + " " + req.connection.remoteAddress + " " + req.method + " " + req.url + " " + code + " " + user_agent);
 }
 
-function handleExistentFile(req, res, fs, filename) {
-    let accept_encoding = req.headers['accept-encoding'];
+function handleExistentFile(req, res, fs, filename : string) {
+    let accept_encoding : string = req.headers['accept-encoding'];
     if (!accept_encoding) {
         accept_encoding = '';
     }
@@ -22,8 +22,9 @@ function handleExistentFile(req, res, fs, filename) {
     if (stat.isDirectory()) {
         filename += '/index.html';
     }
-    var req_mod_date = req.headers["if-modified-since"];
-    var mtime = stat.mtime;
+    // Handle 304 (Not modified files).
+    let req_mod_date = req.headers["if-modified-since"];
+    let mtime = stat.mtime;
     if (req_mod_date != null) {
         req_mod_date = new Date(req_mod_date);
         if (req_mod_date.toUTCString() == mtime.toUTCString()) {
@@ -56,32 +57,30 @@ function handleExistentFile(req, res, fs, filename) {
     }
 }
 
-function handleSendEmail(req, res, uri, params) {
-    // "Use" uri
-    model.PreconditionsCheck.assertIsString(uri);
+function handleSendEmail(req, res, uri : string, params) {
     if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
-        var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
-        var builder = new model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
+        let userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
+        let builder = new model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
         logRequest(req, 200);
 
         // sending email
-        var ms = new model_server.MailSender(config.smtp.login, config.smtp.password);
+        let ms = new model_server.MailSender(config.smtp.login, config.smtp.password);
 
-        var attachments = [];
+        let attachments = [];
 
         // Just send the attachment if its a bike workout
         if (builder.getSportType() == model.SportType.Bike) {
-            var attachment_mrc = {
+            let attachment_mrc = {
                 name: builder.getMRCFileName(),
                 data: builder.getMRCFile(),
                 extension: "mrc",
             };
-            var attachment_zwo = {
+            let attachment_zwo = {
                 name: builder.getZWOFileName(),
                 data: builder.getZWOFile(),
                 extension: "zwo",
             };
-            var attachment_ppsmrx = {
+            let attachment_ppsmrx = {
                 name: builder.getPPSMRXFileName(),
                 data: builder.getPPSMRXFile(),
                 extension: "ppsmrx",
@@ -110,10 +109,6 @@ function handleSendEmail(req, res, uri, params) {
 }
 
 function handleGetWorkouts(req, res, uri, params) {
-    // "Use" uri
-    model.PreconditionsCheck.assertIsString(uri);
-    // "Use" params
-    model.PreconditionsCheck.assertIsTrue(params != null);
     logRequest(req, 200);
     var db = new model_server.WorkoutDB(config.mysql);
     db.getAll(function (err, workouts) {
@@ -135,14 +130,12 @@ function show404(req, res) {
     res.end();
 }
 
-function handleSaveWorkout(req, res, uri, params) {
-    // "Use" uri
-    model.PreconditionsCheck.assertIsString(uri);
+function handleSaveWorkout(req, res, uri : string, params) {
     logRequest(req, 200);
-    var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
-    var builder = new model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
-    var db = new model_server.WorkoutDB(config.mysql);
-    var w = new model_server.Workout();
+    let userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
+    let builder = new model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
+    let db = new model_server.WorkoutDB(config.mysql);
+    let w = new model_server.Workout();
     w.title = params.t;
     w.value = builder.getNormalizedWorkoutDefinition();
     w.tags = "";
@@ -158,11 +151,11 @@ function handleSaveWorkout(req, res, uri, params) {
 
 http.createServer(function (req, res) {
     try {
-        var parsed_url = url.parse(req.url, true);
-        var uri = parsed_url.pathname;
+        let parsed_url = url.parse(req.url, true);
+        let uri : string = parsed_url.pathname;
 
-        var base_path = process.cwd();
-        var filename = path.normalize(path.join(base_path, uri));
+        let base_path : string = process.cwd();
+        let filename : string = path.normalize(path.join(base_path, uri));
 
         if (filename.indexOf(base_path) < 0) {
             logRequest(req, 403);
@@ -172,19 +165,19 @@ http.createServer(function (req, res) {
             return;
         }
 
-        var handler_map = {
+        let handler_map = {
             "/send_mail": handleSendEmail,
             "/save_workout": handleSaveWorkout,
-            "/workouts": handleGetWorkouts,
+            "/workouts": handleGetWorkouts
         };
 
-        fs.exists(filename, function (exists) {
+        fs.exists(filename, function (exists: boolean) {
             try {
                 if (exists) {
                     handleExistentFile(req, res, fs, filename);
                 } else {
                     if (uri in handler_map) {
-                        var params = parsed_url.query;
+                        let params = parsed_url.query;
                         if (!handler_map[uri](req, res, uri, params)) {
                             show404(req, res);
                         }

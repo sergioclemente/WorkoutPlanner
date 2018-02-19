@@ -1,13 +1,10 @@
-// make the commonjs happy
-window.exports = {}
+import React from 'react'
+import ReactDOM from 'react-dom'
 
-var UI = require("./ui");
-var Workout = require("./app/workout").default;
-var WorkoutViews = require("./app/workout_views").default;
-var PlayerView = require("./app/player").default;
-
-var React = require('react');
-var ReactDOM = require('react-dom');
+import Workout from './app/workout'
+import WorkoutViews from './app/workout_views'
+import PlayerView from './app/player'
+import UI from './ui'
 
 function _init() {
     // Use params as react expects a plain object

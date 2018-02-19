@@ -148,10 +148,10 @@ export default class PlayerView extends React.Component<any, any> {
 			<div> Total workout elapsed: <span>{this.state.total_time_elapsed}</span></div>
 			<table ref="workout_summary" ></table>
 			<form>
-				<input type="button" value="Start" onClick={e => this._start(e)} />
-				<input type="button" value="Pause" onClick={e => this._pause(e)} />
-				<input type="button" value="Next Set" onClick={e => this._next(e)} />
-				<input type="button" value="Reset" onClick={e => this._reset(e)} />
+				<input type="button" value="Start (S)" onClick={e => this._start(e)} />
+				<input type="button" value="Pause (P)" onClick={e => this._pause(e)} />
+				<input type="button" value="Next Set (N)" onClick={e => this._next(e)} />
+				<input type="button" value="Reset (R)" onClick={e => this._reset(e)} />
 				<br />
 			</form>
 			<WorkoutView {...this.props} ref='view'></WorkoutView>

@@ -40,6 +40,15 @@ Server
 * Refactor validation of parameters on server.js (params.w && params.ftp && params.tpace ...)
 * Make server.js a typescript file
 
+Model
+* Fix pretty print
+* Macros are not properly replacing content
+* Use collections (import * as Collections from 'typescript-collections';)
+			// TODO: Start using the hashtable here.
+			let m = new Collections.Dictionary<string, DurationUnit>();
+			m["mi"] = DistanceUnit.Miles;
+typescript-collections": "^1.3.2"
+
 Player:
 * Fix play of music on iphone
 * Implement next

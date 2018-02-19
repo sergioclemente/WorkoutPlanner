@@ -6,6 +6,9 @@ declare module Model {
         Run = 2,
         Other = 3,
     }
+    class SportTypeHelper {
+        static convertToString(sportType: SportType): "" | "Bike" | "Run" | "Swim" | "Other";
+    }
     enum DistanceUnit {
         Unknown = 0,
         Miles = 1,
@@ -35,9 +38,6 @@ declare module Model {
         HeartRate = 10,
         FreeRide = 11,
     }
-    class SportTypeHelper {
-        static convertToString(sportType: SportType): "" | "Bike" | "Run" | "Swim" | "Other";
-    }
     class DistanceUnitHelper {
         static convertTo(value: number, unitFrom: DistanceUnit, unitTo: DistanceUnit): number;
     }
@@ -49,7 +49,7 @@ declare module Model {
         static roundNumberDown(value: number, round_val?: number): number;
         static formatNumber(value: number, decimalMultiplier: number, separator: string, unit: string, round_val?: number): string;
         static enforceDigits(value: number, digits: number): string;
-        static formatTime(milliseconds: any): string;
+        static formatTime(milliseconds: number): string;
     }
     class Duration {
         private value;
@@ -242,7 +242,6 @@ declare module Model {
         private sum;
         private count;
         private ma;
-        private ftp;
         private np;
         visitSimpleInterval(interval: SimpleInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
@@ -335,7 +334,6 @@ declare module Model {
         getContent(): string;
     }
     class PPSMRXCourseDataVisitor extends BaseVisitor {
-        private fileName;
         private content;
         private groupId;
         private currentRepeatIteration;
@@ -379,7 +377,7 @@ declare module Model {
     }
     class SpeedParser {
         static getSpeedInMph(speed: string): number;
-        static _extractNumber(numberString: any, decimalMultiplier: any, strSeparator: any, strSuffix: any): number;
+        static _extractNumber(numberString: string, decimalMultiplier: number, strSeparator: string, strSuffix: string): number;
     }
     class UserProfile {
         private bikeFTP;
@@ -432,7 +430,7 @@ declare module Model {
         getIntervalPretty(interval: Interval, roundValues: boolean): string;
         getEstimatedDistancePretty(): string;
         getAveragePace(): string;
-        getStepsList(new_line: any): string;
+        getStepsList(new_line: string): string;
         getDistanceInMiles(): number;
         getPrettyPrint(new_line?: string): string;
         getMRCFile(): string;

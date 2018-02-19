@@ -1,13 +1,14 @@
-var http = require('http');
-var zlib = require('zlib');
-var path = require("path");
-var fs = require("fs");
-var url = require("url");
-var model = require("./model");
-var model_server = require("./model_server");
-var config = require('./config');
+"use strict";
+let http = require('http');
+let zlib = require('zlib');
+let path = require("path");
+let fs = require("fs");
+let url = require("url");
+let model = require("./model");
+let model_server = require("./model_server");
+let config = require('./config');
 function logRequest(req, code) {
-    var user_agent = req.headers['user-agent'];
+    let user_agent = req.headers['user-agent'];
     console.log(new Date().toTimeString() + " " + req.connection.remoteAddress + " " + req.method + " " + req.url + " " + code + " " + user_agent);
 }
 function handleExistentFile(req, res, fs, filename) {
@@ -19,8 +20,8 @@ function handleExistentFile(req, res, fs, filename) {
     if (stat.isDirectory()) {
         filename += '/index.html';
     }
-    var req_mod_date = req.headers["if-modified-since"];
-    var mtime = stat.mtime;
+    let req_mod_date = req.headers["if-modified-since"];
+    let mtime = stat.mtime;
     if (req_mod_date != null) {
         req_mod_date = new Date(req_mod_date);
         if (req_mod_date.toUTCString() == mtime.toUTCString()) {
@@ -53,25 +54,24 @@ function handleExistentFile(req, res, fs, filename) {
     }
 }
 function handleSendEmail(req, res, uri, params) {
-    model.PreconditionsCheck.assertIsString(uri);
     if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
-        var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
-        var builder = new model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
+        let userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
+        let builder = new model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
         logRequest(req, 200);
-        var ms = new model_server.MailSender(config.smtp.login, config.smtp.password);
-        var attachments = [];
+        let ms = new model_server.MailSender(config.smtp.login, config.smtp.password);
+        let attachments = [];
         if (builder.getSportType() == model.SportType.Bike) {
-            var attachment_mrc = {
+            let attachment_mrc = {
                 name: builder.getMRCFileName(),
                 data: builder.getMRCFile(),
                 extension: "mrc",
             };
-            var attachment_zwo = {
+            let attachment_zwo = {
                 name: builder.getZWOFileName(),
                 data: builder.getZWOFile(),
                 extension: "zwo",
             };
-            var attachment_ppsmrx = {
+            let attachment_ppsmrx = {
                 name: builder.getPPSMRXFileName(),
                 data: builder.getPPSMRXFile(),
                 extension: "ppsmrx",
@@ -99,8 +99,6 @@ function handleSendEmail(req, res, uri, params) {
     }
 }
 function handleGetWorkouts(req, res, uri, params) {
-    model.PreconditionsCheck.assertIsString(uri);
-    model.PreconditionsCheck.assertIsTrue(params != null);
     logRequest(req, 200);
     var db = new model_server.WorkoutDB(config.mysql);
     db.getAll(function (err, workouts) {
@@ -122,12 +120,11 @@ function show404(req, res) {
     res.end();
 }
 function handleSaveWorkout(req, res, uri, params) {
-    model.PreconditionsCheck.assertIsString(uri);
     logRequest(req, 200);
-    var userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
-    var builder = new model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
-    var db = new model_server.WorkoutDB(config.mysql);
-    var w = new model_server.Workout();
+    let userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
+    let builder = new model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
+    let db = new model_server.WorkoutDB(config.mysql);
+    let w = new model_server.Workout();
     w.title = params.t;
     w.value = builder.getNormalizedWorkoutDefinition();
     w.tags = "";
@@ -140,10 +137,10 @@ function handleSaveWorkout(req, res, uri, params) {
 }
 http.createServer(function (req, res) {
     try {
-        var parsed_url = url.parse(req.url, true);
-        var uri = parsed_url.pathname;
-        var base_path = process.cwd();
-        var filename = path.normalize(path.join(base_path, uri));
+        let parsed_url = url.parse(req.url, true);
+        let uri = parsed_url.pathname;
+        let base_path = process.cwd();
+        let filename = path.normalize(path.join(base_path, uri));
         if (filename.indexOf(base_path) < 0) {
             logRequest(req, 403);
             res.writeHead(403, { "Content-Type": "text/plain" });
@@ -151,10 +148,10 @@ http.createServer(function (req, res) {
             res.end();
             return;
         }
-        var handler_map = {
+        let handler_map = {
             "/send_mail": handleSendEmail,
             "/save_workout": handleSaveWorkout,
-            "/workouts": handleGetWorkouts,
+            "/workouts": handleGetWorkouts
         };
         fs.exists(filename, function (exists) {
             try {
@@ -163,7 +160,7 @@ http.createServer(function (req, res) {
                 }
                 else {
                     if (uri in handler_map) {
-                        var params = parsed_url.query;
+                        let params = parsed_url.query;
                         if (!handler_map[uri](req, res, uri, params)) {
                             show404(req, res);
                         }

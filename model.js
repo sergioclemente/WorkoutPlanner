@@ -10,6 +10,30 @@ var Model;
         SportType[SportType["Run"] = 2] = "Run";
         SportType[SportType["Other"] = 3] = "Other";
     })(SportType = Model.SportType || (Model.SportType = {}));
+    class SportTypeHelper {
+        // TODO: Can I use toString and or add this to the enum itself?
+        static convertToString(sportType) {
+            if (sportType == SportType.Bike) {
+                return "Bike";
+            }
+            else if (sportType == SportType.Run) {
+                return "Run";
+            }
+            else if (sportType == SportType.Swim) {
+                return "Swim";
+            }
+            else if (sportType == SportType.Other) {
+                return "Other";
+            }
+            else {
+                console.assert(false);
+                return "";
+            }
+        }
+    }
+    Model.SportTypeHelper = SportTypeHelper;
+    const MIN_TIME = 11;
+    const MAX_DISTANCE = 10;
     // If you add another distance, make sure you update the MAX_DISTANCE
     // and that it doesn't overlap with TimeUnit
     let DistanceUnit;
@@ -23,13 +47,11 @@ var Model;
     // If you add another time unit, be careful not adding one before MIN_TIME
     let TimeUnit;
     (function (TimeUnit) {
-        TimeUnit[TimeUnit["Unknown"] = 11] = "Unknown";
+        TimeUnit[TimeUnit["Unknown"] = 11] = "Unknown"; /* MIN_TIME */
         TimeUnit[TimeUnit["Seconds"] = 12] = "Seconds";
         TimeUnit[TimeUnit["Minutes"] = 13] = "Minutes";
         TimeUnit[TimeUnit["Hours"] = 14] = "Hours";
     })(TimeUnit = Model.TimeUnit || (Model.TimeUnit = {}));
-    const MIN_TIME = 11;
-    const MAX_DISTANCE = 10;
     let IntensityUnit;
     (function (IntensityUnit) {
         IntensityUnit[IntensityUnit["Unknown"] = -1] = "Unknown";
@@ -46,6 +68,10 @@ var Model;
         IntensityUnit[IntensityUnit["HeartRate"] = 10] = "HeartRate";
         IntensityUnit[IntensityUnit["FreeRide"] = 11] = "FreeRide";
     })(IntensityUnit = Model.IntensityUnit || (Model.IntensityUnit = {}));
+    // Even though typescript guarantees type safety, specially when you don't have 
+    // type annotations properly you can have strings being passed as ints and so forth.
+    // Until all type annotations are added (through --noImplicitAny) we still need
+    // this compiler option.
     class PreconditionsCheck {
         static assertIsNumber(v, name) {
             console.assert(typeof (v) == "number", stringFormat("{0} must be a number, it was {1}", name, typeof (v)));
@@ -82,11 +108,11 @@ var Model;
                 return NaN;
             }
             // Shift
-            value = value.toString().split('e');
-            value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
+            let values = value.toString().split('e');
+            value = Math[type](+(values[0] + 'e' + (values[1] ? (+values[1] - exp) : -exp)));
             // Shift back
-            value = value.toString().split('e');
-            return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
+            values = value.toString().split('e');
+            return +(values[0] + 'e' + (values[1] ? (+values[1] + exp) : exp));
         }
         static round10(value, exp) {
             return MyMath.decimalAdjust('round', value, exp);
@@ -98,27 +124,6 @@ var Model;
             return MyMath.decimalAdjust('ceil', value, exp);
         }
     }
-    class SportTypeHelper {
-        static convertToString(sportType) {
-            if (sportType == SportType.Bike) {
-                return "Bike";
-            }
-            else if (sportType == SportType.Run) {
-                return "Run";
-            }
-            else if (sportType == SportType.Swim) {
-                return "Swim";
-            }
-            else if (sportType == SportType.Other) {
-                return "Other";
-            }
-            else {
-                console.assert(false);
-                return "";
-            }
-        }
-    }
-    Model.SportTypeHelper = SportTypeHelper;
     class DistanceUnitHelper {
         static convertTo(value, unitFrom, unitTo) {
             // convert first to meters
@@ -1590,7 +1595,6 @@ var Model;
             this.sum = 0;
             this.count = 0;
             this.ma = new MovingAverage(/*window_size=*/ 30);
-            this.ftp = 0;
             this.np = 0;
         }
         visitSimpleInterval(interval) {
@@ -1975,12 +1979,10 @@ var Model;
     class PPSMRXCourseDataVisitor extends BaseVisitor {
         constructor(fileName) {
             super();
-            this.fileName = "";
             this.content = "";
             this.groupId = 1;
             this.currentRepeatIteration = [];
             this.repeatCountMax = [];
-            this.fileName = fileName;
         }
         getTitlePretty(interval) {
             var title = interval.getTitle();
@@ -2095,7 +2097,7 @@ var Model;
             var zoneMaxName = -1;
             for (var id in timeInZones) {
                 var zone = timeInZones[id];
-                var zoneDuration = zone.duration.estimatedDurationInSeconds;
+                var zoneDuration = zone.duration.getSeconds();
                 if (zoneDuration > zoneMaxTime) {
                     zoneMaxTime = zoneDuration;
                     zoneMaxName = zone.name;

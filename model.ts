@@ -10,6 +10,27 @@ module Model {
 		Other = 3
 	}
 
+	export class SportTypeHelper {
+		// TODO: Can I use toString and or add this to the enum itself?
+		static convertToString(sportType: SportType) {
+			if (sportType == SportType.Bike) {
+				return "Bike";
+			} else if (sportType == SportType.Run) {
+				return "Run";
+			} else if (sportType == SportType.Swim) {
+				return "Swim";
+			} else if (sportType == SportType.Other) {
+				return "Other";
+			} else {
+				console.assert(false);
+				return "";
+			}
+		}
+	}
+
+	const MIN_TIME: number = 11;
+	const MAX_DISTANCE: number = 10;
+
 	// If you add another distance, make sure you update the MAX_DISTANCE
 	// and that it doesn't overlap with TimeUnit
 	export enum DistanceUnit {
@@ -22,7 +43,7 @@ module Model {
 
 	// If you add another time unit, be careful not adding one before MIN_TIME
 	export enum TimeUnit {
-		Unknown = 11,
+		Unknown = 11 /* MIN_TIME */,
 		Seconds,
 		Minutes,
 		Hours
@@ -32,8 +53,6 @@ module Model {
 	// We use the | definition of typescript, but we have to be careful
 	// so that the enums don't overlap. 
 	export type DurationUnit = TimeUnit | DistanceUnit;
-	const MIN_TIME: number = 11;
-	const MAX_DISTANCE: number = 10;
 
 	export enum IntensityUnit {
 		Unknown = -1,
@@ -51,6 +70,10 @@ module Model {
 		FreeRide = 11,
 	}
 
+	// Even though typescript guarantees type safety, specially when you don't have 
+	// type annotations properly you can have strings being passed as ints and so forth.
+	// Until all type annotations are added (through --noImplicitAny) we still need
+	// this compiler option.
 	class PreconditionsCheck {
 		static assertIsNumber(v: number, name: string) {
 			console.assert(typeof (v) == "number", stringFormat("{0} must be a number, it was {1}", name, typeof (v)));
@@ -78,7 +101,7 @@ module Model {
 		 * @param   {Integer}   exp     The exponent (the 10 logarithm of the adjustment base).
 		 * @returns {Number}            The adjusted value.
 		 */
-		static decimalAdjust(type, value, exp) {
+		static decimalAdjust(type: string, value: number, exp: number): number {
 			// If the exp is undefined or zero...
 			if (typeof exp === 'undefined' || +exp === 0) {
 				return Math[type](value);
@@ -90,11 +113,11 @@ module Model {
 				return NaN;
 			}
 			// Shift
-			value = value.toString().split('e');
-			value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
+			let values : string[] = value.toString().split('e');
+			value = Math[type](+(values[0] + 'e' + (values[1] ? (+values[1] - exp) : -exp)));
 			// Shift back
-			value = value.toString().split('e');
-			return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
+			values = value.toString().split('e');
+			return +(values[0] + 'e' + (values[1] ? (+values[1] + exp) : exp));
 		}
 
 		static round10(value: number, exp: number): number {
@@ -105,23 +128,6 @@ module Model {
 		}
 		static ceil10(value: number, exp: number): number {
 			return MyMath.decimalAdjust('ceil', value, exp);
-		}
-	}
-
-	export class SportTypeHelper {
-		static convertToString(sportType: SportType) {
-			if (sportType == SportType.Bike) {
-				return "Bike";
-			} else if (sportType == SportType.Run) {
-				return "Run";
-			} else if (sportType == SportType.Swim) {
-				return "Swim";
-			} else if (sportType == SportType.Other) {
-				return "Other";
-			} else {
-				console.assert(false);
-				return "";
-			}
 		}
 	}
 
@@ -334,7 +340,7 @@ module Model {
 			}
 		}
 
-		static formatTime(milliseconds): string {
+		static formatTime(milliseconds: number): string {
 			var hours = ((milliseconds / 3600000) % 60) | 0;
 			var minutes = ((milliseconds / 60000) % 60) | 0;
 			var seconds = ((milliseconds % 60000) / 1000) | 0;
@@ -1413,7 +1419,7 @@ module Model {
 
 							// (3) Handle repeat interval by peaking at the stack
 							if (stack[stack.length - 1] instanceof RepeatInterval) {
-								var repeatInterval = <RepeatInterval>(stack[stack.length - 1]);
+								var repeatInterval : RepeatInterval = <RepeatInterval>(stack[stack.length - 1]);
 								// There is ambiguity in the following interval:
 								// 2[(45s, 75, 100), (15s, 55)]
 								// It could be two types of intervals:
@@ -1434,10 +1440,10 @@ module Model {
 									// add the new intervals
 									var step_intervals = [];
 									for (var k = 0; k < repeatInterval.getRepeatCount(); k++) {
-										var durationUnit = k < durationUnits.length ? durationUnits[k] : durationUnits[0];
-										var durationValue = k < durationValues.length ? durationValues[k] : durationValues[0];
-										var intensity = k < intensities.length ? intensities[k] : intensities[0];
-										var step_duration = factory.createDuration(intensity, durationUnit, durationValue);
+										var durationUnit : DurationUnit = k < durationUnits.length ? durationUnits[k] : durationUnits[0];
+										var durationValue : number = k < durationValues.length ? durationValues[k] : durationValues[0];
+										var intensity : Intensity = k < intensities.length ? intensities[k] : intensities[0];
+										var step_duration : Duration = factory.createDuration(intensity, durationUnit, durationValue);
 										step_intervals.push(new SimpleInterval(title.trim(), intensity, step_duration, Duration.ZeroDuration));
 									}
 
@@ -1709,7 +1715,6 @@ module Model {
 		private sum: number = 0;
 		private count: number = 0;
 		private ma: MovingAverage = new MovingAverage(/*window_size=*/30);
-		private ftp: number = 0;
 		private np: number = 0;
 
 		visitSimpleInterval(interval: SimpleInterval): void {
@@ -2111,7 +2116,6 @@ module Model {
 	}
 
 	export class PPSMRXCourseDataVisitor extends BaseVisitor {
-		private fileName: string = "";
 		private content = "";
 		private groupId = 1;
 		private currentRepeatIteration = []
@@ -2119,7 +2123,6 @@ module Model {
 
 		constructor(fileName: string) {
 			super();
-			this.fileName = fileName;
 		}
 
 		getTitlePretty(interval: BaseInterval): string {
@@ -2263,7 +2266,7 @@ module Model {
 			var zoneMaxName = -1;
 			for (var id in timeInZones) {
 				var zone = timeInZones[id];
-				var zoneDuration = zone.duration.estimatedDurationInSeconds;
+				var zoneDuration = zone.duration.getSeconds();
 				if (zoneDuration > zoneMaxTime) {
 					zoneMaxTime = zoneDuration;
 					zoneMaxName = zone.name;
@@ -2742,7 +2745,7 @@ module Model {
 			return res;
 		}
 
-		static _extractNumber(numberString, decimalMultiplier, strSeparator, strSuffix) {
+		static _extractNumber(numberString : string, decimalMultiplier: number, strSeparator: string, strSuffix: string) {
 			var indexSuffix = numberString.indexOf(strSuffix);
 			var indexSeparator = numberString.indexOf(strSeparator);
 			if (indexSuffix < 0) {
@@ -3108,7 +3111,7 @@ module Model {
 		getIntervalPretty(interval: Interval, roundValues: boolean) {
 			return WorkoutTextVisitor.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit, roundValues);
 		}
-
+		
 		getEstimatedDistancePretty(): string {
 			if (this.sportType == SportType.Swim) {
 				return this.intervals.getWorkDuration().toStringDistance(DistanceUnit.Yards);
@@ -3131,10 +3134,10 @@ module Model {
 			}
 		}
 
-		getStepsList(new_line): string {
+		getStepsList(new_line: string): string {
 			var result = "";
 
-			this.intervals.getIntervals().forEach(function (interval) {
+			this.intervals.getIntervals().forEach(function (interval: Interval) {
 				result += ("* " + this.getIntervalPretty(interval) + new_line);
 			}.bind(this));
 

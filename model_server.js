@@ -57,13 +57,6 @@ var ModelServer;
     class Workout {
     }
     ModelServer.Workout = Workout;
-    function stringFormat(format, ...args) {
-        return format.replace(/{(\d+)}/g, function (match, number) {
-            return typeof args[number] != 'undefined'
-                ? args[number]
-                : match;
-        });
-    }
     class WorkoutDB {
         constructor(connection_string) {
             this.connection_string = null;
@@ -80,17 +73,6 @@ var ModelServer;
                 db.close();
             }
         }
-        _createWorkout(row) {
-            var workout = new Workout();
-            workout.id = row.id;
-            workout.title = row.title;
-            workout.value = row.value;
-            workout.tags = row.tags;
-            workout.duration_sec = row.duration_sec;
-            workout.tss = row.tss;
-            workout.sport_type = row.sport_type;
-            return workout;
-        }
         getAll(callback) {
             var db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READONLY);
             var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id DESC";
@@ -102,7 +84,15 @@ var ModelServer;
                 else {
                     let result = [];
                     for (let i = 0; i < rows.length; i++) {
-                        result.push(this._createWorkout(rows[i]));
+                        var workout = new Workout();
+                        workout.id = rows[i].id;
+                        workout.title = rows[i].title;
+                        workout.value = rows[i].value;
+                        workout.tags = rows[i].tags;
+                        workout.duration_sec = rows[i].duration_sec;
+                        workout.tss = rows[i].tss;
+                        workout.sport_type = rows[i].sport_type;
+                        result.push(workout);
                     }
                     callback("", result);
                 }
