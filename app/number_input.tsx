@@ -1,5 +1,3 @@
-/// <reference path="../node_modules/@types/react/index.d.ts" />
-
 import * as React from 'react';
 import * as UI from '../ui';
 import ErrorLabel from './error_label';

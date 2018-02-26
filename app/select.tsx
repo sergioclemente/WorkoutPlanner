@@ -1,5 +1,3 @@
-/// <reference path="../node_modules/@types/react/index.d.ts" />
-
 import * as React from 'react';
 
 export default class Select extends React.Component<any, any> {

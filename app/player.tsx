@@ -1,4 +1,3 @@
-/// <reference path="../node_modules/@types/react/index.d.ts" />
 /// <reference path="../type_definitions/canvasjs.d.ts" />
 
 import * as React from 'react';

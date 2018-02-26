@@ -47,21 +47,12 @@ if [[ "$?" != 0 ]]; then
 fi
 echo Built JSX files
 
-# Webpack doesnt support ES2017, so we use webpack just to bundle
-# and babili to minify.
-node_modules/webpack/bin/webpack.js index.js --output-filename index.min.js
+node_modules/webpack/bin/webpack.js index.js --output-filename index.min.js --output-path . -p
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
 fi
-echo Bundled index.min.js file
-
-node node_modules/babili/bin/babili.js --no-comments --compact true --minified --out-file index.min.js index.min.js
-if [[ "$?" != 0 ]]; then
-	echo "Build error." 1>&2
-	exit 1
-fi
-echo Minified index.min.js
+echo Bundled and minified index.min.js file
 
 rm app/*.js
 if [[ "$?" != 0 ]]; then
@@ -70,7 +61,7 @@ if [[ "$?" != 0 ]]; then
 fi
 echo Removed intermediate files
 
-# node_modules/browserify/bin/cmd.js server.js model_server.js model.js config.js -o server.min.js
+# node_modules/webpack/bin/webpack.js server.js --output-filename server.min.js
 # if [[ "$?" != 0 ]]; then
 # 	echo "Build error." 1>&2
 # 	exit 1

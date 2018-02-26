@@ -3068,11 +3068,11 @@ var Model;
                     [
                         "2[(45s, 45, Single leg - left), (15s, 45, both), (45s, 45, Single leg - right), (15s, 45, both)]",
                         "8[(15s, 55, spin ups), (15s, 55)]",
-                        "4[(30s, cadence 80/90/100/110, 55), (30s, 55)]"
+                        "[(30s, 55, cadence 80), (30s, 55), (30s, 55, cadence 90), (30s, 55), (30s, 55, cadence 100), (30s, 55), (30s, 55, cadence 110), (30s, 55)]"
                     ],
                     // 4 min (build)
                     [
-                        "4[(15s, *, build), (45s, 55)]",
+                        "4[(15s, *, Sprints), (45s, 55)]",
                         "4[(5s, *, MAX), (55s, 55)]",
                         "4[(45s, 75, 100), (15s, 55)]",
                         "4[(30s, 85, 90, 95, 100), (30s, 55)]"
@@ -3101,7 +3101,8 @@ var Model;
             for (let i = 0; i < warmup_groups.length; i++) {
                 warmup_text += this._randElement(warmup_groups[i]);
             }
-            return warmup_text;
+            // Remove extra new line.
+            return warmup_text.substring(0, warmup_text.length - 1);
         }
         _single_leg(number_repeats, single_leg_duration_secs) {
             console.assert(single_leg_duration_secs >= 0);
@@ -3168,6 +3169,9 @@ var Model;
             return input;
         }
         process(input) {
+            // First filter the main two regexes that will cover
+            // macros with paramters like: #sl(4,45) and parameterless 
+            // like #wu. 
             let main_regexes = [/(#\w+\(\d*(?:,\d*)*\)())/, /(#\w+)/];
             for (let i = 0; i < main_regexes.length; i++) {
                 input = input.replace(new RegExp(main_regexes[i], "g"), this.processOne.bind(this));
