@@ -37,11 +37,22 @@ var mapStateToProps = function(state) {
     }
 }
 
-let Layout = ({counter}) => {
-    return (<div>
-        <h1>Counter</h1>
-        <ul>{counter}</ul>
-    </div>);
+interface LayoutProps {
+    counter: number;
+}
+
+class Layout extends React.Component<LayoutProps, any> {
+  componentWillMount() {
+  }
+
+  render() {
+    const { counter } = this.props;
+
+    return <div>
+      <h1>Counter</h1>
+      <ul>{counter}</ul>
+    </div>
+  }
 }
 
 var LayoutContainer = connect(mapStateToProps)(Layout);

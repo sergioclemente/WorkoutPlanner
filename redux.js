@@ -29,16 +29,20 @@ store.dispatch((dispatch) => {
     dispatch({ type: "DECREMENT", payload: 10 });
 });
 var mapStateToProps = function (state) {
-    console.log("MapStateToProps");
     return {
         counter: state.value
     };
 };
-let Layout = ({ counter }) => {
-    return (React.createElement("div", null,
-        React.createElement("h1", null, "Counter"),
-        React.createElement("ul", null, counter)));
-};
+class Layout extends React.Component {
+    componentWillMount() {
+    }
+    render() {
+        const { counter } = this.props;
+        return React.createElement("div", null,
+            React.createElement("h1", null, "Counter"),
+            React.createElement("ul", null, counter));
+    }
+}
 var LayoutContainer = react_redux_1.connect(mapStateToProps)(Layout);
 const app = document.getElementById('app');
 console.log(app);
