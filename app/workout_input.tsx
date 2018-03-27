@@ -25,6 +25,11 @@ export default class WorkoutInput extends React.Component<any, any> {
 		return workoutText.value;
 	}
 
+	setWorkoutText(v: string) {
+		var workoutText = this.refs['workout_text'] as HTMLTextAreaElement;
+		workoutText.value = v;
+	}
+
 	getWorkoutTitle(): string {
 		var workoutTitle = this.refs['workout_title'] as HTMLInputElement;
 		return workoutTitle.value;
@@ -78,9 +83,16 @@ export default class WorkoutInput extends React.Component<any, any> {
 	}
 
 	_onWorkoutTextChange(e) {
-		var workoutText = this.refs['workout_text'] as HTMLTextAreaElement;
+		let workoutText = this.refs['workout_text'] as HTMLTextAreaElement;
 		let wp = new Model.TextPreprocessor(this.getSportType());
 		workoutText.value = wp.process(workoutText.value);
+		if (workoutText.value == "") {
+			// clear the title if the user cleared the value. this
+			// is assuming the workflow usually is writing the workout
+			// then writing the title.
+			let workoutTitle = this.refs['workout_title'] as HTMLInputElement;
+			workoutTitle.value = "";
+		}
 		this._loadWorkout();
 	}
 

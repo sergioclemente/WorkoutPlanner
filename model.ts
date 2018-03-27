@@ -3069,7 +3069,7 @@ module Model {
 
 		getNormalizedWorkoutDefinition(): string {
 			let object_factory = new ObjectFactory(this.userProfile, this.sportType);
-			return IntervalParser.normalize(object_factory, this.workoutDefinition, UnparserFormat.Whitespaces);;
+			return IntervalParser.normalize(object_factory, this.workoutDefinition, UnparserFormat.Whitespaces);
 		}
 
 		withDefinition(workoutTitle: string, workoutDefinition: string): WorkoutBuilder {

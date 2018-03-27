@@ -2826,7 +2826,6 @@ var Model;
         getNormalizedWorkoutDefinition() {
             let object_factory = new ObjectFactory(this.userProfile, this.sportType);
             return IntervalParser.normalize(object_factory, this.workoutDefinition, UnparserFormat.Whitespaces);
-            ;
         }
         withDefinition(workoutTitle, workoutDefinition) {
             let object_factory = new ObjectFactory(this.userProfile, this.sportType);

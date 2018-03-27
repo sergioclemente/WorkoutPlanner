@@ -136,6 +136,14 @@ export default class Workout extends React.Component<any, any> {
 		link.click();
 	}
 
+	_onPrettyPrint() {
+		let input: WorkoutInput = this.refs['input'] as WorkoutInput;
+		let workoutText = input.getWorkoutText();
+
+		let builder = this.params.createWorkoutBuilder();
+		input.setWorkoutText(builder.getNormalizedWorkoutDefinition());
+	}
+
 	render() {
 		return (<div>
 			<UserSettings {...this.props} ref='settings' onChange={(f, t, c, e, ef) => this._onUserSettingsChanged(f, t, c, e, ef)}></UserSettings>
@@ -145,6 +153,7 @@ export default class Workout extends React.Component<any, any> {
 					<tr>
 						<td><a href="#" onClick={(e) => this._onClickLink()}>Download Files</a></td>
 						<td><a ref="player_link">Player</a></td>
+						<td><a href="#" onClick={(e) => this._onPrettyPrint()}>Pretty print</a></td>
 						<td><a ref="email_send_workout" href="#" onClick={(e) => this._onEmailWorkout()}>Email Workout</a></td>
 						<td><a ref="save_workout" href="#" onClick={(e) => this._onSaveWorkout()}>Save Workout</a></td>
 						<td><a href="?page=list">List Workouts</a></td>
