@@ -1,9 +1,3 @@
-# Playing with the app
-
-The current deployed code is been deployed at:
-
-https://workoutplanner.herokuapp.com
-
 # Installing dependencies
 
 1. First of all install node js 6.5 or higher (https://nodejs.org/en/download/).
@@ -29,20 +23,18 @@ npm start
 
 To install the protocol handler:
 - Run this in a developer console window 
--- navigator.registerProtocolHandler("web+wp", "http://workoutplanner.herokuapp.com/?wh=%s", "Workout Planner handler");
+-- navigator.registerProtocolHandler("web+wp", "http://<url>/?wh=%s", "Workout Planner handler");
 
 # Bugs/Feature requests
+- Implement cadence intervals #c()
+- Test pretty printing (Not very good at repeat or complex intervlas?)
 - 1min30sec not being parsed properly. e.g. (1min30sec, 105)
-- pretty print on the intervals is not very good for repeat and complex intervals
 - Can we add a "hint" for * intervals so that it computes IF better?
 
 Server
 * Refactor validation of parameters on server.js (params.w && params.ftp && params.tpace ...)
-* Make server.js a typescript file
 
 Model
-* Fix pretty print
-* Macros are not properly replacing content
 * Use collections (import * as Collections from 'typescript-collections';)
 			// TODO: Start using the hashtable here.
 			let m = new Collections.Dictionary<string, DurationUnit>();

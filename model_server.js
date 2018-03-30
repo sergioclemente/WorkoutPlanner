@@ -19,6 +19,10 @@ var ModelServer;
             this.password = password;
         }
         send(to, subject, body, attachments, callback) {
+            if (!(this.user.length > 0 && this.password.length > 0)) {
+                callback(false, "Credentials are not set");
+                return;
+            }
             var send = require('gmail-send')({});
             let files = [];
             let scoped_files = [];

@@ -28,6 +28,10 @@ module ModelServer {
 		}
 
 		send(to: string, subject: string, body: string, attachments: any, callback: any): void {
+			if (!(this.user.length > 0 && this.password.length > 0)) {
+				callback(false, "Credentials are not set");
+				return;
+			}
 			var send = require('gmail-send')({});
 
 			// The gmail-send api is a bit silly in the sense that it requires an
