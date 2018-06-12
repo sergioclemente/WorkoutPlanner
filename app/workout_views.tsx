@@ -133,7 +133,7 @@ export default class WorkoutViews extends React.Component<any, any> {
 		for (let i = 0; i < this._rows.length; i++) {
 			var row = this._rows[i];
 			if ((sportTypeEnum == Model.SportType.Unknown || row.sport_type == sportTypeEnum)
-				&& (filterText.length == 0 || row.title.indexOf(filterText) >= 0)) {
+				&& (filterText.length == 0 || row.title.toLowerCase().indexOf(filterText.toLowerCase()) >= 0)) {
 				filteredRows.push(row);
 			}
 		}
