@@ -334,11 +334,12 @@ declare module Model {
         getContent(): string;
     }
     class PPSMRXCourseDataVisitor extends BaseVisitor {
+        private title;
         private content;
         private groupId;
         private currentRepeatIteration;
         private repeatCountMax;
-        constructor(fileName: string);
+        constructor(title: string);
         getTitlePretty(interval: BaseInterval): string;
         getGroupId(): number;
         getMode(interval: Interval): string;

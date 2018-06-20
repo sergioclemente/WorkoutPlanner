@@ -1977,12 +1977,14 @@ var Model;
     }
     Model.MRCCourseDataVisitor = MRCCourseDataVisitor;
     class PPSMRXCourseDataVisitor extends BaseVisitor {
-        constructor(fileName) {
+        constructor(title) {
             super();
+            this.title = "";
             this.content = "";
             this.groupId = 1;
             this.currentRepeatIteration = [];
             this.repeatCountMax = [];
+            this.title = title;
         }
         getTitlePretty(interval) {
             var title = interval.getTitle();
@@ -2050,7 +2052,7 @@ var Model;
 	"type":"json",
 	"createdby":"PerfPRO Studio v5.80.25",
 	"version":5.00,
-	"name":"manual mode",
+	"name":"{0}",
 	"workoutType":"",
 	"comments":"",
 	"isLocked":0,
@@ -2061,7 +2063,7 @@ var Model;
 	"startMinute":0,
 	"set_fields":["description","seconds","start","finish","mode","intervals","group","autolap","targetcad"],
 	"sets":[
-`) + this.content +
+`, this.title) + this.content +
                 `	]
 }`;
         }
@@ -2776,16 +2778,12 @@ var Model;
             return dataVisitor.getContent();
         }
         getZWOFile() {
-            var fileNameHelper = new FileNameHelper(this.intervals);
-            var workout_name = fileNameHelper.getFileName();
-            var zwift = new ZwiftDataVisitor(workout_name);
+            var zwift = new ZwiftDataVisitor(this.getBaseFileName());
             VisitorHelper.visitAndFinalize(zwift, this.intervals);
             return zwift.getContent();
         }
         getPPSMRXFile() {
-            var fileNameHelper = new FileNameHelper(this.intervals);
-            var workout_name = fileNameHelper.getFileName();
-            var zwift = new PPSMRXCourseDataVisitor(workout_name);
+            var zwift = new PPSMRXCourseDataVisitor(this.getBaseFileName());
             VisitorHelper.visitAndFinalize(zwift, this.intervals);
             return zwift.getContent();
         }

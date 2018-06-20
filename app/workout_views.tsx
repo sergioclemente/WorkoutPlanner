@@ -122,6 +122,14 @@ export default class WorkoutViews extends React.Component<any, any> {
 		this._filterData();
 	}
 
+	_shouldIncludeInResult(filterText: string, rowText: string) {
+		// TODO: Temporary hack until we actually curate the db.
+		if (rowText.indexOf("delete") >= 0) {
+			return false;
+		}
+		return filterText.length == 0 || rowText.indexOf(filterText) >= 0;
+	}
+
 	_filterData() {
 		let sportTypeComp: Select = this.refs["sportType"] as Select;
 		let filterTextComp: HTMLInputElement = this.refs["text"] as HTMLInputElement;
@@ -133,7 +141,7 @@ export default class WorkoutViews extends React.Component<any, any> {
 		for (let i = 0; i < this._rows.length; i++) {
 			var row = this._rows[i];
 			if ((sportTypeEnum == Model.SportType.Unknown || row.sport_type == sportTypeEnum)
-				&& (filterText.length == 0 || row.title.toLowerCase().indexOf(filterText.toLowerCase()) >= 0)) {
+				&& this._shouldIncludeInResult(filterText.toLowerCase(), row.title.toLowerCase())) {
 				filteredRows.push(row);
 			}
 		}
