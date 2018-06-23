@@ -1147,7 +1147,8 @@ var Model;
                 i--;
             }
             // - Check the unit. 
-            // TODO: Find a better way to represent this
+            // TODO: Find a better way to represent this or at least write an unit test to match
+            // toDurationUnit().
             var unitMap = {
                 "w": 1,
                 "watts": 1,
@@ -1174,6 +1175,7 @@ var Model;
                 "miles": 1,
                 "yards": 1,
                 "yrs": 1,
+                "y": 1,
                 "mi": 1,
                 "": 1,
             };
@@ -2459,7 +2461,13 @@ var Model;
         }
         visitSimpleInterval(interval) {
             if (interval.getRestDuration().getValue() != 0) {
-                this.output += stringFormat("({0}, {1}, {2}{3})", this.getDurationPretty(interval.getWorkDuration()), this.getIntensityPretty(interval.getIntensity()), this.getDurationPretty(interval.getRestDuration()), this.getTitlePretty(interval));
+                let duration_pretty = this.getDurationPretty(interval.getWorkDuration());
+                console.assert(duration_pretty.length > 0, "" + interval.getWorkDuration());
+                let intensity_pretty = this.getIntensityPretty(interval.getIntensity());
+                console.assert(intensity_pretty.length > 0, "" + interval.getIntensity());
+                let duration_rest_pretty = this.getDurationPretty(interval.getRestDuration());
+                console.assert(duration_rest_pretty.length > 0, "" + interval.getRestDuration());
+                this.output += stringFormat("({0}, {1}, {2}{3})", duration_pretty, intensity_pretty, duration_rest_pretty, this.getTitlePretty(interval));
             }
             else {
                 this.output += stringFormat("({0}, {1}{2})", this.getDurationPretty(interval.getWorkDuration()), this.getIntensityPretty(interval.getIntensity()), this.getTitlePretty(interval));

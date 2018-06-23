@@ -629,6 +629,12 @@ describe('Swim', function () {
         expect_eq_nbr(400, interval.getTotalDuration().getValueInUnit(Model.DistanceUnit.Yards));
         expect_eq_nbr(30, interval.getRestDuration().getSeconds());
     });
+    it('distance', function () {
+        let interval = Model.IntervalParser.parse(of_swim, `(500y, free)`);
+        expect_eq_nbr(500, interval.getTotalDuration().getValueInUnit(Model.DistanceUnit.Yards));
+        // TODO: Investigate this later.
+        expect_eq_nbr(0, interval.getTSS());
+    });
 });
 describe('Player Helper', function () {
     it('Two intervals, 2 boundaries', function () {
@@ -690,6 +696,8 @@ describe('parse and unparse', function () {
         parseAndNormalize(of_run, /*insert_whitespaces=*/ false, "(2mi, 7:00min/mi)", "(2mi, 85.7)");
         parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "2[(1min, 85, 95), (30sec, 50)]");
         parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "2[(100, 30sec, 45sec), (30sec, 50)]");
+        // TODO: Investigate why its not setting default value.
+        parseAndNormalize(of_swim, /*insert_whitespaces=*/ false, "(500y, free)", "(500yards, 0, free)");
     });
     it('with whitespace', function () {
         parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "(10min, 100, FTP)");

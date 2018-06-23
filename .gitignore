@@ -2,6 +2,10 @@ node_modules/*
 
 local.sh
 
+
+parser.js
+parser.ts
+
 .vscode/launch.json
 .vscode/settings.json
 run.bat
