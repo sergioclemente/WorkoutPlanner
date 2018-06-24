@@ -689,13 +689,13 @@ describe('parse and unparse', function () {
         parseAndNormalize(of_run, /*insert_whitespaces=*/ false, "(2mi, 6:00min/mi, threshold)", "(2mi, 100, threshold)");
         parseAndNormalize(of_swim, /*insert_whitespaces=*/ false, "\"Comment 123\"");
         parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "(155w, 310w, 1min, build to ftp)", "(50, 100, 1min, build to ftp)");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "4[(1min, 100, hard), (30sec, 50, easy)]");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "4[(1min, 100, hard),(30sec, 50, easy)]");
         parseAndNormalize(of_swim, /*insert_whitespaces=*/ false, "(400yards, +10s, 30sec, warmup)");
         parseAndNormalize(of_run, /*insert_whitespaces=*/ false, "(2mi, 80)");
         parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "(10sec, *)");
         parseAndNormalize(of_run, /*insert_whitespaces=*/ false, "(2mi, 7:00min/mi)", "(2mi, 85.7)");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "2[(1min, 85, 95), (30sec, 50)]");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "2[(100, 30sec, 45sec), (30sec, 50)]");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "2[(1min, 85, 95),(30sec, 50)]");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "2[(100, 30sec, 45sec),(30sec, 50)]");
         // TODO: Investigate why its not setting default value.
         parseAndNormalize(of_swim, /*insert_whitespaces=*/ false, "(500y, free)", "(500yards, 0, free)");
     });
@@ -708,6 +708,7 @@ describe('parse and unparse', function () {
         parseAndNormalize(of_swim, /*insert_whitespaces=*/ true, "(400yards, +10s, 30sec, warmup)");
         parseAndNormalize(of_run, /*insert_whitespaces=*/ true, "(2mi, 80)");
         parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "(10sec, *)");
+        parseAndNormalize(of_run, /*insert_whitespaces=*/ true, "[(6min, 100), (2min, 80)], (10min, 70)", "[(6min, 100), (2min, 80)]\n(10min, 70)");
         parseAndNormalize(of_run, /*insert_whitespaces=*/ true, "(2mi, 7:00min/mi)", "(2mi, 85.7)");
         parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "2[(1min, 85, 95), (30sec, 50)]");
         parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "2[(100, 30sec, 45sec), (30sec, 50)]");

@@ -1474,7 +1474,11 @@ var Model;
         // default units. For example: if the unit is in min/km it will be converted
         // to IF so that its independent of thresholds.
         static normalize(factory, input, unparser_format) {
+            console.log("normalize: " + input);
             let interval = IntervalParser.parse(factory, input);
+            let tree_printer = new TreePrinterVisitor();
+            VisitorHelper.visitAndFinalize(tree_printer, interval);
+            console.log(tree_printer.getOutput());
             let visitor = new UnparserVisitor(unparser_format);
             VisitorHelper.visitAndFinalize(visitor, interval);
             return visitor.output;
@@ -1512,6 +1516,47 @@ var Model;
         }
     }
     Model.VisitorHelper = VisitorHelper;
+    class TreePrinterVisitor {
+        constructor() {
+            this.output = "";
+            this.indentation = 0;
+        }
+        visitCommentInterval(interval) {
+            this.indent();
+            this.output += stringFormat("Comment({0})\n", interval.getTitle());
+        }
+        visitSimpleInterval(interval) {
+            this.indent();
+            this.output += stringFormat("SimpleInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), interval.getIntensity().toString(), interval.getTitle(), interval.getRestDuration().toString());
+        }
+        visitStepBuildInterval(interval) {
+        }
+        visitRampBuildInterval(interval) {
+        }
+        visitRepeatInterval(interval) {
+        }
+        visitArrayInterval(interval) {
+            this.indent();
+            this.indentation++;
+            this.output += "ArrayInterval(\n";
+            for (var i = 0; i < interval.getIntervals().length; i++) {
+                VisitorHelper.visit(this, interval.getIntervals()[i]);
+            }
+            this.indentation--;
+            this.indent();
+            this.output += ")\n";
+        }
+        finalize() {
+        }
+        indent() {
+            for (let i = 0; i < this.indentation; i++) {
+                this.output += "\t";
+            }
+        }
+        getOutput() {
+            return this.output;
+        }
+    }
     class BaseVisitor {
         visitCommentInterval() {
             // nothing to do
@@ -2450,14 +2495,9 @@ var Model;
                 return "";
             }
         }
-        addNewLine() {
-            if (this.format == UnparserFormat.Whitespaces && this.level == 0) {
-                this.output += "\n";
-            }
-        }
         visitCommentInterval(interval) {
             this.output += stringFormat("\"{0}\"", interval.getTitle());
-            this.addNewLine();
+            this.addSeparator();
         }
         visitSimpleInterval(interval) {
             if (interval.getRestDuration().getValue() != 0) {
@@ -2472,7 +2512,7 @@ var Model;
             else {
                 this.output += stringFormat("({0}, {1}{2})", this.getDurationPretty(interval.getWorkDuration()), this.getIntensityPretty(interval.getIntensity()), this.getTitlePretty(interval));
             }
-            this.addNewLine();
+            this.addSeparator();
         }
         visitStepBuildInterval(interval) {
             this.level++;
@@ -2486,7 +2526,8 @@ var Model;
                     this.output += ", ";
                     this.output += this.getDurationPretty(interval.getStepInterval(i).getTotalDuration());
                 }
-                this.output += "), ";
+                this.output += ")";
+                this.addSeparator();
                 VisitorHelper.visit(this, interval.getRestInterval());
             }
             else {
@@ -2498,18 +2539,20 @@ var Model;
                     this.output += ", ";
                     this.output += this.getIntensityPretty(interval.getStepInterval(i).getIntensity());
                 }
-                this.output += "), ";
+                this.output += ")";
+                this.addSeparator();
                 VisitorHelper.visit(this, interval.getRestInterval());
             }
+            this.trimSeparator();
             this.output += "]";
             this.level--;
-            this.addNewLine();
+            this.addSeparator();
         }
         visitRampBuildInterval(interval) {
             this.level++;
             this.output += stringFormat("({0}, {1}, {2}{3})", this.getIntensityPretty(interval.getStartIntensity()), this.getIntensityPretty(interval.getEndIntensity()), this.getDurationPretty(interval.getWorkDuration()), this.getTitlePretty(interval));
             this.level--;
-            this.addNewLine();
+            this.addSeparator();
         }
         visitRepeatInterval(interval) {
             this.level++;
@@ -2517,21 +2560,61 @@ var Model;
             this.output += "[";
             for (let i = 0; i < interval.getIntervals().length; i++) {
                 VisitorHelper.visit(this, interval.getIntervals()[i]);
-                if (i != interval.getIntervals().length - 1) {
-                    this.output += ", ";
-                }
             }
+            this.trimSeparator();
             this.output += "]";
             this.level--;
-            this.addNewLine();
+            this.addSeparator();
         }
         visitArrayInterval(interval) {
+            this.level++;
+            if (this.level > 1) {
+                this.output += "[";
+            }
             for (var i = 0; i < interval.getIntervals().length; i++) {
                 VisitorHelper.visit(this, interval.getIntervals()[i]);
             }
+            this.trimSeparator();
+            if (this.level > 1) {
+                this.output += "]";
+            }
+            this.level--;
+            this.addSeparator();
         }
         finalize() {
-            if (this.output.endsWith("\n")) {
+            this.trimNewLine();
+            this.trimSeparator();
+            this.trimNewLine();
+            // The surroundings [ ] are redundant. lets remove them.
+            if (this.output[0] == "[" && this.output[this.output.length - 1] == "]") {
+                this.output = this.output.slice(1, this.output.length - 1);
+            }
+        }
+        addSeparator() {
+            if (this.level == 1) {
+                if (this.format == UnparserFormat.Whitespaces) {
+                    console.log("adding new line");
+                    this.output += "\n";
+                    return;
+                }
+            }
+            if (this.format == UnparserFormat.Whitespaces) {
+                this.output += ", ";
+            }
+            else {
+                this.output += ",";
+            }
+        }
+        trimSeparator() {
+            while (this.output.endsWith(", ")) {
+                this.output = this.output.slice(0, this.output.length - 2);
+            }
+            while (this.output.endsWith(",")) {
+                this.output = this.output.slice(0, this.output.length - 1);
+            }
+        }
+        trimNewLine() {
+            while (this.output.endsWith("\n")) {
                 this.output = this.output.slice(0, this.output.length - 1);
             }
         }

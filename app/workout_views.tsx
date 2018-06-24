@@ -100,12 +100,8 @@ export default class WorkoutViews extends React.Component<any, any> {
 
 			this._rows = rows;
 
-			// Check the ui parameters
-			if (this._params.validate()) {
-				this._onSportTypeChange(this._params.getSportType());
-			} else {
-				this.setState({ filteredRows: rows });
-			}
+			// filter initially.
+			this._filterData();
 
 			// force a re-render
 			this.forceUpdate();
@@ -123,10 +119,6 @@ export default class WorkoutViews extends React.Component<any, any> {
 	}
 
 	_shouldIncludeInResult(filterText: string, rowText: string) {
-		// TODO: Temporary hack until we actually curate the db.
-		if (rowText.indexOf("delete") >= 0) {
-			return false;
-		}
 		return filterText.length == 0 || rowText.indexOf(filterText) >= 0;
 	}
 
