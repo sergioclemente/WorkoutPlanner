@@ -1474,11 +1474,7 @@ var Model;
         // default units. For example: if the unit is in min/km it will be converted
         // to IF so that its independent of thresholds.
         static normalize(factory, input, unparser_format) {
-            console.log("normalize: " + input);
             let interval = IntervalParser.parse(factory, input);
-            let tree_printer = new TreePrinterVisitor();
-            VisitorHelper.visitAndFinalize(tree_printer, interval);
-            console.log(tree_printer.getOutput());
             let visitor = new UnparserVisitor(unparser_format);
             VisitorHelper.visitAndFinalize(visitor, interval);
             return visitor.output;
@@ -1555,6 +1551,11 @@ var Model;
         }
         getOutput() {
             return this.output;
+        }
+        static Print(interval) {
+            let tree_printer = new TreePrinterVisitor();
+            VisitorHelper.visitAndFinalize(tree_printer, interval);
+            return tree_printer.getOutput();
         }
     }
     class BaseVisitor {
@@ -3183,6 +3184,40 @@ var Model;
                         "3[(10s, 0, 10 reverse lunges - 5 each side)]",
                         "3[(10s, 0, 10 lunges with rotation - 5 each side)]",
                         "3[(10s, 0, sumo squat)]",
+                    ]
+                ];
+            }
+            else if (this.sport_type == Model.SportType.Swim) {
+                warmup_groups = [
+                    // Free
+                    [
+                        "(300y, +10, free)",
+                        "(400y, +10, free)",
+                        "(500y, +10, free)"
+                    ],
+                    // Kick
+                    [
+                        "(200y, kick, +10)",
+                        "(300yards, as 50 kick w/ board - 50 free)",
+                        "3[(100y, Butterfly on the back)]",
+                        "(200y, Butterfly Kick with fins on your back)",
+                        "6[(50, Streamline kick on left/side)]"
+                    ],
+                    // Drill
+                    [
+                        "8[(50yards, Drill on first 25, free, build on second 50)]",
+                        "4[(50yards, Swim GOLF - Descend each one), \"10s rest\"]",
+                        "3[(100y, single arm freestyle right side, free, single arm freestyle left side, free)]",
+                        "4[(75y, unco left; swim; unco right)]",
+                        "(200y, +10, pull)"
+                    ],
+                    // Build
+                    [
+                        "8[(50y, +0, build 1-4)]",
+                        "6[(50yards, 100, build)]",
+                        "4[(50yards, Swim descend 1-4), \"10s rest\"]",
+                        "4[(100yards, add 25yards of hard swimming on every 100)]",
+                        "4[(100y, descend 1-4)]"
                     ]
                 ];
             }

@@ -3476,6 +3476,39 @@ module Model {
 						"3[(10s, 0, sumo squat)]",
 					]
 				];
+			} else if (this.sport_type == Model.SportType.Swim) {
+				warmup_groups = [
+					// Free
+					[
+						"(300y, +10, free)",
+						"(400y, +10, free)",
+						"(500y, +10, free)"
+					],
+					// Kick
+					[
+						"(200y, kick, +10)",
+						"(300yards, as 50 kick w/ board - 50 free)",
+						"3[(100y, Butterfly on the back)]",
+						"(200y, Butterfly Kick with fins on your back)",
+						"6[(50, Streamline kick on left/side)]"
+					],
+					// Drill
+					[
+						"8[(50yards, Drill on first 25, free, build on second 50)]",
+						"4[(50yards, Swim GOLF - Descend each one), \"10s rest\"]",
+						"3[(100y, single arm freestyle right side, free, single arm freestyle left side, free)]",
+						"4[(75y, unco left; swim; unco right)]",
+						"(200y, +10, pull)"
+					],
+					// Build
+					[
+						"8[(50y, +0, build 1-4)]",
+						"6[(50yards, 100, build)]",
+						"4[(50yards, Swim descend 1-4), \"10s rest\"]",
+						"4[(100yards, add 25yards of hard swimming on every 100)]",
+						"4[(100y, descend 1-4)]"
+					]
+				];
 			}
 			for (let i = 0; i < warmup_groups.length; i++) {
 				warmup_text += this._randElement(warmup_groups[i]);
