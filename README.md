@@ -26,9 +26,14 @@ To install the protocol handler:
 -- navigator.registerProtocolHandler("web+wp", "http://<url>/?wh=%s", "Workout Planner handler");
 
 # Bugs/Feature requests
-- Implement cadence intervals #c()
-- Test pretty printing (Not very good at repeat or complex intervlas?)
+- Add 4x25 sprint on the bike swim sets
+- Add specific cadence work on warmup
+- Add more drills on the swim
 - 1min30sec not being parsed properly. e.g. (1min30sec, 105)
+- Remove TSS or TSS(R) 
+- Couple of TODO's in the test.ts (They are bugs)
+
+- Implement cadence intervals #c()
 - Can we add a "hint" for * intervals so that it computes IF better?
 
 Server

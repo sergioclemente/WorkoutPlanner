@@ -1,0 +1,56 @@
+Input: 
+(10min, 85, HIM)
+Normalized: 
+(10min, 85, HIM)
+AST: 
+ArrayInterval(
+	SimpleInterval(10min, 85%, HIM)
+)
+----------------------------
+Input: 
+(20min, 55, 75, Warm up)
+Normalized: 
+(55, 75, 20min, Warm up)
+AST: 
+ArrayInterval(
+	BuildInterval(20min, 55%, 75%, Warm up)
+)
+----------------------------
+Input: 
+4[(45s, 75, 100), (15s, 55)]
+Normalized: 
+4[(75, 100, 45sec), (15sec, 55)]
+AST: 
+ArrayInterval(
+	RepeatInterval(count=4, 
+		BuildInterval(45sec, 75%, 100%, )
+		SimpleInterval(15sec, 55%, )
+	)
+)
+----------------------------
+Input: 
+3[(1min, 80, 90, 100), (30s, 50)]
+Normalized: 
+3[(1min, 80, 90, 100), (30sec, 50)]
+AST: 
+ArrayInterval(
+	)
+----------------------------
+Input: 
+(5min, easy)
+Normalized: 
+(5min, 55, easy)
+AST: 
+ArrayInterval(
+	SimpleInterval(5min, 55%, easy)
+)
+----------------------------
+Input: 
+(10min, 100, FTP, 2min)
+Normalized: 
+(10min, 100, 2min, FTP)
+AST: 
+ArrayInterval(
+	SimpleInterval(10min, 100%, FTP, 2min)
+)
+----------------------------

@@ -45,6 +45,8 @@ var of_run = new Model.ObjectFactory(up, Model.SportType.Run);
 var of_other = new Model.ObjectFactory(up, Model.SportType.Other);
 describe('DistanceUnitHelper', function () {
     it('convert miles to kilometers', function () {
+        // TODO: Remove this here.
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "(10min, *, Free)");
         let res = Model.DistanceUnitHelper.convertTo(1000, Model.DistanceUnit.Miles, Model.DistanceUnit.Kilometers);
         expect_eq_nbr(1609.344, res);
     });
@@ -166,11 +168,11 @@ describe('IntervalParser', function () {
         expect_eq_nbr(128.2, Model.TSSCalculator.compute(int_par_2hr_75_85));
     });
     it('1min @ 85%', function () {
-        var simple1min85 = Model.IntervalParser.parse(of_bike, "(1, 85)");
+        var simple1min85 = Model.IntervalParser.parse(of_bike, "(1min, 85)");
         expect_eq_nbr(0.85, simple1min85.getIntervals()[0].getIntensity().getOriginalValue());
     });
     it('1min @ 55%-85%', function () {
-        var build1min5585 = Model.IntervalParser.parse(of_bike, "(1, 60, 80)");
+        var build1min5585 = Model.IntervalParser.parse(of_bike, "(1min, 60, 80)");
         expect_eq_nbr(0.70, build1min5585.getIntervals()[0].getIntensity().getOriginalValue());
     });
     it('Mixed watts and percentage', function () {
@@ -190,8 +192,8 @@ describe('IntervalParser', function () {
         expect_eq_nbr(6, int_par_unit_run.getIntervals()[1].getIntensity().getOriginalValue());
     });
     it('no intensity', function () {
-        expect_eq_nbr(0, Model.IntervalParser.parse(of_bike, `(10min)`).getIntensity().getValue());
-        expect_eq_nbr(0, Model.IntervalParser.parse(of_bike, `(10min, easy)`).getIntensity().getValue());
+        expect_eq_nbr(0.55, Model.IntervalParser.parse(of_bike, `(10min)`).getIntensity().getValue());
+        expect_eq_nbr(0.55, Model.IntervalParser.parse(of_bike, `(10min, easy)`).getIntensity().getValue());
         expect_eq_nbr(0.55, Model.IntervalParser.parse(of_bike, `(10s, *, free ride)`).getIntensity().getValue());
     });
     it('repeat interval', function () {
@@ -509,7 +511,7 @@ describe('Interval title', function () {
     it('simple interval', function () {
         expect_eq_str("10' easy", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 55)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
         expect_eq_str("10'' relaxed @ 10:00min/mi", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10s, 60, relaxed)`), up, Model.SportType.Run, Model.IntensityUnit.MinMi));
-        expect_eq_str("10'' relaxed", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10s, relaxed)`), up, Model.SportType.Run, Model.IntensityUnit.MinMi));
+        expect_eq_str("10'' relaxed @ 8:00min/mi", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10s, relaxed)`), up, Model.SportType.Run, Model.IntensityUnit.MinMi));
         expect_eq_str("10' single leg @ 140w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 45, single leg)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
         expect_eq_str("10' @ 205w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 65)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
         expect_eq_str("10' LC @ 235w", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_run, `(10min, 75, LC)`), up, Model.SportType.Bike, Model.IntensityUnit.Watts));
@@ -547,18 +549,17 @@ describe('Interval title', function () {
         expect_eq_str("500 warmup on 7'52'' off 8'42''", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500yards, 90, 50s, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards));
         expect_eq_str("100 strong on 1'25'' off 1'35''", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(100yards, 100, 10s, strong)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards));
         expect_eq_str("500 warmup on 7'55'' off 8'45''", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500yards, +10, 50s, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards));
-        expect_eq_str("500 warmup w/ 50'' rest", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500yards, 50s, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards));
+        expect_eq_str("500 warmup @ 1:37/100yards w/ 50'' rest", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500yards, 50s, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards));
         expect_eq_str("500 warmup on 6'40'' off 7'30''", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500yards, -5, 50s, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards));
         expect_eq_str("500 warmup on 6'14'' off 7'04''", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500yards, -10, 50s, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards));
-        expect_eq_str("500 warmup w/ 50'' rest", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500yards, 50s, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.IF));
+        expect_eq_str("500 warmup @ 88% w/ 50'' rest", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500yards, 50s, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.IF));
         expect_eq_str("500 warmup on 7'55'' off 8'45''", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500yards, +10, 50s, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.IF));
         expect_eq_str("100 strong on 1'20'' off 1'35''", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(100yards, -5, 15s, strong)`), up, Model.SportType.Swim, Model.IntensityUnit.IF));
         expect_eq_str("100 strong on 1'25'' off 1'45''", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(100yards, +0, 20s, strong)`), up, Model.SportType.Swim, Model.IntensityUnit.IF));
         expect_eq_str("100 strong on 1'25'' off 1'30''", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(100yards, -0, 5s, strong)`), up, Model.SportType.Swim, Model.IntensityUnit.IF));
-        expect_eq_str("400 free", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(400yards, free)`), up, Model.SportType.Swim, Model.IntensityUnit.IF));
-        expect_eq_str("300 pull", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(300yards, pull)`), up, Model.SportType.Swim, Model.IntensityUnit.IF));
-        expect_eq_str("300 pull - 10'' rest", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(300yards, pull), (10s, rest)`), up, Model.SportType.Swim, Model.IntensityUnit.IF));
-        expect_eq_str("300 pull w/ 10'' rest", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(300yards, pull, 10s)`), up, Model.SportType.Swim, Model.IntensityUnit.IF));
+        expect_eq_str("400 free @ 88%", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(400yards, free)`), up, Model.SportType.Swim, Model.IntensityUnit.IF));
+        expect_eq_str("300 pull @ 88%", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(300yards, pull)`), up, Model.SportType.Swim, Model.IntensityUnit.IF));
+        expect_eq_str("300 pull @ 88% w/ 10'' rest", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(300yards, pull, 10s)`), up, Model.SportType.Swim, Model.IntensityUnit.IF));
     });
 });
 describe('Formatter', function () {
@@ -625,15 +626,14 @@ describe('Swim', function () {
         expect_eq_nbr(/* 1:32 */ 92.95, new Model.ObjectFactory(up, Model.SportType.Swim).createDuration(intensity_100_pct, Model.DistanceUnit.Meters, 100).getSeconds());
     });
     it('distance and rest interval', function () {
-        let interval = Model.IntervalParser.parse(of_swim, `2[(200yards, neg split, 30s)]`);
+        let interval = Model.IntervalParser.parse(of_swim, `2[(200yards, 100, neg split, 30s)]`);
         expect_eq_nbr(400, interval.getTotalDuration().getValueInUnit(Model.DistanceUnit.Yards));
         expect_eq_nbr(30, interval.getRestDuration().getSeconds());
     });
     it('distance', function () {
-        let interval = Model.IntervalParser.parse(of_swim, `(500y, free)`);
+        let interval = Model.IntervalParser.parse(of_swim, `(500y, 100, free)`);
         expect_eq_nbr(500, interval.getTotalDuration().getValueInUnit(Model.DistanceUnit.Yards));
-        // TODO: Investigate this later.
-        expect_eq_nbr(0, interval.getTSS());
+        expect_eq_nbr(11.8, interval.getTSS());
     });
 });
 describe('Player Helper', function () {
@@ -653,6 +653,37 @@ describe('free ride', function () {
         let free_ride_interval = array_interval.getIntervals()[0];
         expect_eq_nbr(Model.IntensityUnit.FreeRide, free_ride_interval.getIntensity().getOriginalUnit());
         expect_eq_str("TT", free_ride_interval.getTitle());
+    });
+});
+function GoldenTest(input_file, golden_file) {
+    let fs = require('fs');
+    let input = fs.readFileSync(input_file).toString();
+    let test_cases = input.toString().split("-- EOT\n");
+    let actual_output = "";
+    let separator = "----------------------------\n";
+    for (let i = 0; i < test_cases.length; ++i) {
+        let input = test_cases[i];
+        // Skip last one which is a blank.
+        if (input.trim().length == 0) {
+            continue;
+        }
+        let interval = Model.IntervalParser.parse(of_bike, input);
+        actual_output += "Input: \n";
+        actual_output += input;
+        let normalized_text = Model.IntervalParser.normalize(of_bike, input, Model.UnparserFormat.Whitespaces);
+        actual_output += "Normalized: \n";
+        actual_output += normalized_text;
+        actual_output += "\n";
+        actual_output += "AST: \n";
+        actual_output += Model.TreePrinterVisitor.Print(interval);
+        actual_output += separator;
+    }
+    let expected_output = fs.readFileSync(golden_file).toString();
+    expect_eq_str(expected_output, actual_output);
+}
+describe('debug printing', function () {
+    it('test.input golden', function () {
+        GoldenTest("./bike_test.input", "./bike_test.golden");
     });
 });
 describe('rest interval ride', function () {
@@ -693,11 +724,12 @@ describe('parse and unparse', function () {
         parseAndNormalize(of_swim, /*insert_whitespaces=*/ false, "(400yards, +10s, 30sec, warmup)");
         parseAndNormalize(of_run, /*insert_whitespaces=*/ false, "(2mi, 80)");
         parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "(10sec, *)");
+        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "(10min, *, Free)");
         parseAndNormalize(of_run, /*insert_whitespaces=*/ false, "(2mi, 7:00min/mi)", "(2mi, 85.7)");
         parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "2[(1min, 85, 95),(30sec, 50)]");
         parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "2[(100, 30sec, 45sec),(30sec, 50)]");
-        // TODO: Investigate why its not setting default value.
-        parseAndNormalize(of_swim, /*insert_whitespaces=*/ false, "(500y, free)", "(500yards, 0, free)");
+        parseAndNormalize(of_swim, /*insert_whitespaces=*/ false, "(500y, *, free)", "(500yards, *, free)");
+        parseAndNormalize(of_swim, /*insert_whitespaces=*/ false, "(500yards, 90, 50sec, warmup)", "(500yards, 90, 50sec, warmup)");
     });
     it('with whitespace', function () {
         parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "(10min, 100, FTP)");

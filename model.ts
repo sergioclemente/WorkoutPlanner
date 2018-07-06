@@ -1368,53 +1368,34 @@ module Model {
 							var durationUnits: DurationUnit[] = [];
 							var intensities: Intensity[] = [];
 
-							// (1) Tries to guess where is the time and where is the intensity
-							// The assumption here is that intensity will likely be bigger
-							// than time. For example: 65% for 60min
-							var containsUnit = false;
-							var minIndex = -1;
-							var minValue = 9999999999999;
-							for (var k = 0; k < Object.keys(units).length; k++) {
-								containsUnit = containsUnit || units[k] != "";
-								if (nums[k] < minValue) {
-									minValue = nums[k];
-									minIndex = k;
-								}
-							}
-
-							// Patch the missing units now.
-							if (!containsUnit) {
-								for (var k = 0; k < Object.keys(units).length; k++) {
-									if (units[k] == "") {
-										if (k == minIndex) {
-											units[k] = "min";
-										} else {
-											units[k] = "%";
-										}
-									}
+							// (1) Fill the intensity if not provided. Do not do any guessing
+							// on the unit based on the value because its confusing.
+							for (let ki = 0; ki < Object.keys(units).length; ki++) {
+								let k = Object.keys(units)[ki];
+								if (nums[k] >= 0 && units[k] == "") {
+									units[k] = "%";
 								}
 							}
 
 							// (2) Create the duration units and intensities
-							for (var k = 0; k < Object.keys(units).length; k++) {
+							for (let ki = 0; ki < Object.keys(units).length; ki++) {
+								let k = Object.keys(units)[ki];
 								if (DurationUnitHelper.isDurationUnit(units[k])) {
 									durationUnits.push(DurationUnitHelper.toDurationUnit(units[k]));
 									durationValues.push(nums[k]);
-								} else if (nums[k] > 0) {
-									var intensityUnit = IntensityUnit.IF;
-									if (IntensityUnitHelper.isIntensityUnit(units[k])) {
-										intensityUnit = IntensityUnitHelper.toIntensityUnit(units[k]);
-									}
-									intensities.push(factory.createIntensity(nums[k], intensityUnit));
 								} else {
-									// Most of the times here means we didn't have a intensity
-									// Free ride or offset mode for example.
-									var unit = IntensityUnitHelper.toIntensityUnit(units[k]);
-
-									if (unit == IntensityUnit.OffsetSeconds) {
-										intensities.push(factory.createIntensity(nums[k], IntensityUnit.OffsetSeconds));
-									} else if (unit == IntensityUnit.FreeRide) {
-										intensities.push(factory.createIntensity(factory.getEasyThreshold(), IntensityUnit.FreeRide));
+									// Get the Intensity unit and do some minor massaging for
+									// handling free intervals.
+									var unit : IntensityUnit = IntensityUnitHelper.toIntensityUnit(units[k]);
+									
+									// Unit could be time, so we have to safeguard on valid
+									// intensities.
+									if (unit != IntensityUnit.Unknown) {
+										if (unit == IntensityUnit.FreeRide) {
+											intensities.push(factory.createIntensity(factory.getEasyThreshold(), IntensityUnit.FreeRide));
+										} else {
+											intensities.push(factory.createIntensity(nums[k], unit));
+										}
 									}
 								}
 							}
@@ -1441,7 +1422,7 @@ module Model {
 
 									// add the new intervals
 									var step_intervals = [];
-									for (var k = 0; k < repeatInterval.getRepeatCount(); k++) {
+									for (let k = 0; k < repeatInterval.getRepeatCount(); k++) {
 										var durationUnit : DurationUnit = k < durationUnits.length ? durationUnits[k] : durationUnits[0];
 										var durationValue : number = k < durationValues.length ? durationValues[k] : durationValues[0];
 										var intensity : Intensity = k < intensities.length ? intensities[k] : intensities[0];
@@ -1478,10 +1459,10 @@ module Model {
 								}
 								interval = new SimpleInterval(title.trim(), intensity, duration, restDuration);
 							} else {
-								// Two types of interval here:
-								// (10s) - means 10s rest
-								// (10min, easy) - means 10min at default interval pace
-								let intensity = factory.createIntensity(0, IntensityUnit.IF);
+								// Whenever there us no intensity is specified, we get
+								// the default intensity. There is no rest interval with 0
+								// intensity anymore.
+								let intensity = factory.createIntensity(factory.getEasyThreshold(), IntensityUnit.IF);
 								let duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
 								if (durationUnits.length == 2 && durationValues.length == 2) {
 									restDuration = factory.createDuration(zeroIntensity, durationUnits[1], durationValues[1]);
@@ -1533,9 +1514,10 @@ module Model {
 								if (value == "*") {
 									units[numIndex] = "free-ride";
 								} else {
-									// Set the value for the title and a dummy value in the units
+									// Set the value for the title.
+									// Do not set the units[numIndex]="";
+									// Its ok to have a gap on it.
 									title = value;
-									units[numIndex] = "";
 								}
 							}
 						}
@@ -1572,7 +1554,6 @@ module Model {
 			if (result.getIntervals().length == 0) {
 				IntervalParser.throwParserError(0, "Invalid interval");
 			}
-
 			return result;
 		}
 
@@ -1622,7 +1603,7 @@ module Model {
 		finalize(): void;
 	}
 
-	class TreePrinterVisitor implements Visitor {
+	export class TreePrinterVisitor implements Visitor {
 		private output : string = "";
 		private indentation : number = 0;
 
@@ -1633,17 +1614,31 @@ module Model {
 
 		visitSimpleInterval(interval: SimpleInterval): void {
 			this.indent();
-			this.output += stringFormat("SimpleInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), interval.getIntensity().toString(), interval.getTitle(), interval.getRestDuration().toString());
+			if (interval.getRestDuration().getValue() > 0) {
+				this.output += stringFormat("SimpleInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), interval.getIntensity().toString(), interval.getTitle(), interval.getRestDuration().toString());
+			} else {
+				this.output += stringFormat("SimpleInterval({0}, {1}, {2})\n", interval.getWorkDuration().toString(), interval.getIntensity().toString(), interval.getTitle());
+			}
 		}
 		visitStepBuildInterval(interval: StepBuildInterval): void {
-			
+			this.indent();
+			// TODO: Implement
 		}
 		visitRampBuildInterval(interval: RampBuildInterval): void {
-
+			this.indent();
+			this.output += stringFormat("BuildInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), interval.getStartIntensity().toString(), interval.getEndIntensity().toString(), interval.getTitle());
 		}
 
 		visitRepeatInterval(interval: RepeatInterval) {
-
+			this.indent();
+			this.output += stringFormat("RepeatInterval(count={0}, {1}\n", interval.getRepeatCount(), interval.getTitle());
+			this.indentation++;
+			for (var i = 0; i < interval.getIntervals().length; i++) {
+				VisitorHelper.visit(this, interval.getIntervals()[i]);
+			}
+			this.indentation--;
+			this.indent();
+			this.output += ")\n";			
 		}
 		visitArrayInterval(interval: ArrayInterval) {
 			this.indent();
@@ -2366,7 +2361,6 @@ module Model {
 			sportType: SportType = SportType.Unknown,
 			outputUnit: IntensityUnit = IntensityUnit.Unknown,
 			roundValues: boolean = true): string {
-			// TODO: instantiating visitor is a bit clowny
 			var f = new WorkoutTextVisitor(userProfile, sportType, outputUnit, roundValues);
 			VisitorHelper.visitAndFinalize(f, interval);
 
@@ -2787,7 +2781,6 @@ module Model {
 		addSeparator(): void {
 			if (this.level == 1) {
 				if (this.format == UnparserFormat.Whitespaces) {
-					console.log("adding new line");
 					this.output += "\n";
 					return;
 				}
@@ -3498,7 +3491,14 @@ module Model {
 						"4[(50yards, Swim GOLF - Descend each one), \"10s rest\"]",
 						"3[(100y, single arm freestyle right side, free, single arm freestyle left side, free)]",
 						"4[(75y, unco left; swim; unco right)]",
+						"4[(50yards, scull and free by 25)]",
 						"(200y, +10, pull)"
+					],
+					// Pre-main set
+					[
+						// TODO: Allow probabilities or weight
+						"4[(25yards, sprint)]",
+						""
 					],
 					// Build
 					[

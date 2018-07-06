@@ -220,6 +220,20 @@ declare module Model {
         visitArrayInterval(interval: ArrayInterval): void;
         finalize(): void;
     }
+    class TreePrinterVisitor implements Visitor {
+        private output;
+        private indentation;
+        visitCommentInterval(interval: CommentInterval): void;
+        visitSimpleInterval(interval: SimpleInterval): void;
+        visitStepBuildInterval(interval: StepBuildInterval): void;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
+        visitRepeatInterval(interval: RepeatInterval): void;
+        visitArrayInterval(interval: ArrayInterval): void;
+        finalize(): void;
+        indent(): void;
+        getOutput(): string;
+        static Print(interval: Interval): string;
+    }
     abstract class BaseVisitor implements Visitor {
         visitCommentInterval(): void;
         abstract visitSimpleInterval(interval: SimpleInterval): void;
