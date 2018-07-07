@@ -14,3 +14,15 @@
 -- EOT
 "Comment 123"
 -- EOT
+(10min, 100, 2min, CSS)
+-- EOT
+(500m, 100, warmup)
+-- EOT
+(500m, warmup, 100)
+-- EOT
+(500m, 100, warmup), (200m, 80, easy)
+-- EOT
+(500yards, 100, warmup)
+-- EOT
+(500yards, warmup, 100)
+-- EOT

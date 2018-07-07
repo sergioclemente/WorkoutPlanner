@@ -443,19 +443,31 @@ module Model {
 
 			var time = this.getTimeComponents();
 
+			let unit = "";
 			if (time.hours != 0) {
-				result += time.hours + "hr";
+				result += time.hours;
+				unit = "hr";
 			}
 
 			if (time.minutes != 0) {
-				result += time.minutes + "min";
+				if (result.length > 0) {
+					result += ":";
+				} else {
+					unit = "min";
+				}
+				result += time.minutes;
 			}
 
 			if (time.seconds != 0) {
-				result += time.seconds + "sec";
+				if (result.length > 0) {
+					result += ":";
+				} else {
+					unit = "sec";
+				}
+				result += time.seconds;
 			}
 
-			return result;
+			return result + unit;
 		}
 
 		toTimeStringShort(): string {
@@ -1221,10 +1233,8 @@ module Model {
 			// - Check for another number after the current cursor.
 			// - Skip any white spaces as well
 			// TODO: Move this into number parser
-			// Think on how to fix this code. There are a couple of options:
-			// - 1) Make the Unparser generate 01:30 min style notation
-			// - 2) Fix this parsing so that it parses something like 1hr30min10s
-			// 
+			// Think on how to fix this code. Right now the unparser generates
+			// something like 01:30min to avoid writing 1min30sec for this hitting this bug.
 			if (i + 1 < input.length && input[i + 1] == ":") {
 				i = i + 2; // skip : and go to the next char
 				var res_temp = IntervalParser.parseDouble(input, i);

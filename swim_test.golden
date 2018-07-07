@@ -8,6 +8,7 @@ ArrayInterval(
 	SimpleInterval(100yards, 100%, )
 	SimpleInterval(10sec, 0%, )
 )
+IF (Avg): 0.9459053029269173
 TSS: 2.4
 TSS2: 2.5
 Yards: 100
@@ -21,6 +22,7 @@ AST:
 ArrayInterval(
 	SimpleInterval(10min, *, TT)
 )
+IF (Avg): 0.88
 TSS: 12.9
 TSS2: 13.2
 Yards: 621.2
@@ -34,6 +36,7 @@ AST:
 ArrayInterval(
 	SimpleInterval(500yards, 100%, free)
 )
+IF (Avg): 1
 TSS: 11.8
 TSS2: 11.8
 Yards: 500
@@ -49,6 +52,7 @@ ArrayInterval(
 		SimpleInterval(200yards, 100%, neg split, 30sec)
 	)
 )
+IF (Avg): 1
 TSS: 9.4
 TSS2: 10.3
 Yards: 400
@@ -62,6 +66,7 @@ AST:
 ArrayInterval(
 	SimpleInterval(500yards, *, free)
 )
+IF (Avg): 0.88
 TSS: 10.4
 TSS2: 10.6
 Yards: 500
@@ -75,6 +80,7 @@ AST:
 ArrayInterval(
 	SimpleInterval(500yards, 90%, warmup, 50sec)
 )
+IF (Avg): 0.9000000000000001
 TSS: 10.6
 TSS2: 11.8
 Yards: 500
@@ -88,6 +94,7 @@ AST:
 ArrayInterval(
 	SimpleInterval(400yards, CSS+10, warmup, 30sec)
 )
+IF (Avg): 0.8947368421052629
 TSS: 8.5
 TSS2: 9.2
 Yards: 400
@@ -101,8 +108,95 @@ AST:
 ArrayInterval(
 	Comment(Comment 123)
 )
+IF (Avg): 0
 TSS: 0
 TSS2: 0
 Yards: 0
 Duration (Sec): 0
+----------------------------
+Input: 
+(10min, 100, 2min, CSS)
+Normalized: 
+(10min, 100, CSS, 2min)
+AST: 
+ArrayInterval(
+	SimpleInterval(10min, 100%, CSS, 2min)
+)
+IF (Avg): 1
+TSS: 16.7
+TSS2: 20
+Yards: 705.9
+Duration (Sec): 720
+----------------------------
+Input: 
+(500m, 100, warmup)
+Normalized: 
+(500m, 100, warmup)
+AST: 
+ArrayInterval(
+	SimpleInterval(500m, 100%, warmup)
+)
+IF (Avg): 1
+TSS: 12.9
+TSS2: 12.9
+Yards: 546.8
+Duration (Sec): 464.7856517935258
+----------------------------
+Input: 
+(500m, warmup, 100)
+Normalized: 
+(500m, 100, warmup)
+AST: 
+ArrayInterval(
+	SimpleInterval(500m, 100%, warmup)
+)
+IF (Avg): 1
+TSS: 12.9
+TSS2: 12.9
+Yards: 546.8
+Duration (Sec): 464.7856517935258
+----------------------------
+Input: 
+(500m, 100, warmup), (200m, 80, easy)
+Normalized: 
+(500m, 100, warmup)
+(200m, 80, easy)
+AST: 
+ArrayInterval(
+	SimpleInterval(500m, 100%, warmup)
+	SimpleInterval(200m, 80%, easy)
+)
+IF (Avg): 0.938083151964686
+TSS: 17
+TSS2: 16.4
+Yards: 765.5
+Duration (Sec): 697.1784776902887
+----------------------------
+Input: 
+(500yards, 100, warmup)
+Normalized: 
+(500yards, 100, warmup)
+AST: 
+ArrayInterval(
+	SimpleInterval(500yards, 100%, warmup)
+)
+IF (Avg): 1
+TSS: 11.8
+TSS2: 11.8
+Yards: 500
+Duration (Sec): 425
+----------------------------
+Input: 
+(500yards, warmup, 100)
+Normalized: 
+(500yards, 100, warmup)
+AST: 
+ArrayInterval(
+	SimpleInterval(500yards, 100%, warmup)
+)
+IF (Avg): 1
+TSS: 11.8
+TSS2: 11.8
+Yards: 500
+Duration (Sec): 425
 ----------------------------

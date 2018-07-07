@@ -106,10 +106,6 @@ describe('Bugs', function () {
 		expect_eq_nbr(Model.DistanceUnit.Yards, cd2.getUnit());
 		expect_eq_nbr(400, cd2.getValue());
 	});
-	// it('90s duration', function () {
-	// 	var interval = Model.IntervalParser.parse(of_bike, "(1min30s, 55)");
-	// 	expect_eq_nbr(90, interval.getTotalDuration().getSeconds());
-	// });
 });
 
 // TODO: Add test for half MINUTES
@@ -126,128 +122,6 @@ describe('IntervalParser', function () {
 	it('Parse double', function () {
 		expect_eq_nbr(123, Model.IntervalParser.parseDouble("123", 0).value);
 		expect_eq_nbr(123.456, Model.IntervalParser.parseDouble("123.456", 0).value);
-	});
-	it('1hr @ 75%, 1hr @ 85%', function () {
-		var int_par_2hr_75_85 = Model.IntervalParser.parse(of_bike, "(1hr, 75), (1hr, 85)");
-		expect_eq_nbr(128.5, int_par_2hr_75_85.getTSS());
-		expect_eq_nbr(128.2, Model.TSSCalculator.compute(int_par_2hr_75_85));
-	});
-	it('1min @ 85%', function () {
-		var simple1min85 = Model.IntervalParser.parse(of_bike, "(1min, 85)");
-		expect_eq_nbr(0.85, simple1min85.getIntervals()[0].getIntensity().getOriginalValue());
-	});
-	it('1min @ 55%-85%', function () {
-		var build1min5585 = Model.IntervalParser.parse(of_bike, "(1min, 60, 80)");
-		expect_eq_nbr(0.70, build1min5585.getIntervals()[0].getIntensity().getOriginalValue());
-	});
-	it('Mixed watts and percentage', function () {
-		var int_par_unit_bike = Model.IntervalParser.parse(of_bike, "(1s, 50), (2s, 155w), (3s, 50%)");
-		expect_eq_nbr(Model.IntensityUnit.IF, int_par_unit_bike.getIntervals()[0].getIntensity().getOriginalUnit());
-		expect_eq_nbr(0.5, int_par_unit_bike.getIntervals()[0].getIntensity().getOriginalValue());
-
-		expect_eq_nbr(Model.IntensityUnit.Watts, int_par_unit_bike.getIntervals()[1].getIntensity().getOriginalUnit());
-		expect_eq_nbr(155, int_par_unit_bike.getIntervals()[1].getIntensity().getOriginalValue());
-
-		expect_eq_nbr(Model.IntensityUnit.IF, int_par_unit_bike.getIntervals()[2].getIntensity().getOriginalUnit());
-		expect_eq_nbr(0.5, int_par_unit_bike.getIntervals()[2].getIntensity().getOriginalValue());
-	});
-	it('Mixed mph and min/mi', function () {
-		var int_par_unit_run = Model.IntervalParser.parse(of_run, "(4s, 10mph), (5s, 6min/mi)");
-		expect_eq_nbr(Model.IntensityUnit.Mph, int_par_unit_run.getIntervals()[0].getIntensity().getOriginalUnit());
-		expect_eq_nbr(10, int_par_unit_run.getIntervals()[0].getIntensity().getOriginalValue());
-
-		expect_eq_nbr(Model.IntensityUnit.MinMi, int_par_unit_run.getIntervals()[1].getIntensity().getOriginalUnit());
-		expect_eq_nbr(6, int_par_unit_run.getIntervals()[1].getIntensity().getOriginalValue());
-	});
-	it('no intensity', function () {
-		expect_eq_nbr(0.55, Model.IntervalParser.parse(of_bike, `(10min)`).getIntensity().getValue());
-		expect_eq_nbr(0.55, Model.IntervalParser.parse(of_bike, `(10min, easy)`).getIntensity().getValue());
-		expect_eq_nbr(0.55, Model.IntervalParser.parse(of_bike, `(10s, *, free ride)`).getIntensity().getValue());
-	});
-	it('repeat interval', function () {
-		var repeat_85_1 = Model.IntervalParser.parse(of_bike, `1[(1hr, 85)]`);
-		var repeat_85_2 = Model.IntervalParser.parse(of_bike, `2[(1hr, 85)]`);
-
-		expect_true(repeat_85_1.getIntervals()[0] instanceof Model.RepeatInterval);
-		expect_eq_nbr(72.2, repeat_85_1.getTSS());
-		expect_eq_nbr(76.5, Model.TSSCalculator.compute(repeat_85_1));		
-		expect_eq_nbr(3600, repeat_85_1.getWorkDuration().getSeconds());
-		expect_eq_nbr(0.85, repeat_85_1.getIntensity().getValue());
-
-		expect_eq_nbr(144.5, repeat_85_2.getTSS());
-		expect_eq_nbr(153, Model.TSSCalculator.compute(repeat_85_2));		
-		expect_eq_nbr(2 * 3600, repeat_85_2.getWorkDuration().getSeconds());
-		expect_eq_nbr(0.85, repeat_85_2.getIntensity().getValue());
-	});
-	it('baseline plus repeat', function () {
-		var baseLinePlusRepeat = Model.IntervalParser.parse(of_bike, `(1hr, 75) 2[(1hr, 85)]`);
-		expect_eq_nbr(200.8, baseLinePlusRepeat.getTSS(), 0.1);
-		expect_eq_nbr(196.3, Model.TSSCalculator.compute(baseLinePlusRepeat));		
-		expect_eq_nbr(3 * 3600, baseLinePlusRepeat.getWorkDuration().getSeconds());
-		expect_eq_nbr(0.816, baseLinePlusRepeat.getIntensity().getValue());
-	});
-	it('one hour 85', function () {
-		var onehr85 = Model.IntervalParser.parse(of_bike, `(1hr, 86)`);
-		expect_eq_nbr(74, onehr85.getTSS(), 0.1);
-		expect_eq_nbr(77.4, Model.TSSCalculator.compute(onehr85));		
-		expect_eq_nbr(0.86, onehr85.getIntensity().getValue());
-		expect_eq_nbr(3600, onehr85.getWorkDuration().getSeconds());
-	});
-	it('one hour high tss', function () {
-		var onehr85ButHighTSS = Model.IntervalParser.parse(of_bike, `(30min, 60), (30min, 100)`);
-		expect_eq_nbr(68, onehr85ButHighTSS.getTSS(), 0.1);
-		expect_eq_nbr(74.2, Model.TSSCalculator.compute(onehr85ButHighTSS));		
-		expect_eq_nbr(0.82, onehr85ButHighTSS.getIntensity().getValue());
-		expect_eq_nbr(3600, onehr85ButHighTSS.getWorkDuration().getSeconds());
-	});
-	it('step build', function () {
-		var step_build_85_100 = Model.IntervalParser.parse(of_bike, `3[(1min, 80, 90, 100), (30s, 50)]`);
-		expect_eq_nbr(4.7, step_build_85_100.getTSS(), 0.1);
-		expect_eq_nbr(5.1, Model.TSSCalculator.compute(step_build_85_100));
-		expect_eq_nbr(3 * 60 + 3 * 30, step_build_85_100.getWorkDuration().getSeconds());
-		expect_eq_nbr(0.85, step_build_85_100.getIntensity().getValue());
-		expect_true(!step_build_85_100.getIntervals()[0].areAllIntensitiesSame());
-	});
-	it('step build equal intensity', function () {
-		var step_build_equal_intensity = Model.IntervalParser.parse(of_bike, `3[(2min, 1min, 1min, 75), (1min, 55)]`);
-		expect_eq_nbr((2 + 1 + 1) * 60 + 3 * 60, step_build_equal_intensity.getWorkDuration().getSeconds());
-		expect_true(step_build_equal_intensity.getIntervals()[0].areAllIntensitiesSame());
-	});
-	it('repeat interval', function () {
-		var repeat_main_interval = Model.IntervalParser.parse(of_bike, `4[(45s, 75, 100), (15s, 55)]`);
-		expect_eq_nbr(1, repeat_main_interval.getIntervals().length);
-		var repeat_interval = repeat_main_interval.getIntervals()[0];
-		expect_eq_nbr(4, repeat_interval.getRepeatCount());
-	});
-	it('min/mi', function () {
-		var units_on_workout = Model.IntervalParser.parse(of_run, `(60min, 6:00min/mi)`);
-		expect_eq_nbr(3600, units_on_workout.getWorkDuration().getSeconds());
-		expect_eq_nbr(1, units_on_workout.getIntensity().getValue());
-
-		var units_on_workout_spc = Model.IntervalParser.parse(of_run, `(60min, 6:00 min/mi)`);
-		expect_eq_nbr(3600, units_on_workout_spc.getWorkDuration().getSeconds());
-		expect_eq_nbr(1, units_on_workout_spc.getIntensity().getValue());
-	});
-	it('min/km', function () {
-		var units_on_workout_2 = Model.IntervalParser.parse(of_run, `(45min, 3:44min/km)`);
-		expect_eq_nbr(45 * 60, units_on_workout_2.getWorkDuration().getSeconds());
-		expect_eq_nbr(1, units_on_workout_2.getIntensity().getValue());
-	});
-	it('swim duration and tss', function () {
-		expect_eq_nbr(425, Model.IntervalParser.parse(of_swim, `(500yards, 100, warmup)`).getWorkDuration().getSeconds());
-		expect_eq_nbr(425, Model.IntervalParser.parse(of_swim, `(500yards, warmup, 100)`).getWorkDuration().getSeconds());
-		let interval = Model.IntervalParser.parse(of_swim, `(500yards, 100, warmup)`);
-		expect_eq_nbr(11.8, interval.getTSS());
-		expect_eq_nbr(11.8, Model.TSSCalculator.compute(interval));		
-		expect_eq_nbr(15.6, Model.IntervalParser.parse(of_swim, `(500yards, 100, warmup), (200yards, 80, easy)`).getTSS());
-	});
-	it("swim duration and tss (meters)", function () {
-		expect_eq_nbr(464.78, Model.IntervalParser.parse(of_swim, `(500m, 100, warmup)`).getWorkDuration().getSeconds());
-		expect_eq_nbr(464.78, Model.IntervalParser.parse(of_swim, `(500m, warmup, 100)`).getWorkDuration().getSeconds());
-		let interval = Model.IntervalParser.parse(of_swim, `(500m, 100, warmup)`);
-		expect_eq_nbr(12.9, interval.getTSS());
-		expect_eq_nbr(12.9, Model.TSSCalculator.compute(interval));		
-		expect_eq_nbr(17, Model.IntervalParser.parse(of_swim, `(500m, 100, warmup), (200m, 80, easy)`).getTSS());
 	});
 });
 
@@ -661,6 +535,7 @@ function GoldenTest(of: any, input_file :string, golden_file:string) {
 		actual_output += "\n";
 		actual_output += "AST: \n";
 		actual_output += Model.TreePrinterVisitor.Print(interval);
+		actual_output += string_format("IF (Avg): {0}\n", interval.getIntensity().getValue());
 		actual_output += string_format("TSS: {0}\n", interval.getTSS());
 		actual_output += string_format("TSS2: {0}\n", interval.getTSS2());
 		if (of.getSportType() == Model.SportType.Swim) {
@@ -677,8 +552,6 @@ function GoldenTest(of: any, input_file :string, golden_file:string) {
 		final_output += actual_output;
 		final_output += separator;
 	}
-	console.log(generate_golden);
-	console.log(final_output);
 	if (generate_golden) {
 		fs.writeFileSync(golden_file, final_output);
 	}
@@ -696,16 +569,6 @@ describe('Golden Test', function () {
 	});
 });
 
-describe('rest interval ride', function () {
-	it('simple rest interval', function () {
-		let array_interval = Model.IntervalParser.parse(of_swim, "(10min, 100, 2min, FTP)");
-		let free_ride_interval = array_interval.getIntervals()[0];
-		expect_eq_nbr(1, free_ride_interval.getIntensity().getValue());
-		expect_eq_nbr(10 * 60 + 2 * 60, free_ride_interval.getTotalDuration().getSeconds());
-		expect_eq_str("FTP", free_ride_interval.getTitle());
-	});
-});
-
 describe('NumberAndUnitParser', function () {
 	it('Per400m', function () {
 		let p = new Model.NumberAndUnitParser();
@@ -715,15 +578,7 @@ describe('NumberAndUnitParser', function () {
 	});
 });
 
-function parseAndNormalize(of: any, text: string, expected_text : string = null) {
-	let normalized_text = Model.IntervalParser.normalize(of, text);
-	if (expected_text == null) {
-		expected_text = text;
-	}
-	expect_eq_str(expected_text, normalized_text);
-}
-
-function textPrerocessor(input: string, expected : string) {
+function textPreprocessor(input: string, expected : string) {
 	let tp = new Model.TextPreprocessor();
 	let actual = tp.process(input);
 	expect_eq_str(expected, actual);
@@ -737,13 +592,13 @@ describe('text processor', function () {
 		let actual = tp.process("#wu");
 		console.assert(actual.indexOf("#wu") == -1);
 		
-		textPrerocessor("#sl(4,40)", "4[(40s,45,Left Leg), (15s,45,Both), (40s,45,Right Leg), (15s,45,Both)]");
-		textPrerocessor("#o(4,40)", "4[(40s,*,Build), (40s,55,Relaxed)]");
-		textPrerocessor("#sl(4,40) #o(4,40)", "4[(40s,45,Left Leg), (15s,45,Both), (40s,45,Right Leg), (15s,45,Both)] 4[(40s,*,Build), (40s,55,Relaxed)]");
+		textPreprocessor("#sl(4,40)", "4[(40s,45,Left Leg), (15s,45,Both), (40s,45,Right Leg), (15s,45,Both)]");
+		textPreprocessor("#o(4,40)", "4[(40s,*,Build), (40s,55,Relaxed)]");
+		textPreprocessor("#sl(4,40) #o(4,40)", "4[(40s,45,Left Leg), (15s,45,Both), (40s,45,Right Leg), (15s,45,Both)] 4[(40s,*,Build), (40s,55,Relaxed)]");
 	});
 });
 
-function moving_average(input: any, window_size: number, expected_average: number) : void {
+function movingAverage(input: any, window_size: number, expected_average: number) : void {
 	let ma = new Model.MovingAverage(window_size);
 
 	for (let i = 0; i < input.length; i++) {
@@ -755,13 +610,13 @@ function moving_average(input: any, window_size: number, expected_average: numbe
 
 describe('moving average', function () {
 	it('simple', function () {
-		moving_average([], 1, null);
-		moving_average([1], 1, 1.0);
-		moving_average([2, 2], 2, 2.0);
-		moving_average([1, 3], 2, 1.5);
-		moving_average([1, 3, 5], 2, 4);
-		moving_average([2, 2], 1, 2.0);
-		moving_average([1, 3], 1, 3.0);
+		movingAverage([], 1, null);
+		movingAverage([1], 1, 1.0);
+		movingAverage([2, 2], 2, 2.0);
+		movingAverage([1, 3], 2, 1.5);
+		movingAverage([1, 3, 5], 2, 4);
+		movingAverage([2, 2], 1, 2.0);
+		movingAverage([1, 3], 1, 3.0);
 	});
 });
 

@@ -2,6 +2,12 @@
 -- EOT
 (1hr, 85)
 -- EOT
+(1min, 85)
+-- EOT
+(1min, 60, 80)
+-- EOT
+(1s, 50), (2s, 155w), (3s, 50%)
+-- EOT
 (1hr, 75), (1hr, 85)
 -- EOT
 (1min, 55, 75)
@@ -39,4 +45,28 @@
 4[(1min, 100, hard), (30sec, 50, easy)]
 -- EOT
 (155w, 310w, 1min, build to ftp)
+-- EOT
+(10min)
+-- EOT
+(10min, easy)
+-- EOT
+(10s, *, free ride)
+-- EOT
+1[(1hr, 85)]
+-- EOT
+2[(1hr, 85)]
+-- EOT
+(1hr, 75) 2[(1hr, 85)]
+-- EOT
+(1hr, 86)
+-- EOT
+(30min, 60), (30min, 100)
+-- EOT
+4[(45s, 75, 100), (15s, 55)]
+-- EOT
+3[(2min, 1min, 1min, 75), (1min, 55)]
+-- EOT
+3[(1min, 80, 90, 100), (30s, 50)]
+-- EOT
+(1:30min, 55)
 -- EOT
