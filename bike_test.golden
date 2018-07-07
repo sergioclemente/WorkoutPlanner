@@ -1,4 +1,54 @@
 Input: 
+(1hr, 75)
+Normalized: 
+(1hr, 75)
+AST: 
+ArrayInterval(
+	SimpleInterval(1hr, 75%, )
+)
+TSS: 56.3
+TSS2: 60
+Duration (Sec): 3600
+----------------------------
+Input: 
+(1hr, 85)
+Normalized: 
+(1hr, 85)
+AST: 
+ArrayInterval(
+	SimpleInterval(1hr, 85%, )
+)
+TSS: 72.2
+TSS2: 76.5
+Duration (Sec): 3600
+----------------------------
+Input: 
+(1hr, 75), (1hr, 85)
+Normalized: 
+(1hr, 75)
+(1hr, 85)
+AST: 
+ArrayInterval(
+	SimpleInterval(1hr, 75%, )
+	SimpleInterval(1hr, 85%, )
+)
+TSS: 128.5
+TSS2: 128.2
+Duration (Sec): 7200
+----------------------------
+Input: 
+(1min, 55, 75)
+Normalized: 
+(1min, 55, 75)
+AST: 
+ArrayInterval(
+	BuildInterval(1min, 55%, 75%, )
+)
+TSS: 0.7
+TSS2: 0.8
+Duration (Sec): 60
+----------------------------
+Input: 
 (10min, 85, HIM)
 Normalized: 
 (10min, 85, HIM)
@@ -6,20 +56,26 @@ AST:
 ArrayInterval(
 	SimpleInterval(10min, 85%, HIM)
 )
+TSS: 12
+TSS2: 12.8
+Duration (Sec): 600
 ----------------------------
 Input: 
 (20min, 55, 75, Warm up)
 Normalized: 
-(55, 75, 20min, Warm up)
+(20min, 55, 75, Warm up)
 AST: 
 ArrayInterval(
 	BuildInterval(20min, 55%, 75%, Warm up)
 )
+TSS: 14.2
+TSS2: 15.3
+Duration (Sec): 1200
 ----------------------------
 Input: 
 4[(45s, 75, 100), (15s, 55)]
 Normalized: 
-4[(75, 100, 45sec), (15sec, 55)]
+4[(45sec, 75, 100), (15sec, 55)]
 AST: 
 ArrayInterval(
 	RepeatInterval(count=4, 
@@ -27,6 +83,9 @@ ArrayInterval(
 		SimpleInterval(15sec, 55%, )
 	)
 )
+TSS: 4.3
+TSS2: 4.3
+Duration (Sec): 240
 ----------------------------
 Input: 
 3[(1min, 80, 90, 100), (30s, 50)]
@@ -35,6 +94,9 @@ Normalized:
 AST: 
 ArrayInterval(
 	)
+TSS: 4.7
+TSS2: 5.1
+Duration (Sec): 270
 ----------------------------
 Input: 
 (5min, easy)
@@ -44,13 +106,156 @@ AST:
 ArrayInterval(
 	SimpleInterval(5min, 55%, easy)
 )
+TSS: 2.5
+TSS2: 2.8
+Duration (Sec): 300
 ----------------------------
 Input: 
 (10min, 100, FTP, 2min)
 Normalized: 
-(10min, 100, 2min, FTP)
+(10min, 100, FTP, 2min)
 AST: 
 ArrayInterval(
 	SimpleInterval(10min, 100%, FTP, 2min)
 )
+TSS: 16.7
+TSS2: 20
+Duration (Sec): 720
+----------------------------
+Input: 
+(1min, 55, 70rpm)
+Normalized: 
+(1min, 55, 70rpm)
+AST: 
+ArrayInterval(
+	SimpleInterval(1min, 55%, 70rpm)
+)
+TSS: 0.5
+TSS2: 0.6
+Duration (Sec): 60
+----------------------------
+Input: 
+(1min, 55, 2% grade)
+Normalized: 
+(1min, 55, 2% grade)
+AST: 
+ArrayInterval(
+	SimpleInterval(1min, 55%, 2% grade)
+)
+TSS: 0.5
+TSS2: 0.6
+Duration (Sec): 60
+----------------------------
+Input: 
+(1hr, 75), (20mi, 85)
+Normalized: 
+(1hr, 75)
+(20mi, 85)
+AST: 
+ArrayInterval(
+	SimpleInterval(1hr, 75%, )
+	SimpleInterval(20mi, 85%, )
+)
+TSS: 128.5
+TSS2: 128.2
+Duration (Sec): 7200
+----------------------------
+Input: 
+(10min, *, Free)
+Normalized: 
+(10min, *, Free)
+AST: 
+ArrayInterval(
+	SimpleInterval(10min, *, Free)
+)
+TSS: 5
+TSS2: 5.5
+Duration (Sec): 600
+----------------------------
+Input: 
+(10min, 100, FTP)
+Normalized: 
+(10min, 100, FTP)
+AST: 
+ArrayInterval(
+	SimpleInterval(10min, 100%, FTP)
+)
+TSS: 16.7
+TSS2: 16.7
+Duration (Sec): 600
+----------------------------
+Input: 
+(10sec, *)
+Normalized: 
+(10sec, *)
+AST: 
+ArrayInterval(
+	SimpleInterval(10sec, *, )
+)
+TSS: 0.1
+TSS2: 0.1
+Duration (Sec): 10
+----------------------------
+Input: 
+2[(1min, 85, 95), (30sec, 50)]
+Normalized: 
+2[(1min, 85, 95), (30sec, 50)]
+AST: 
+ArrayInterval(
+	)
+TSS: 3.1
+TSS2: 3.3
+Duration (Sec): 180
+----------------------------
+Input: 
+2[(100, 30sec, 45sec), (30sec, 50)]
+Normalized: 
+2[(100, 30sec, 45sec), (30sec, 50)]
+AST: 
+ArrayInterval(
+	)
+TSS: 2.5
+TSS2: 3
+Duration (Sec): 135
+----------------------------
+Input: 
+(10min, 100, FTP), (5min, 55, easy)
+Normalized: 
+(10min, 100, FTP)
+(5min, 55, easy)
+AST: 
+ArrayInterval(
+	SimpleInterval(10min, 100%, FTP)
+	SimpleInterval(5min, 55%, easy)
+)
+TSS: 19.2
+TSS2: 19.7
+Duration (Sec): 900
+----------------------------
+Input: 
+4[(1min, 100, hard), (30sec, 50, easy)]
+Normalized: 
+4[(1min, 100, hard), (30sec, 50, easy)]
+AST: 
+ArrayInterval(
+	RepeatInterval(count=4, 
+		SimpleInterval(1min, 100%, hard)
+		SimpleInterval(30sec, 50%, easy)
+	)
+)
+TSS: 7.5
+TSS2: 7.8
+Duration (Sec): 360
+----------------------------
+Input: 
+(155w, 310w, 1min, build to ftp)
+Normalized: 
+(1min, 50, 100, build to ftp)
+AST: 
+ArrayInterval(
+	BuildInterval(1min, 155w, 310w, build to ftp)
+)
+TSS: 1
+TSS2: 1.1
+Duration (Sec): 60
 ----------------------------

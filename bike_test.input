@@ -1,3 +1,11 @@
+(1hr, 75)
+-- EOT
+(1hr, 85)
+-- EOT
+(1hr, 75), (1hr, 85)
+-- EOT
+(1min, 55, 75)
+-- EOT
 (10min, 85, HIM)
 -- EOT
 (20min, 55, 75, Warm up)
@@ -9,4 +17,26 @@
 (5min, easy)
 -- EOT
 (10min, 100, FTP, 2min)
+-- EOT
+(1min, 55, 70rpm)
+-- EOT
+(1min, 55, 2% grade)
+-- EOT
+(1hr, 75), (20mi, 85)
+-- EOT
+(10min, *, Free)
+-- EOT
+(10min, 100, FTP)
+-- EOT
+(10sec, *)
+-- EOT
+2[(1min, 85, 95), (30sec, 50)]
+-- EOT
+2[(100, 30sec, 45sec), (30sec, 50)]
+-- EOT
+(10min, 100, FTP), (5min, 55, easy)
+-- EOT
+4[(1min, 100, hard), (30sec, 50, easy)]
+-- EOT
+(155w, 310w, 1min, build to ftp)
 -- EOT

@@ -1,0 +1,16 @@
+(100yards, 100)(10s, 0)
+-- EOT
+(10min, *, TT)
+-- EOT
+(500y, 100, free)
+-- EOT
+2[(200yards, 100, neg split, 30s)]
+-- EOT
+(500y, *, free)
+-- EOT
+(500yards, 90, 50sec, warmup)
+-- EOT
+(400yards, +10s, 30sec, warmup)
+-- EOT
+"Comment 123"
+-- EOT

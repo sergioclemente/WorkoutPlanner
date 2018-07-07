@@ -1,0 +1,108 @@
+Input: 
+(100yards, 100)(10s, 0)
+Normalized: 
+(100yards, 100)
+(10sec, 0)
+AST: 
+ArrayInterval(
+	SimpleInterval(100yards, 100%, )
+	SimpleInterval(10sec, 0%, )
+)
+TSS: 2.4
+TSS2: 2.5
+Yards: 100
+Duration (Sec): 95
+----------------------------
+Input: 
+(10min, *, TT)
+Normalized: 
+(10min, *, TT)
+AST: 
+ArrayInterval(
+	SimpleInterval(10min, *, TT)
+)
+TSS: 12.9
+TSS2: 13.2
+Yards: 621.2
+Duration (Sec): 600
+----------------------------
+Input: 
+(500y, 100, free)
+Normalized: 
+(500yards, 100, free)
+AST: 
+ArrayInterval(
+	SimpleInterval(500yards, 100%, free)
+)
+TSS: 11.8
+TSS2: 11.8
+Yards: 500
+Duration (Sec): 425
+----------------------------
+Input: 
+2[(200yards, 100, neg split, 30s)]
+Normalized: 
+2[(200yards, 100, neg split, 30sec)]
+AST: 
+ArrayInterval(
+	RepeatInterval(count=2, 
+		SimpleInterval(200yards, 100%, neg split, 30sec)
+	)
+)
+TSS: 9.4
+TSS2: 10.3
+Yards: 400
+Duration (Sec): 370
+----------------------------
+Input: 
+(500y, *, free)
+Normalized: 
+(500yards, *, free)
+AST: 
+ArrayInterval(
+	SimpleInterval(500yards, *, free)
+)
+TSS: 10.4
+TSS2: 10.6
+Yards: 500
+Duration (Sec): 482.9545454545454
+----------------------------
+Input: 
+(500yards, 90, 50sec, warmup)
+Normalized: 
+(500yards, 90, warmup, 50sec)
+AST: 
+ArrayInterval(
+	SimpleInterval(500yards, 90%, warmup, 50sec)
+)
+TSS: 10.6
+TSS2: 11.8
+Yards: 500
+Duration (Sec): 522.2222222222222
+----------------------------
+Input: 
+(400yards, +10s, 30sec, warmup)
+Normalized: 
+(400yards, +10s, warmup, 30sec)
+AST: 
+ArrayInterval(
+	SimpleInterval(400yards, CSS+10, warmup, 30sec)
+)
+TSS: 8.5
+TSS2: 9.2
+Yards: 400
+Duration (Sec): 410.0000000000001
+----------------------------
+Input: 
+"Comment 123"
+Normalized: 
+"Comment 123"
+AST: 
+ArrayInterval(
+	Comment(Comment 123)
+)
+TSS: 0
+TSS2: 0
+Yards: 0
+Duration (Sec): 0
+----------------------------

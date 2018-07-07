@@ -124,6 +124,7 @@ var Model;
             return MyMath.decimalAdjust('ceil', value, exp);
         }
     }
+    Model.MyMath = MyMath;
     class DistanceUnitHelper {
         static convertTo(value, unitFrom, unitTo) {
             // convert first to meters
@@ -743,6 +744,9 @@ var Model;
                         else {
                             return "CSS";
                         }
+                    }
+                    else if (this.originalUnit == IntensityUnit.FreeRide) {
+                        return "*";
                     }
                     else {
                         return MyMath.round10(this.originalValue, -1) + IntensityUnitHelper.toString(this.originalUnit);
@@ -1454,9 +1458,9 @@ var Model;
         // Parses the string, converts into the object, then convert back into the
         // default units. For example: if the unit is in min/km it will be converted
         // to IF so that its independent of thresholds.
-        static normalize(factory, input, unparser_format) {
+        static normalize(factory, input) {
             let interval = IntervalParser.parse(factory, input);
-            let visitor = new UnparserVisitor(unparser_format);
+            let visitor = new UnparserVisitor();
             VisitorHelper.visitAndFinalize(visitor, interval);
             return visitor.output;
         }
@@ -1671,6 +1675,13 @@ var Model;
             }
         }
         finalize() {
+            // If the moving average was never "flushed"
+            // we then flush so that we have some values
+            // to compute.
+            if (!this.ma.is_full()) {
+                this.sum += this.ma.get_moving_average();
+                this.count += 1;
+            }
             this.np = MyMath.round10(Math.sqrt(Math.sqrt(this.sum / this.count)), -1);
         }
         getIF() {
@@ -2459,15 +2470,9 @@ var Model;
         }
     }
     Model.WorkoutTextVisitor = WorkoutTextVisitor;
-    let UnparserFormat;
-    (function (UnparserFormat) {
-        UnparserFormat[UnparserFormat["NoWhitespaces"] = 0] = "NoWhitespaces";
-        UnparserFormat[UnparserFormat["Whitespaces"] = 1] = "Whitespaces";
-    })(UnparserFormat = Model.UnparserFormat || (Model.UnparserFormat = {}));
     class UnparserVisitor {
-        constructor(format) {
+        constructor() {
             this.output = "";
-            this.format = format;
             this.level = 0;
         }
         getDurationPretty(d) {
@@ -2507,7 +2512,7 @@ var Model;
                 console.assert(intensity_pretty.length > 0, "" + interval.getIntensity());
                 let duration_rest_pretty = this.getDurationPretty(interval.getRestDuration());
                 console.assert(duration_rest_pretty.length > 0, "" + interval.getRestDuration());
-                this.output += stringFormat("({0}, {1}, {2}{3})", duration_pretty, intensity_pretty, duration_rest_pretty, this.getTitlePretty(interval));
+                this.output += stringFormat("({0}, {1}{2}, {3})", duration_pretty, intensity_pretty, this.getTitlePretty(interval), duration_rest_pretty);
             }
             else {
                 this.output += stringFormat("({0}, {1}{2})", this.getDurationPretty(interval.getWorkDuration()), this.getIntensityPretty(interval.getIntensity()), this.getTitlePretty(interval));
@@ -2550,7 +2555,7 @@ var Model;
         }
         visitRampBuildInterval(interval) {
             this.level++;
-            this.output += stringFormat("({0}, {1}, {2}{3})", this.getIntensityPretty(interval.getStartIntensity()), this.getIntensityPretty(interval.getEndIntensity()), this.getDurationPretty(interval.getWorkDuration()), this.getTitlePretty(interval));
+            this.output += stringFormat("({0}, {1}, {2}{3})", this.getDurationPretty(interval.getWorkDuration()), this.getIntensityPretty(interval.getStartIntensity()), this.getIntensityPretty(interval.getEndIntensity()), this.getTitlePretty(interval));
             this.level--;
             this.addSeparator();
         }
@@ -2592,17 +2597,10 @@ var Model;
         }
         addSeparator() {
             if (this.level == 1) {
-                if (this.format == UnparserFormat.Whitespaces) {
-                    this.output += "\n";
-                    return;
-                }
+                this.output += "\n";
+                return;
             }
-            if (this.format == UnparserFormat.Whitespaces) {
-                this.output += ", ";
-            }
-            else {
-                this.output += ",";
-            }
+            this.output += ", ";
         }
         trimSeparator() {
             while (this.output.endsWith(", ")) {
@@ -2745,6 +2743,9 @@ var Model;
                 actualSpeedMph = 20;
             }
             return actualSpeedMph;
+        }
+        getSportType() {
+            return this.sportType;
         }
         createIntensity(value, unit) {
             var ifValue = 0;
@@ -2913,7 +2914,7 @@ var Model;
         }
         getNormalizedWorkoutDefinition() {
             let object_factory = new ObjectFactory(this.userProfile, this.sportType);
-            return IntervalParser.normalize(object_factory, this.workoutDefinition, UnparserFormat.Whitespaces);
+            return IntervalParser.normalize(object_factory, this.workoutDefinition);
         }
         withDefinition(workoutTitle, workoutDefinition) {
             let object_factory = new ObjectFactory(this.userProfile, this.sportType);

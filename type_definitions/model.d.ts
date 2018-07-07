@@ -38,6 +38,20 @@ declare module Model {
         HeartRate = 10,
         FreeRide = 11,
     }
+    class MyMath {
+        /**
+         * Decimal adjustment of a number.
+         *
+         * @param   {String}    type    The type of adjustment.
+         * @param   {Number}    value   The number.
+         * @param   {Integer}   exp     The exponent (the 10 logarithm of the adjustment base).
+         * @returns {Number}            The adjusted value.
+         */
+        static decimalAdjust(type: string, value: number, exp: number): number;
+        static round10(value: number, exp: number): number;
+        static floor10(value: number, exp: number): number;
+        static ceil10(value: number, exp: number): number;
+    }
     class DistanceUnitHelper {
         static convertTo(value: number, unitFrom: DistanceUnit, unitTo: DistanceUnit): number;
     }
@@ -205,7 +219,7 @@ declare module Model {
         static isWhitespace(ch: string): boolean;
         static throwParserError(column: number, msg: string): void;
         static parse(factory: ObjectFactory, input: string): ArrayInterval;
-        static normalize(factory: ObjectFactory, input: string, unparser_format: UnparserFormat): string;
+        static normalize(factory: ObjectFactory, input: string): string;
     }
     class VisitorHelper {
         static visitAndFinalize(visitor: Visitor, interval: Interval): any;
@@ -386,10 +400,6 @@ declare module Model {
         getIntervalTitle(interval: Interval): string;
         finalize(): void;
     }
-    enum UnparserFormat {
-        NoWhitespaces = 0,
-        Whitespaces = 1,
-    }
     class SpeedParser {
         static getSpeedInMph(speed: string): number;
         static _extractNumber(numberString: string, decimalMultiplier: number, strSeparator: string, strSuffix: string): number;
@@ -419,6 +429,7 @@ declare module Model {
         private sportType;
         constructor(userProfile: UserProfile, sportType: SportType);
         private getBikeSpeedMphForIntensity(intensity);
+        getSportType(): SportType;
         createIntensity(value: number, unit: IntensityUnit): Intensity;
         createDuration(intensity: Intensity, unit: DurationUnit, value: number): Duration;
         getEasyThreshold(): number;

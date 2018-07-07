@@ -1,0 +1,93 @@
+Input: 
+(1km, 100), (1km, 5min/km)
+Normalized: 
+(1km, 100)
+(1km, 74.6)
+AST: 
+ArrayInterval(
+	SimpleInterval(1km, 100%, )
+	SimpleInterval(1km, 5min/km, )
+)
+TSS: 10.8
+TSS2: 11.3
+Distance (Miles): 1.2mi
+Distance (Kilometers): 2km
+Duration (Sec): 523.6936292054402
+----------------------------
+Input: 
+(200m, 100)(45s, 100)
+Normalized: 
+(200m, 100)
+(45sec, 100)
+AST: 
+ArrayInterval(
+	SimpleInterval(200m, 100%, )
+	SimpleInterval(45sec, 100%, )
+)
+TSS: 2.5
+TSS2: 2.5
+Distance (Miles): 0.2mi
+Distance (Kilometers): 0.4km
+Duration (Sec): 89.73872584108804
+----------------------------
+Input: 
+(2mi, 6:00min/mi, threshold)
+Normalized: 
+(2mi, 100, threshold)
+AST: 
+ArrayInterval(
+	SimpleInterval(2mi, 6:00min/mi, threshold)
+)
+TSS: 20
+TSS2: 20
+Distance (Miles): 2mi
+Distance (Kilometers): 3.2km
+Duration (Sec): 720
+----------------------------
+Input: 
+(2mi, 80)
+Normalized: 
+(2mi, 80)
+AST: 
+ArrayInterval(
+	SimpleInterval(2mi, 80%, )
+)
+TSS: 16
+TSS2: 16
+Distance (Miles): 2mi
+Distance (Kilometers): 3.2km
+Duration (Sec): 900
+----------------------------
+Input: 
+[(6min, 100), (2min, 80)], (10min, 70)
+Normalized: 
+[(6min, 100), (2min, 80)]
+(10min, 70)
+AST: 
+ArrayInterval(
+	ArrayInterval(
+		SimpleInterval(6min, 100%, )
+		SimpleInterval(2min, 80%, )
+	)
+	SimpleInterval(10min, 70%, )
+)
+TSS: 20.3
+TSS2: 19.7
+Distance (Miles): 2.4mi
+Distance (Kilometers): 3.9km
+Duration (Sec): 1080
+----------------------------
+Input: 
+(2mi, 7:00min/mi)
+Normalized: 
+(2mi, 85.7)
+AST: 
+ArrayInterval(
+	SimpleInterval(2mi, 7:00min/mi, )
+)
+TSS: 17.1
+TSS2: 18
+Distance (Miles): 2mi
+Distance (Kilometers): 3.2km
+Duration (Sec): 840
+----------------------------

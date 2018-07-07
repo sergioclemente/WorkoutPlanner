@@ -92,7 +92,7 @@ module Model {
 		}
 	};
 
-	class MyMath {
+	export class MyMath {
 		/**
 		 * Decimal adjustment of a number.
 		 *
@@ -766,6 +766,8 @@ module Model {
 						} else {
 							return "CSS";
 						}
+					} else if (this.originalUnit == IntensityUnit.FreeRide) {
+						return "*";
 					} else {
 						return MyMath.round10(this.originalValue, -1) + IntensityUnitHelper.toString(this.originalUnit);
 					}
@@ -1560,9 +1562,9 @@ module Model {
 		// Parses the string, converts into the object, then convert back into the
 		// default units. For example: if the unit is in min/km it will be converted
 		// to IF so that its independent of thresholds.
-		static normalize(factory: ObjectFactory, input: string, unparser_format: UnparserFormat): string {
+		static normalize(factory: ObjectFactory, input: string): string {
 			let interval = IntervalParser.parse(factory, input);
-			let visitor = new UnparserVisitor(unparser_format);
+			let visitor = new UnparserVisitor();
 			VisitorHelper.visitAndFinalize(visitor, interval);
 			return visitor.output;
 		}
@@ -1798,6 +1800,13 @@ module Model {
 		}
 
 		finalize(): void {
+			// If the moving average was never "flushed"
+			// we then flush so that we have some values
+			// to compute.
+			if (!this.ma.is_full()) {
+				this.sum += this.ma.get_moving_average();
+				this.count += 1;
+			}
 			this.np = MyMath.round10(Math.sqrt(Math.sqrt(this.sum / this.count)), -1);
 		}
 
@@ -2644,18 +2653,12 @@ module Model {
 		finalize(): void {
 		}
 	}
-	export enum UnparserFormat {
-		NoWhitespaces,
-		Whitespaces
-	}
 	class UnparserVisitor implements Visitor {
 		output: string;
-		format: UnparserFormat;
 		level: number;
 
-		constructor(format: UnparserFormat) {
+		constructor() {
 			this.output = "";
-			this.format = format;
 			this.level = 0;
 		}
 
@@ -2696,7 +2699,7 @@ module Model {
 				console.assert(intensity_pretty.length > 0, "" + interval.getIntensity());
 				let duration_rest_pretty = this.getDurationPretty(interval.getRestDuration());
 				console.assert(duration_rest_pretty.length > 0, "" + interval.getRestDuration())
-				this.output += stringFormat("({0}, {1}, {2}{3})", duration_pretty, intensity_pretty, duration_rest_pretty, this.getTitlePretty(interval));
+				this.output += stringFormat("({0}, {1}{2}, {3})", duration_pretty, intensity_pretty, this.getTitlePretty(interval), duration_rest_pretty);
 			} else {
 				this.output += stringFormat("({0}, {1}{2})", this.getDurationPretty(interval.getWorkDuration()), this.getIntensityPretty(interval.getIntensity()), this.getTitlePretty(interval));
 			}
@@ -2737,7 +2740,7 @@ module Model {
 		}
 		visitRampBuildInterval(interval: RampBuildInterval): void {
 			this.level++;
-			this.output += stringFormat("({0}, {1}, {2}{3})", this.getIntensityPretty(interval.getStartIntensity()), this.getIntensityPretty(interval.getEndIntensity()), this.getDurationPretty(interval.getWorkDuration()), this.getTitlePretty(interval));
+			this.output += stringFormat("({0}, {1}, {2}{3})", this.getDurationPretty(interval.getWorkDuration()), this.getIntensityPretty(interval.getStartIntensity()), this.getIntensityPretty(interval.getEndIntensity()), this.getTitlePretty(interval));
 			this.level--;
 			this.addSeparator();
 		}
@@ -2780,16 +2783,10 @@ module Model {
 
 		addSeparator(): void {
 			if (this.level == 1) {
-				if (this.format == UnparserFormat.Whitespaces) {
-					this.output += "\n";
-					return;
-				}
+				this.output += "\n";
+				return;
 			}
-			if (this.format == UnparserFormat.Whitespaces) {
-				this.output += ", ";
-			} else {
-				this.output += ",";
-			}
+			this.output += ", ";
 		}
 
 		trimSeparator() : void {
@@ -2963,6 +2960,10 @@ module Model {
 				actualSpeedMph = 20;
 			}
 			return actualSpeedMph;
+		}
+
+		getSportType() : SportType {
+			return this.sportType;
 		}
 
 		createIntensity(value: number, unit: IntensityUnit) {
@@ -3158,7 +3159,7 @@ module Model {
 
 		getNormalizedWorkoutDefinition(): string {
 			let object_factory = new ObjectFactory(this.userProfile, this.sportType);
-			return IntervalParser.normalize(object_factory, this.workoutDefinition, UnparserFormat.Whitespaces);
+			return IntervalParser.normalize(object_factory, this.workoutDefinition);
 		}
 
 		withDefinition(workoutTitle: string, workoutDefinition: string): WorkoutBuilder {

@@ -1,0 +1,12 @@
+(1km, 100), (1km, 5min/km)
+-- EOT
+(200m, 100)(45s, 100)
+-- EOT
+(2mi, 6:00min/mi, threshold)
+-- EOT
+(2mi, 80)
+-- EOT
+[(6min, 100), (2min, 80)], (10min, 70)
+-- EOT
+(2mi, 7:00min/mi)
+-- EOT

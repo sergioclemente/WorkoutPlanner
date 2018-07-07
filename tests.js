@@ -45,8 +45,6 @@ var of_run = new Model.ObjectFactory(up, Model.SportType.Run);
 var of_other = new Model.ObjectFactory(up, Model.SportType.Other);
 describe('DistanceUnitHelper', function () {
     it('convert miles to kilometers', function () {
-        // TODO: Remove this here.
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "(10min, *, Free)");
         let res = Model.DistanceUnitHelper.convertTo(1000, Model.DistanceUnit.Miles, Model.DistanceUnit.Kilometers);
         expect_eq_nbr(1609.344, res);
     });
@@ -73,23 +71,6 @@ describe('Intensity', function () {
         expect_eq_str("132bpm", hr_visitor.getIntensityPretty(intensity_85_pct));
     });
 });
-describe('TSS', function () {
-    it('1hr @ 75%', function () {
-        var int1hri75 = Model.IntervalParser.parse(of_bike, "(1hr, 75)");
-        expect_eq_nbr(56.3, int1hri75.getTSS());
-        expect_eq_nbr(60, Model.TSSCalculator.compute(int1hri75));
-    });
-    it('1hr @ 85%', function () {
-        var int1hri85 = Model.IntervalParser.parse(of_bike, "(1hr, 85)");
-        expect_eq_nbr(72.2, int1hri85.getTSS());
-        expect_eq_nbr(76.5, Model.TSSCalculator.compute(int1hri85));
-    });
-    it('1min @ 55%-75%', function () {
-        var buildInterval = Model.IntervalParser.parse(of_bike, "(1min, 55, 75)");
-        expect_eq_nbr(0.7, buildInterval.getTSS());
-        expect_eq_nbr(0.8, Model.TSSCalculator.compute(buildInterval));
-    });
-});
 describe('Other Sport Type', function () {
     it('1min @ 55%-75%', function () {
         var buildInterval = Model.IntervalParser.parse(of_other, "(1min, 55, 75)");
@@ -108,27 +89,6 @@ describe('Bugs', function () {
         expect_eq_nbr(Model.DistanceUnit.Yards, cd2.getUnit());
         expect_eq_nbr(400, cd2.getValue());
     });
-    it('Low cadence intervals being parsed as intensity', function () {
-        var low_cadence = Model.IntervalParser.parse(of_bike, "(1min, 55, 70rpm)");
-        let first_interval = low_cadence.getIntervals()[0];
-        expect_eq_nbr(0.55, first_interval.getIntensity().getOriginalValue());
-        expect_eq_str("70rpm", first_interval.getTitle());
-    });
-    it('grade being parsed as intensity', function () {
-        var low_cadence = Model.IntervalParser.parse(of_bike, "(1min, 55, 2% grade)");
-        let first_interval = low_cadence.getIntervals()[0];
-        expect_eq_nbr(0.55, first_interval.getIntensity().getOriginalValue());
-        expect_eq_str("2% grade", first_interval.getTitle());
-    });
-    it('Mixed time and distance', function () {
-        var int_par_bug = Model.IntervalParser.parse(of_bike, "(1hr, 75), (20mi, 85)");
-        expect_eq_nbr(0.75, int_par_bug.getIntervals()[0].getIntensity().getOriginalValue());
-        expect_eq_nbr(0.85, int_par_bug.getIntervals()[1].getIntensity().getOriginalValue());
-    });
-    it('Incorrect distance', function () {
-        let interval = Model.IntervalParser.parse(of_run, "(1km, 100), (1km, 5min/km)");
-        expect_eq_str("1.2mi", interval.getWorkDuration().toStringDistance(Model.DistanceUnit.Miles));
-    });
     // it('90s duration', function () {
     // 	var interval = Model.IntervalParser.parse(of_bike, "(1min30s, 55)");
     // 	expect_eq_nbr(90, interval.getTotalDuration().getSeconds());
@@ -141,26 +101,11 @@ describe('Combine duration', function () {
         expect_eq_nbr(Model.DistanceUnit.Yards, dur.getUnit());
         expect_eq_nbr(300, dur.getValue());
     });
-    it('Combine distance and time', function () {
-        let interval = Model.IntervalParser.parse(of_swim, `(100yards, 100)(10s, 0)`);
-        expect_eq_nbr(100, interval.getTotalDuration().getValueInUnit(Model.DistanceUnit.Yards));
-        expect_eq_nbr(95, interval.getTotalDuration().getSeconds(), 1);
-    });
-    it('Combine durations in a run', function () {
-        let interval = Model.IntervalParser.parse(of_run, `(200m, 100)(45s, 100)`);
-        expect_eq_nbr(400, interval.getTotalDuration().getValueInUnit(Model.DistanceUnit.Meters), 2);
-        expect_eq_nbr(90, interval.getTotalDuration().getSeconds(), 1);
-    });
 });
 describe('IntervalParser', function () {
     it('Parse double', function () {
         expect_eq_nbr(123, Model.IntervalParser.parseDouble("123", 0).value);
         expect_eq_nbr(123.456, Model.IntervalParser.parseDouble("123.456", 0).value);
-    });
-    it('1hr @ 75%', function () {
-        var int_par_1hr_75 = Model.IntervalParser.parse(of_bike, "(1hr, 75)");
-        expect_eq_nbr(56.3, int_par_1hr_75.getTSS());
-        expect_eq_nbr(60, Model.TSSCalculator.compute(int_par_1hr_75));
     });
     it('1hr @ 75%, 1hr @ 85%', function () {
         var int_par_2hr_75_85 = Model.IntervalParser.parse(of_bike, "(1hr, 75), (1hr, 85)");
@@ -625,16 +570,6 @@ describe('Swim', function () {
     it('speed (meters)', function () {
         expect_eq_nbr(/* 1:32 */ 92.95, new Model.ObjectFactory(up, Model.SportType.Swim).createDuration(intensity_100_pct, Model.DistanceUnit.Meters, 100).getSeconds());
     });
-    it('distance and rest interval', function () {
-        let interval = Model.IntervalParser.parse(of_swim, `2[(200yards, 100, neg split, 30s)]`);
-        expect_eq_nbr(400, interval.getTotalDuration().getValueInUnit(Model.DistanceUnit.Yards));
-        expect_eq_nbr(30, interval.getRestDuration().getSeconds());
-    });
-    it('distance', function () {
-        let interval = Model.IntervalParser.parse(of_swim, `(500y, 100, free)`);
-        expect_eq_nbr(500, interval.getTotalDuration().getValueInUnit(Model.DistanceUnit.Yards));
-        expect_eq_nbr(11.8, interval.getTSS());
-    });
 });
 describe('Player Helper', function () {
     it('Two intervals, 2 boundaries', function () {
@@ -647,43 +582,63 @@ describe('Player Helper', function () {
         expect_eq_str(null, ph.get(40 * 60));
     });
 });
-describe('free ride', function () {
-    it('simple free ride', function () {
-        let array_interval = Model.IntervalParser.parse(of_swim, "(10min, *, TT)");
-        let free_ride_interval = array_interval.getIntervals()[0];
-        expect_eq_nbr(Model.IntensityUnit.FreeRide, free_ride_interval.getIntensity().getOriginalUnit());
-        expect_eq_str("TT", free_ride_interval.getTitle());
-    });
-});
-function GoldenTest(input_file, golden_file) {
+function GoldenTest(of, input_file, golden_file) {
     let fs = require('fs');
     let input = fs.readFileSync(input_file).toString();
     let test_cases = input.toString().split("-- EOT\n");
-    let actual_output = "";
     let separator = "----------------------------\n";
+    let expected_output = fs.readFileSync(golden_file).toString();
+    let expected_outputs = expected_output.split(separator);
+    // Set this to true if you need to regenerate the files.
+    let generate_golden = false;
+    let final_output = "";
     for (let i = 0; i < test_cases.length; ++i) {
         let input = test_cases[i];
         // Skip last one which is a blank.
         if (input.trim().length == 0) {
             continue;
         }
-        let interval = Model.IntervalParser.parse(of_bike, input);
-        actual_output += "Input: \n";
+        let interval = Model.IntervalParser.parse(of, input);
+        let actual_output = "Input: \n";
         actual_output += input;
-        let normalized_text = Model.IntervalParser.normalize(of_bike, input, Model.UnparserFormat.Whitespaces);
+        let normalized_text = Model.IntervalParser.normalize(of, input);
         actual_output += "Normalized: \n";
         actual_output += normalized_text;
         actual_output += "\n";
         actual_output += "AST: \n";
         actual_output += Model.TreePrinterVisitor.Print(interval);
-        actual_output += separator;
+        actual_output += string_format("TSS: {0}\n", interval.getTSS());
+        actual_output += string_format("TSS2: {0}\n", interval.getTSS2());
+        if (of.getSportType() == Model.SportType.Swim) {
+            actual_output += string_format("Yards: {0}\n", interval.getTotalDuration().getValueInUnit(Model.DistanceUnit.Yards));
+        }
+        else if (of.getSportType() == Model.SportType.Run) {
+            actual_output += string_format("Distance (Miles): {0}\n", interval.getWorkDuration().toStringDistance(Model.DistanceUnit.Miles));
+            actual_output += string_format("Distance (Kilometers): {0}\n", interval.getWorkDuration().toStringDistance(Model.DistanceUnit.Kilometers));
+        }
+        actual_output += string_format("Duration (Sec): {0}\n", interval.getTotalDuration().getSeconds());
+        if (!generate_golden) {
+            expect_eq_str(expected_outputs[i], actual_output);
+        }
+        // final_output is used for writing to the golden_file
+        final_output += actual_output;
+        final_output += separator;
     }
-    let expected_output = fs.readFileSync(golden_file).toString();
-    expect_eq_str(expected_output, actual_output);
+    console.log(generate_golden);
+    console.log(final_output);
+    if (generate_golden) {
+        fs.writeFileSync(golden_file, final_output);
+    }
 }
-describe('debug printing', function () {
-    it('test.input golden', function () {
-        GoldenTest("./bike_test.input", "./bike_test.golden");
+describe('Golden Test', function () {
+    it('swim', function () {
+        GoldenTest(of_swim, "./swim_test.input", "./swim_test.golden");
+    });
+    it('bike', function () {
+        GoldenTest(of_bike, "./bike_test.input", "./bike_test.golden");
+    });
+    it('run', function () {
+        GoldenTest(of_run, "./run_test.input", "./run_test.golden");
     });
 });
 describe('rest interval ride', function () {
@@ -703,50 +658,13 @@ describe('NumberAndUnitParser', function () {
         expect_eq_str("/400m", p.getUnit());
     });
 });
-function parseAndNormalize(of, insert_whitespaces, text, expected_text = null) {
-    let format_mode = Model.UnparserFormat.NoWhitespaces;
-    if (insert_whitespaces) {
-        format_mode = Model.UnparserFormat.Whitespaces;
-    }
-    let normalized_text = Model.IntervalParser.normalize(of, text, format_mode);
+function parseAndNormalize(of, text, expected_text = null) {
+    let normalized_text = Model.IntervalParser.normalize(of, text);
     if (expected_text == null) {
         expected_text = text;
     }
     expect_eq_str(expected_text, normalized_text);
 }
-describe('parse and unparse', function () {
-    it('no whitespace', function () {
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "(10min, 100, FTP)");
-        parseAndNormalize(of_run, /*insert_whitespaces=*/ false, "(2mi, 6:00min/mi, threshold)", "(2mi, 100, threshold)");
-        parseAndNormalize(of_swim, /*insert_whitespaces=*/ false, "\"Comment 123\"");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "(155w, 310w, 1min, build to ftp)", "(50, 100, 1min, build to ftp)");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "4[(1min, 100, hard),(30sec, 50, easy)]");
-        parseAndNormalize(of_swim, /*insert_whitespaces=*/ false, "(400yards, +10s, 30sec, warmup)");
-        parseAndNormalize(of_run, /*insert_whitespaces=*/ false, "(2mi, 80)");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "(10sec, *)");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "(10min, *, Free)");
-        parseAndNormalize(of_run, /*insert_whitespaces=*/ false, "(2mi, 7:00min/mi)", "(2mi, 85.7)");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "2[(1min, 85, 95),(30sec, 50)]");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ false, "2[(100, 30sec, 45sec),(30sec, 50)]");
-        parseAndNormalize(of_swim, /*insert_whitespaces=*/ false, "(500y, *, free)", "(500yards, *, free)");
-        parseAndNormalize(of_swim, /*insert_whitespaces=*/ false, "(500yards, 90, 50sec, warmup)", "(500yards, 90, 50sec, warmup)");
-    });
-    it('with whitespace', function () {
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "(10min, 100, FTP)");
-        parseAndNormalize(of_run, /*insert_whitespaces=*/ true, "(2mi, 6:00min/mi, threshold)", "(2mi, 100, threshold)");
-        parseAndNormalize(of_swim, /*insert_whitespaces=*/ true, "\"Comment 123\"");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "(155w, 310w, 1min, build to ftp)", "(50, 100, 1min, build to ftp)");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "4[(1min, 100, hard), (30sec, 50, easy)]");
-        parseAndNormalize(of_swim, /*insert_whitespaces=*/ true, "(400yards, +10s, 30sec, warmup)");
-        parseAndNormalize(of_run, /*insert_whitespaces=*/ true, "(2mi, 80)");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "(10sec, *)");
-        parseAndNormalize(of_run, /*insert_whitespaces=*/ true, "[(6min, 100), (2min, 80)], (10min, 70)", "[(6min, 100), (2min, 80)]\n(10min, 70)");
-        parseAndNormalize(of_run, /*insert_whitespaces=*/ true, "(2mi, 7:00min/mi)", "(2mi, 85.7)");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "2[(1min, 85, 95), (30sec, 50)]");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "2[(100, 30sec, 45sec), (30sec, 50)]");
-        parseAndNormalize(of_bike, /*insert_whitespaces=*/ true, "(10min, 100, FTP), (5min, 55, easy)", "(10min, 100, FTP)\n(5min, 55, easy)");
-    });
-});
 function textPrerocessor(input, expected) {
     let tp = new Model.TextPreprocessor();
     let actual = tp.process(input);
