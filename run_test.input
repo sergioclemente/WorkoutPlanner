@@ -1,3 +1,5 @@
+{name=Mixed units and percentage}
+{output_unit=mi/hr}
 (1km, 100), (1km, 5min/km)
 -- EOT
 (200m, 100)(45s, 100)
@@ -17,4 +19,12 @@
 (60min, 6:00min/mi)
 -- EOT
 (60min, 6:00 min/mi)
+-- EOT
+{output_unit=min/mi}
+(10s, 60, relaxed)
+-- EOT
+(10s, relaxed)
+-- EOT
+{output_unit=/400meters}
+(1mi, 100, threshold)
 -- EOT

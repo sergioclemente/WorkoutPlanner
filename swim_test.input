@@ -26,3 +26,45 @@
 -- EOT
 (500yards, warmup, 100)
 -- EOT
+{output_unit=/100yards}
+(500yards, 90, 50s, warmup)
+-- EOT
+{output_unit=/100yards}
+(100yards, 100, 10s, strong)
+-- EOT
+{output_unit=/100yards}
+(500yards, +10, 50s, warmup)
+-- EOT
+{output_unit=/100yards}
+(500yards, 50s, warmup)
+-- EOT
+{output_unit=/100yards}
+(500yards, -5, 50s, warmup)
+-- EOT
+{output_unit=/100yards}
+(500yards, -10, 50s, warmup)
+-- EOT
+{output_unit=if}
+(500yards, 50s, warmup)
+-- EOT
+{output_unit=if}
+(500yards, +10, 50s, warmup)
+-- EOT
+{output_unit=if}
+(100yards, -5, 15s, strong)
+-- EOT
+{output_unit=if}
+(100yards, +0, 20s, strong)
+-- EOT
+{output_unit=if}
+(100yards, -0, 5s, strong)
+-- EOT
+{output_unit=if}
+(400yards, free)
+-- EOT
+{output_unit=if}
+(300yards, pull)
+-- EOT
+{output_unit=if}
+(300yards, pull, 10s)
+-- EOT

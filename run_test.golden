@@ -1,3 +1,4 @@
+Name: Mixed units and percentage
 Input: 
 (1km, 100), (1km, 5min/km)
 Normalized: 
@@ -11,6 +12,10 @@ ArrayInterval(
 IF (Avg): 0.8635076320941238
 TSS: 10.8
 TSS2: 11.3
+Output Unit: mi/h
+Pretty Print:
+	* 1km @ 10mi/h
+	* 1km easy
 Duration Unit: km
 Kilometers: 2
 Duration (Sec): 523.6936292054402
@@ -28,7 +33,7 @@ ArrayInterval(
 IF (Avg): 1
 TSS: 2.5
 TSS2: 2.5
-Intensity Unit: %
+Dominant Unit: %
 Pretty Print:
 	* 200m @ 100%
 	* 45'' @ 100%
@@ -45,7 +50,7 @@ ArrayInterval(
 IF (Avg): 1
 TSS: 20
 TSS2: 20
-Intensity Unit: min/mi
+Dominant Unit: min/mi
 Pretty Print:
 	* 2mi threshold @ 6:00min/mi
 Duration Unit: mi
@@ -63,7 +68,7 @@ ArrayInterval(
 IF (Avg): 0.8
 TSS: 16
 TSS2: 16
-Intensity Unit: %
+Dominant Unit: %
 Pretty Print:
 	* 2mi @ 80%
 Duration Unit: mi
@@ -86,7 +91,7 @@ ArrayInterval(
 IF (Avg): 0.8225975119502044
 TSS: 20.3
 TSS2: 19.7
-Intensity Unit: %
+Dominant Unit: %
 Pretty Print:
 	* 6' @ 100% - 2' @ 80%
 	* 10' easy
@@ -105,7 +110,7 @@ ArrayInterval(
 IF (Avg): 0.8571428571428571
 TSS: 17.1
 TSS2: 18
-Intensity Unit: min/mi
+Dominant Unit: min/mi
 Pretty Print:
 	* 2mi @ 7:00min/mi
 Duration Unit: mi
@@ -139,7 +144,7 @@ ArrayInterval(
 IF (Avg): 0.9986322732385723
 TSS: 74.8
 TSS2: 74.9
-Intensity Unit: min/km
+Dominant Unit: min/km
 Pretty Print:
 	* 45' @ 3:44min/km
 Duration Unit: min
@@ -157,7 +162,7 @@ ArrayInterval(
 IF (Avg): 1
 TSS: 100
 TSS2: 100
-Intensity Unit: min/mi
+Dominant Unit: min/mi
 Pretty Print:
 	* 1hr @ 6:00min/mi
 Duration Unit: min
@@ -166,7 +171,7 @@ Duration (Sec): 3600
 ----------------------------
 Input: 
 (60min, 6:00 min/mi)
--- EOTNormalized: 
+Normalized: 
 (1hr, 100)
 AST: 
 ArrayInterval(
@@ -175,10 +180,64 @@ ArrayInterval(
 IF (Avg): 1
 TSS: 100
 TSS2: 100
-Intensity Unit: min/mi
+Dominant Unit: min/mi
 Pretty Print:
 	* 1hr @ 6:00min/mi
 Duration Unit: min
 Miles: 10mi
 Duration (Sec): 3600
+----------------------------
+Input: 
+(10s, 60, relaxed)
+Normalized: 
+(10sec, 60, relaxed)
+AST: 
+ArrayInterval(
+	SimpleInterval(10sec, 60%, relaxed)
+)
+IF (Avg): 0.6
+TSS: 0.1
+TSS2: 0.1
+Output Unit: min/mi
+Pretty Print:
+	* 10'' relaxed @ 10:00min/mi
+Duration Unit: s
+Miles: 0mi
+Duration (Sec): 10
+----------------------------
+Input: 
+(10s, relaxed)
+Normalized: 
+(10sec, 75, relaxed)
+AST: 
+ArrayInterval(
+	SimpleInterval(10sec, 75%, relaxed)
+)
+IF (Avg): 0.75
+TSS: 0.2
+TSS2: 0.2
+Dominant Unit: %
+Pretty Print:
+	* 10'' relaxed @ 75%
+Duration Unit: s
+Miles: 0mi
+Duration (Sec): 10
+----------------------------
+Input: 
+(1mi, 100, threshold)
+-- EOTNormalized: 
+(1mi, 100, threshold)
+AST: 
+ArrayInterval(
+	SimpleInterval(1mi, 100%, threshold)
+)
+IF (Avg): 1
+TSS: 10
+TSS2: 10
+Output Unit: /400meters
+Pretty Print:
+	* 1mi threshold @ 1:29/400meters
+Duration Unit: mi
+Miles: 1mi
+Duration (Sec): 360
 ----------------------------

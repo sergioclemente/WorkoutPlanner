@@ -1888,13 +1888,13 @@ module Model {
 		static computeIntensity(interval: Interval) : IntensityUnit {
 			let dominant = new DominantUnitVisitor();
 			VisitorHelper.visit(dominant, interval);
-			return dominant.intensity_unit;
+			return dominant.intensity_unit == null ? IntensityUnit.Unknown : dominant.intensity_unit;
 		}
 
 		static computeDuration(interval: Interval) : DurationUnit {
 			let dominant = new DominantUnitVisitor();
 			VisitorHelper.visit(dominant, interval);
-			return dominant.duration_unit;
+			return dominant.duration_unit == null ? DistanceUnit.Unknown : dominant.duration_unit;
 		}		
 	}
 

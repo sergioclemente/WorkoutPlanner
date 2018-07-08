@@ -36,6 +36,9 @@
 -- EOT
 (10sec, *)
 -- EOT
+{output_unit=w}
+(10min, *, TT)
+-- EOT
 2[(1min, 85, 95), (30sec, 50)]
 -- EOT
 2[(100, 30sec, 45sec), (30sec, 50)]
@@ -69,4 +72,60 @@
 3[(1min, 80, 90, 100), (30s, 50)]
 -- EOT
 (1:30min, 55)
+-- EOT
+{output_unit=w}
+(10min, 45, single leg)
+-- EOT
+{output_unit=w}
+(10min, 65)
+-- EOT
+{output_unit=if}
+(10min, 65)
+-- EOT
+{output_unit=w}
+(10min, 75, LC)
+-- EOT
+{output_unit=w}
+(75, 100, 10min)
+-- EOT
+{output_unit=w}
+(100, 75, 10min)
+-- EOT
+(55, 75, 10min)
+-- EOT
+{output_unit=w}
+(10min, 55)
+-- EOT
+{output_unit=w}
+2[(5min, 75), (2min, 100)]
+-- EOT
+{output_unit=w}
+2[(5min, 75), (1min, 55)]
+-- EOT
+{output_unit=w}
+2[(5min, 75), (2min, 100), (1min, 55)]
+-- EOT
+{output_unit=w}
+2[(5min, 75), (2min, 100), (1min, 65)]
+-- EOT
+{output_unit=w}
+2[(5min, 60), (1min, 55)]
+-- EOT
+{output_unit=w}
+2[(75, 85, 2min), (1min, 55)]
+-- EOT
+{output_unit=w}
+2[(75, 1min, 3min), (1min, 55)]
+-- EOT
+{output_unit=w}
+"Do this in a flat terrain"
+-- EOT
+{output_unit=w}
+"Do this in a flat terrain", (10min, 55)
+-- EOT
+{output_unit=w}
+"Do this in a flat terrain",(10min, 55)
+-- EOT
+{output_unit=w}
+(10min, 55), "Do this in a flat terrain"
 -- EOT
