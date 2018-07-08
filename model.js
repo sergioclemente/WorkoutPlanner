@@ -263,7 +263,13 @@ var Model;
             return true;
         }
         static toString(unit) {
+            if (unit == null) {
+                return "null";
+            }
             switch (unit) {
+                case DistanceUnit.Unknown:
+                case TimeUnit.Unknown:
+                    return "Unknown";
                 case DistanceUnit.Miles:
                     return "mi";
                 case DistanceUnit.Kilometers:
@@ -278,9 +284,6 @@ var Model;
                     return "min";
                 case TimeUnit.Seconds:
                     return "s";
-                default:
-                    console.assert(false, stringFormat("unkown duration {0}", unit));
-                    return "unknown";
             }
         }
         static toDurationUnit(unit) {
@@ -309,6 +312,7 @@ var Model;
             }
         }
     }
+    Model.DurationUnitHelper = DurationUnitHelper;
     class FormatterHelper {
         static roundNumberUp(value, round_val = 0) {
             if (round_val != 0) {
@@ -618,12 +622,17 @@ var Model;
             return result;
         }
         static toString(unit) {
+            if (unit == null) {
+                return "null";
+            }
             PreconditionsCheck.assertIsNumber(unit, "unit");
             switch (unit) {
-                case IntensityUnit.Watts:
-                    return "w";
+                case IntensityUnit.Unknown:
+                    return "Unknown";
                 case IntensityUnit.IF:
                     return "%";
+                case IntensityUnit.Watts:
+                    return "w";
                 case IntensityUnit.MinMi:
                     return "min/mi";
                 case IntensityUnit.Mph:
@@ -638,13 +647,12 @@ var Model;
                     return "/100meters";
                 case IntensityUnit.Per400Meters:
                     return "/400meters";
+                case IntensityUnit.OffsetSeconds:
+                    return "hr";
                 case IntensityUnit.HeartRate:
                     return "hr";
                 case IntensityUnit.FreeRide:
                     return "free-ride";
-                default:
-                    console.assert(false, stringFormat("Unknown intensity unit {0}", unit));
-                    return "unknown";
             }
         }
         static toIntensityUnit(unit) {
@@ -1719,6 +1727,53 @@ var Model;
         }
     }
     Model.TSSCalculator = TSSCalculator;
+    class DominantUnitVisitor extends BaseVisitor {
+        constructor() {
+            super(...arguments);
+            this.intensity_unit = null;
+            this.duration_unit = null;
+        }
+        visitSimpleInterval(interval) {
+            this.updateIntensity(interval.getIntensity());
+            this.updateDuration(interval.getWorkDuration());
+        }
+        visitRampBuildInterval(interval) {
+            this.updateIntensity(interval.getStartIntensity());
+            this.updateIntensity(interval.getEndIntensity());
+            this.updateDuration(interval.getWorkDuration());
+        }
+        updateIntensity(intensity) {
+            if (this.intensity_unit == null) {
+                this.intensity_unit = intensity.getOriginalUnit();
+            }
+            else {
+                if (this.intensity_unit != intensity.getOriginalUnit()) {
+                    this.intensity_unit = IntensityUnit.Unknown;
+                }
+            }
+        }
+        updateDuration(duration) {
+            if (this.duration_unit == null) {
+                this.duration_unit = duration.getUnit();
+            }
+            else {
+                if (this.duration_unit != duration.getUnit()) {
+                    this.duration_unit = DistanceUnit.Unknown;
+                }
+            }
+        }
+        static computeIntensity(interval) {
+            let dominant = new DominantUnitVisitor();
+            VisitorHelper.visit(dominant, interval);
+            return dominant.intensity_unit;
+        }
+        static computeDuration(interval) {
+            let dominant = new DominantUnitVisitor();
+            VisitorHelper.visit(dominant, interval);
+            return dominant.duration_unit;
+        }
+    }
+    Model.DominantUnitVisitor = DominantUnitVisitor;
     // TSS = [(s x NP x IF) / (FTP x 3600)] x 100
     // IF = NP / FTP
     // TSS = [(s x NP x NP/FTP) / (FTP x 3600)] x 100
@@ -2758,6 +2813,9 @@ var Model;
         }
         getSportType() {
             return this.sportType;
+        }
+        getUserProfile() {
+            return this.userProfile;
         }
         createIntensity(value, unit) {
             var ifValue = 0;

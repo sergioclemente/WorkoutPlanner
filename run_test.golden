@@ -11,8 +11,8 @@ ArrayInterval(
 IF (Avg): 0.8635076320941238
 TSS: 10.8
 TSS2: 11.3
-Distance (Miles): 1.2mi
-Distance (Kilometers): 2km
+Duration Unit: km
+Kilometers: 2
 Duration (Sec): 523.6936292054402
 ----------------------------
 Input: 
@@ -28,8 +28,10 @@ ArrayInterval(
 IF (Avg): 1
 TSS: 2.5
 TSS2: 2.5
-Distance (Miles): 0.2mi
-Distance (Kilometers): 0.4km
+Intensity Unit: %
+Pretty Print:
+	* 200m @ 100%
+	* 45'' @ 100%
 Duration (Sec): 89.73872584108804
 ----------------------------
 Input: 
@@ -43,8 +45,11 @@ ArrayInterval(
 IF (Avg): 1
 TSS: 20
 TSS2: 20
-Distance (Miles): 2mi
-Distance (Kilometers): 3.2km
+Intensity Unit: min/mi
+Pretty Print:
+	* 2mi threshold @ 6:00min/mi
+Duration Unit: mi
+Miles: 2mi
 Duration (Sec): 720
 ----------------------------
 Input: 
@@ -58,8 +63,11 @@ ArrayInterval(
 IF (Avg): 0.8
 TSS: 16
 TSS2: 16
-Distance (Miles): 2mi
-Distance (Kilometers): 3.2km
+Intensity Unit: %
+Pretty Print:
+	* 2mi @ 80%
+Duration Unit: mi
+Miles: 2mi
 Duration (Sec): 900
 ----------------------------
 Input: 
@@ -78,8 +86,12 @@ ArrayInterval(
 IF (Avg): 0.8225975119502044
 TSS: 20.3
 TSS2: 19.7
-Distance (Miles): 2.4mi
-Distance (Kilometers): 3.9km
+Intensity Unit: %
+Pretty Print:
+	* 6' @ 100% - 2' @ 80%
+	* 10' easy
+Duration Unit: min
+Miles: 2.4mi
 Duration (Sec): 1080
 ----------------------------
 Input: 
@@ -93,8 +105,11 @@ ArrayInterval(
 IF (Avg): 0.8571428571428571
 TSS: 17.1
 TSS2: 18
-Distance (Miles): 2mi
-Distance (Kilometers): 3.2km
+Intensity Unit: min/mi
+Pretty Print:
+	* 2mi @ 7:00min/mi
+Duration Unit: mi
+Miles: 2mi
 Duration (Sec): 840
 ----------------------------
 Input: 
@@ -110,8 +125,7 @@ ArrayInterval(
 IF (Avg): 1
 TSS: 0.3
 TSS2: 0.3
-Distance (Miles): 0mi
-Distance (Kilometers): 0km
+Duration Unit: s
 Duration (Sec): 9
 ----------------------------
 Input: 
@@ -125,8 +139,11 @@ ArrayInterval(
 IF (Avg): 0.9986322732385723
 TSS: 74.8
 TSS2: 74.9
-Distance (Miles): 7.5mi
-Distance (Kilometers): 12.1km
+Intensity Unit: min/km
+Pretty Print:
+	* 45' @ 3:44min/km
+Duration Unit: min
+Kilometers: 12.1km
 Duration (Sec): 2700
 ----------------------------
 Input: 
@@ -140,8 +157,11 @@ ArrayInterval(
 IF (Avg): 1
 TSS: 100
 TSS2: 100
-Distance (Miles): 10mi
-Distance (Kilometers): 16.1km
+Intensity Unit: min/mi
+Pretty Print:
+	* 1hr @ 6:00min/mi
+Duration Unit: min
+Miles: 10mi
 Duration (Sec): 3600
 ----------------------------
 Input: 
@@ -155,7 +175,10 @@ ArrayInterval(
 IF (Avg): 1
 TSS: 100
 TSS2: 100
-Distance (Miles): 10mi
-Distance (Kilometers): 16.1km
+Intensity Unit: min/mi
+Pretty Print:
+	* 1hr @ 6:00min/mi
+Duration Unit: min
+Miles: 10mi
 Duration (Sec): 3600
 ----------------------------

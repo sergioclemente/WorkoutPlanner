@@ -58,6 +58,16 @@ declare module Model {
     class TimeUnitHelper {
         static convertTo(value: number, unitFrom: TimeUnit, unitTo: TimeUnit): number;
     }
+    class DurationUnitHelper {
+        static isTime(durationUnit: DurationUnit): boolean;
+        static isDistance(durationUnit: DurationUnit): boolean;
+        static isDurationUnit(unit: string): boolean;
+        static getDistanceMiles(unit: DurationUnit, value: number): number;
+        static getDurationSeconds(unit: DurationUnit, value: number): number;
+        static areDurationUnitsSame(durationUnits: DurationUnit[]): boolean;
+        static toString(unit: DurationUnit): string;
+        static toDurationUnit(unit: string): DurationUnit;
+    }
     class FormatterHelper {
         static roundNumberUp(value: number, round_val?: number): number;
         static roundNumberDown(value: number, round_val?: number): number;
@@ -280,6 +290,16 @@ declare module Model {
     class TSSCalculator {
         static compute(interval: Interval): number;
     }
+    class DominantUnitVisitor extends BaseVisitor {
+        private intensity_unit;
+        private duration_unit;
+        visitSimpleInterval(interval: SimpleInterval): void;
+        visitRampBuildInterval(interval: RampBuildInterval): void;
+        private updateIntensity(intensity);
+        private updateDuration(duration);
+        static computeIntensity(interval: Interval): IntensityUnit;
+        static computeDuration(interval: Interval): DurationUnit;
+    }
     class TSSVisitor extends BaseVisitor {
         private tss;
         visitSimpleInterval(interval: SimpleInterval): void;
@@ -430,6 +450,7 @@ declare module Model {
         constructor(userProfile: UserProfile, sportType: SportType);
         private getBikeSpeedMphForIntensity(intensity);
         getSportType(): SportType;
+        getUserProfile(): UserProfile;
         createIntensity(value: number, unit: IntensityUnit): Intensity;
         createDuration(intensity: Intensity, unit: DurationUnit, value: number): Duration;
         getEasyThreshold(): number;

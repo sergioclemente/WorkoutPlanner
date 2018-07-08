@@ -13,7 +13,6 @@ export default class WorkoutView extends React.Component<any, any> {
 
 	getState(params: UI.QueryParams): any {
 		try {
-			var userProfile = params.createUserProfile();
 			var builder = params.createWorkoutBuilder();
 
 			var time_in_zones_data = builder.getInterval().getTimeInZones(builder.getSportType()).map(

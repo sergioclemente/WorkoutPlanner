@@ -190,7 +190,7 @@ module Model {
 		}
 	}
 
-	class DurationUnitHelper {
+	export class DurationUnitHelper {
 		public static isTime(durationUnit: DurationUnit): boolean {
 			return durationUnit >= MIN_TIME;
 		}
@@ -254,7 +254,13 @@ module Model {
 		}
 
 		static toString(unit: DurationUnit): string {
+			if (unit == null) {
+				return "null";
+			}
 			switch (unit) {
+				case DistanceUnit.Unknown:
+				case TimeUnit.Unknown:
+					return "Unknown";
 				case DistanceUnit.Miles:
 					return "mi";
 				case DistanceUnit.Kilometers:
@@ -269,9 +275,6 @@ module Model {
 					return "min";
 				case TimeUnit.Seconds:
 					return "s";
-				default:
-					console.assert(false, stringFormat("unkown duration {0}", unit));
-					return "unknown";
 			}
 		}
 
@@ -627,13 +630,18 @@ module Model {
 		}
 
 		static toString(unit: IntensityUnit): string {
+			if (unit == null) {
+				return "null";
+			}
 			PreconditionsCheck.assertIsNumber(unit, "unit");
 
 			switch (unit) {
-				case IntensityUnit.Watts:
-					return "w";
+				case IntensityUnit.Unknown:
+					return "Unknown";
 				case IntensityUnit.IF:
 					return "%";
+				case IntensityUnit.Watts:
+					return "w";
 				case IntensityUnit.MinMi:
 					return "min/mi";
 				case IntensityUnit.Mph:
@@ -648,13 +656,12 @@ module Model {
 					return "/100meters";
 				case IntensityUnit.Per400Meters:
 					return "/400meters";
+				case IntensityUnit.OffsetSeconds:
+					return "hr";
 				case IntensityUnit.HeartRate:
 					return "hr";
 				case IntensityUnit.FreeRide:
 					return "free-ride";
-				default:
-					console.assert(false, stringFormat("Unknown intensity unit {0}", unit));
-					return "unknown";
 			}
 		}
 
@@ -1843,6 +1850,54 @@ module Model {
 		}
 	}
 
+	export class DominantUnitVisitor extends BaseVisitor {
+		private intensity_unit : IntensityUnit = null;
+		private duration_unit : DurationUnit = null;
+
+		visitSimpleInterval(interval: SimpleInterval) : void {
+			this.updateIntensity(interval.getIntensity());
+			this.updateDuration(interval.getWorkDuration());
+		}
+
+		visitRampBuildInterval(interval: RampBuildInterval): void {
+			this.updateIntensity(interval.getStartIntensity());
+			this.updateIntensity(interval.getEndIntensity());
+			this.updateDuration(interval.getWorkDuration());
+		}
+
+		private updateIntensity(intensity: Intensity) {
+			if (this.intensity_unit == null) {
+				this.intensity_unit = intensity.getOriginalUnit();
+			} else {
+				if (this.intensity_unit != intensity.getOriginalUnit()) {
+					this.intensity_unit = IntensityUnit.Unknown;
+				}
+			}
+		}
+
+		private updateDuration(duration: Duration) {
+			if (this.duration_unit == null) {
+				this.duration_unit = duration.getUnit();
+			} else {
+				if (this.duration_unit != duration.getUnit()) {
+					this.duration_unit = DistanceUnit.Unknown;
+				}
+			}
+		}
+
+		static computeIntensity(interval: Interval) : IntensityUnit {
+			let dominant = new DominantUnitVisitor();
+			VisitorHelper.visit(dominant, interval);
+			return dominant.intensity_unit;
+		}
+
+		static computeDuration(interval: Interval) : DurationUnit {
+			let dominant = new DominantUnitVisitor();
+			VisitorHelper.visit(dominant, interval);
+			return dominant.duration_unit;
+		}		
+	}
+
 	// TSS = [(s x NP x IF) / (FTP x 3600)] x 100
 	// IF = NP / FTP
 	// TSS = [(s x NP x NP/FTP) / (FTP x 3600)] x 100
@@ -2974,6 +3029,10 @@ module Model {
 
 		getSportType() : SportType {
 			return this.sportType;
+		}
+
+		getUserProfile() : UserProfile {
+			return this.userProfile;
 		}
 
 		createIntensity(value: number, unit: IntensityUnit) {
