@@ -421,6 +421,11 @@ export class QueryParams {
 			return null;
 		}
 	}
+
+	getDominantUnit() : Model.IntensityUnit {
+		return Model.DominantUnitVisitor.computeIntensity(this.createWorkoutBuilder().getInterval());
+
+	}
 }
 
 function getQueryParams(): any {

@@ -331,6 +331,9 @@ var UI;
                 return null;
             }
         }
+        getDominantUnit() {
+            return Model.DominantUnitVisitor.computeIntensity(this.createWorkoutBuilder().getInterval());
+        }
     }
     UI.QueryParams = QueryParams;
     function getQueryParams() {

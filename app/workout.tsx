@@ -18,6 +18,16 @@ export default class Workout extends React.Component<any, any> {
 		this.params.output_unit = outputUnit.toString();
 		this.params.workout_text = workout_text;
 		this.params.workout_title = workout_title;
+
+		let dominant_unit : Model.IntensityUnit = this.params.getDominantUnit();
+		// Don't override the unit if its IF since its too generic.
+		if (dominant_unit != Model.IntensityUnit.Unknown &&
+			dominant_unit != Model.IntensityUnit.IF) {
+			let input: WorkoutInput = this.refs['input'] as WorkoutInput;
+			input.setOutputUnit(dominant_unit);
+		}
+		
+
 		this.refresh();
 	}
 
@@ -138,7 +148,6 @@ export default class Workout extends React.Component<any, any> {
 
 	_onPrettyPrint() {
 		let input: WorkoutInput = this.refs['input'] as WorkoutInput;
-		let workoutText = input.getWorkoutText();
 
 		let builder = this.params.createWorkoutBuilder();
 		input.setWorkoutText(builder.getNormalizedWorkoutDefinition());

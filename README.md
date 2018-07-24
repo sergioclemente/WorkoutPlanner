@@ -51,4 +51,21 @@ Player:
 * Implement next
 * Add some sort of highlight or next
 
-
+Bug on graph
+```
+(5min, *, 90rpm - Smooth pedaling)
+(2min, *, 95rpm - Smooth pedaling)
+(2min, *, 100rpm - Smooth pedaling)
+(2min, *, 105rpm - Smooth pedaling)
+(1:30min, *, 110rpm - Smooth pedaling)
+(30sec, *, 120-130rpm - Maintain form)
+(2min, *, 90rpm - Relax and recover)
+(6sec, *, Max rev out)
+(1min, *, 90rpm - Smooth pedaling)
+(6sec, *, Max rev out)
+(1min, *, 90rpm - Smooth pedaling)
+(6sec, *, Max rev out)
+(2:42min, *, 90 rpm - Relax and recover)
+2[(4min, 60, cadence 80rpm), (3min, 65, cadence 90rpm), (2min, 70, cadence 100rpm), (1min, 75, cadence 110rpm)]
+4[(2min, 90), (3min, 55)]
+```

@@ -1,9 +1,7 @@
 import * as React from 'react';
-import * as UI from '../ui';
 import * as Model from '../model';
 import Select from './select';
 import SelectOption from './select_option';
-import { SportType } from '../model';
 
 export default class WorkoutInput extends React.Component<any, any> {
 	constructor(props: any) {
@@ -18,6 +16,11 @@ export default class WorkoutInput extends React.Component<any, any> {
 	getUnitType(): Model.IntensityUnit {
 		var sltUnit = this.refs['unit'] as Select;
 		return parseInt(sltUnit.getSelectedValue());
+	}
+
+	setOutputUnit(unit: Model.IntensityUnit) {
+		let selectUnit: Select = this.refs["unit"] as Select;
+		selectUnit.setSelectedValue(unit.toString());
 	}
 
 	getWorkoutText(): string {

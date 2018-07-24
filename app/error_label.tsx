@@ -1,5 +1,4 @@
 import * as React from 'react';
-import * as UI from '../ui';
 
 export default class ErrorLabel extends React.Component<any, any> {
   constructor(props: any) {

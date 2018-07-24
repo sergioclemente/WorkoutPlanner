@@ -1,7 +1,5 @@
 import * as React from 'react';
-import * as UI from '../ui';
 import * as Model from '../model';
-import ErrorLabel from './error_label';
 import NumberInput from './number_input';
 import EmailInput from './email_input';
 import TextInput from './text_input';
