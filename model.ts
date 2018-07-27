@@ -62,7 +62,8 @@ module Model {
 		Mph = 3,
 		Kmh = 4,
 		MinKm = 5,
-		Per100Yards = 6,
+		Per25Yards = 12,
+		Per100Yards = 6,		
 		Per100Meters = 7,
 		Per400Meters = 8,
 		OffsetSeconds = 9,
@@ -595,6 +596,8 @@ module Model {
 				speedMph = DistanceUnitHelper.convertTo(value, DistanceUnit.Kilometers, DistanceUnit.Miles);
 			} else if (unitFrom == IntensityUnit.MinKm) {
 				speedMph = DistanceUnitHelper.convertTo(60 / value, DistanceUnit.Kilometers, DistanceUnit.Miles);
+			} else if (unitFrom == IntensityUnit.Per25Yards) {
+				speedMph = DistanceUnitHelper.convertTo(1500 / value, DistanceUnit.Yards, DistanceUnit.Miles);
 			} else if (unitFrom == IntensityUnit.Per100Yards) {
 				speedMph = DistanceUnitHelper.convertTo(6000 / value, DistanceUnit.Yards, DistanceUnit.Miles);
 			} else if (unitFrom == IntensityUnit.Per100Meters) {
@@ -615,6 +618,8 @@ module Model {
 				result = DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Kilometers);
 			} else if (unitTo == IntensityUnit.MinKm) {
 				result = 60 / DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Kilometers);
+			} else if (unitTo == IntensityUnit.Per25Yards) {
+				result = 1500 / DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Yards);
 			} else if (unitTo == IntensityUnit.Per100Yards) {
 				result = 6000 / DistanceUnitHelper.convertTo(speedMph, DistanceUnit.Miles, DistanceUnit.Yards);
 			} else if (unitTo == IntensityUnit.Per100Meters) {
@@ -650,6 +655,8 @@ module Model {
 					return "km/h";
 				case IntensityUnit.MinKm:
 					return "min/km";
+				case IntensityUnit.Per25Yards:
+					return "/25yards";
 				case IntensityUnit.Per100Yards:
 					return "/100yards";
 				case IntensityUnit.Per100Meters:
@@ -657,7 +664,7 @@ module Model {
 				case IntensityUnit.Per400Meters:
 					return "/400meters";
 				case IntensityUnit.OffsetSeconds:
-					return "hr";
+					return "offset-seconds";
 				case IntensityUnit.HeartRate:
 					return "hr";
 				case IntensityUnit.FreeRide:
@@ -675,6 +682,7 @@ module Model {
 				"mph": IntensityUnit.Mph,
 				"km/hr": IntensityUnit.Kmh,
 				"min/km": IntensityUnit.MinKm,
+				"/25yards": IntensityUnit.Per25Yards,
 				"/100yards": IntensityUnit.Per100Yards,
 				"/100meters": IntensityUnit.Per100Meters,
 				"/400meters": IntensityUnit.Per400Meters,
@@ -773,7 +781,7 @@ module Model {
 			} else {
 				if (this.originalUnit == IntensityUnit.MinMi) {
 					return FormatterHelper.formatNumber(this.originalValue, 60, ":", IntensityUnitHelper.toString(IntensityUnit.MinMi));
-				} else if (this.originalUnit == IntensityUnit.Per100Yards || this.originalUnit == IntensityUnit.Per100Meters || this.originalUnit == IntensityUnit.Per400Meters) {
+				} else if (this.originalUnit == IntensityUnit.Per100Yards || this.originalUnit == IntensityUnit.Per100Meters || this.originalUnit == IntensityUnit.Per400Meters || this.originalUnit == IntensityUnit.Per25Yards) {
 					return FormatterHelper.formatNumber(this.originalValue, 60, ":", IntensityUnitHelper.toString(this.originalUnit));
 				} else {
 
@@ -1270,6 +1278,7 @@ module Model {
 				"mph": 1,
 				"km/hr": 1,
 				"min/km": 1,
+				"/25yards": 1,
 				"/100yards": 1,
 				"/100meters": 1,
 				"/100m": 1,
@@ -2630,6 +2639,13 @@ module Model {
 					} else {
 						this.result += " on " + interval.getWorkDuration().toTimeStringShort();
 					}
+					// If the distance is 100yards don't show the pace.
+					if (!((interval.getWorkDuration().getUnit() == DistanceUnit.Yards ||
+						interval.getWorkDuration().getUnit() == DistanceUnit.Meters) &&
+						interval.getWorkDuration().getValue() == 100) &&
+						this.outputUnit != IntensityUnit.IF) {
+						this.result += " (" + this.getIntensityPretty(interval.getIntensity()) + ")";
+					}
 				} else {
 					this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
 
@@ -2694,9 +2710,17 @@ module Model {
 			} else if (this.sportType == SportType.Swim) {
 				if (this.outputUnit == IntensityUnit.Mph) {
 					return MyMath.round10(this.userProfile.getSwimPaceMph(intensity), -1) + IntensityUnitHelper.toString(this.outputUnit);
-				} else if (this.outputUnit == IntensityUnit.Per100Yards || this.outputUnit == IntensityUnit.Per100Meters) {
+				} else if (this.outputUnit == IntensityUnit.Per100Yards || this.outputUnit == IntensityUnit.Per100Meters || this.outputUnit == IntensityUnit.Per25Yards) {
 					var swim_pace_per_100 = this.userProfile.getSwimPace(this.outputUnit, intensity);
 					return FormatterHelper.formatNumber(swim_pace_per_100, 60, ":", "") + IntensityUnitHelper.toString(this.outputUnit);
+				} else if (this.outputUnit == IntensityUnit.OffsetSeconds) {
+					// TODO: Not handling if the intensity needs conversion. 
+					console.assert(intensity.getOriginalUnit() == IntensityUnit.OffsetSeconds);
+					if (intensity.getOriginalValue() > 0) {
+						return "+" + intensity.getOriginalValue();
+					} else {
+						return "" + intensity.getOriginalValue();
+					}
 				} else {
 					console.assert(false, stringFormat("Invalid output unit {0}", this.outputUnit));
 					return "";
@@ -2887,6 +2911,9 @@ module Model {
 						suffix = "/400m";
 					}
 					res = (60 / (this._extractNumber(speed, 60, ":", suffix) * 2.5 * 1.609344));
+				} else if (speed.indexOf("/25yards") != -1) {
+					var pace_per_25_yards = this._extractNumber(speed, 60, ":", "/25yards");
+					res = IntensityUnitHelper.convertTo(pace_per_25_yards, IntensityUnit.Per25Yards, IntensityUnit.Mph);
 				} else if (speed.indexOf("/100yards") != -1) {
 					var pace_per_100_yards = this._extractNumber(speed, 60, ":", "/100yards");
 					res = IntensityUnitHelper.convertTo(pace_per_100_yards, IntensityUnit.Per100Yards, IntensityUnit.Mph);
@@ -3088,7 +3115,7 @@ module Model {
 				// For swimming we support 3 IntensityUnits
 				if (unit == IntensityUnit.IF) {
 					ifValue = value;
-				} else if (unit == IntensityUnit.Per100Yards || unit == IntensityUnit.Per100Meters) {
+				} else if (unit == IntensityUnit.Per100Yards || unit == IntensityUnit.Per100Meters || unit == IntensityUnit.Per25Yards) {
 					var swimming_mph = IntensityUnitHelper.convertTo(value, unit, IntensityUnit.Mph);
 					var swimming_mph_css = this.userProfile.getSwimCSSMph();
 					ifValue = swimming_mph / swimming_mph_css;

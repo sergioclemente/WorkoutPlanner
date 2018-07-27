@@ -364,17 +364,19 @@ describe('Swim', function () {
         expect_eq_nbr(2.41, Model.IntensityUnitHelper.convertTo(1.41, Model.IntensityUnit.Per100Yards, Model.IntensityUnit.Mph));
         expect_eq_nbr(1.42, Model.IntensityUnitHelper.convertTo(2.4, Model.IntensityUnit.Mph, Model.IntensityUnit.Per100Yards));
         expect_eq_nbr(2.40, Model.SpeedParser.getSpeedInMph("1:25/100yards"));
+        expect_eq_nbr(2.55, Model.SpeedParser.getSpeedInMph("0:20/25yards"));
         expect_eq_nbr(2.63, Model.SpeedParser.getSpeedInMph("1:25/100meters"));
     });
     it('intensity conversion', function () {
         expect_eq_str("1:30/100yards", new Model.Intensity(1, 1.5, Model.IntensityUnit.Per100Yards).toString());
+        expect_eq_str("0:20/25yards", new Model.Intensity(1, 0.33333, Model.IntensityUnit.Per25Yards).toString());
         var swim_visitor_mph = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Mph, /*roundValues=*/ true);
         var swim_visitor_per100 = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards, /*roundValues=*/ true);
         expect_eq_str("2.4mi/h", swim_visitor_mph.getIntensityPretty(intensity_100_pct));
         expect_eq_str("1:25/100yards", swim_visitor_per100.getIntensityPretty(intensity_100_pct));
     });
     it('speed conversion (meters)', function () {
-        expect_eq_str("500 warmup on 8'36''", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500m, 90, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Meters));
+        expect_eq_str("500 warmup on 8'36'' (1:43/100meters)", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(500m, 90, warmup)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Meters));
         expect_eq_str("100 strong on 1'32''", Model.WorkoutTextVisitor.getIntervalTitle(Model.IntervalParser.parse(of_swim, `(100m, 100, strong)`), up, Model.SportType.Swim, Model.IntensityUnit.Per100Meters));
         expect_eq_nbr(2.48, Model.IntensityUnitHelper.convertTo(1.5, Model.IntensityUnit.Per100Meters, Model.IntensityUnit.Mph));
         expect_eq_nbr(1.5, Model.IntensityUnitHelper.convertTo(2.48, Model.IntensityUnit.Mph, Model.IntensityUnit.Per100Meters));

@@ -501,3 +501,21 @@ Duration Unit: yards
 Yards: 300
 Duration (Sec): 299.77272727272725
 ----------------------------
+Input: 
+(400yards, +10s, 30sec, warmup)
+Normalized: 
+(400yards, +10s, warmup, 30sec)
+AST: 
+ArrayInterval(
+	SimpleInterval(400yards, CSS+10, warmup, 30sec)
+)
+IF (Avg): 0.8947368421052629
+TSS: 8.5
+TSS2: 9.2
+Dominant Unit: offset-seconds
+Pretty Print:
+	* 400 warmup on 6'20'' off 6'50'' (+10)
+Duration Unit: yards
+Yards: 400
+Duration (Sec): 410.0000000000001
+----------------------------

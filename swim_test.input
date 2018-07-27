@@ -68,3 +68,6 @@
 {output_unit=if}
 (300yards, pull, 10s)
 -- EOT
+{output_unit=/25yards}
+(300yards, +0, Tempo trainer)
+-- EOT

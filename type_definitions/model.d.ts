@@ -31,6 +31,7 @@ declare module Model {
         Mph = 3,
         Kmh = 4,
         MinKm = 5,
+        Per25Yards = 12,
         Per100Yards = 6,
         Per100Meters = 7,
         Per400Meters = 8,
