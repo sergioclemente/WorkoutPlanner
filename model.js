@@ -3233,6 +3233,10 @@ var Model;
         constructor(sport_type) {
             this.sport_type = sport_type;
         }
+        _randBool() {
+            return this._rand(0, 2) == 1;
+        }
+        // Generated a number in [min, max)
         _rand(min, max) {
             return Math.floor(Math.random() * (max - min) + min);
         }
@@ -3248,28 +3252,54 @@ var Model;
             let warmup_text = "";
             let warmup_groups = [];
             if (this.sport_type == Model.SportType.Bike) {
-                warmup_groups = [
-                    // 9 min (warmup)
-                    [
-                        "(3min, 55), (3min, 65), (3min, 75)",
-                        "(9min, 55, 75)"
-                    ],
-                    // 4 min (drill)
-                    [
-                        "2[(45s, 45, Single leg - left), (15s, 45, both), (45s, 45, Single leg - right), (15s, 45, both)]",
-                        "8[(15s, 55, spin ups), (15s, 55)]",
-                        "[(30s, 55, cadence 80), (30s, 55), (30s, 55, cadence 90), (30s, 55), (30s, 55, cadence 100), (30s, 55), (30s, 55, cadence 110), (30s, 55)]"
-                    ],
-                    // 4 min (build)
-                    [
-                        "4[(15s, *, Sprints), (45s, 55)]",
-                        "4[(5s, *, MAX), (55s, 55)]",
-                        "4[(45s, 75, 100), (15s, 55)]",
-                        "4[(30s, 85, 90, 95, 100), (30s, 55)]"
-                    ],
-                    // static (3min)
-                    ["(3min, 55)"]
-                ];
+                // Are we going to do the british warmup?
+                if (this._randBool()) {
+                    // Yes.
+                    warmup_text = `(5min, *, 90rpm - Smooth pedaling)
+(2min, *, 95rpm - Smooth pedaling)
+(2min, *, 100rpm - Smooth pedaling)
+(2min, *, 105rpm - Smooth pedaling)
+(1:30min, *, 110rpm - Smooth pedaling)
+(30sec, *, 120-130rpm - Maintain form)
+(2min, *, 90rpm - Relax and recover)
+(6sec, *, Max rev out)
+(1min, *, 90rpm - Smooth pedaling)
+(6sec, *, Max rev out)
+(1min, *, 90rpm - Smooth pedaling)
+(6sec, *, Max rev out)
+(2:42min, *, 90 rpm - Relax and recover)
+`;
+                }
+                else {
+                    // No.
+                    warmup_groups = [
+                        // 9 min (warmup)
+                        [
+                            "(3min, 55), (3min, 65), (3min, 75)",
+                            "(9min, 55, 75)"
+                        ],
+                        // 4 min (drill)
+                        [
+                            "2[(45s, 45, Single leg - left), (15s, 45, both), (45s, 45, Single leg - right), (15s, 45, both)]",
+                            "8[(15s, 55, Spin ups), (15s, 55)]",
+                            "[(30s, 55, cadence 80), (30s, 55), (30s, 55, Cadence 90), (30s, 55), (30s, 55, Cadence 100), (30s, 55), (30s, 55, Cadence 110), (30s, 55)]"
+                        ],
+                        // 4 min (build)
+                        [
+                            "4[(15s, *, Sprints), (45s, 55)]",
+                            "4[(10sec, *, Max sprints), (50sec, 55, easy riding)]",
+                            "4[(5s, *, MAX), (55s, 55)]",
+                            "4[(45s, 75, 100), (15s, 55)]",
+                            "3[(30sec, *, FAST), (1min, 55, easy)]",
+                            "4[(30s, 85, 90, 95, 100), (30s, 55)]"
+                        ],
+                        // static (3min)
+                        ["(3min, 55)"]
+                    ];
+                    for (let i = 0; i < warmup_groups.length; i++) {
+                        warmup_text += this._randElement(warmup_groups[i]);
+                    }
+                }
             }
             else if (this.sport_type == Model.SportType.Run) {
                 warmup_groups = [
@@ -3287,6 +3317,9 @@ var Model;
                         "3[(10s, 0, sumo squat)]",
                     ]
                 ];
+                for (let i = 0; i < warmup_groups.length; i++) {
+                    warmup_text += this._randElement(warmup_groups[i]);
+                }
             }
             else if (this.sport_type == Model.SportType.Swim) {
                 warmup_groups = [
@@ -3328,11 +3361,12 @@ var Model;
                         "4[(100y, descend 1-4)]"
                     ]
                 ];
-            }
-            for (let i = 0; i < warmup_groups.length; i++) {
-                warmup_text += this._randElement(warmup_groups[i]);
+                for (let i = 0; i < warmup_groups.length; i++) {
+                    warmup_text += this._randElement(warmup_groups[i]);
+                }
             }
             // Remove extra new line.
+            console.assert(warmup_text.length > 0);
             return warmup_text.substring(0, warmup_text.length - 1);
         }
         _single_leg(number_repeats, single_leg_duration_secs) {

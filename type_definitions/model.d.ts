@@ -525,6 +525,7 @@ declare module Model {
     class TextPreprocessor {
         sport_type: SportType;
         constructor(sport_type: SportType);
+        private _randBool();
         private _rand(min, max);
         private _randElement(array);
         private _warmup();

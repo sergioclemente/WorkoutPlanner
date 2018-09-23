@@ -8,16 +8,6 @@ import SelectOption from './select_option';
 import * as UI from '../ui';
 import * as Model from '../model';
 
-class CustomCell extends React.Component<any, any> {
-	render() {
-		return (
-			<Cell {...this.props}>
-				{this.props.data[this.props.rowIndex][this.props.field]}
-			</Cell>
-		);
-	}
-}
-
 class TitleCell extends React.Component<any, any> {
 	render() {
 		var title = this.props.data[this.props.rowIndex][this.props.field];
@@ -61,11 +51,19 @@ class TagsCell extends React.Component<any, any> {
 
 class DurationCell extends React.Component<any, any> {
 	render() {
-		let durationSec = this.props.data[this.props.rowIndex][this.props.field];
-		let duration = new Model.Duration(Model.TimeUnit.Seconds, durationSec, durationSec, 0);
+		let duration_sec = this.props.data[this.props.rowIndex][this.props.field];
+		let duration = new Model.Duration(Model.TimeUnit.Seconds, duration_sec, duration_sec, 0);
+		let time_component = duration.getTimeComponents();
+		let format_str = "";
+		// Do even a shorter version of duration.toStringShort().
+		if (time_component.hours > 0) {
+			format_str = Model.MyMath.round10(time_component.hours + time_component.minutes/60.0, -1) + "hr"
+		} else {
+			format_str = time_component.minutes + "min";
+		}
 		return (
 			<Cell {...this.props}>
-				{duration.toStringShort(false)}
+				{format_str}
 			</Cell>
 		);
 	}
@@ -209,22 +207,17 @@ export default class WorkoutViews extends React.Component<any, any> {
 				<Column
 					header={<Cell>Type</Cell>}
 					cell={<SportTypeCell data={filteredRows} field="sport_type"> </SportTypeCell>}
-					width={100}
-				/>
-				<Column
-					header={<Cell>Duration</Cell>}
-					cell={<DurationCell data={filteredRows} field="duration_sec"> </DurationCell>}
-					width={100}
-				/>
-				<Column
-					header={<Cell>TSS</Cell>}
-					cell={<CustomCell data={filteredRows} field="tss"> </CustomCell>}
-					width={100}
+					width={60}
 				/>
 				<Column
 					header={<Cell>Title</Cell>}
 					cell={<TitleCell data={filteredRows} field="title" link="link"> </TitleCell>}
-					width={400}
+					width={300}
+				/>
+				<Column
+					header={<Cell>Duration</Cell>}
+					cell={<DurationCell data={filteredRows} field="duration_sec"> </DurationCell>}
+					width={80}
 				/>
 				<Column
 					header={<Cell>Tags</Cell>}
