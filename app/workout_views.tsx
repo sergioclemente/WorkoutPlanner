@@ -5,7 +5,6 @@ import * as React from 'react';
 import { Table, Column, Cell } from 'fixed-data-table';
 import Select from './select';
 import SelectOption from './select_option';
-import TextInput from './text_input';
 import * as UI from '../ui';
 import * as Model from '../model';
 
@@ -43,6 +42,23 @@ class SportTypeCell extends React.Component<any, any> {
 	}
 }
 
+class TagsCell extends React.Component<any, any> {
+	render() {
+		var tags : Set<string> = this.props.data[this.props.rowIndex][this.props.field];
+		var tags_string = "";
+		var prefix = "";
+		tags.forEach((v : string) => {
+			tags_string += prefix + v;
+			prefix = ", ";
+		});
+		return (
+			<Cell {...this.props}>
+				{tags_string}
+			</Cell>
+		);
+	}
+}
+
 class DurationCell extends React.Component<any, any> {
 	render() {
 		let durationSec = this.props.data[this.props.rowIndex][this.props.field];
@@ -57,12 +73,14 @@ class DurationCell extends React.Component<any, any> {
 
 export default class WorkoutViews extends React.Component<any, any> {
 	private _rows: any;
+	private _global_tags: Set<string>;
 	private _params: UI.QueryParamsList;
 
 	constructor(params: any) {
 		super(params);
 
 		this._rows = [];
+		this._global_tags = new Set<string>();
 		this.state = {
 			filteredRows: this._rows,
 		};
@@ -94,7 +112,14 @@ export default class WorkoutViews extends React.Component<any, any> {
 				params.workout_title = rows[i].title;
 				params.sport_type = rows[i].sport_type.toString();
 				params.page = "wv";
-
+				// Tags are separated by comma. e.g. speed, awc
+				let tags_array = rows[i].tags.split(",").map(x => x.trim());
+				for (let j = 0; j < tags_array.length; j++) {
+					if (tags_array[j].length > 0) {
+						this._global_tags.add(tags_array[j]);
+					}
+				}
+				rows[i].tags = new Set(tags_array);
 				rows[i].link = params.getURL();
 			}
 
@@ -118,10 +143,6 @@ export default class WorkoutViews extends React.Component<any, any> {
 		this._filterData();
 	}
 
-	_shouldIncludeInResult(filterText: string, rowText: string) {
-		return filterText.length == 0 || rowText.indexOf(filterText) >= 0;
-	}
-
 	_filterData() {
 		let sportTypeComp: Select = this.refs["sportType"] as Select;
 		let filterTextComp: HTMLInputElement = this.refs["text"] as HTMLInputElement;
@@ -130,10 +151,29 @@ export default class WorkoutViews extends React.Component<any, any> {
 		var filterText = filterTextComp.value;
 		var filteredRows = [];
 
+		// I am not a UI guy, so lets do things a bit implict here. If the user types
+		// something that matches the global tags, then we use the tags for filtering
+		// otherwise we simply filter on the title.
+		var shouldIncludeInResult : (row: any) => boolean;
+		if (filterText.length == 0) {
+			// Lets include all results.
+			shouldIncludeInResult = () : boolean => { return true; }
+		} else if (this._global_tags.has(filterText)) {
+			// Lets filter by tag.
+			shouldIncludeInResult = (row: any) : boolean => {
+				return row.tags.has(filterText.toLowerCase());
+			}
+		} else {
+			// Lets filter by title.
+			shouldIncludeInResult = (row: any) : boolean => {
+				return row.title.toLowerCase().indexOf(filterText.toLowerCase()) >= 0;
+			}
+		}
+
 		for (let i = 0; i < this._rows.length; i++) {
 			var row = this._rows[i];
 			if ((sportTypeEnum == Model.SportType.Unknown || row.sport_type == sportTypeEnum)
-				&& this._shouldIncludeInResult(filterText.toLowerCase(), row.title.toLowerCase())) {
+				&& shouldIncludeInResult(row)) {
 				filteredRows.push(row);
 			}
 		}
@@ -188,7 +228,7 @@ export default class WorkoutViews extends React.Component<any, any> {
 				/>
 				<Column
 					header={<Cell>Tags</Cell>}
-					cell={<CustomCell data={filteredRows} field="tags"> </CustomCell>}
+					cell={<TagsCell data={filteredRows} field="tags"> </TagsCell>}
 					width={200}
 				/>
 			</Table>

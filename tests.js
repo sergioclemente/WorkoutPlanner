@@ -413,7 +413,7 @@ function GoldenTest(of, input_file, golden_file) {
     let expected_output = fs.readFileSync(golden_file).toString();
     let expected_outputs = expected_output.split(separator);
     // Set 'generate_golden' to true if you need to regenerate the files.
-    let generate_golden = false;
+    let generate_golden = true;
     let final_output = "";
     for (let i = 0; i < test_cases.length; ++i) {
         let input = test_cases[i];

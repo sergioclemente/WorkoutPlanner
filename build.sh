@@ -47,7 +47,8 @@ if [[ "$?" != 0 ]]; then
 fi
 echo Built JSX files
 
-node_modules/webpack/bin/webpack.js index.js --output-filename index.min.js --output-path . -p
+# Change --mode to development in order to get unminified javascript.
+node_modules/webpack/bin/webpack.js index.js --output-filename index.min.js --output-path . --mode production
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
