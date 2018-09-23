@@ -25,6 +25,14 @@ To install the protocol handler:
 - Run this in a developer console window 
 -- navigator.registerProtocolHandler("web+wp", "http://<url>/?wh=%s", "Workout Planner handler");
 
+
+// 
+Not properly formatting
+
+(15min, 80)4[(1km, 92)]"1'20'' rest between"(5min, 80)4[(1km, 95.8)]"1'20'' rest between"(10min, 80)
+
+
+
 # Bugs/Feature requests
 - Add 4x25 sprint on the bike swim sets
 - Add specific cadence work on warmup
