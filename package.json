@@ -32,6 +32,6 @@
     "mocha": "^5.2.0",
     "typescript": "^3.1.6",
     "webpack": "^4.0.0",
-    "webpack-cli": "^2.0.8"
+    "webpack-cli": "^3.1.2"
   }
 }
