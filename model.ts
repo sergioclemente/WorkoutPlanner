@@ -63,7 +63,7 @@ module Model {
 		Kmh = 4,
 		MinKm = 5,
 		Per25Yards = 12,
-		Per100Yards = 6,		
+		Per100Yards = 6,
 		Per100Meters = 7,
 		Per400Meters = 8,
 		OffsetSeconds = 9,
@@ -84,7 +84,7 @@ module Model {
 			console.assert(typeof (v) == "boolean", stringFormat("{0} must be a boolean, it was {1}", name, typeof (v)));
 		}
 
-		static assertIsString(v : string, name: string) {
+		static assertIsString(v: string, name: string) {
 			console.assert(typeof (v) == "string", stringFormat("{0} must be a string, it was {1}", name, typeof (v)));
 		}
 
@@ -114,7 +114,7 @@ module Model {
 				return NaN;
 			}
 			// Shift
-			let values : string[] = value.toString().split('e');
+			let values: string[] = value.toString().split('e');
 			value = Math[type](+(values[0] + 'e' + (values[1] ? (+values[1] - exp) : -exp)));
 			// Shift back
 			values = value.toString().split('e');
@@ -1296,7 +1296,7 @@ module Model {
 				"miles": 1,
 				"yards": 1,
 				"yrs": 1,
-				"y" : 1,
+				"y": 1,
 				"mi": 1,
 				"": 1,
 			};
@@ -1414,8 +1414,8 @@ module Model {
 								} else {
 									// Get the Intensity unit and do some minor massaging for
 									// handling free intervals.
-									var unit : IntensityUnit = IntensityUnitHelper.toIntensityUnit(units[k]);
-									
+									var unit: IntensityUnit = IntensityUnitHelper.toIntensityUnit(units[k]);
+
 									// Unit could be time, so we have to safeguard on valid
 									// intensities.
 									if (unit != IntensityUnit.Unknown) {
@@ -1430,7 +1430,7 @@ module Model {
 
 							// (3) Handle repeat interval by peaking at the stack
 							if (stack[stack.length - 1] instanceof RepeatInterval) {
-								var repeatInterval : RepeatInterval = <RepeatInterval>(stack[stack.length - 1]);
+								var repeatInterval: RepeatInterval = <RepeatInterval>(stack[stack.length - 1]);
 								// There is ambiguity in the following interval:
 								// 2[(45s, 75, 100), (15s, 55)]
 								// It could be two types of intervals:
@@ -1451,10 +1451,10 @@ module Model {
 									// add the new intervals
 									var step_intervals = [];
 									for (let k = 0; k < repeatInterval.getRepeatCount(); k++) {
-										var durationUnit : DurationUnit = k < durationUnits.length ? durationUnits[k] : durationUnits[0];
-										var durationValue : number = k < durationValues.length ? durationValues[k] : durationValues[0];
-										var intensity : Intensity = k < intensities.length ? intensities[k] : intensities[0];
-										var step_duration : Duration = factory.createDuration(intensity, durationUnit, durationValue);
+										var durationUnit: DurationUnit = k < durationUnits.length ? durationUnits[k] : durationUnits[0];
+										var durationValue: number = k < durationValues.length ? durationValues[k] : durationValues[0];
+										var intensity: Intensity = k < intensities.length ? intensities[k] : intensities[0];
+										var step_duration: Duration = factory.createDuration(intensity, durationUnit, durationValue);
 										step_intervals.push(new SimpleInterval(title.trim(), intensity, step_duration, Duration.ZeroDuration));
 									}
 
@@ -1632,8 +1632,8 @@ module Model {
 	}
 
 	export class TreePrinterVisitor implements Visitor {
-		private output : string = "";
-		private indentation : number = 0;
+		private output: string = "";
+		private indentation: number = 0;
 
 		visitCommentInterval(interval: CommentInterval): void {
 			this.indent();
@@ -1666,7 +1666,7 @@ module Model {
 			}
 			this.indentation--;
 			this.indent();
-			this.output += ")\n";			
+			this.output += ")\n";
 		}
 		visitArrayInterval(interval: ArrayInterval) {
 			this.indent();
@@ -1682,17 +1682,17 @@ module Model {
 		finalize(): void {
 		}
 
-		indent() : void {
+		indent(): void {
 			for (let i = 0; i < this.indentation; i++) {
 				this.output += "\t";
 			}
 		}
 
-		getOutput() : string {
+		getOutput(): string {
 			return this.output;
 		}
 
-		static Print(interval : Interval) : string {
+		static Print(interval: Interval): string {
 			let tree_printer = new TreePrinterVisitor();
 			VisitorHelper.visitAndFinalize(tree_printer, interval);
 			return tree_printer.getOutput();
@@ -1782,7 +1782,7 @@ module Model {
 	// incorrect results for the AVG IF, so we use a artificial FTP here
 	// in order to compute the NP Power, since the only exposed member
 	// from this class is the IF.
-	let FTP : number = 256;
+	let FTP: number = 256;
 
 	// Calculate the IF similar to how the NP is calculated.
 	// 
@@ -1836,7 +1836,7 @@ module Model {
 			this.np = MyMath.round10(Math.sqrt(Math.sqrt(this.sum / this.count)), -1);
 		}
 
-		getIF() : number {
+		getIF(): number {
 			return MyMath.round10(this.np / FTP, -1);
 		}
 	}
@@ -1860,10 +1860,10 @@ module Model {
 	}
 
 	export class DominantUnitVisitor extends BaseVisitor {
-		private intensity_unit : IntensityUnit = null;
-		private duration_unit : DurationUnit = null;
+		private intensity_unit: IntensityUnit = null;
+		private duration_unit: DurationUnit = null;
 
-		visitSimpleInterval(interval: SimpleInterval) : void {
+		visitSimpleInterval(interval: SimpleInterval): void {
 			this.updateIntensity(interval.getIntensity());
 			this.updateDuration(interval.getWorkDuration());
 		}
@@ -1894,17 +1894,17 @@ module Model {
 			}
 		}
 
-		static computeIntensity(interval: Interval) : IntensityUnit {
+		static computeIntensity(interval: Interval): IntensityUnit {
 			let dominant = new DominantUnitVisitor();
 			VisitorHelper.visit(dominant, interval);
 			return dominant.intensity_unit == null ? IntensityUnit.Unknown : dominant.intensity_unit;
 		}
 
-		static computeDuration(interval: Interval) : DurationUnit {
+		static computeDuration(interval: Interval): DurationUnit {
 			let dominant = new DominantUnitVisitor();
 			VisitorHelper.visit(dominant, interval);
 			return dominant.duration_unit == null ? DistanceUnit.Unknown : dominant.duration_unit;
-		}		
+		}
 	}
 
 	// TSS = [(s x NP x IF) / (FTP x 3600)] x 100
@@ -2250,7 +2250,7 @@ module Model {
 	}
 
 	export class PPSMRXCourseDataVisitor extends BaseVisitor {
-        private title: string = "";
+		private title: string = "";
 		private content = "";
 		private groupId = 1;
 		private currentRepeatIteration = []
@@ -2258,7 +2258,7 @@ module Model {
 
 		constructor(title: string) {
 			super();
-            this.title = title;
+			this.title = title;
 		}
 
 		getTitlePretty(interval: BaseInterval): string {
@@ -2865,7 +2865,7 @@ module Model {
 			this.trimSeparator();
 			this.trimNewLine();
 			// The surroundings [ ] are redundant. lets remove them.
-			if (this.output[0] == "[" && this.output[this.output.length-1] == "]") {
+			if (this.output[0] == "[" && this.output[this.output.length - 1] == "]") {
 				this.output = this.output.slice(1, this.output.length - 1);
 			}
 		}
@@ -2878,7 +2878,7 @@ module Model {
 			this.output += ", ";
 		}
 
-		trimSeparator() : void {
+		trimSeparator(): void {
 			while (this.output.endsWith(", ")) {
 				this.output = this.output.slice(0, this.output.length - 2);
 			}
@@ -2886,7 +2886,7 @@ module Model {
 				this.output = this.output.slice(0, this.output.length - 1);
 			}
 		}
-		trimNewLine() : void {
+		trimNewLine(): void {
 			while (this.output.endsWith("\n")) {
 				this.output = this.output.slice(0, this.output.length - 1);
 			}
@@ -2929,7 +2929,7 @@ module Model {
 			return res;
 		}
 
-		static _extractNumber(numberString : string, decimalMultiplier: number, strSeparator: string, strSuffix: string) {
+		static _extractNumber(numberString: string, decimalMultiplier: number, strSeparator: string, strSuffix: string) {
 			var indexSuffix = numberString.indexOf(strSuffix);
 			var indexSeparator = numberString.indexOf(strSeparator);
 			if (indexSuffix < 0) {
@@ -3054,11 +3054,11 @@ module Model {
 			return actualSpeedMph;
 		}
 
-		getSportType() : SportType {
+		getSportType(): SportType {
 			return this.sportType;
 		}
 
-		getUserProfile() : UserProfile {
+		getUserProfile(): UserProfile {
 			return this.userProfile;
 		}
 
@@ -3297,7 +3297,7 @@ module Model {
 		getIntervalPretty(interval: Interval, roundValues: boolean) {
 			return WorkoutTextVisitor.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit, roundValues);
 		}
-		
+
 		getEstimatedDistancePretty(): string {
 			if (this.sportType == SportType.Swim) {
 				return this.intervals.getWorkDuration().toStringDistance(DistanceUnit.Yards);
@@ -3512,7 +3512,7 @@ module Model {
 			this.sport_type = sport_type;
 		}
 
-		private _randBool() : boolean {
+		private _randBool(): boolean {
 			return this._rand(0, 2) == 1;
 		}
 
@@ -3536,7 +3536,7 @@ module Model {
 				// Are we going to do the british warmup?
 				if (this._randBool()) {
 					// Yes.
-					warmup_text =`(5min, *, 90rpm - Smooth pedaling)
+					warmup_text = `(5min, *, 90rpm - Smooth pedaling)
 (2min, *, 95rpm - Smooth pedaling)
 (2min, *, 100rpm - Smooth pedaling)
 (2min, *, 105rpm - Smooth pedaling)
@@ -3645,7 +3645,7 @@ module Model {
 			}
 			// Remove extra new line.
 			console.assert(warmup_text.length > 0);
-			return warmup_text.substring(0, warmup_text.length-1);
+			return warmup_text.substring(0, warmup_text.length - 1);
 		}
 
 		private _single_leg(number_repeats: number, single_leg_duration_secs: number): string {

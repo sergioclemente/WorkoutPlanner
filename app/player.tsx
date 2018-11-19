@@ -28,6 +28,8 @@ export default class PlayerView extends React.Component<any, any> {
 		if (bei == null) {
 			return {};
 		}
+		// TODO: Do a better job getting the title. I think it can be
+		// as simple as the title plus rep number (for repeat intervals)
 		return {
 			current_title: bei.getInterval().getTitle(),
 			elapsed_time: Model.FormatterHelper.formatTime(this._getElapsedTimeMilliseconds(bei)),
