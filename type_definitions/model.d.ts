@@ -489,14 +489,15 @@ declare module Model {
         getPPSMRXFileName(): string;
     }
     class StopWatch {
-        startTime: number;
-        stoppedTime: number;
+        startTimeMillis: number;
+        stoppedTimeMillis: number;
         constructor();
         start(): void;
         stop(): void;
         reset(): void;
         getIsStarted(): boolean;
-        getElapsedTime(): number;
+        getElapsedTimeMillis(): number;
+        moveStartTime(durationMillis: number): void;
     }
     class AbsoluteTimeInterval {
         private begin_;
@@ -514,12 +515,14 @@ declare module Model {
         visitSimpleInterval(interval: SimpleInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
         getIntervalArray(): AbsoluteTimeInterval[];
+        visitRepeatInterval(interval: RepeatInterval): void;
     }
     class PlayerHelper {
         private data_;
         private durationTotalSeconds_;
         constructor(interval: Interval);
         get(ts: number): AbsoluteTimeInterval;
+        getNext(ts: number): AbsoluteTimeInterval;
         getDurationTotalSeconds(): number;
     }
     class TextPreprocessor {

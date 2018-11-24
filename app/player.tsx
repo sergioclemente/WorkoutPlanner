@@ -28,27 +28,31 @@ export default class PlayerView extends React.Component<any, any> {
 		if (bei == null) {
 			return {};
 		}
+		console.log("Elapsed on get: " + this._getElapsedTimeSeconds() + " bei: " + bei.getInterval().getTitle());
 		// TODO: Do a better job getting the title. I think it can be
 		// as simple as the title plus rep number (for repeat intervals)
-		return {
+		let s = {
 			current_title: bei.getInterval().getTitle(),
 			elapsed_time: Model.FormatterHelper.formatTime(this._getElapsedTimeMilliseconds(bei)),
 			remaining_time: Model.FormatterHelper.formatTime(this._getRemainingTimeMilliseconds(bei)),
-			total_time_elapsed: Model.FormatterHelper.formatTime(this.stopWatch_.getElapsedTime()),
+			total_time_elapsed: Model.FormatterHelper.formatTime(this.stopWatch_.getElapsedTimeMillis()),
 			total_time_workout: Model.FormatterHelper.formatTime(this.playerHelper_.getDurationTotalSeconds() * 1000)
 		};
+		// TODO: Remove this here.
+		console.log(JSON.stringify(s));
+		return s;
 	}
 
 	_getElapsedTimeMilliseconds(bei: Model.AbsoluteTimeInterval): number {
-		return this.stopWatch_.getElapsedTime() - bei.getBeginSeconds() * 1000;
+		return this.stopWatch_.getElapsedTimeMillis() - bei.getBeginSeconds() * 1000;
 	}
 
 	_getRemainingTimeMilliseconds(bei: Model.AbsoluteTimeInterval): number {
-		return bei.getEndSeconds() * 1000 - this.stopWatch_.getElapsedTime();
+		return bei.getEndSeconds() * 1000 - this.stopWatch_.getElapsedTimeMillis();
 	}
 
 	_getElapsedTimeSeconds(): number {
-		return this.stopWatch_.getElapsedTime() / 1000;
+		return this.stopWatch_.getElapsedTimeMillis() / 1000;
 	}
 
 	_start(e) {
@@ -102,7 +106,14 @@ export default class PlayerView extends React.Component<any, any> {
 	}
 
 	_next(e) {
-		console.log("not implemented");
+		let bei = this.playerHelper_.getNext(this._getElapsedTimeSeconds());
+		if (bei == null) {
+			return;
+		}
+		this.stopWatch_.moveStartTime(bei.getBeginSeconds() * 1000);
+
+		// Update state.
+		this.setState(this.getState());
 	}
 
 	_reset(e) {

@@ -3385,36 +3385,49 @@ module Model {
 	};
 
 	export class StopWatch {
-		startTime: number;
-		stoppedTime: number;
+		startTimeMillis: number;
+		stoppedDurationMillis: number;
 
 		constructor() {
-			this.startTime = null;
-			this.stoppedTime = null;
+			this.startTimeMillis = null;
+			this.stoppedDurationMillis = null;
 		}
 		start(): void {
-			if (this.startTime === null) {
-				this.startTime = Date.now();
+			if (this.startTimeMillis === null) {
+				this.startTimeMillis = Date.now();
 			}
 		}
 		stop(): void {
-			if (this.startTime !== null) {
-				this.stoppedTime += Date.now() - this.startTime;
-				this.startTime = null;
+			if (this.startTimeMillis !== null) {
+				this.stoppedDurationMillis += Date.now() - this.startTimeMillis;
+				this.startTimeMillis = null;
 			}
 		}
 		reset(): void {
-			this.startTime = null;
-			this.stoppedTime = 0;
+			this.startTimeMillis = null;
+			this.stoppedDurationMillis = 0;
 		}
 		getIsStarted(): boolean {
-			return this.startTime !== null;
+			return this.startTimeMillis !== null;
 		}
-		getElapsedTime(): number {
-			if (this.startTime !== null) {
-				return (Date.now() - this.startTime) + this.stoppedTime;
+		getElapsedTimeMillis(): number {
+			if (this.startTimeMillis !== null) {
+				return (Date.now() - this.startTimeMillis) + this.stoppedDurationMillis;
 			} else {
-				return this.stoppedTime;
+				return this.stoppedDurationMillis;
+			}
+		}
+		// Moves the start time so that durationMillis will be 
+		// the result of getElapsedTimeMillis.
+		moveStartTime(durationMillis: number) {
+			if (this.startTimeMillis != null) {
+				// now() - start = durationMillis
+				// start = now() - durationMillis
+				this.startTimeMillis = Date.now() - durationMillis;
+			} else {
+				// Change stopped so that when we start again
+				// elapsed == durationMillis.
+				this.stoppedDurationMillis = durationMillis;
 			}
 		}
 	}
@@ -3467,6 +3480,17 @@ module Model {
 		getIntervalArray(): AbsoluteTimeInterval[] {
 			return this.data_;
 		}
+
+		// Visit the intervals in order t
+		visitRepeatInterval(interval: RepeatInterval) {
+			for (let i = 0; i < interval.getRepeatCount(); i++) {
+				// TODO: Save the iteration number and total interval, here in order to improve
+				// the title that is going to be saved in AbsoluteTimeInterval.
+				for (let j = 0; j < interval.getIntervals().length; j++) {
+					VisitorHelper.visit(this, interval.getIntervals()[j]);
+				}
+			}
+		}
 	}
 
 	export class PlayerHelper {
@@ -3489,6 +3513,18 @@ module Model {
 				let bei = this.data_[i];
 				if (ts >= bei.getBeginSeconds() && ts <= bei.getEndSeconds()) {
 					return bei;
+				}
+			}
+			return null;
+		}
+
+		getNext(ts: number): AbsoluteTimeInterval {			// TODO: Can potentially do a binary search here.
+			for (let i = 0; i < this.data_.length; i++) {
+				let bei = this.data_[i];
+				if (ts >= bei.getBeginSeconds() && ts <= bei.getEndSeconds()) {
+					if (i < this.data_.length - 1) {
+						return this.data_[i + 1];
+					}
 				}
 			}
 			return null;
