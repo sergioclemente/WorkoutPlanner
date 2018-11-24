@@ -3124,7 +3124,7 @@ var Model;
     class StopWatch {
         constructor() {
             this.startTimeMillis = null;
-            this.stoppedTimeMillis = null;
+            this.stoppedDurationMillis = null;
         }
         start() {
             if (this.startTimeMillis === null) {
@@ -3133,23 +3133,23 @@ var Model;
         }
         stop() {
             if (this.startTimeMillis !== null) {
-                this.stoppedTimeMillis += Date.now() - this.startTimeMillis;
+                this.stoppedDurationMillis += Date.now() - this.startTimeMillis;
                 this.startTimeMillis = null;
             }
         }
         reset() {
             this.startTimeMillis = null;
-            this.stoppedTimeMillis = 0;
+            this.stoppedDurationMillis = 0;
         }
         getIsStarted() {
             return this.startTimeMillis !== null;
         }
         getElapsedTimeMillis() {
             if (this.startTimeMillis !== null) {
-                return (Date.now() - this.startTimeMillis) + this.stoppedTimeMillis;
+                return (Date.now() - this.startTimeMillis) + this.stoppedDurationMillis;
             }
             else {
-                return this.stoppedTimeMillis;
+                return this.stoppedDurationMillis;
             }
         }
         // Moves the start time so that durationMillis will be 
@@ -3162,8 +3162,8 @@ var Model;
             }
             else {
                 // Change stopped so that when we start again
-                // elapsed == duration_ts
-                this.stoppedTimeMillis = durationMillis;
+                // elapsed == durationMillis.
+                this.stoppedDurationMillis = durationMillis;
             }
         }
     }
@@ -3171,10 +3171,11 @@ var Model;
     // Class that is created with the absolute begin and end times.
     // |interval_| will be either SimpleInterval or RampBuildInterval.
     class AbsoluteTimeInterval {
-        constructor(begin, end, interval) {
+        constructor(begin, end, interval, title) {
             this.begin_ = begin;
             this.end_ = end;
             this.interval_ = interval;
+            this.title_ = title;
         }
         getBeginSeconds() {
             return this.begin_;
@@ -3188,6 +3189,9 @@ var Model;
         getInterval() {
             return this.interval_;
         }
+        getTitle() {
+            return this.title_;
+        }
     }
     Model.AbsoluteTimeInterval = AbsoluteTimeInterval;
     class AbsoluteTimeIntervalVisitor extends BaseVisitor {
@@ -3195,29 +3199,42 @@ var Model;
             super(...arguments);
             this.time_ = 0;
             this.data_ = [];
+            this.repeat_stack_ = [];
+            this.iteration_stack_ = [];
+        }
+        getTitle(interval) {
+            let title = interval.getTitle();
+            if (this.repeat_stack_.length > 0) {
+                console.assert(this.repeat_stack_.length == this.iteration_stack_.length);
+                title += " " + this.iteration_stack_[this.iteration_stack_.length - 1] + "/" + this.repeat_stack_[this.repeat_stack_.length - 1];
+            }
+            return title;
         }
         visitSimpleInterval(interval) {
             var duration_seconds = interval.getTotalDuration().getSeconds();
-            this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval));
+            this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval, this.getTitle(interval)));
             this.time_ += duration_seconds;
         }
         visitRampBuildInterval(interval) {
             var duration_seconds = interval.getWorkDuration().getSeconds();
-            this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval));
+            this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval, this.getTitle(interval)));
             this.time_ += duration_seconds;
         }
         getIntervalArray() {
             return this.data_;
         }
-        // Visit the intervals in order t
+        // Visit the repeat intervals in order to keep track of the current iteration to
+        // provide a better title.
         visitRepeatInterval(interval) {
+            this.repeat_stack_.push(interval.getRepeatCount());
             for (let i = 0; i < interval.getRepeatCount(); i++) {
-                // TODO: Save the iteration number and total interval, here in order to improve
-                // the title that is going to be saved in AbsoluteTimeInterval.
+                this.iteration_stack_.push(i + 1);
                 for (let j = 0; j < interval.getIntervals().length; j++) {
                     VisitorHelper.visit(this, interval.getIntervals()[j]);
                 }
+                this.iteration_stack_.pop();
             }
+            this.repeat_stack_.pop();
         }
     }
     Model.AbsoluteTimeIntervalVisitor = AbsoluteTimeIntervalVisitor;

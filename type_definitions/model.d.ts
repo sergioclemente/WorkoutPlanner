@@ -490,7 +490,7 @@ declare module Model {
     }
     class StopWatch {
         startTimeMillis: number;
-        stoppedTimeMillis: number;
+        stoppedDurationMillis: number;
         constructor();
         start(): void;
         stop(): void;
@@ -503,15 +503,20 @@ declare module Model {
         private begin_;
         private end_;
         private interval_;
-        constructor(begin: number, end: number, interval: BaseInterval);
+        private title_;
+        constructor(begin: number, end: number, interval: BaseInterval, title: string);
         getBeginSeconds(): number;
         getEndSeconds(): number;
         getDurationSeconds(): number;
         getInterval(): BaseInterval;
+        getTitle(): string;
     }
     class AbsoluteTimeIntervalVisitor extends BaseVisitor {
         private time_;
         private data_;
+        private repeat_stack_;
+        private iteration_stack_;
+        private getTitle(interval);
         visitSimpleInterval(interval: SimpleInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
         getIntervalArray(): AbsoluteTimeInterval[];

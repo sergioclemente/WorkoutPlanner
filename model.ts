@@ -3438,11 +3438,13 @@ module Model {
 		private begin_: number;
 		private end_: number;
 		private interval_: BaseInterval;
+		private title_: string;
 
-		constructor(begin: number, end: number, interval: BaseInterval) {
+		constructor(begin: number, end: number, interval: BaseInterval, title: string) {
 			this.begin_ = begin;
 			this.end_ = end;
 			this.interval_ = interval;
+			this.title_ = title;
 		}
 
 		getBeginSeconds(): number {
@@ -3460,20 +3462,35 @@ module Model {
 		getInterval(): BaseInterval {
 			return this.interval_;
 		}
+
+		getTitle(): string {
+			return this.title_;
+		}
 	}
 
 	export class AbsoluteTimeIntervalVisitor extends BaseVisitor {
 		private time_: number = 0;
 		private data_: AbsoluteTimeInterval[] = [];
+		private repeat_stack_ = [];
+		private iteration_stack_ = [];
+
+		private getTitle(interval: Interval): string {
+			let title = interval.getTitle();
+			if (this.repeat_stack_.length > 0) {
+				console.assert(this.repeat_stack_.length == this.iteration_stack_.length);
+				title += " " + this.iteration_stack_[this.iteration_stack_.length - 1] + "/" + this.repeat_stack_[this.repeat_stack_.length - 1];
+			}
+			return title;
+		}
 
 		visitSimpleInterval(interval: SimpleInterval) {
 			var duration_seconds = interval.getTotalDuration().getSeconds();
-			this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval));
+			this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval, this.getTitle(interval)));
 			this.time_ += duration_seconds;
 		}
 		visitRampBuildInterval(interval: RampBuildInterval) {
 			var duration_seconds = interval.getWorkDuration().getSeconds();
-			this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval));
+			this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval, this.getTitle(interval)));
 			this.time_ += duration_seconds;
 		}
 
@@ -3481,15 +3498,18 @@ module Model {
 			return this.data_;
 		}
 
-		// Visit the intervals in order t
+		// Visit the repeat intervals in order to keep track of the current iteration to
+		// provide a better title.
 		visitRepeatInterval(interval: RepeatInterval) {
+			this.repeat_stack_.push(interval.getRepeatCount());
 			for (let i = 0; i < interval.getRepeatCount(); i++) {
-				// TODO: Save the iteration number and total interval, here in order to improve
-				// the title that is going to be saved in AbsoluteTimeInterval.
+				this.iteration_stack_.push(i + 1);
 				for (let j = 0; j < interval.getIntervals().length; j++) {
 					VisitorHelper.visit(this, interval.getIntervals()[j]);
 				}
+				this.iteration_stack_.pop();
 			}
+			this.repeat_stack_.pop();
 		}
 	}
 

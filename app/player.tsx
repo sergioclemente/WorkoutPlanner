@@ -28,19 +28,13 @@ export default class PlayerView extends React.Component<any, any> {
 		if (bei == null) {
 			return {};
 		}
-		console.log("Elapsed on get: " + this._getElapsedTimeSeconds() + " bei: " + bei.getInterval().getTitle());
-		// TODO: Do a better job getting the title. I think it can be
-		// as simple as the title plus rep number (for repeat intervals)
-		let s = {
-			current_title: bei.getInterval().getTitle(),
+		return {
+			current_title: bei.getTitle(),
 			elapsed_time: Model.FormatterHelper.formatTime(this._getElapsedTimeMilliseconds(bei)),
 			remaining_time: Model.FormatterHelper.formatTime(this._getRemainingTimeMilliseconds(bei)),
 			total_time_elapsed: Model.FormatterHelper.formatTime(this.stopWatch_.getElapsedTimeMillis()),
 			total_time_workout: Model.FormatterHelper.formatTime(this.playerHelper_.getDurationTotalSeconds() * 1000)
 		};
-		// TODO: Remove this here.
-		console.log(JSON.stringify(s));
-		return s;
 	}
 
 	_getElapsedTimeMilliseconds(bei: Model.AbsoluteTimeInterval): number {
