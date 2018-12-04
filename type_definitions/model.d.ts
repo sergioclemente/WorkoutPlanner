@@ -489,37 +489,45 @@ declare module Model {
         getPPSMRXFileName(): string;
     }
     class StopWatch {
-        startTime: number;
-        stoppedTime: number;
+        startTimeMillis: number;
+        stoppedDurationMillis: number;
         constructor();
         start(): void;
         stop(): void;
         reset(): void;
         getIsStarted(): boolean;
-        getElapsedTime(): number;
+        getElapsedTimeMillis(): number;
+        moveStartTime(durationMillis: number): void;
     }
     class AbsoluteTimeInterval {
         private begin_;
         private end_;
         private interval_;
-        constructor(begin: number, end: number, interval: BaseInterval);
+        private title_;
+        constructor(begin: number, end: number, interval: BaseInterval, title: string);
         getBeginSeconds(): number;
         getEndSeconds(): number;
         getDurationSeconds(): number;
         getInterval(): BaseInterval;
+        getTitle(): string;
     }
     class AbsoluteTimeIntervalVisitor extends BaseVisitor {
         private time_;
         private data_;
+        private repeat_stack_;
+        private iteration_stack_;
+        private getTitle(interval);
         visitSimpleInterval(interval: SimpleInterval): void;
         visitRampBuildInterval(interval: RampBuildInterval): void;
         getIntervalArray(): AbsoluteTimeInterval[];
+        visitRepeatInterval(interval: RepeatInterval): void;
     }
     class PlayerHelper {
         private data_;
         private durationTotalSeconds_;
         constructor(interval: Interval);
         get(ts: number): AbsoluteTimeInterval;
+        getNext(ts: number): AbsoluteTimeInterval;
         getDurationTotalSeconds(): number;
     }
     class TextPreprocessor {

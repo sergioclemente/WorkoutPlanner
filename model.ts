@@ -3385,36 +3385,49 @@ module Model {
 	};
 
 	export class StopWatch {
-		startTime: number;
-		stoppedTime: number;
+		startTimeMillis: number;
+		stoppedDurationMillis: number;
 
 		constructor() {
-			this.startTime = null;
-			this.stoppedTime = null;
+			this.startTimeMillis = null;
+			this.stoppedDurationMillis = null;
 		}
 		start(): void {
-			if (this.startTime === null) {
-				this.startTime = Date.now();
+			if (this.startTimeMillis === null) {
+				this.startTimeMillis = Date.now();
 			}
 		}
 		stop(): void {
-			if (this.startTime !== null) {
-				this.stoppedTime += Date.now() - this.startTime;
-				this.startTime = null;
+			if (this.startTimeMillis !== null) {
+				this.stoppedDurationMillis += Date.now() - this.startTimeMillis;
+				this.startTimeMillis = null;
 			}
 		}
 		reset(): void {
-			this.startTime = null;
-			this.stoppedTime = 0;
+			this.startTimeMillis = null;
+			this.stoppedDurationMillis = 0;
 		}
 		getIsStarted(): boolean {
-			return this.startTime !== null;
+			return this.startTimeMillis !== null;
 		}
-		getElapsedTime(): number {
-			if (this.startTime !== null) {
-				return (Date.now() - this.startTime) + this.stoppedTime;
+		getElapsedTimeMillis(): number {
+			if (this.startTimeMillis !== null) {
+				return (Date.now() - this.startTimeMillis) + this.stoppedDurationMillis;
 			} else {
-				return this.stoppedTime;
+				return this.stoppedDurationMillis;
+			}
+		}
+		// Moves the start time so that durationMillis will be 
+		// the result of getElapsedTimeMillis.
+		moveStartTime(durationMillis: number) {
+			if (this.startTimeMillis != null) {
+				// now() - start = durationMillis
+				// start = now() - durationMillis
+				this.startTimeMillis = Date.now() - durationMillis;
+			} else {
+				// Change stopped so that when we start again
+				// elapsed == durationMillis.
+				this.stoppedDurationMillis = durationMillis;
 			}
 		}
 	}
@@ -3425,11 +3438,13 @@ module Model {
 		private begin_: number;
 		private end_: number;
 		private interval_: BaseInterval;
+		private title_: string;
 
-		constructor(begin: number, end: number, interval: BaseInterval) {
+		constructor(begin: number, end: number, interval: BaseInterval, title: string) {
 			this.begin_ = begin;
 			this.end_ = end;
 			this.interval_ = interval;
+			this.title_ = title;
 		}
 
 		getBeginSeconds(): number {
@@ -3447,25 +3462,54 @@ module Model {
 		getInterval(): BaseInterval {
 			return this.interval_;
 		}
+
+		getTitle(): string {
+			return this.title_;
+		}
 	}
 
 	export class AbsoluteTimeIntervalVisitor extends BaseVisitor {
 		private time_: number = 0;
 		private data_: AbsoluteTimeInterval[] = [];
+		private repeat_stack_ = [];
+		private iteration_stack_ = [];
+
+		private getTitle(interval: Interval): string {
+			let title = interval.getTitle();
+			if (this.repeat_stack_.length > 0) {
+				console.assert(this.repeat_stack_.length == this.iteration_stack_.length);
+				title += " " + this.iteration_stack_[this.iteration_stack_.length - 1] + "/" + this.repeat_stack_[this.repeat_stack_.length - 1];
+			}
+			return title;
+		}
 
 		visitSimpleInterval(interval: SimpleInterval) {
 			var duration_seconds = interval.getTotalDuration().getSeconds();
-			this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval));
+			this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval, this.getTitle(interval)));
 			this.time_ += duration_seconds;
 		}
 		visitRampBuildInterval(interval: RampBuildInterval) {
 			var duration_seconds = interval.getWorkDuration().getSeconds();
-			this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval));
+			this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval, this.getTitle(interval)));
 			this.time_ += duration_seconds;
 		}
 
 		getIntervalArray(): AbsoluteTimeInterval[] {
 			return this.data_;
+		}
+
+		// Visit the repeat intervals in order to keep track of the current iteration to
+		// provide a better title.
+		visitRepeatInterval(interval: RepeatInterval) {
+			this.repeat_stack_.push(interval.getRepeatCount());
+			for (let i = 0; i < interval.getRepeatCount(); i++) {
+				this.iteration_stack_.push(i + 1);
+				for (let j = 0; j < interval.getIntervals().length; j++) {
+					VisitorHelper.visit(this, interval.getIntervals()[j]);
+				}
+				this.iteration_stack_.pop();
+			}
+			this.repeat_stack_.pop();
 		}
 	}
 
@@ -3489,6 +3533,18 @@ module Model {
 				let bei = this.data_[i];
 				if (ts >= bei.getBeginSeconds() && ts <= bei.getEndSeconds()) {
 					return bei;
+				}
+			}
+			return null;
+		}
+
+		getNext(ts: number): AbsoluteTimeInterval {			// TODO: Can potentially do a binary search here.
+			for (let i = 0; i < this.data_.length; i++) {
+				let bei = this.data_[i];
+				if (ts >= bei.getBeginSeconds() && ts <= bei.getEndSeconds()) {
+					if (i < this.data_.length - 1) {
+						return this.data_[i + 1];
+					}
 				}
 			}
 			return null;
