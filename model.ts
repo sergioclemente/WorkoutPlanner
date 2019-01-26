@@ -3476,6 +3476,9 @@ module Model {
 
 		private getTitle(interval: Interval): string {
 			let title = interval.getTitle();
+			if (title.length == 0) {
+				title = interval.getIntensity().toString();
+			}
 			if (this.repeat_stack_.length > 0) {
 				console.assert(this.repeat_stack_.length == this.iteration_stack_.length);
 				title += " " + this.iteration_stack_[this.iteration_stack_.length - 1] + "/" + this.repeat_stack_[this.repeat_stack_.length - 1];

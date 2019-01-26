@@ -27,5 +27,4 @@ function _init() {
         );
     }
 }
-
 window.onload = _init;
