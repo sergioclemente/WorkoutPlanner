@@ -4,5 +4,5 @@ compiler:
   - gcc
 node_js:
   - "iojs"
-  - "7"
+  - "6.9.1"
   
