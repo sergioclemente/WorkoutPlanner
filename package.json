@@ -4,7 +4,8 @@
   "description": "A simple generator of workouts for bike/run",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+	"test": "./build.sh"
   },
   "dependencies": {
     "fixed-data-table": "^0.6.5",
