@@ -3,6 +3,6 @@ compiler:
   - clang
   - gcc
 node_js:
-  - "iojs"
+  - "node"
   - "6.9.1"
   
