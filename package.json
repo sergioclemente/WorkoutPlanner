@@ -10,7 +10,7 @@
   "dependencies": {
     "fixed-data-table": "^0.6.5",
     "gmail-send": "^1.2.14",
-    "react": "^16.2.0",
+    "react": "^16.8.3",
     "react-dom": "^16.2.0",
     "sqlite3": "^4.0.6"
   },
