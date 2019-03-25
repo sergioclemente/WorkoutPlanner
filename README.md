@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/sergioclemente/WorkoutPlanner.svg?branch=master)](https://travis-ci.com/sergioclemente/WorkoutPlanner)
+
 # Installing dependencies
 
 1. First of all install node js 6.5 or higher (https://nodejs.org/en/download/).
@@ -12,7 +14,7 @@ npm install --dev
 * Compile and run tests
 
 ```
-./build.sh
+npm test
 ```
 
 * Starting the node server
@@ -26,13 +28,6 @@ To install the protocol handler:
 -- navigator.registerProtocolHandler("web+wp", "http://<url>/?wh=%s", "Workout Planner handler");
 
 
-// 
-Not properly formatting
-
-(15min, 80)4[(1km, 92)]"1'20'' rest between"(5min, 80)4[(1km, 95.8)]"1'20'' rest between"(10min, 80)
-
-
-
 # Bugs/Feature requests
 - Add 4x25 sprint on the bike swim sets
 - Add specific cadence work on warmup
@@ -40,6 +35,8 @@ Not properly formatting
 - 1min30sec not being parsed properly. e.g. (1min30sec, 105)
 - Remove TSS or TSS(R) 
 - Couple of TODO's in the test.ts (They are bugs)
+- Not properly formatting
+(15min, 80)4[(1km, 92)]"1'20'' rest between"(5min, 80)4[(1km, 95.8)]"1'20'' rest between"(10min, 80)
 
 - Implement cadence intervals #c()
 - Can we add a "hint" for * intervals so that it computes IF better?
