@@ -1,9 +1,6 @@
-/// <reference path="./node_modules/@types/node/index.d.ts"/>
-/// <reference path="./type_definitions/model.d.ts" />
-
-
 import * as UI from './ui';
 import * as Model from './model';
+import 'mocha';
 
 // Usage: 
 // string_format("Parameter1: {0}, Parameter2: {1}", val1, val2)
@@ -34,9 +31,6 @@ function expect_eq_nbr(expected: number, actual: number, error: number = 0.01) {
 		expect_true(false, string_format("\nexpected: [{0}] \nactual: [{1}]", JSON.stringify(expected), JSON.stringify(actual)));
 	}
 }
-
-// TODO: Remove res
-var mocha = require('mocha');
 
 var intensity_100_pct = new Model.Intensity(1, 1);
 var up = new Model.UserProfile(310, "6:00min/mi", "1:25/100yards", "foo@bar.com");
@@ -270,7 +264,7 @@ Desc9=20' @ 75%
 		expect_eq_str(expected_content, zwift.getContent());
 	});
 	it('PPSMRX More Complex', function () {
-		let file_interval = Model.IntervalParser.parse(of_bike, "(10min, 55, 75), 4[(1hr, 80), (5min, 55)], (20min, 75)");		
+		let file_interval = Model.IntervalParser.parse(of_bike, "(10min, 55, 75), 4[(1hr, 80), (5min, 55)], (20min, 75)");
 		let mrx_visitor = new Model.PPSMRXCourseDataVisitor("untitled_workout");
 		Model.VisitorHelper.visitAndFinalize(mrx_visitor, file_interval);
 		let expected_content = `{
@@ -445,16 +439,16 @@ describe('Player Helper', function () {
 });
 
 // TODO: Refactor this function, its becoming a bit of a mess.
-function GoldenTest(of: any, input_file :string, golden_file:string) {
+function GoldenTest(of: any, input_file: string, golden_file: string) {
 	let fs = require('fs');
-	let input : string = fs.readFileSync(input_file).toString();
+	let input: string = fs.readFileSync(input_file).toString();
 	let test_cases = input.toString().split("-- EOT\n");
 	let separator = "----------------------------\n";
-	let expected_output : string = fs.readFileSync(golden_file).toString();
-	let expected_outputs : string[] = expected_output.split(separator);
+	let expected_output: string = fs.readFileSync(golden_file).toString();
+	let expected_outputs: string[] = expected_output.split(separator);
 	// Set 'generate_golden' to true if you need to regenerate the files.
 	let generate_golden = true;
-	let final_output : string = ""; 
+	let final_output: string = "";
 	for (let i = 0; i < test_cases.length; ++i) {
 		let input = test_cases[i];
 		// Skip last one which is a blank.
@@ -462,13 +456,13 @@ function GoldenTest(of: any, input_file :string, golden_file:string) {
 		let lines = input.split("\n");
 		let test_case = "";
 		let name = "";
-		let output_unit : Model.IntensityUnit = Model.IntensityUnit.Unknown;
+		let output_unit: Model.IntensityUnit = Model.IntensityUnit.Unknown;
 		// Extract the name and output_unit if any is provided.
 		for (let j = 0; j < lines.length; ++j) {
 			// If there is any parameter, process them.
 			if (lines[j].startsWith("{")) {
 				console.assert(lines[j].endsWith("}"));
-				let assignment = lines[j].slice(1, lines[j].length-1).split("=");
+				let assignment = lines[j].slice(1, lines[j].length - 1).split("=");
 				switch (assignment[0]) {
 					case "name":
 						name = assignment[1];
@@ -493,7 +487,7 @@ function GoldenTest(of: any, input_file :string, golden_file:string) {
 		if (name.length > 0) {
 			actual_output += string_format("Name: {0}\n", name);
 		}
-		actual_output += "Input: \n";		
+		actual_output += "Input: \n";
 		actual_output += test_case;
 		let normalized_text = Model.IntervalParser.normalize(of, test_case);
 		actual_output += "Normalized: \n";
@@ -508,7 +502,7 @@ function GoldenTest(of: any, input_file :string, golden_file:string) {
 		// Get the dominant unit and pretty print.
 		let dominant_intensity_unit = Model.DominantUnitVisitor.computeIntensity(interval);
 		if (dominant_intensity_unit != Model.IntensityUnit.Unknown || output_unit != Model.IntensityUnit.Unknown) {
-			let presentation_unit : Model.IntensityUnit;
+			let presentation_unit: Model.IntensityUnit;
 			if (output_unit != Model.IntensityUnit.Unknown) {
 				presentation_unit = output_unit;
 				actual_output += string_format("Output Unit: {0}\n", Model.IntensityUnitHelper.toString(output_unit));
@@ -546,7 +540,7 @@ function GoldenTest(of: any, input_file :string, golden_file:string) {
 				}
 			}
 		}
-	
+
 		actual_output += string_format("Duration (Sec): {0}\n", interval.getTotalDuration().getSeconds());
 		if (!generate_golden) {
 			expect_eq_str(expected_outputs[i], actual_output);
@@ -581,7 +575,7 @@ describe('NumberAndUnitParser', function () {
 	});
 });
 
-function textPreprocessor(input: string, expected : string) {
+function textPreprocessor(input: string, expected: string) {
 	let tp = new Model.TextPreprocessor(Model.SportType.Bike);
 	let actual = tp.process(input);
 	expect_eq_str(expected, actual);
@@ -594,14 +588,14 @@ describe('text processor', function () {
 		let tp = new Model.TextPreprocessor(Model.SportType.Bike);
 		let actual = tp.process("#wu");
 		console.assert(actual.indexOf("#wu") == -1);
-		
+
 		textPreprocessor("#sl(4,40)", "4[(40s,45,Left Leg), (15s,45,Both), (40s,45,Right Leg), (15s,45,Both)]");
 		textPreprocessor("#o(4,40)", "4[(40s,*,Build), (40s,55,Relaxed)]");
 		textPreprocessor("#sl(4,40) #o(4,40)", "4[(40s,45,Left Leg), (15s,45,Both), (40s,45,Right Leg), (15s,45,Both)] 4[(40s,*,Build), (40s,55,Relaxed)]");
 	});
 });
 
-function movingAverage(input: any, window_size: number, expected_average: number) : void {
+function movingAverage(input: any, window_size: number, expected_average: number): void {
 	let ma = new Model.MovingAverage(window_size);
 
 	for (let i = 0; i < input.length; i++) {

@@ -40,14 +40,6 @@ declare module Model {
         FreeRide = 11,
     }
     class MyMath {
-        /**
-         * Decimal adjustment of a number.
-         *
-         * @param   {String}    type    The type of adjustment.
-         * @param   {Number}    value   The number.
-         * @param   {Integer}   exp     The exponent (the 10 logarithm of the adjustment base).
-         * @returns {Number}            The adjusted value.
-         */
         static decimalAdjust(type: string, value: number, exp: number): number;
         static round10(value: number, exp: number): number;
         static floor10(value: number, exp: number): number;
@@ -109,9 +101,6 @@ declare module Model {
         private originalUnit;
         static ZeroIntensity: Intensity;
         constructor(ifValue?: number, value?: number, unit?: IntensityUnit);
-        /**
-         * A value between 0 and 1 that represents the intensity of the interval
-         */
         getValue(): number;
         toString(): string;
         getOriginalUnit(): IntensityUnit;

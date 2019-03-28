@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "outDir": ".",
+    "noImplicitReturns": true,
+    "removeComments": true,
+    "noUnusedLocals": true,
+    "noFallthroughCasesInSwitch": true,
+    "alwaysStrict": true,
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "target": "ES2017",
+    "declaration": true,
+  },
+  "files": [
+    "model.ts",
+    "ui.ts",
+    "model_server.ts",
+    "server.ts",
+    "tests.ts"
+  ]
+}

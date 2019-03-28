@@ -5,33 +5,12 @@ export JS_TARGET=ES2017
 # --noImplicitThis --strictNullChecks --strictFunctionTypes --noImplicitAny  
 export TSC_OPTS="--noImplicitReturns --removeComments --noUnusedLocals --noFallthroughCasesInSwitch --alwaysStrict"
 
-tsc --moduleResolution node --m commonjs ${TSC_OPTS} --target ${JS_TARGET} --removeComments model.ts ui.ts model_server.ts server.ts
+tsc -p tsconfig.json
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
 fi
 echo Compiled TSC files
-
-tsc --module commonjs --target ${JS_TARGET} ./model.ts -d
-if [[ "$?" != 0 ]]; then
-	echo "Build error." 1>&2
-	exit 1
-fi
-echo Updated type object
-
-mv model.d.ts type_definitions/model.d.ts
-if [[ "$?" != 0 ]]; then
-	echo "Build error." 1>&2
-	exit 1
-fi
-echo Updated type object - Moving file
-
-tsc --module commonjs --target ${JS_TARGET} ./tests.ts
-if [[ "$?" != 0 ]]; then
-	echo "Build error." 1>&2
-	exit 1
-fi
-echo Compiled Tests
 
 node_modules/mocha/bin/mocha tests.js
 if [[ "$?" != 0 ]]; then
@@ -39,6 +18,13 @@ if [[ "$?" != 0 ]]; then
 	exit 1
 fi
 echo Ran Tests
+
+mv model.d.ts type_definitions/model.d.ts
+if [[ "$?" != 0 ]]; then
+	echo "Build error." 1>&2
+	exit 1
+fi
+echo Moving model.d.ts type
 
 tsc --moduleResolution node --m commonjs --target ${JS_TARGET} --jsx react app/*.tsx
 if [[ "$?" != 0 ]]; then

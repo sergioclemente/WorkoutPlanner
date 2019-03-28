@@ -1,11 +1,8 @@
 "use strict";
-/// <reference path="./node_modules/@types/node/index.d.ts"/>
-/// <reference path="./type_definitions/model.d.ts" />
 Object.defineProperty(exports, "__esModule", { value: true });
 const UI = require("./ui");
 const Model = require("./model");
-// Usage: 
-// string_format("Parameter1: {0}, Parameter2: {1}", val1, val2)
+require("mocha");
 function string_format(format, ...args) {
     return format.replace(/{(\d+)}/g, function (match, number) {
         return typeof args[number] != 'undefined'
@@ -29,8 +26,6 @@ function expect_eq_nbr(expected, actual, error = 0.01) {
         expect_true(false, string_format("\nexpected: [{0}] \nactual: [{1}]", JSON.stringify(expected), JSON.stringify(actual)));
     }
 }
-// TODO: Remove res
-var mocha = require('mocha');
 var intensity_100_pct = new Model.Intensity(1, 1);
 var up = new Model.UserProfile(310, "6:00min/mi", "1:25/100yards", "foo@bar.com");
 up.setEfficiencyFactor(2);
@@ -58,7 +53,7 @@ describe('Intensity', function () {
         expect_eq_nbr(0.85, res);
     });
     it('hr conversion', function () {
-        var hr_visitor = new Model.WorkoutTextVisitor(up, Model.SportType.Bike, Model.IntensityUnit.HeartRate, /*roundValues=*/ false);
+        var hr_visitor = new Model.WorkoutTextVisitor(up, Model.SportType.Bike, Model.IntensityUnit.HeartRate, false);
         expect_eq_str("155bpm", hr_visitor.getIntensityPretty(intensity_100_pct));
         var intensity_90_pct = new Model.Intensity(0.9, 0.9);
         expect_eq_str("140bpm", hr_visitor.getIntensityPretty(intensity_90_pct));
@@ -85,7 +80,6 @@ describe('Bugs', function () {
         expect_eq_nbr(400, cd2.getValue());
     });
 });
-// TODO: Add test for half MINUTES
 describe('Combine duration', function () {
     it('Combine two distances', function () {
         let dur = Model.Duration.combine(new Model.Duration(Model.DistanceUnit.Yards, 100, 0, 0), new Model.Duration(Model.DistanceUnit.Yards, 200, 0, 0));
@@ -281,7 +275,6 @@ Desc9=20' @ 75%
         expect_eq_str(expected_content, mrx_visitor.getContent());
     });
 });
-// StepBuildInterval basic tests
 var duration1min = new Model.Duration(Model.TimeUnit.Seconds, 60, 60, 0);
 var duration30s = new Model.Duration(Model.TimeUnit.Seconds, 30, 30, 0);
 var si1min80 = new Model.SimpleInterval("", new Model.Intensity(80), duration1min, Model.Duration.ZeroDuration);
@@ -370,8 +363,8 @@ describe('Swim', function () {
     it('intensity conversion', function () {
         expect_eq_str("1:30/100yards", new Model.Intensity(1, 1.5, Model.IntensityUnit.Per100Yards).toString());
         expect_eq_str("0:20/25yards", new Model.Intensity(1, 0.33333, Model.IntensityUnit.Per25Yards).toString());
-        var swim_visitor_mph = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Mph, /*roundValues=*/ true);
-        var swim_visitor_per100 = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards, /*roundValues=*/ true);
+        var swim_visitor_mph = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Mph, true);
+        var swim_visitor_per100 = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Per100Yards, true);
         expect_eq_str("2.4mi/h", swim_visitor_mph.getIntensityPretty(intensity_100_pct));
         expect_eq_str("1:25/100yards", swim_visitor_per100.getIntensityPretty(intensity_100_pct));
     });
@@ -381,16 +374,16 @@ describe('Swim', function () {
         expect_eq_nbr(2.48, Model.IntensityUnitHelper.convertTo(1.5, Model.IntensityUnit.Per100Meters, Model.IntensityUnit.Mph));
         expect_eq_nbr(1.5, Model.IntensityUnitHelper.convertTo(2.48, Model.IntensityUnit.Mph, Model.IntensityUnit.Per100Meters));
         expect_eq_str("1:30/100meters", new Model.Intensity(1, 1.5, Model.IntensityUnit.Per100Meters).toString());
-        var swim_visitor_mph = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Mph, /*roundValues=*/ true);
-        var swim_visitor_per100 = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Per100Meters, /*roundValues=*/ true);
+        var swim_visitor_mph = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Mph, true);
+        var swim_visitor_per100 = new Model.WorkoutTextVisitor(up, Model.SportType.Swim, Model.IntensityUnit.Per100Meters, true);
         expect_eq_str("2.4mi/h", swim_visitor_mph.getIntensityPretty(intensity_100_pct));
         expect_eq_str("1:33/100meters", swim_visitor_per100.getIntensityPretty(intensity_100_pct));
     });
     it('speed', function () {
-        expect_eq_nbr(/* 1:25 */ 60 + 25, new Model.ObjectFactory(up, Model.SportType.Swim).createDuration(intensity_100_pct, Model.DistanceUnit.Yards, 100).getSeconds());
+        expect_eq_nbr(60 + 25, new Model.ObjectFactory(up, Model.SportType.Swim).createDuration(intensity_100_pct, Model.DistanceUnit.Yards, 100).getSeconds());
     });
     it('speed (meters)', function () {
-        expect_eq_nbr(/* 1:32 */ 92.95, new Model.ObjectFactory(up, Model.SportType.Swim).createDuration(intensity_100_pct, Model.DistanceUnit.Meters, 100).getSeconds());
+        expect_eq_nbr(92.95, new Model.ObjectFactory(up, Model.SportType.Swim).createDuration(intensity_100_pct, Model.DistanceUnit.Meters, 100).getSeconds());
     });
 });
 describe('Player Helper', function () {
@@ -404,7 +397,6 @@ describe('Player Helper', function () {
         expect_true(null == ph.get(40 * 60));
     });
 });
-// TODO: Refactor this function, its becoming a bit of a mess.
 function GoldenTest(of, input_file, golden_file) {
     let fs = require('fs');
     let input = fs.readFileSync(input_file).toString();
@@ -412,20 +404,15 @@ function GoldenTest(of, input_file, golden_file) {
     let separator = "----------------------------\n";
     let expected_output = fs.readFileSync(golden_file).toString();
     let expected_outputs = expected_output.split(separator);
-    // Set 'generate_golden' to true if you need to regenerate the files.
     let generate_golden = true;
     let final_output = "";
     for (let i = 0; i < test_cases.length; ++i) {
         let input = test_cases[i];
-        // Skip last one which is a blank.
-        // Extract name and output unit
         let lines = input.split("\n");
         let test_case = "";
         let name = "";
         let output_unit = Model.IntensityUnit.Unknown;
-        // Extract the name and output_unit if any is provided.
         for (let j = 0; j < lines.length; ++j) {
-            // If there is any parameter, process them.
             if (lines[j].startsWith("{")) {
                 console.assert(lines[j].endsWith("}"));
                 let assignment = lines[j].slice(1, lines[j].length - 1).split("=");
@@ -464,7 +451,6 @@ function GoldenTest(of, input_file, golden_file) {
         actual_output += string_format("IF (Avg): {0}\n", interval.getIntensity().getValue());
         actual_output += string_format("TSS: {0}\n", interval.getTSS());
         actual_output += string_format("TSS2: {0}\n", interval.getTSS2());
-        // Get the dominant unit and pretty print.
         let dominant_intensity_unit = Model.DominantUnitVisitor.computeIntensity(interval);
         if (dominant_intensity_unit != Model.IntensityUnit.Unknown || output_unit != Model.IntensityUnit.Unknown) {
             let presentation_unit;
@@ -477,7 +463,7 @@ function GoldenTest(of, input_file, golden_file) {
                 actual_output += string_format("Dominant Unit: {0}\n", Model.IntensityUnitHelper.toString(dominant_intensity_unit));
             }
             var workout_steps = interval.getIntervals().map(function (interval_1, index) {
-                return "\t* " + Model.WorkoutTextVisitor.getIntervalTitle(interval_1, of.getUserProfile(), of.getSportType(), presentation_unit, /*round_values=*/ false);
+                return "\t* " + Model.WorkoutTextVisitor.getIntervalTitle(interval_1, of.getUserProfile(), of.getSportType(), presentation_unit, false);
             }.bind(this));
             actual_output += "Pretty Print:\n";
             actual_output += workout_steps.join("\n") + "\n";
@@ -513,7 +499,6 @@ function GoldenTest(of, input_file, golden_file) {
         if (!generate_golden) {
             expect_eq_str(expected_outputs[i], actual_output);
         }
-        // final_output is used for writing to the golden_file
         final_output += actual_output;
         final_output += separator;
     }
@@ -547,8 +532,6 @@ function textPreprocessor(input, expected) {
 }
 describe('text processor', function () {
     it('simple', function () {
-        // Make sure #wu gets resolved. Its a random output so we cannot
-        // check against a static value unless we override the random generator.
         let tp = new Model.TextPreprocessor(Model.SportType.Bike);
         let actual = tp.process("#wu");
         console.assert(actual.indexOf("#wu") == -1);
@@ -585,7 +568,7 @@ function computePower(input_workout, expected_np, expected_avg) {
 }
 describe('np computation', function () {
     it('simple', function () {
-        computePower("(30s, 100)", /*np=*/ 310, /*avg=*/ 310);
-        computePower("(30s, 100), (30s, 55)", /*np=*/ 279, /*avg=*/ 250.17);
+        computePower("(30s, 100)", 310, 310);
+        computePower("(30s, 100), (30s, 55)", 279, 250.17);
     });
 });
