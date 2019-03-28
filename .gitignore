@@ -1,11 +1,4 @@
 node_modules/*
-
-local.sh
-
-
-parser.js
-parser.ts
-
+dist/*
 .vscode/launch.json
 .vscode/settings.json
-run.bat

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import * as UI from '../ui';
 import ErrorLabel from './error_label';
 
 export default class TextInput extends React.Component<any, any> {

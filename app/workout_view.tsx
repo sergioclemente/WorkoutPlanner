@@ -89,7 +89,7 @@ export default class WorkoutView extends React.Component<any, any> {
 				<td>{this.state.avg_power}</td>
 			</tr>);
 		} else {
-			return;
+			return null;
 		}
 	}
 
@@ -107,7 +107,7 @@ export default class WorkoutView extends React.Component<any, any> {
 				<td>{this.state.avg_pace}</td>
 			</tr>);
 		} else {
-			return;
+			return null;
 		}
 	}
 

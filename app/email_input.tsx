@@ -2,7 +2,7 @@ import * as React from "react";
 import * as UI from "../ui";
 import ErrorLabel from "./error_label";
 
-interface EmailInputProps {
+export interface EmailInputProps {
 	value: string,
 	onChange: any,
 	defaultValue: string,
@@ -18,8 +18,8 @@ export default class EmailInput extends React.Component<EmailInputProps, any> {
 	}
 
 	render() {
-		const {value} = this.state;
-		const {defaultValue, width} = this.props;
+		const { value } = this.state;
+		const { defaultValue, width } = this.props;
 		return (<span>
 			<input width={width} placeholder={defaultValue} type='string' value={value} onChange={e => this._change(e)} onBlur={e => this._blur(e)} />
 			<ErrorLabel ref='errorLabel' message=''></ErrorLabel>
@@ -35,7 +35,7 @@ export default class EmailInput extends React.Component<EmailInputProps, any> {
 			this._setError("Enter a valid email");
 		} else {
 			this._setError("");
-			const {onChange} = this.props; 
+			const { onChange } = this.props;
 			onChange(e.target.value);
 		}
 	}

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": ".",
+    "outDir": "dist/",
     "noImplicitReturns": true,
     "removeComments": true,
     "noUnusedLocals": true,
@@ -9,13 +9,10 @@
     "moduleResolution": "node",
     "module": "commonjs",
     "target": "ES2017",
-    "declaration": true,
+    "jsx": "react",
   },
-  "files": [
-    "model.ts",
-    "ui.ts",
-    "model_server.ts",
-    "server.ts",
-    "tests.ts"
+  "include": [
+    "*.ts",
+    "app/*.tsx"
   ]
 }
