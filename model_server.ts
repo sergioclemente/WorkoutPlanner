@@ -1,7 +1,8 @@
 /// <reference path="./node_modules/@types/sqlite3/index.d.ts"/>
 
 var sqlite3 = require('sqlite3').verbose();
-var fs = require('fs');
+
+import 'fs'
 
 module ModelServer {
 	class ScopedFilename {
@@ -112,7 +113,7 @@ module ModelServer {
 					callback("Error while reading row from db", null);
 				} else {
 					let result = [];
-					for (let i = 0 ; i < rows.length; i++) {
+					for (let i = 0; i < rows.length; i++) {
 						var workout = new Workout();
 						workout.id = rows[i].id;
 						workout.title = rows[i].title;

@@ -9,7 +9,7 @@ export default class PlayerView extends React.Component<any, any> {
 	private stopWatch_: Model.StopWatch = null;
 	private params_: UI.QueryParams = null;
 	private playerHelper_: Model.PlayerHelper = null;
-	private intervalId_: number = null;
+	private intervalId_: NodeJS.Timeout = null;
 
 	constructor(params: any) {
 		super(params);

@@ -1,8 +1,8 @@
 {
   "name": "WorkoutPlanner",
   "version": "0.1.5",
-  "description": "A simple generator of workouts for bike/run",
-  "main": "server.js",
+  "description": "A simple generator of workouts for swim/bike/run",
+  "main": "dist/server.js",
   "scripts": {
     "start": "cd dist && node server.js",
     "test": "./build.sh"
@@ -10,12 +10,12 @@
   "dependencies": {
     "fixed-data-table": "^0.6.5",
     "gmail-send": "^1.2.14",
-    "react": "^16.8.5",
-    "react-dom": "^16.8.5",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
     "sqlite3": "^4.0.6"
   },
   "engines": {
-    "node": "6.9.1"
+    "node": "6.9.0"
   },
   "repository": {
     "type": "git",
@@ -24,13 +24,11 @@
   "keywords": [],
   "license": "GNU GPL",
   "devDependencies": {
-    "@types/fixed-data-table": "^0.6.32",
+    "@types/fixed-data-table": "^0.6.35",
     "@types/jasmine": "^3.3.12",
     "@types/mocha": "^5.2.6",
-    "@types/node": "^11.12.0",
-    "@types/nodemailer": "^4.6.7",
+    "@types/node": "^11.12.2",
     "@types/sqlite3": "^3.1.5",
-    "babili": "^0.1.4",
     "mocha": "^6.0.2",
     "typescript": "^3.3.4000",
     "webpack": "^4.29.6",

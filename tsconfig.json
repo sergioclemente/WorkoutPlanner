@@ -6,13 +6,24 @@
     "noUnusedLocals": true,
     "noFallthroughCasesInSwitch": true,
     "alwaysStrict": true,
+    "noUnusedParameters": false,
+    "noImplicitThis": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "noImplicitAny": false,
     "moduleResolution": "node",
     "module": "commonjs",
     "target": "ES2017",
     "jsx": "react",
+    // We don't include jasmine  and other types as it can collide with
+    // other dependencies. See github issue
+    // https://github.com/angular/protractor/issues/3792
+    "types": [
+      "node",
+    ]
   },
   "include": [
     "*.ts",
     "app/*.tsx"
-  ]
+  ],
 }

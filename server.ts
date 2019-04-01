@@ -8,13 +8,13 @@ let model = require("./model");
 let model_server = require("./model_server");
 let config = require('./config');
 
-function logRequest(req, code : number) {
-    let user_agent : string = req.headers['user-agent'];
+function logRequest(req, code: number) {
+    let user_agent: string = req.headers['user-agent'];
     console.log(new Date().toTimeString() + " " + req.connection.remoteAddress + " " + req.method + " " + req.url + " " + code + " " + user_agent);
 }
 
-function handleExistentFile(req, res, fs, filename : string) {
-    let accept_encoding : string = req.headers['accept-encoding'];
+function handleExistentFile(req, res, fs, filename: string) {
+    let accept_encoding: string = req.headers['accept-encoding'];
     if (!accept_encoding) {
         accept_encoding = '';
     }
@@ -57,7 +57,7 @@ function handleExistentFile(req, res, fs, filename : string) {
     }
 }
 
-function handleSendEmail(req, res, uri : string, params) {
+function handleSendEmail(req, res, uri: string, params) {
     if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
         let userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
         let builder = new model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
@@ -130,7 +130,7 @@ function show404(req, res) {
     res.end();
 }
 
-function handleSaveWorkout(req, res, uri : string, params) {
+function handleSaveWorkout(req, res, uri: string, params) {
     logRequest(req, 200);
     let userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
     let builder = new model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
@@ -152,10 +152,10 @@ function handleSaveWorkout(req, res, uri : string, params) {
 http.createServer(function (req, res) {
     try {
         let parsed_url = url.parse(req.url, true);
-        let uri : string = parsed_url.pathname;
+        let uri: string = parsed_url.pathname;
 
-        let base_path : string = process.cwd();
-        let filename : string = path.normalize(path.join(base_path, uri));
+        let base_path: string = process.cwd();
+        let filename: string = path.normalize(path.join(base_path, uri));
 
         if (filename.indexOf(base_path) < 0) {
             logRequest(req, 403);

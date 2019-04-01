@@ -1,9 +1,4 @@
-export JS_TARGET=ES2017
-# TODO: Enable this option back
-# --noUnusedParameters: 
-# Problem is in the server.
-# --noImplicitThis --strictNullChecks --strictFunctionTypes --noImplicitAny  
-export TSC_OPTS="--noImplicitReturns --removeComments --noUnusedLocals --noFallthroughCasesInSwitch --alwaysStrict"
+#!/bin/bash
 
 tsc -p tsconfig.json
 if [[ "$?" != 0 ]]; then
