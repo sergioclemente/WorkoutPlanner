@@ -1,0 +1,20 @@
+(5min, 40)
+(30sec, 40, easy)
+(5min, 60)
+(30sec, 40, easy)
+(5min, 65)
+(30sec, 40, easy)
+10[(2min, 75), (20sec, 40, easy)]
+(5min, 40, easy)
+15[(30sec, 100), (20sec, 40, easy)]
+(5min, 40, easy)
+-- EOT
+(5min, 40)
+(30sec, 40, easy)
+8[(30s, descend 1-4), (10s, 40)]
+(30sec, 40, easy)
+10[(90s, 75), (30sec, 100), (40sec, 40, easy)]
+(5min, 40, easy)
+10[(15s, max), (45s, easy)]
+(5min, 40, easy)
+-- EOT

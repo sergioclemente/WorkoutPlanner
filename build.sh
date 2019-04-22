@@ -16,7 +16,8 @@ echo Ran Tests
 
 # Copy static files directly to dist folder
 cp index.* dist/
-cp canvasjs.* dist/
+cp canvasjs.min.js dist/
+cp fixed-data-table.css dist/
 cp sql/app.db dist/app.db
 
 # Bundle now

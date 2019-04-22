@@ -2,7 +2,7 @@
 
 # Installing dependencies
 
-1. First of all install node js 6.5 or higher (https://nodejs.org/en/download/).
+1. First of all install node js 6.9 or higher (https://nodejs.org/en/download/).
 2. Then install the following dependencies (as an administrator):
 
 ```
