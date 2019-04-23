@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tsc -p tsconfig.json
+node_modules/typescript/bin/tsc -p tsconfig.json
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
