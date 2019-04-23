@@ -19,6 +19,7 @@ cp index.* dist/
 cp canvasjs.min.js dist/
 cp fixed-data-table.css dist/
 cp sql/app.db dist/app.db
+cp countdown.wav dist/
 
 # Bundle now
 node_modules/webpack/bin/webpack.js dist/index.js --output-filename index.min.js --output-path dist/ --mode production

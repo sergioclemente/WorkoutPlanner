@@ -81,13 +81,9 @@ export default class PlayerView extends React.Component<any, any> {
 		}
 
 		let durationIntervalMilliseconds = bei.getDurationSeconds() * 1000;
-		// If the interval lasts more than 20s, we will plan the countdown, otherwise the ding (for rest).
-		if (durationIntervalMilliseconds > 20000 && this._getRemainingTimeMilliseconds(bei) < 11600) {
+		// If the interval lasts more than 3.5, we will plan the countdown.
+		if (durationIntervalMilliseconds > 3500 && this._getRemainingTimeMilliseconds(bei) < 3500) {
 			this._pauseAudioElement("countdown", false);
-		} else {
-			if (this._getRemainingTimeMilliseconds(bei) < 100) {
-				this._pauseAudioElement("ding", false);
-			}
 		}
 	}
 
@@ -165,9 +161,6 @@ export default class PlayerView extends React.Component<any, any> {
 				<source src="countdown.wav" type="audio/wav" />
 				Your browser does not support the audio element.
 					</audio>
-			<audio ref="ding" hidden={false}>
-				<source src="ding.wav" type="audio/wav" />
-			</audio>
 		</div>);
 	}
 }
