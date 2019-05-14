@@ -17,7 +17,7 @@
     "@types/fixed-data-table": "^0.6.35",
     "@types/jasmine": "^3.3.12",
     "@types/mocha": "^5.2.6",
-    "@types/node": "^11.12.2",
+    "@types/node": "^12.0.1",
     "@types/sqlite3": "^3.1.5",
     "mocha": "^6.0.2",
     "webpack": "^4.29.6",
