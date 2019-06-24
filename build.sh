@@ -16,6 +16,7 @@ echo Ran Tests
 
 # Copy static files directly to dist folder
 cp index.* dist/
+cp *.png dist/
 cp canvasjs.min.js dist/
 cp fixed-data-table.css dist/
 cp sql/app.db dist/app.db
