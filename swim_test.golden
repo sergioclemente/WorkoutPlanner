@@ -519,3 +519,67 @@ Duration Unit: yards
 Yards: 300
 Duration (Sec): 255
 ----------------------------
+Input: 
+(5min, 40)
+(30sec, 40, easy)
+8[(30s, descend 1-4), (10s, 40)]
+(30sec, 40, put door on 3)
+10[(60s, 100, LC), (20s, easy)]
+(30sec, 40, put door on 1)
+10[(120s, 85), (20sec, 40, easy)]
+(2min, 40, easy)
+5[(30s, 110, fast), (30s, easy)]
+(5min, 40, easy)
+-Normalized: 
+(5min, 40)
+(30sec, 40, easy)
+8[(30sec, 88, descend 1-4), (10sec, 40)]
+(30sec, 40, put door on 3)
+10[(1min, 100, LC), (20sec, 88, easy)]
+(30sec, 40, put door on 1)
+10[(2min, 85), (20sec, 40, easy)]
+(2min, 40, easy)
+5[(30sec, 110, fast), (30sec, 88, easy)]
+(5min, 40, easy)
+AST: 
+ArrayInterval(
+	SimpleInterval(5min, 40%, )
+	SimpleInterval(30sec, 40%, easy)
+	RepeatInterval(count=8, 
+		SimpleInterval(30sec, 88%, descend 1-4)
+		SimpleInterval(10sec, 40%, )
+	)
+	SimpleInterval(30sec, 40%, put door on 3)
+	RepeatInterval(count=10, 
+		SimpleInterval(1min, 100%, LC)
+		SimpleInterval(20sec, 88%, easy)
+	)
+	SimpleInterval(30sec, 40%, put door on 1)
+	RepeatInterval(count=10, 
+		SimpleInterval(2min, 85%, )
+		SimpleInterval(20sec, 40%, easy)
+	)
+	SimpleInterval(2min, 40%, easy)
+	RepeatInterval(count=5, 
+		SimpleInterval(30sec, 110%, fast)
+		SimpleInterval(30sec, 88%, easy)
+	)
+	SimpleInterval(5min, 40%, easy)
+)
+IF (Avg): 0.7924916246917765
+TSS: 63.3
+TSS2: 63.9
+Dominant Unit: %
+Pretty Print:
+	* 5' easy
+	* 30'' easy @ 40%
+	* 8 x 30'' descend 1-4 on 30'' - 10'' easy
+	* 30'' put door on 3 @ 40%
+	* 10 x 1' LC on 1' - 20'' easy
+	* 30'' put door on 1 @ 40%
+	* 10 x 2' on 2' - 20'' easy
+	* 2' easy @ 40%
+	* 5 x 30'' fast on 30'' - 30'' easy
+	* 5' easy @ 40%
+Duration (Sec): 3630
+----------------------------

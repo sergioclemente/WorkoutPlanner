@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const UI = require("./ui");
 const Model = require("./model");
 require("mocha");
+const Assert = require("assert");
 function string_format(format, ...args) {
     return format.replace(/{(\d+)}/g, function (match, number) {
         return typeof args[number] != 'undefined'
@@ -12,13 +13,11 @@ function string_format(format, ...args) {
 }
 function expect_true(condition, message = "Expect true failed") {
     if (!condition) {
-        console.assert(false, message);
+        Assert.fail(message);
     }
 }
 function expect_eq_str(expected, actual) {
-    if (expected !== actual) {
-        expect_true(false, string_format("\nexpected: [{0}] \nactual: [{1}]", expected, actual));
-    }
+    Assert.equal(actual, expected, string_format("\nexpected: [{0}] \nactual: [{1}]", expected, actual));
 }
 function expect_eq_nbr(expected, actual, error = 0.01) {
     var delta = Math.abs(expected - actual);
@@ -351,6 +350,9 @@ describe('Formatter', function () {
         expect_eq_nbr(245, Model.FormatterHelper.roundNumberDown(245, 5));
         expect_eq_nbr(245, Model.FormatterHelper.roundNumberDown(246, 5));
     });
+    it('time', function () {
+        expect_eq_str("01:00:30", Model.FormatterHelper.formatTime(3630000));
+    });
 });
 describe('Swim', function () {
     it('speed conversion', function () {
@@ -496,9 +498,7 @@ function GoldenTest(of, input_file, golden_file) {
             }
         }
         actual_output += string_format("Duration (Sec): {0}\n", interval.getTotalDuration().getSeconds());
-        if (!generate_golden) {
-            expect_eq_str(expected_outputs[i], actual_output);
-        }
+        expect_eq_str(expected_outputs[i], actual_output);
         final_output += actual_output;
         final_output += separator;
     }

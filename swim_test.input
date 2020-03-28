@@ -71,3 +71,14 @@
 {output_unit=/25yards}
 (300yards, +0, Tempo trainer)
 -- EOT
+(5min, 40)
+(30sec, 40, easy)
+8[(30s, descend 1-4), (10s, 40)]
+(30sec, 40, put door on 3)
+10[(60s, 100, LC), (20s, easy)]
+(30sec, 40, put door on 1)
+10[(120s, 85), (20sec, 40, easy)]
+(2min, 40, easy)
+5[(30s, 110, fast), (30s, easy)]
+(5min, 40, easy)
+--- EOT

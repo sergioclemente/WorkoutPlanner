@@ -1,6 +1,7 @@
 import * as UI from './ui';
 import * as Model from './model';
 import 'mocha';
+import * as Assert from 'assert'
 
 // Usage: 
 // string_format("Parameter1: {0}, Parameter2: {1}", val1, val2)
@@ -15,14 +16,12 @@ function string_format(format, ...args) {
 
 function expect_true(condition: boolean, message: string = "Expect true failed") {
 	if (!condition) {
-		console.assert(false, message);
+		Assert.fail(message);
 	}
 }
 
 function expect_eq_str(expected: string, actual: string) {
-	if (expected !== actual) {
-		expect_true(false, string_format("\nexpected: [{0}] \nactual: [{1}]", expected, actual));
-	}
+	Assert.equal(actual, expected, string_format("\nexpected: [{0}] \nactual: [{1}]", expected, actual));
 }
 
 function expect_eq_nbr(expected: number, actual: number, error: number = 0.01) {
@@ -383,6 +382,9 @@ describe('Formatter', function () {
 		expect_eq_nbr(245, Model.FormatterHelper.roundNumberDown(245, 5));
 		expect_eq_nbr(245, Model.FormatterHelper.roundNumberDown(246, 5));
 	});
+	it('time', function () {
+		expect_eq_str("01:00:30", Model.FormatterHelper.formatTime(3630000));
+	});
 });
 
 describe('Swim', function () {
@@ -542,9 +544,7 @@ function GoldenTest(of: any, input_file: string, golden_file: string) {
 		}
 
 		actual_output += string_format("Duration (Sec): {0}\n", interval.getTotalDuration().getSeconds());
-		if (!generate_golden) {
-			expect_eq_str(expected_outputs[i], actual_output);
-		}
+		expect_eq_str(expected_outputs[i], actual_output);
 		// final_output is used for writing to the golden_file
 		final_output += actual_output;
 		final_output += separator;
