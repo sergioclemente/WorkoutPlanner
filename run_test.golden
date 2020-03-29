@@ -15,7 +15,7 @@ TSS2: 11.3
 Output Unit: mi/h
 Pretty Print:
 	* 1km @ 10mi/h
-	* 1km easy
+	* 1km @ 7.5mi/h
 Duration Unit: km
 Kilometers: 2
 Duration (Sec): 523.6936292054402
@@ -94,7 +94,7 @@ TSS2: 19.7
 Dominant Unit: %
 Pretty Print:
 	* 6' @ 100% - 2' @ 80%
-	* 10' easy
+	* 10' @ 70%
 Duration Unit: min
 Miles: 2.4mi
 Duration (Sec): 1080
@@ -208,17 +208,17 @@ Duration (Sec): 10
 Input: 
 (10s, relaxed)
 Normalized: 
-(10sec, 75, relaxed)
+(10sec, relaxed)
 AST: 
 ArrayInterval(
-	SimpleInterval(10sec, 75%, relaxed)
+	SimpleInterval(10sec, , relaxed)
 )
-IF (Avg): 0.75
-TSS: 0.2
-TSS2: 0.2
+IF (Avg): 0.01
+TSS: 0
+TSS2: 0
 Dominant Unit: %
 Pretty Print:
-	* 10'' relaxed @ 75%
+	* 10'' relaxed
 Duration Unit: s
 Miles: 0mi
 Duration (Sec): 10

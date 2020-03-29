@@ -1,4 +1,21 @@
 Input: 
+(10min, 55, 75)
+Normalized: 
+(10min, 55, 75)
+AST: 
+ArrayInterval(
+	BuildInterval(10min, 55%, 75%, )
+)
+IF (Avg): 0.6576473218982952
+TSS: 7.1
+TSS2: 7.7
+Dominant Unit: %
+Pretty Print:
+	* 10' build from 55% to 75%
+Duration Unit: min
+Duration (Sec): 600
+----------------------------
+Input: 
 (1hr, 75)
 Normalized: 
 (1hr, 75)
@@ -117,7 +134,7 @@ TSS: 0.7
 TSS2: 0.8
 Dominant Unit: %
 Pretty Print:
-	* 1' warm up to 75%
+	* 1' build from 55% to 75%
 Duration Unit: min
 Duration (Sec): 60
 ----------------------------
@@ -151,7 +168,7 @@ TSS: 14.2
 TSS2: 15.3
 Dominant Unit: %
 Pretty Print:
-	* 20' warm up to 75%
+	* 20' build from 55% to 75%
 Duration Unit: min
 Duration (Sec): 1200
 ----------------------------
@@ -171,7 +188,7 @@ TSS: 4.3
 TSS2: 4.3
 Dominant Unit: %
 Pretty Print:
-	* 4 x 45'' build from 75% to 100% - 15'' easy
+	* 4 x 45'' build from 75% to 100% - 15'' @ 55%
 Duration Unit: s
 Duration (Sec): 240
 ----------------------------
@@ -181,29 +198,35 @@ Normalized:
 3[(1min, 80, 90, 100), (30sec, 50)]
 AST: 
 ArrayInterval(
+	StepBuildInterval(
+		SimpleInterval(1min, 80%, )
+		SimpleInterval(1min, 90%, )
+		SimpleInterval(1min, 100%, )
+		SimpleInterval(30sec, 50%, )
 	)
+)
 IF (Avg): 0.8577378887016043
 TSS: 4.7
 TSS2: 5.1
 Dominant Unit: %
 Pretty Print:
-	* 3 x 1' - w/ 30'' easy (80%, 90%, 100%)
+	* 3 x 1' - w/ 30'' @ 50% (80%, 90%, 100%)
 Duration (Sec): 270
 ----------------------------
 Input: 
 (5min, easy)
 Normalized: 
-(5min, 55, easy)
+(5min, easy)
 AST: 
 ArrayInterval(
-	SimpleInterval(5min, 55%, easy)
+	SimpleInterval(5min, , easy)
 )
-IF (Avg): 0.55
-TSS: 2.5
-TSS2: 2.8
+IF (Avg): 0.01
+TSS: 0
+TSS2: 0
 Dominant Unit: %
 Pretty Print:
-	* 5' easy @ 55%
+	* 5' easy
 Duration Unit: min
 Duration (Sec): 300
 ----------------------------
@@ -285,9 +308,9 @@ AST:
 ArrayInterval(
 	SimpleInterval(10min, *, Free)
 )
-IF (Avg): 0.55
-TSS: 5
-TSS2: 5.5
+IF (Avg): 0.5
+TSS: 4.2
+TSS2: 4.2
 Dominant Unit: free-ride
 Pretty Print:
 	* 10' Free
@@ -319,7 +342,7 @@ AST:
 ArrayInterval(
 	SimpleInterval(10sec, *, )
 )
-IF (Avg): 0.55
+IF (Avg): 0.5
 TSS: 0.1
 TSS2: 0.1
 Dominant Unit: free-ride
@@ -336,9 +359,9 @@ AST:
 ArrayInterval(
 	SimpleInterval(10min, *, TT)
 )
-IF (Avg): 0.55
-TSS: 5
-TSS2: 5.5
+IF (Avg): 0.5
+TSS: 4.2
+TSS2: 4.2
 Output Unit: w
 Pretty Print:
 	* 10' TT
@@ -351,13 +374,18 @@ Normalized:
 2[(1min, 85, 95), (30sec, 50)]
 AST: 
 ArrayInterval(
+	StepBuildInterval(
+		SimpleInterval(1min, 85%, )
+		SimpleInterval(1min, 95%, )
+		SimpleInterval(30sec, 50%, )
 	)
+)
 IF (Avg): 0.8366600265340756
 TSS: 3.1
 TSS2: 3.3
 Dominant Unit: %
 Pretty Print:
-	* 2 x 1' - w/ 30'' easy (85%, 95%)
+	* 2 x 1' - w/ 30'' @ 50% (85%, 95%)
 Duration (Sec): 180
 ----------------------------
 Input: 
@@ -366,13 +394,18 @@ Normalized:
 2[(100, 30sec, 45sec), (30sec, 50)]
 AST: 
 ArrayInterval(
+	StepBuildInterval(
+		SimpleInterval(30sec, 100%, )
+		SimpleInterval(45sec, 100%, )
+		SimpleInterval(30sec, 50%, )
 	)
+)
 IF (Avg): 0.8864052604279183
 TSS: 2.5
 TSS2: 3
 Dominant Unit: %
 Pretty Print:
-	* 2 x 100% - w/ 30'' easy (30'', 45'')
+	* 2 x 100% - w/ 30'' @ 50% (30'', 45'')
 Duration Unit: s
 Duration (Sec): 135
 ----------------------------
@@ -412,7 +445,7 @@ TSS: 7.5
 TSS2: 7.8
 Dominant Unit: %
 Pretty Print:
-	* 4 x 1' hard @ 100% - 30'' easy
+	* 4 x 1' hard @ 100% - 30'' @ 50%
 Duration (Sec): 360
 ----------------------------
 Input: 
@@ -428,21 +461,21 @@ TSS: 1
 TSS2: 1.1
 Dominant Unit: w
 Pretty Print:
-	* 1' warm up to 310w
+	* 1' build from 155w to 310w
 Duration Unit: min
 Duration (Sec): 60
 ----------------------------
 Input: 
 (10min)
 Normalized: 
-(10min, 55)
+(10min)
 AST: 
 ArrayInterval(
-	SimpleInterval(10min, 55%, )
+	SimpleInterval(10min, , )
 )
-IF (Avg): 0.55
-TSS: 5
-TSS2: 5.5
+IF (Avg): 0.01
+TSS: 0
+TSS2: 0
 Dominant Unit: %
 Pretty Print:
 	* 10' easy
@@ -452,17 +485,17 @@ Duration (Sec): 600
 Input: 
 (10min, easy)
 Normalized: 
-(10min, 55, easy)
+(10min, easy)
 AST: 
 ArrayInterval(
-	SimpleInterval(10min, 55%, easy)
+	SimpleInterval(10min, , easy)
 )
-IF (Avg): 0.55
-TSS: 5
-TSS2: 5.5
+IF (Avg): 0.01
+TSS: 0
+TSS2: 0
 Dominant Unit: %
 Pretty Print:
-	* 10' easy @ 55%
+	* 10' easy
 Duration Unit: min
 Duration (Sec): 600
 ----------------------------
@@ -474,7 +507,7 @@ AST:
 ArrayInterval(
 	SimpleInterval(10sec, *, free ride)
 )
-IF (Avg): 0.55
+IF (Avg): 0.5
 TSS: 0.1
 TSS2: 0.1
 Dominant Unit: free-ride
@@ -596,7 +629,7 @@ TSS: 4.3
 TSS2: 4.3
 Dominant Unit: %
 Pretty Print:
-	* 4 x 45'' build from 75% to 100% - 15'' easy
+	* 4 x 45'' build from 75% to 100% - 15'' @ 55%
 Duration Unit: s
 Duration (Sec): 240
 ----------------------------
@@ -606,13 +639,19 @@ Normalized:
 3[(75, 2min, 1min, 1min), (1min, 55)]
 AST: 
 ArrayInterval(
+	StepBuildInterval(
+		SimpleInterval(2min, 75%, )
+		SimpleInterval(1min, 75%, )
+		SimpleInterval(1min, 75%, )
+		SimpleInterval(1min, 55%, )
 	)
+)
 IF (Avg): 0.71449282711585
 TSS: 5.3
 TSS2: 5.8
 Dominant Unit: %
 Pretty Print:
-	* 3 x 75% - w/ 1' easy (2', 1', 1')
+	* 3 x 75% - w/ 1' @ 55% (2', 1', 1')
 Duration Unit: min
 Duration (Sec): 420
 ----------------------------
@@ -622,13 +661,19 @@ Normalized:
 3[(1min, 80, 90, 100), (30sec, 50)]
 AST: 
 ArrayInterval(
+	StepBuildInterval(
+		SimpleInterval(1min, 80%, )
+		SimpleInterval(1min, 90%, )
+		SimpleInterval(1min, 100%, )
+		SimpleInterval(30sec, 50%, )
 	)
+)
 IF (Avg): 0.8577378887016043
 TSS: 4.7
 TSS2: 5.1
 Dominant Unit: %
 Pretty Print:
-	* 3 x 1' - w/ 30'' easy (80%, 90%, 100%)
+	* 3 x 1' - w/ 30'' @ 50% (80%, 90%, 100%)
 Duration (Sec): 270
 ----------------------------
 Input: 
@@ -644,7 +689,7 @@ TSS: 0.8
 TSS2: 0.8
 Dominant Unit: %
 Pretty Print:
-	* 1'30'' easy
+	* 1'30'' @ 55%
 Duration Unit: min
 Duration (Sec): 90
 ----------------------------
@@ -763,7 +808,7 @@ TSS: 7.1
 TSS2: 7.7
 Dominant Unit: %
 Pretty Print:
-	* 10' warm up to 75%
+	* 10' build from 55% to 75%
 Duration Unit: min
 Duration (Sec): 600
 ----------------------------
@@ -780,7 +825,7 @@ TSS: 5
 TSS2: 5.5
 Output Unit: w
 Pretty Print:
-	* 10' easy
+	* 10' @ 171w
 Duration Unit: min
 Duration (Sec): 600
 ----------------------------
@@ -820,7 +865,7 @@ TSS: 10.4
 TSS2: 10.1
 Output Unit: w
 Pretty Print:
-	* 2 x 5' @ 233w - 1' easy
+	* 2 x 5' @ 233w - 1' @ 171w
 Duration Unit: min
 Duration (Sec): 720
 ----------------------------
@@ -841,7 +886,7 @@ TSS: 17
 TSS2: 17.1
 Output Unit: w
 Pretty Print:
-	* 2 x (5' @ 233w, 2' @ 310w) - w/ 1' easy
+	* 2 x (5' @ 233w, 2' @ 310w) - w/ 1' @ 171w
 Duration Unit: min
 Duration (Sec): 960
 ----------------------------
@@ -882,7 +927,7 @@ TSS: 7
 TSS2: 7.1
 Output Unit: w
 Pretty Print:
-	* 2 x 5' @ 186w - 1' easy
+	* 2 x 5' @ 186w - 1' @ 171w
 Duration Unit: min
 Duration (Sec): 720
 ----------------------------
@@ -892,13 +937,18 @@ Normalized:
 2[(2min, 75, 85), (1min, 55)]
 AST: 
 ArrayInterval(
+	StepBuildInterval(
+		SimpleInterval(2min, 75%, )
+		SimpleInterval(2min, 85%, )
+		SimpleInterval(1min, 55%, )
 	)
+)
 IF (Avg): 0.757957782465488
 TSS: 5.3
 TSS2: 6.1
 Output Unit: w
 Pretty Print:
-	* 2 x 2' - w/ 1' easy (233w, 264w)
+	* 2 x 2' - w/ 1' @ 171w (233w, 264w)
 Duration Unit: min
 Duration (Sec): 360
 ----------------------------
@@ -908,13 +958,18 @@ Normalized:
 2[(75, 1min, 3min), (1min, 55)]
 AST: 
 ArrayInterval(
+	StepBuildInterval(
+		SimpleInterval(1min, 75%, )
+		SimpleInterval(3min, 75%, )
+		SimpleInterval(1min, 55%, )
 	)
+)
 IF (Avg): 0.71449282711585
 TSS: 4.8
 TSS2: 5
 Output Unit: w
 Pretty Print:
-	* 2 x 233w - w/ 1' easy (1', 3')
+	* 2 x 233w - w/ 1' @ 171w (1', 3')
 Duration Unit: min
 Duration (Sec): 360
 ----------------------------
@@ -950,7 +1005,7 @@ TSS2: 5.5
 Output Unit: w
 Pretty Print:
 	* Do this in a flat terrain
-	* 10' easy
+	* 10' @ 171w
 Duration Unit: min
 Duration (Sec): 600
 ----------------------------
@@ -970,7 +1025,7 @@ TSS2: 5.5
 Output Unit: w
 Pretty Print:
 	* Do this in a flat terrain
-	* 10' easy
+	* 10' @ 171w
 Duration Unit: min
 Duration (Sec): 600
 ----------------------------
@@ -989,7 +1044,7 @@ TSS: 5
 TSS2: 5.5
 Output Unit: w
 Pretty Print:
-	* 10' easy
+	* 10' @ 171w
 	* Do this in a flat terrain
 Duration Unit: min
 Duration (Sec): 600

@@ -82,3 +82,17 @@
 5[(30s, 110, fast), (30s, easy)]
 (5min, 40, easy)
 --- EOT
+{output_unit=w}
+(5min, 50)
+(5min, 65)
+(5min, 90)
+(5min, 90, 95)
+3[(5min, 90, 95, 100), (30s, easy)]
+2[(5min, 90), (30s, easy)]
+--- EOT
+{output_unit=w}
+(10min, easy)
+-- EOT
+{output_unit=w}
+(10s, change to dd3)
+-- EOT

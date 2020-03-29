@@ -7,6 +7,7 @@ import TextInput from './text_input';
 export default class UserProperty extends React.Component<any, any> {
 	private ftp: number;
 	private t_pace: string;
+	private swim_ftp: string;
 	private swim_css: string;
 	private email: string;
 	private efficiency_factor: string;
@@ -17,6 +18,7 @@ export default class UserProperty extends React.Component<any, any> {
 		this.ftp = parseInt(params.ftp_watts);
 		this.email = params.email;
 		this.t_pace = params.t_pace;
+		this.swim_ftp = params.swim_ftp;
 		this.swim_css = params.swim_css;
 		this.efficiency_factor = params.efficiency_factor;
 	}
@@ -40,6 +42,16 @@ export default class UserProperty extends React.Component<any, any> {
 			tPaceInput.setError("Enter a value speed for your running t-pace. Allowed units are: min/mi, km/h, mi/h, min/km");
 		}
 		this.t_pace = t_pace;
+		this._fireOnChange();
+	}
+	_onSwimFtpChange(swim_ftp) {
+		var swimFtpInput: NumberInput = this.refs['swim_ftp'] as NumberInput;
+		if (swim_ftp < 30 || swim_ftp > 200) {
+			swimFtpInput.setError("Set a value between 30 and 200");
+		} else {
+			swimFtpInput.setError("");
+		}
+		this.swim_ftp = swim_ftp;
 		this._fireOnChange();
 	}
 	_onSwimCSSChange(swim_css) {
@@ -71,6 +83,7 @@ export default class UserProperty extends React.Component<any, any> {
 			<div>
 				<h1> User Settings </h1>
 				Swim CSS: <TextInput ref="swim_css" width="20" placeholder="1:30 min/100yards" value={this.swim_css} onChange={this._onSwimCSSChange.bind(this)}></TextInput> <br />
+				Swim FTP: <TextInput ref="swim_ftp" width="20" placeholder="100" value={this.swim_ftp} onChange={this._onSwimFtpChange.bind(this)}></TextInput> <br />
 				Bike FTP: <NumberInput ref="ftp" width="20" placeholder="245" value={this.ftp} onChange={this._onFtpChange.bind(this)}></NumberInput><br />
 				Run T-Pace: <TextInput ref="t_pace" width="20" placeholder="7:30 min/mi" value={this.t_pace} onChange={this._onTPaceChange.bind(this)}></TextInput> <br />
 				Email: <EmailInput ref="email" width={20} defaultValue="foo@gmail.com" value={this.email} onChange={this._onEmailChange.bind(this)}></EmailInput> <br />

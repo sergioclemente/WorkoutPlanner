@@ -63,6 +63,7 @@ var UI;
             ret.workout_text = params.workout_text;
             ret.ftp_watts = params.ftp_watts;
             ret.t_pace = params.t_pace;
+            ret.swim_ftp = params.swim_ftp;
             ret.swim_css = params.swim_css;
             ret.efficiency_factor = params.efficiency_factor;
             ret.sport_type = params.sport_type;
@@ -85,6 +86,9 @@ var UI;
             }
             if (params.tpace != null && params.tpace.trim() != 0) {
                 this.t_pace = params.tpace;
+            }
+            if (params.swim_ftp != null && params.swim_ftp.trim() != 0) {
+                this.swim_ftp = params.swim_ftp;
             }
             if (params.css != null && params.css.trim() != 0) {
                 this.swim_css = params.css;
@@ -139,6 +143,12 @@ var UI;
                 let value = loadPersistedValue("t_pace");
                 if (value != null && value.trim().length != 0) {
                     this.t_pace = value;
+                }
+            }
+            {
+                let value = loadPersistedValue("swim_ftp");
+                if (value != null && value.trim().length != 0) {
+                    this.swim_ftp = value;
                 }
             }
             {
@@ -203,6 +213,9 @@ var UI;
             if (this.hasTPace()) {
                 setPersistedValue("t_pace", this.t_pace);
             }
+            if (this.hasSwimFTP()) {
+                setPersistedValue("swim_ftp", this.swim_ftp);
+            }
             if (this.hasSwimCSS()) {
                 setPersistedValue("swim_css", this.swim_css);
             }
@@ -240,6 +253,9 @@ var UI;
         hasTPace() {
             return typeof (this.t_pace) != 'undefined' && this.t_pace != "";
         }
+        hasSwimFTP() {
+            return typeof (this.swim_ftp) != 'undefined' && this.swim_ftp != "";
+        }
         hasSwimCSS() {
             return typeof (this.swim_css) != 'undefined' && this.swim_css != "";
         }
@@ -265,6 +281,7 @@ var UI;
             return this.hasWorkoutText() &&
                 this.hasFtpWatts() &&
                 this.hasTPace() &&
+                this.hasSwimFTP() &&
                 this.hasSwimCSS() &&
                 this.hasEfficiencyFactor() &&
                 this.hasSportType() &&
@@ -288,6 +305,9 @@ var UI;
             if (this.hasTPace()) {
                 res += "&tpace=" + encodeURIComponent(this.t_pace);
             }
+            if (this.hasSwimFTP()) {
+                res += "&swim_ftp=" + encodeURIComponent(this.swim_ftp);
+            }
             if (this.hasSwimCSS()) {
                 res += "&css=" + encodeURIComponent(this.swim_css);
             }
@@ -310,7 +330,7 @@ var UI;
         }
         createUserProfile() {
             if (this.validate()) {
-                let result = new Model.UserProfile(parseInt(this.ftp_watts), this.t_pace, this.swim_css, this.email);
+                let result = new Model.UserProfile(parseInt(this.ftp_watts), this.t_pace, parseInt(this.swim_ftp), this.swim_css, this.email);
                 result.setEfficiencyFactor(parseFloat(this.efficiency_factor));
                 return result;
             }

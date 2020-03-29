@@ -8,7 +8,7 @@ let model = require("./model");
 let model_server = require("./model_server");
 let config = require('./config');
 
-function logRequest(req, code: number) {
+function logRequest(req: any, code: number) {
     let user_agent: string = req.headers['user-agent'];
     console.log(new Date().toTimeString() + " " + req.connection.remoteAddress + " " + req.method + " " + req.url + " " + code + " " + user_agent);
 }

@@ -26,7 +26,7 @@ function expect_eq_nbr(expected, actual, error = 0.01) {
     }
 }
 var intensity_100_pct = new Model.Intensity(1, 1);
-var up = new Model.UserProfile(310, "6:00min/mi", "1:25/100yards", "foo@bar.com");
+var up = new Model.UserProfile(310, "6:00min/mi", 100, "1:25/100yards", "foo@bar.com");
 up.setEfficiencyFactor(2);
 var of_swim = new Model.ObjectFactory(up, Model.SportType.Swim);
 var of_bike = new Model.ObjectFactory(up, Model.SportType.Bike);
@@ -94,7 +94,7 @@ describe('IntervalParser', function () {
 });
 describe('UserProfile', function () {
     it('6min/mi to other paces', function () {
-        var up_6tpace = new Model.UserProfile(310, "6:00min/mi", "1:10/100yards", "foo@bar.com");
+        var up_6tpace = new Model.UserProfile(310, "6:00min/mi", 100, "1:10/100yards", "foo@bar.com");
         expect_eq_nbr(6, up_6tpace.getPaceMinMi(new Model.Intensity(1, 1)));
         expect_eq_nbr(7.05, up_6tpace.getPaceMinMi(new Model.Intensity(0.85, 0.85)));
         expect_eq_nbr(8, up_6tpace.getPaceMinMi(new Model.Intensity(0.75, 0.75)));
@@ -161,7 +161,7 @@ MINUTES\tPERCENT
 75\t55
 [END COURSE DATA]
 [PERFPRO DESCRIPTIONS]
-Desc0=10' warm up to 75%
+Desc0=10' build from 55% to 75%
 Desc1=1hr @ 80%
 Desc2=5' warm down from 75% to 55%
 [END PERFPRO DESCRIPTIONS]
@@ -201,15 +201,15 @@ MINUTES\tPERCENT
 290\t75
 [END COURSE DATA]
 [PERFPRO DESCRIPTIONS]
-Desc0=10' warm up to 75%
+Desc0=10' build from 55% to 75%
 Desc1=1hr @ 80% | 1 of 4
-Desc2=5' easy | 1 of 4
+Desc2=5' @ 55% | 1 of 4
 Desc3=1hr @ 80% | 2 of 4
-Desc4=5' easy | 2 of 4
+Desc4=5' @ 55% | 2 of 4
 Desc5=1hr @ 80% | 3 of 4
-Desc6=5' easy | 3 of 4
+Desc6=5' @ 55% | 3 of 4
 Desc7=1hr @ 80% | 4 of 4
-Desc8=5' easy | 4 of 4
+Desc8=5' @ 55% | 4 of 4
 Desc9=20' @ 75%
 [END PERFPRO DESCRIPTIONS]
 `;
@@ -233,7 +233,7 @@ Desc9=20' @ 75%
 	"startMinute":0,
 	"set_fields":["description","seconds","start","finish","mode","intervals","group","autolap","targetcad"],
 	"sets":[
-		["10' warm up to 75%",600,55,75,"M",1,75,0,90],
+		["10' build from 55% to 75%",600,55,75,"M",1,75,0,90],
 		["Free",3600,0,0,"T",1,0,0,90],
 		["5' warm down from 75% to 55%",300,75,55,"M",1,55,0,90]
 	]
@@ -259,15 +259,15 @@ Desc9=20' @ 75%
 	"startMinute":0,
 	"set_fields":["description","seconds","start","finish","mode","intervals","group","autolap","targetcad"],
 	"sets":[
-		["10' warm up to 75%",600,55,75,"M",1,75,0,90],
+		["10' build from 55% to 75%",600,55,75,"M",1,75,0,90],
 		["1hr @ 80% (1/4)",3600,80,80,"M",1,1,0,90],
-		["5' easy (1/4)",300,55,55,"M",1,1,0,90],
+		["5' @ 55% (1/4)",300,55,55,"M",1,1,0,90],
 		["1hr @ 80% (2/4)",3600,80,80,"M",1,1,0,90],
-		["5' easy (2/4)",300,55,55,"M",1,1,0,90],
+		["5' @ 55% (2/4)",300,55,55,"M",1,1,0,90],
 		["1hr @ 80% (3/4)",3600,80,80,"M",1,1,0,90],
-		["5' easy (3/4)",300,55,55,"M",1,1,0,90],
+		["5' @ 55% (3/4)",300,55,55,"M",1,1,0,90],
 		["1hr @ 80% (4/4)",3600,80,80,"M",1,1,0,90],
-		["5' easy (4/4)",300,55,55,"M",1,1,0,90],
+		["5' @ 55% (4/4)",300,55,55,"M",1,1,0,90],
 		["20' @ 75%",1200,75,75,"M",1,0,0,90]
 	]
 }`;
@@ -498,7 +498,9 @@ function GoldenTest(of, input_file, golden_file) {
             }
         }
         actual_output += string_format("Duration (Sec): {0}\n", interval.getTotalDuration().getSeconds());
-        expect_eq_str(expected_outputs[i], actual_output);
+        if (!generate_golden) {
+            expect_eq_str(expected_outputs[i], actual_output);
+        }
         final_output += actual_output;
         final_output += separator;
     }

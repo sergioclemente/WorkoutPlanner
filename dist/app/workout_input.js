@@ -61,7 +61,7 @@ class WorkoutInput extends React.Component {
             selectOption.setEnabled(false);
         }
         let map = {};
-        map[Model.SportType.Swim.toString()] = ["yards", "meters"];
+        map[Model.SportType.Swim.toString()] = ["watts", "yards", "meters"];
         map[Model.SportType.Bike.toString()] = ["watts", "if", "hr"];
         map[Model.SportType.Run.toString()] = ["minmi", "mih", "minkm", "kmh", "hr", "per400m"];
         map[Model.SportType.Other.toString()] = ["if", "hr"];

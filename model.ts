@@ -28,11 +28,10 @@ module Model {
 		}
 	}
 
-	const MIN_TIME: number = 11;
-	const MAX_DISTANCE: number = 10;
-
 	// If you add another distance, make sure you update the MAX_DISTANCE
 	// and that it doesn't overlap with TimeUnit
+	const MIN_TIME: number = 11;
+	const MAX_DISTANCE: number = 10;
 	export enum DistanceUnit {
 		Unknown = 0,
 		Miles = 1,
@@ -134,7 +133,7 @@ module Model {
 
 	export class DistanceUnitHelper {
 		static convertTo(value: number, unitFrom: DistanceUnit, unitTo: DistanceUnit): number {
-			// convert first to meters
+			// Convert to a common unit meters.
 			var distanceInMeters = 0;
 			if (unitFrom == DistanceUnit.Kilometers) {
 				distanceInMeters = value * 1000;
@@ -149,7 +148,7 @@ module Model {
 				throw new Error("Unknown distance unit");
 			}
 
-			// convert to final unit
+			// Convert to the final unit.
 			if (unitTo == DistanceUnit.Kilometers) {
 				return distanceInMeters / 1000;
 			} else if (unitTo == DistanceUnit.Meters) {
@@ -166,6 +165,7 @@ module Model {
 
 	export class TimeUnitHelper {
 		static convertTo(value: number, unitFrom: TimeUnit, unitTo: TimeUnit): number {
+			// Convert to common unit in seconds.
 			var timeInSeconds = 0;
 			if (unitFrom == TimeUnit.Seconds) {
 				timeInSeconds = value;
@@ -178,7 +178,7 @@ module Model {
 				throw new Error("Unknown time unit");
 			}
 
-			// convert to final unit
+			// Convert to the final unit.
 			if (unitTo == TimeUnit.Seconds) {
 				return timeInSeconds;
 			} else if (unitTo == TimeUnit.Minutes) {
@@ -706,29 +706,6 @@ module Model {
 		}
 	};
 
-	class DefaultIntensity {
-		static isEasy(intensity: Intensity, sportType: SportType): boolean {
-			// If the pace is swim based and its on offset relative to the CSS, lets handle it 
-			// differently. 10s from CSS is the threshold for easy.
-			if (sportType == SportType.Swim
-				&& intensity.getOriginalUnit() == IntensityUnit.OffsetSeconds) {
-				return intensity.getOriginalValue() > 10;
-			}
-
-			return intensity.getValue() <= DefaultIntensity.getEasyThreshold(sportType);
-		}
-
-		static getEasyThreshold(sportType: SportType): number {
-			var easyThreshold = 0.55;
-			if (sportType == SportType.Run) {
-				easyThreshold = 0.75;
-			} else if (sportType == SportType.Swim) {
-				easyThreshold = 0.88;
-			}
-			return easyThreshold;
-		}
-	}
-
 	export class Intensity {
 		private ifValue: number;
 
@@ -736,6 +713,7 @@ module Model {
 		private originalUnit: IntensityUnit;
 
 		public static ZeroIntensity: Intensity = new Intensity(0, 0, IntensityUnit.IF);
+		public static EasyIntensity: Intensity = new Intensity(0.01, -1, IntensityUnit.IF);
 
 		constructor(ifValue: number = 0, value: number = 0, unit: IntensityUnit = IntensityUnit.IF) {
 			PreconditionsCheck.assertIsNumber(ifValue, "ifValue");
@@ -828,6 +806,17 @@ module Model {
 			}
 
 			return new Intensity(Math.sqrt(sum1 / sum2));
+		}
+
+
+		isEasy(): Boolean {
+			return Intensity.equals(this, Intensity.EasyIntensity);
+		}
+
+		static equals(i1: Intensity, i2: Intensity) {
+			return (i1.ifValue == i2.ifValue
+				&& i1.originalValue == i2.originalValue
+				&& i1.originalUnit == i2.originalUnit);
 		}
 	}
 
@@ -1420,7 +1409,7 @@ module Model {
 									// intensities.
 									if (unit != IntensityUnit.Unknown) {
 										if (unit == IntensityUnit.FreeRide) {
-											intensities.push(factory.createIntensity(factory.getEasyThreshold(), IntensityUnit.FreeRide));
+											intensities.push(factory.createIntensity(0.50, IntensityUnit.FreeRide));
 										} else {
 											intensities.push(factory.createIntensity(nums[k], unit));
 										}
@@ -1490,7 +1479,7 @@ module Model {
 								// Whenever there us no intensity is specified, we get
 								// the default intensity. There is no rest interval with 0
 								// intensity anymore.
-								let intensity = factory.createIntensity(factory.getEasyThreshold(), IntensityUnit.IF);
+								let intensity = Intensity.EasyIntensity;
 								let duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
 								if (durationUnits.length == 2 && durationValues.length == 2) {
 									restDuration = factory.createDuration(zeroIntensity, durationUnits[1], durationValues[1]);
@@ -1643,18 +1632,25 @@ module Model {
 		visitSimpleInterval(interval: SimpleInterval): void {
 			this.indent();
 			if (interval.getRestDuration().getValue() > 0) {
-				this.output += stringFormat("SimpleInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), interval.getIntensity().toString(), interval.getTitle(), interval.getRestDuration().toString());
+				this.output += stringFormat("SimpleInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getIntensity()), interval.getTitle(), interval.getRestDuration().toString());
 			} else {
-				this.output += stringFormat("SimpleInterval({0}, {1}, {2})\n", interval.getWorkDuration().toString(), interval.getIntensity().toString(), interval.getTitle());
+				this.output += stringFormat("SimpleInterval({0}, {1}, {2})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getIntensity()), interval.getTitle());
 			}
 		}
 		visitStepBuildInterval(interval: StepBuildInterval): void {
 			this.indent();
-			// TODO: Implement
+			this.output += "StepBuildInterval(\n"
+			this.indentation++;
+			for (var i = 0; i < interval.getIntervals().length; i++) {
+				VisitorHelper.visit(this, interval.getIntervals()[i]);
+			}
+			this.indentation--;
+			this.indent();
+			this.output += ")\n";
 		}
 		visitRampBuildInterval(interval: RampBuildInterval): void {
 			this.indent();
-			this.output += stringFormat("BuildInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), interval.getStartIntensity().toString(), interval.getEndIntensity().toString(), interval.getTitle());
+			this.output += stringFormat("BuildInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getStartIntensity()), TreePrinterVisitor.getIntensityPretty(interval.getEndIntensity()), interval.getTitle());
 		}
 
 		visitRepeatInterval(interval: RepeatInterval) {
@@ -1690,6 +1686,14 @@ module Model {
 
 		getOutput(): string {
 			return this.output;
+		}
+
+		static getIntensityPretty(intensity: Intensity) {
+			if (intensity.isEasy()) {
+				return "";
+			} else {
+				return intensity.toString();
+			}
 		}
 
 		static Print(interval: Interval): string {
@@ -2455,13 +2459,12 @@ module Model {
 		}
 
 		visitRestInterval(interval: Interval): void {
-			var value = interval.getIntensity().getValue();
-			if (value <= DefaultIntensity.getEasyThreshold(this.sportType)) {
+			if (interval.getIntensity().isEasy()) {
 				let title = this.getIntervalTitle(interval);
 				if (title == null || title.trim().length == 0) {
 					title = "easy";
 				}
-				this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " " + title;;
+				this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " " + title;
 			} else {
 				this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " @ " + this.getIntensityPretty(interval.getIntensity());
 			}
@@ -2541,7 +2544,7 @@ module Model {
 
 		// RampBuildInterval
 		visitRampBuildInterval(interval: RampBuildInterval): void {
-			if (interval.getStartIntensity().getValue() <= DefaultIntensity.getEasyThreshold(this.sportType)) {
+			if (interval.getStartIntensity().isEasy()) {
 				this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " warm up to " + this.getIntensityPretty(interval.getEndIntensity());
 			} else {
 				if (interval.getStartIntensity().getValue() < interval.getEndIntensity().getValue()) {
@@ -2606,33 +2609,25 @@ module Model {
 			// 3 cases to cover:
 			// - warmup (usually IF around 50-60) - no title - easy peasy
 			// - drills with single leg (IF < 60) - title present - check for title
-			// - recovery interval, first interval in a repeat rest is something like 60. 
-			let isEasyInterval = DefaultIntensity.isEasy(interval.getIntensity(), this.sportType);
-			if (isEasyInterval && !this.disableEasyTitle) {
+			// - recovery interval, first interval in a repeat rest is something like 60.
+			if (interval.getIntensity().getValue() == 0) {
+				this.result += " rest";
+			} else if (interval.getIntensity().isEasy() && !this.disableEasyTitle) {
 				// If no title was provided, let's give one
 				let title = interval.getTitle();
 				if (title == null || title.trim().length == 0) {
-					if (interval.getIntensity().getValue() == 0) {
-						this.result += " rest";
-					} else {
-						this.result += " easy";
-					}
-				} else {
-					// Remove intensity from intervals without specified intensity.
-					if (interval.getIntensity().getValue() != 0) {
-						this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
-					}
+					this.result += " easy";
 				}
 				if (interval.getRestDuration().getSeconds() > 0) {
 					this.result += " w/ " + interval.getRestDuration().toStringShort(this.sportType == SportType.Swim) + " rest";
 					return;
 				}
 			} else {
-				// Handle swim differently
+				// Handle swim differently (For all units except watts)
 				// We want to add the total touch time on the swim. For example, if you CSS
 				// is 1:30 /100yards and you are doing 200 yards, we want to add
 				// that you are touching the wall on 3 min.
-				if (this.sportType == SportType.Swim) {
+				if (this.sportType == SportType.Swim && this.outputUnit != IntensityUnit.Watts) {
 					var total_duration = interval.getTotalDuration();
 					if (total_duration.getSeconds() != interval.getWorkDuration().getSeconds()) {
 						this.result += " on " + interval.getWorkDuration().toTimeStringShort() + " off " + total_duration.toTimeStringShort();
@@ -2679,17 +2674,24 @@ module Model {
 				this.outputUnit == IntensityUnit.IF) {
 				return intensity.toString();
 			}
-			if (this.sportType == SportType.Bike) {
-				if (this.outputUnit == IntensityUnit.Watts) {
-					let value = Math.round(this.userProfile.getBikeFTP() * intensity.getValue());
-					if (this.roundValues) {
-						return FormatterHelper.roundNumberUp(value, 5) + "w";
-					} else {
-						return value + "w";
-					}
+			if (this.outputUnit == IntensityUnit.Watts) {
+				let ftp = 0;
+				if (this.sportType == SportType.Bike) {
+					ftp = this.userProfile.getBikeFTP();
+				} else if (this.sportType == SportType.Swim) {
+					ftp = this.userProfile.getSwimFTP();
 				} else {
-					return intensity.toString();
+					console.assert(false, stringFormat("Invalid sportType {0}", this.sportType));
 				}
+				let value = Math.round(ftp * intensity.getValue());
+				if (this.roundValues) {
+					return FormatterHelper.roundNumberUp(value, 5) + "w";
+				} else {
+					return value + "w";
+				}
+			}
+			if (this.sportType == SportType.Bike) {
+				return intensity.toString();
 			} else if (this.sportType == SportType.Run) {
 				var minMi = this.userProfile.getPaceMinMi(intensity);
 				var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, this.outputUnit);
@@ -2781,20 +2783,32 @@ module Model {
 			this.addSeparator();
 		}
 		visitSimpleInterval(interval: SimpleInterval): void {
-			if (interval.getRestDuration().getValue() != 0) {
-				let duration_pretty = this.getDurationPretty(interval.getWorkDuration());
-				console.assert(duration_pretty.length > 0, "" + interval.getWorkDuration());
+			let params = [];
+			let duration_pretty = this.getDurationPretty(interval.getWorkDuration());
+			console.assert(duration_pretty.length > 0, "" + interval.getWorkDuration());
+			params.push(duration_pretty);
+
+			if (!interval.getIntensity().isEasy()) {
 				let intensity_pretty = this.getIntensityPretty(interval.getIntensity());
+				params.push(intensity_pretty);
 				console.assert(intensity_pretty.length > 0, "" + interval.getIntensity());
+			}
+
+			if (interval.getTitle().length != 0) {
+				params.push(interval.getTitle());
+			}
+
+			if (interval.getRestDuration().getValue() != 0) {
 				let duration_rest_pretty = this.getDurationPretty(interval.getRestDuration());
 				console.assert(duration_rest_pretty.length > 0, "" + interval.getRestDuration())
-				this.output += stringFormat("({0}, {1}{2}, {3})", duration_pretty, intensity_pretty, this.getTitlePretty(interval), duration_rest_pretty);
-			} else {
-				this.output += stringFormat("({0}, {1}{2})", this.getDurationPretty(interval.getWorkDuration()), this.getIntensityPretty(interval.getIntensity()), this.getTitlePretty(interval));
+				params.push(duration_rest_pretty);
 			}
+
+			this.output += stringFormat("({0})", params.join(", "));
 			this.addSeparator();
 		}
 		visitStepBuildInterval(interval: StepBuildInterval): void {
+			// TODO: Refactor this to use params as well
 			this.level++;
 			this.output += interval.getRepeatCount().toString();
 			this.output += "[";
@@ -2811,14 +2825,13 @@ module Model {
 				VisitorHelper.visit(this, interval.getRestInterval());
 			} else {
 				console.assert(interval.areAllDurationsSame())
-				this.output += "(";
-				// Get any step as all the durations are the same.
-				this.output += this.getDurationPretty(interval.getStepInterval(0).getTotalDuration());
+				let params = []
+				params.push(this.getDurationPretty(interval.getStepInterval(0).getTotalDuration()));
+				// Get any step as all the durations are the same.				
 				for (let i = 0; i < interval.getRepeatCount(); i++) {
-					this.output += ", ";
-					this.output += this.getIntensityPretty(interval.getStepInterval(i).getIntensity());
+					params.push(this.getIntensityPretty(interval.getStepInterval(i).getIntensity()));
 				}
-				this.output += ")";
+				this.output += stringFormat("({0})", params.join(", "));
 				this.addSeparator();
 				VisitorHelper.visit(this, interval.getRestInterval());
 			}
@@ -2829,7 +2842,14 @@ module Model {
 		}
 		visitRampBuildInterval(interval: RampBuildInterval): void {
 			this.level++;
-			this.output += stringFormat("({0}, {1}, {2}{3})", this.getDurationPretty(interval.getWorkDuration()), this.getIntensityPretty(interval.getStartIntensity()), this.getIntensityPretty(interval.getEndIntensity()), this.getTitlePretty(interval));
+			let params = []
+			params.push(this.getDurationPretty(interval.getWorkDuration()));
+			params.push(this.getIntensityPretty(interval.getStartIntensity()));
+			params.push(this.getIntensityPretty(interval.getEndIntensity()));
+			if (interval.getTitle().length != 0) {
+				params.push(interval.getTitle());
+			}
+			this.output += stringFormat("({0})", params.join(", "));
 			this.level--;
 			this.addSeparator();
 		}
@@ -2952,16 +2972,18 @@ module Model {
 		private bikeFTP: number;
 		private runningTPaceMinMi: number;
 		private swimmingCSSMinPer100Yards: number;
+		private swimmingFTP: number;
 		private email: string;
 		private effiencyFactor: number;
 
-		constructor(bikeFTPWatts: number, renameTPace: string, swimCSS: string, email: string) {
+		constructor(bikeFTPWatts: number, runningTPace: string, swimmingFTP: number, swimCSS: string, email: string) {
 			this.bikeFTP = bikeFTPWatts;
-			var speed_mph = SpeedParser.getSpeedInMph(renameTPace);
+			var speed_mph = SpeedParser.getSpeedInMph(runningTPace);
 			this.runningTPaceMinMi = IntensityUnitHelper.convertTo(
 				speed_mph,
 				IntensityUnit.Mph,
 				IntensityUnit.MinMi);
+			this.swimmingFTP = swimmingFTP;
 			var swim_css_mph = SpeedParser.getSpeedInMph(swimCSS);
 			this.swimmingCSSMinPer100Yards = IntensityUnitHelper.convertTo(
 				swim_css_mph,
@@ -3015,6 +3037,10 @@ module Model {
 			return IntensityUnitHelper.convertTo(pace_mph,
 				IntensityUnit.Mph,
 				IntensityUnit.MinMi);
+		}
+
+		getSwimFTP(): number {
+			return this.swimmingFTP;
 		}
 
 		getSwimCSSMph(): number {
@@ -3112,8 +3138,10 @@ module Model {
 					throw new Error("Not implemented");
 				}
 			} else if (this.sportType == SportType.Swim) {
-				// For swimming we support 3 IntensityUnits
-				if (unit == IntensityUnit.IF) {
+				// For swimming we support 4 IntensityUnits
+				if (unit == IntensityUnit.Watts) {
+					ifValue = value / this.userProfile.getSwimFTP();
+				} else if (unit == IntensityUnit.IF) {
 					ifValue = value;
 				} else if (unit == IntensityUnit.Per100Yards || unit == IntensityUnit.Per100Meters || unit == IntensityUnit.Per25Yards) {
 					var swimming_mph = IntensityUnitHelper.convertTo(value, unit, IntensityUnit.Mph);
@@ -3168,11 +3196,6 @@ module Model {
 			}
 
 			return new Duration(unit, value, estimatedTimeInSeconds, estimatedDistanceInMiles);
-		}
-
-		// Returns the easy IF threshold
-		getEasyThreshold(): number {
-			return DefaultIntensity.getEasyThreshold(this.sportType);
 		}
 	}
 

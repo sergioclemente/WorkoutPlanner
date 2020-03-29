@@ -11,6 +11,7 @@ class UserProperty extends React.Component {
         this.ftp = parseInt(params.ftp_watts);
         this.email = params.email;
         this.t_pace = params.t_pace;
+        this.swim_ftp = params.swim_ftp;
         this.swim_css = params.swim_css;
         this.efficiency_factor = params.efficiency_factor;
     }
@@ -35,6 +36,17 @@ class UserProperty extends React.Component {
             tPaceInput.setError("Enter a value speed for your running t-pace. Allowed units are: min/mi, km/h, mi/h, min/km");
         }
         this.t_pace = t_pace;
+        this._fireOnChange();
+    }
+    _onSwimFtpChange(swim_ftp) {
+        var swimFtpInput = this.refs['swim_ftp'];
+        if (swim_ftp < 30 || swim_ftp > 200) {
+            swimFtpInput.setError("Set a value between 30 and 200");
+        }
+        else {
+            swimFtpInput.setError("");
+        }
+        this.swim_ftp = swim_ftp;
         this._fireOnChange();
     }
     _onSwimCSSChange(swim_css) {
@@ -67,6 +79,10 @@ class UserProperty extends React.Component {
             React.createElement("h1", null, " User Settings "),
             "Swim CSS: ",
             React.createElement(text_input_1.default, { ref: "swim_css", width: "20", placeholder: "1:30 min/100yards", value: this.swim_css, onChange: this._onSwimCSSChange.bind(this) }),
+            " ",
+            React.createElement("br", null),
+            "Swim FTP: ",
+            React.createElement(text_input_1.default, { ref: "swim_ftp", width: "20", placeholder: "100", value: this.swim_ftp, onChange: this._onSwimFtpChange.bind(this) }),
             " ",
             React.createElement("br", null),
             "Bike FTP: ",

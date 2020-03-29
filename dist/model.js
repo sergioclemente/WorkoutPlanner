@@ -665,25 +665,6 @@ var Model;
     }
     Model.IntensityUnitHelper = IntensityUnitHelper;
     ;
-    class DefaultIntensity {
-        static isEasy(intensity, sportType) {
-            if (sportType == SportType.Swim
-                && intensity.getOriginalUnit() == IntensityUnit.OffsetSeconds) {
-                return intensity.getOriginalValue() > 10;
-            }
-            return intensity.getValue() <= DefaultIntensity.getEasyThreshold(sportType);
-        }
-        static getEasyThreshold(sportType) {
-            var easyThreshold = 0.55;
-            if (sportType == SportType.Run) {
-                easyThreshold = 0.75;
-            }
-            else if (sportType == SportType.Swim) {
-                easyThreshold = 0.88;
-            }
-            return easyThreshold;
-        }
-    }
     class Intensity {
         constructor(ifValue = 0, value = 0, unit = IntensityUnit.IF) {
             PreconditionsCheck.assertIsNumber(ifValue, "ifValue");
@@ -767,8 +748,17 @@ var Model;
             }
             return new Intensity(Math.sqrt(sum1 / sum2));
         }
+        isEasy() {
+            return Intensity.equals(this, Intensity.EasyIntensity);
+        }
+        static equals(i1, i2) {
+            return (i1.ifValue == i2.ifValue
+                && i1.originalValue == i2.originalValue
+                && i1.originalUnit == i2.originalUnit);
+        }
     }
     Intensity.ZeroIntensity = new Intensity(0, 0, IntensityUnit.IF);
+    Intensity.EasyIntensity = new Intensity(0.01, -1, IntensityUnit.IF);
     Model.Intensity = Intensity;
     class BaseInterval {
         constructor(title) {
@@ -1226,7 +1216,7 @@ var Model;
                                     var unit = IntensityUnitHelper.toIntensityUnit(units[k]);
                                     if (unit != IntensityUnit.Unknown) {
                                         if (unit == IntensityUnit.FreeRide) {
-                                            intensities.push(factory.createIntensity(factory.getEasyThreshold(), IntensityUnit.FreeRide));
+                                            intensities.push(factory.createIntensity(0.50, IntensityUnit.FreeRide));
                                         }
                                         else {
                                             intensities.push(factory.createIntensity(nums[k], unit));
@@ -1275,7 +1265,7 @@ var Model;
                                 interval = new SimpleInterval(title.trim(), intensity, duration, restDuration);
                             }
                             else {
-                                let intensity = factory.createIntensity(factory.getEasyThreshold(), IntensityUnit.IF);
+                                let intensity = Intensity.EasyIntensity;
                                 let duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
                                 if (durationUnits.length == 2 && durationValues.length == 2) {
                                     restDuration = factory.createDuration(zeroIntensity, durationUnits[1], durationValues[1]);
@@ -1407,18 +1397,26 @@ var Model;
         visitSimpleInterval(interval) {
             this.indent();
             if (interval.getRestDuration().getValue() > 0) {
-                this.output += stringFormat("SimpleInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), interval.getIntensity().toString(), interval.getTitle(), interval.getRestDuration().toString());
+                this.output += stringFormat("SimpleInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getIntensity()), interval.getTitle(), interval.getRestDuration().toString());
             }
             else {
-                this.output += stringFormat("SimpleInterval({0}, {1}, {2})\n", interval.getWorkDuration().toString(), interval.getIntensity().toString(), interval.getTitle());
+                this.output += stringFormat("SimpleInterval({0}, {1}, {2})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getIntensity()), interval.getTitle());
             }
         }
         visitStepBuildInterval(interval) {
             this.indent();
+            this.output += "StepBuildInterval(\n";
+            this.indentation++;
+            for (var i = 0; i < interval.getIntervals().length; i++) {
+                VisitorHelper.visit(this, interval.getIntervals()[i]);
+            }
+            this.indentation--;
+            this.indent();
+            this.output += ")\n";
         }
         visitRampBuildInterval(interval) {
             this.indent();
-            this.output += stringFormat("BuildInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), interval.getStartIntensity().toString(), interval.getEndIntensity().toString(), interval.getTitle());
+            this.output += stringFormat("BuildInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getStartIntensity()), TreePrinterVisitor.getIntensityPretty(interval.getEndIntensity()), interval.getTitle());
         }
         visitRepeatInterval(interval) {
             this.indent();
@@ -1451,6 +1449,14 @@ var Model;
         }
         getOutput() {
             return this.output;
+        }
+        static getIntensityPretty(intensity) {
+            if (intensity.isEasy()) {
+                return "";
+            }
+            else {
+                return intensity.toString();
+            }
         }
         static Print(interval) {
             let tree_printer = new TreePrinterVisitor();
@@ -2081,14 +2087,12 @@ var Model;
             this.result += this.getIntervalTitle(interval);
         }
         visitRestInterval(interval) {
-            var value = interval.getIntensity().getValue();
-            if (value <= DefaultIntensity.getEasyThreshold(this.sportType)) {
+            if (interval.getIntensity().isEasy()) {
                 let title = this.getIntervalTitle(interval);
                 if (title == null || title.trim().length == 0) {
                     title = "easy";
                 }
                 this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " " + title;
-                ;
             }
             else {
                 this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " @ " + this.getIntensityPretty(interval.getIntensity());
@@ -2158,7 +2162,7 @@ var Model;
             this.visitArrayIntervalInternal(interval, true);
         }
         visitRampBuildInterval(interval) {
-            if (interval.getStartIntensity().getValue() <= DefaultIntensity.getEasyThreshold(this.sportType)) {
+            if (interval.getStartIntensity().isEasy()) {
                 this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim) + " warm up to " + this.getIntensityPretty(interval.getEndIntensity());
             }
             else {
@@ -2206,21 +2210,13 @@ var Model;
             if (interval.getIntensity().getOriginalUnit() == IntensityUnit.FreeRide) {
                 return;
             }
-            let isEasyInterval = DefaultIntensity.isEasy(interval.getIntensity(), this.sportType);
-            if (isEasyInterval && !this.disableEasyTitle) {
+            if (interval.getIntensity().getValue() == 0) {
+                this.result += " rest";
+            }
+            else if (interval.getIntensity().isEasy() && !this.disableEasyTitle) {
                 let title = interval.getTitle();
                 if (title == null || title.trim().length == 0) {
-                    if (interval.getIntensity().getValue() == 0) {
-                        this.result += " rest";
-                    }
-                    else {
-                        this.result += " easy";
-                    }
-                }
-                else {
-                    if (interval.getIntensity().getValue() != 0) {
-                        this.result += " @ " + this.getIntensityPretty(interval.getIntensity());
-                    }
+                    this.result += " easy";
                 }
                 if (interval.getRestDuration().getSeconds() > 0) {
                     this.result += " w/ " + interval.getRestDuration().toStringShort(this.sportType == SportType.Swim) + " rest";
@@ -2228,7 +2224,7 @@ var Model;
                 }
             }
             else {
-                if (this.sportType == SportType.Swim) {
+                if (this.sportType == SportType.Swim && this.outputUnit != IntensityUnit.Watts) {
                     var total_duration = interval.getTotalDuration();
                     if (total_duration.getSeconds() != interval.getWorkDuration().getSeconds()) {
                         this.result += " on " + interval.getWorkDuration().toTimeStringShort() + " off " + total_duration.toTimeStringShort();
@@ -2271,19 +2267,27 @@ var Model;
                 this.outputUnit == IntensityUnit.IF) {
                 return intensity.toString();
             }
-            if (this.sportType == SportType.Bike) {
-                if (this.outputUnit == IntensityUnit.Watts) {
-                    let value = Math.round(this.userProfile.getBikeFTP() * intensity.getValue());
-                    if (this.roundValues) {
-                        return FormatterHelper.roundNumberUp(value, 5) + "w";
-                    }
-                    else {
-                        return value + "w";
-                    }
+            if (this.outputUnit == IntensityUnit.Watts) {
+                let ftp = 0;
+                if (this.sportType == SportType.Bike) {
+                    ftp = this.userProfile.getBikeFTP();
+                }
+                else if (this.sportType == SportType.Swim) {
+                    ftp = this.userProfile.getSwimFTP();
                 }
                 else {
-                    return intensity.toString();
+                    console.assert(false, stringFormat("Invalid sportType {0}", this.sportType));
                 }
+                let value = Math.round(ftp * intensity.getValue());
+                if (this.roundValues) {
+                    return FormatterHelper.roundNumberUp(value, 5) + "w";
+                }
+                else {
+                    return value + "w";
+                }
+            }
+            if (this.sportType == SportType.Bike) {
+                return intensity.toString();
             }
             else if (this.sportType == SportType.Run) {
                 var minMi = this.userProfile.getPaceMinMi(intensity);
@@ -2378,18 +2382,24 @@ var Model;
             this.addSeparator();
         }
         visitSimpleInterval(interval) {
-            if (interval.getRestDuration().getValue() != 0) {
-                let duration_pretty = this.getDurationPretty(interval.getWorkDuration());
-                console.assert(duration_pretty.length > 0, "" + interval.getWorkDuration());
+            let params = [];
+            let duration_pretty = this.getDurationPretty(interval.getWorkDuration());
+            console.assert(duration_pretty.length > 0, "" + interval.getWorkDuration());
+            params.push(duration_pretty);
+            if (!interval.getIntensity().isEasy()) {
                 let intensity_pretty = this.getIntensityPretty(interval.getIntensity());
+                params.push(intensity_pretty);
                 console.assert(intensity_pretty.length > 0, "" + interval.getIntensity());
+            }
+            if (interval.getTitle().length != 0) {
+                params.push(interval.getTitle());
+            }
+            if (interval.getRestDuration().getValue() != 0) {
                 let duration_rest_pretty = this.getDurationPretty(interval.getRestDuration());
                 console.assert(duration_rest_pretty.length > 0, "" + interval.getRestDuration());
-                this.output += stringFormat("({0}, {1}{2}, {3})", duration_pretty, intensity_pretty, this.getTitlePretty(interval), duration_rest_pretty);
+                params.push(duration_rest_pretty);
             }
-            else {
-                this.output += stringFormat("({0}, {1}{2})", this.getDurationPretty(interval.getWorkDuration()), this.getIntensityPretty(interval.getIntensity()), this.getTitlePretty(interval));
-            }
+            this.output += stringFormat("({0})", params.join(", "));
             this.addSeparator();
         }
         visitStepBuildInterval(interval) {
@@ -2409,13 +2419,12 @@ var Model;
             }
             else {
                 console.assert(interval.areAllDurationsSame());
-                this.output += "(";
-                this.output += this.getDurationPretty(interval.getStepInterval(0).getTotalDuration());
+                let params = [];
+                params.push(this.getDurationPretty(interval.getStepInterval(0).getTotalDuration()));
                 for (let i = 0; i < interval.getRepeatCount(); i++) {
-                    this.output += ", ";
-                    this.output += this.getIntensityPretty(interval.getStepInterval(i).getIntensity());
+                    params.push(this.getIntensityPretty(interval.getStepInterval(i).getIntensity()));
                 }
-                this.output += ")";
+                this.output += stringFormat("({0})", params.join(", "));
                 this.addSeparator();
                 VisitorHelper.visit(this, interval.getRestInterval());
             }
@@ -2426,7 +2435,14 @@ var Model;
         }
         visitRampBuildInterval(interval) {
             this.level++;
-            this.output += stringFormat("({0}, {1}, {2}{3})", this.getDurationPretty(interval.getWorkDuration()), this.getIntensityPretty(interval.getStartIntensity()), this.getIntensityPretty(interval.getEndIntensity()), this.getTitlePretty(interval));
+            let params = [];
+            params.push(this.getDurationPretty(interval.getWorkDuration()));
+            params.push(this.getIntensityPretty(interval.getStartIntensity()));
+            params.push(this.getIntensityPretty(interval.getEndIntensity()));
+            if (interval.getTitle().length != 0) {
+                params.push(interval.getTitle());
+            }
+            this.output += stringFormat("({0})", params.join(", "));
             this.level--;
             this.addSeparator();
         }
@@ -2549,10 +2565,11 @@ var Model;
     }
     Model.SpeedParser = SpeedParser;
     class UserProfile {
-        constructor(bikeFTPWatts, renameTPace, swimCSS, email) {
+        constructor(bikeFTPWatts, runningTPace, swimmingFTP, swimCSS, email) {
             this.bikeFTP = bikeFTPWatts;
-            var speed_mph = SpeedParser.getSpeedInMph(renameTPace);
+            var speed_mph = SpeedParser.getSpeedInMph(runningTPace);
             this.runningTPaceMinMi = IntensityUnitHelper.convertTo(speed_mph, IntensityUnit.Mph, IntensityUnit.MinMi);
+            this.swimmingFTP = swimmingFTP;
             var swim_css_mph = SpeedParser.getSpeedInMph(swimCSS);
             this.swimmingCSSMinPer100Yards = IntensityUnitHelper.convertTo(swim_css_mph, IntensityUnit.Mph, IntensityUnit.Per100Yards);
             this.email = email;
@@ -2586,6 +2603,9 @@ var Model;
         getPaceMinMi(intensity) {
             var pace_mph = IntensityUnitHelper.convertTo(this.getRunningTPaceMinMi(), IntensityUnit.MinMi, IntensityUnit.Mph) * intensity.getValue();
             return IntensityUnitHelper.convertTo(pace_mph, IntensityUnit.Mph, IntensityUnit.MinMi);
+        }
+        getSwimFTP() {
+            return this.swimmingFTP;
         }
         getSwimCSSMph() {
             var css_mph = IntensityUnitHelper.convertTo(this.swimmingCSSMinPer100Yards, IntensityUnit.Per100Yards, IntensityUnit.Mph);
@@ -2665,7 +2685,10 @@ var Model;
                 }
             }
             else if (this.sportType == SportType.Swim) {
-                if (unit == IntensityUnit.IF) {
+                if (unit == IntensityUnit.Watts) {
+                    ifValue = value / this.userProfile.getSwimFTP();
+                }
+                else if (unit == IntensityUnit.IF) {
                     ifValue = value;
                 }
                 else if (unit == IntensityUnit.Per100Yards || unit == IntensityUnit.Per100Meters || unit == IntensityUnit.Per25Yards) {
@@ -2719,9 +2742,6 @@ var Model;
                 estimatedTimeInSeconds = 3600 * (estimatedDistanceInMiles / estimatedSpeedMph);
             }
             return new Duration(unit, value, estimatedTimeInSeconds, estimatedDistanceInMiles);
-        }
-        getEasyThreshold() {
-            return DefaultIntensity.getEasyThreshold(this.sportType);
         }
     }
     Model.ObjectFactory = ObjectFactory;

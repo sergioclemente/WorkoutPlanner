@@ -25,9 +25,9 @@ AST:
 ArrayInterval(
 	SimpleInterval(10min, *, TT)
 )
-IF (Avg): 0.88
-TSS: 12.9
-TSS2: 13.2
+IF (Avg): 0.5
+TSS: 4.2
+TSS2: 4.2
 Dominant Unit: free-ride
 Pretty Print:
 	* 10' TT
@@ -80,15 +80,15 @@ AST:
 ArrayInterval(
 	SimpleInterval(500yards, *, free)
 )
-IF (Avg): 0.88
-TSS: 10.4
-TSS2: 10.6
+IF (Avg): 0.5
+TSS: 5.9
+TSS2: 5.9
 Dominant Unit: free-ride
 Pretty Print:
 	* 500 free
 Duration Unit: yards
 Yards: 500
-Duration (Sec): 482.9545454545454
+Duration (Sec): 850
 ----------------------------
 Input: 
 (500yards, 90, 50sec, warmup)
@@ -208,7 +208,7 @@ TSS2: 16.4
 Dominant Unit: %
 Pretty Print:
 	* 500 warmup on 7'44''
-	* 200 easy @ 80%
+	* 200 easy on 3'52''
 Duration Unit: m
 Meters: 700
 Duration (Sec): 697.1784776902887
@@ -306,20 +306,20 @@ Duration (Sec): 525.0000000000001
 Input: 
 (500yards, 50s, warmup)
 Normalized: 
-(500yards, 88, warmup, 50sec)
+(500yards, warmup, 50sec)
 AST: 
 ArrayInterval(
-	SimpleInterval(500yards, 88%, warmup, 50sec)
+	SimpleInterval(500yards, , warmup, 50sec)
 )
-IF (Avg): 0.88
-TSS: 10.4
-TSS2: 11.7
+IF (Avg): 0.01
+TSS: 0.1
+TSS2: 0
 Output Unit: /100yards
 Pretty Print:
-	* 500 warmup @ 1:37/100yards w/ 50'' rest
+	* 500 warmup w/ 50'' rest
 Duration Unit: yards
 Yards: 500
-Duration (Sec): 532.9545454545454
+Duration (Sec): 42550
 ----------------------------
 Input: 
 (500yards, -5, 50s, warmup)
@@ -360,20 +360,20 @@ Duration (Sec): 424.99999999999994
 Input: 
 (500yards, 50s, warmup)
 Normalized: 
-(500yards, 88, warmup, 50sec)
+(500yards, warmup, 50sec)
 AST: 
 ArrayInterval(
-	SimpleInterval(500yards, 88%, warmup, 50sec)
+	SimpleInterval(500yards, , warmup, 50sec)
 )
-IF (Avg): 0.88
-TSS: 10.4
-TSS2: 11.7
+IF (Avg): 0.01
+TSS: 0.1
+TSS2: 0
 Dominant Unit: %
 Pretty Print:
-	* 500 warmup @ 88% w/ 50'' rest
+	* 500 warmup w/ 50'' rest
 Duration Unit: yards
 Yards: 500
-Duration (Sec): 532.9545454545454
+Duration (Sec): 42550
 ----------------------------
 Input: 
 (500yards, +10, 50s, warmup)
@@ -450,56 +450,56 @@ Duration (Sec): 90
 Input: 
 (400yards, free)
 Normalized: 
-(400yards, 88, free)
+(400yards, free)
 AST: 
 ArrayInterval(
-	SimpleInterval(400yards, 88%, free)
+	SimpleInterval(400yards, , free)
 )
-IF (Avg): 0.88
-TSS: 8.3
-TSS2: 8.5
+IF (Avg): 0.01
+TSS: 0.1
+TSS2: 0
 Dominant Unit: %
 Pretty Print:
-	* 400 free @ 88%
+	* 400 free
 Duration Unit: yards
 Yards: 400
-Duration (Sec): 386.3636363636364
+Duration (Sec): 34000
 ----------------------------
 Input: 
 (300yards, pull)
 Normalized: 
-(300yards, 88, pull)
+(300yards, pull)
 AST: 
 ArrayInterval(
-	SimpleInterval(300yards, 88%, pull)
+	SimpleInterval(300yards, , pull)
 )
-IF (Avg): 0.88
-TSS: 6.2
-TSS2: 6.4
+IF (Avg): 0.01
+TSS: 0.1
+TSS2: 0
 Dominant Unit: %
 Pretty Print:
-	* 300 pull @ 88%
+	* 300 pull
 Duration Unit: yards
 Yards: 300
-Duration (Sec): 289.77272727272725
+Duration (Sec): 25500
 ----------------------------
 Input: 
 (300yards, pull, 10s)
 Normalized: 
-(300yards, 88, pull, 10sec)
+(300yards, pull, 10sec)
 AST: 
 ArrayInterval(
-	SimpleInterval(300yards, 88%, pull, 10sec)
+	SimpleInterval(300yards, , pull, 10sec)
 )
-IF (Avg): 0.88
-TSS: 6.2
-TSS2: 6.6
+IF (Avg): 0.01
+TSS: 0.1
+TSS2: 0
 Dominant Unit: %
 Pretty Print:
-	* 300 pull @ 88% w/ 10'' rest
+	* 300 pull w/ 10'' rest
 Duration Unit: yards
 Yards: 300
-Duration (Sec): 299.77272727272725
+Duration (Sec): 25510
 ----------------------------
 Input: 
 (300yards, +0, Tempo trainer)
@@ -533,26 +533,26 @@ Input:
 -Normalized: 
 (5min, 40)
 (30sec, 40, easy)
-8[(30sec, 88, descend 1-4), (10sec, 40)]
+8[(30sec, descend 1-4), (10sec, 40)]
 (30sec, 40, put door on 3)
-10[(1min, 100, LC), (20sec, 88, easy)]
+10[(1min, 100, LC), (20sec, easy)]
 (30sec, 40, put door on 1)
 10[(2min, 85), (20sec, 40, easy)]
 (2min, 40, easy)
-5[(30sec, 110, fast), (30sec, 88, easy)]
+5[(30sec, 110, fast), (30sec, easy)]
 (5min, 40, easy)
 AST: 
 ArrayInterval(
 	SimpleInterval(5min, 40%, )
 	SimpleInterval(30sec, 40%, easy)
 	RepeatInterval(count=8, 
-		SimpleInterval(30sec, 88%, descend 1-4)
+		SimpleInterval(30sec, , descend 1-4)
 		SimpleInterval(10sec, 40%, )
 	)
 	SimpleInterval(30sec, 40%, put door on 3)
 	RepeatInterval(count=10, 
 		SimpleInterval(1min, 100%, LC)
-		SimpleInterval(20sec, 88%, easy)
+		SimpleInterval(20sec, , easy)
 	)
 	SimpleInterval(30sec, 40%, put door on 1)
 	RepeatInterval(count=10, 
@@ -562,24 +562,102 @@ ArrayInterval(
 	SimpleInterval(2min, 40%, easy)
 	RepeatInterval(count=5, 
 		SimpleInterval(30sec, 110%, fast)
-		SimpleInterval(30sec, 88%, easy)
+		SimpleInterval(30sec, , easy)
 	)
 	SimpleInterval(5min, 40%, easy)
 )
-IF (Avg): 0.7924916246917765
-TSS: 63.3
-TSS2: 63.9
+IF (Avg): 0.708655460702499
+TSS: 50.6
+TSS2: 57.2
 Dominant Unit: %
 Pretty Print:
-	* 5' easy
-	* 30'' easy @ 40%
-	* 8 x 30'' descend 1-4 on 30'' - 10'' easy
-	* 30'' put door on 3 @ 40%
+	* 5' on 5'
+	* 30'' easy on 30''
+	* 8 x (30'' descend 1-4 - 10'' on 10'')
+	* 30'' put door on 3 on 30''
 	* 10 x 1' LC on 1' - 20'' easy
-	* 30'' put door on 1 @ 40%
-	* 10 x 2' on 2' - 20'' easy
-	* 2' easy @ 40%
+	* 30'' put door on 1 on 30''
+	* 10 x 2' on 2' - 20'' @ 40%
+	* 2' easy on 2'
 	* 5 x 30'' fast on 30'' - 30'' easy
-	* 5' easy @ 40%
+	* 5' easy on 5'
 Duration (Sec): 3630
+----------------------------
+Input: 
+(5min, 50)
+(5min, 65)
+(5min, 90)
+(5min, 90, 95)
+3[(5min, 90, 95, 100), (30s, easy)]
+2[(5min, 90), (30s, easy)]
+-Normalized: 
+(5min, 50)
+(5min, 65)
+(5min, 90)
+(5min, 90, 95)
+3[(5min, 90, 95, 100), (30sec, easy)]
+2[(5min, 90), (30sec, easy)]
+AST: 
+ArrayInterval(
+	SimpleInterval(5min, 50%, )
+	SimpleInterval(5min, 65%, )
+	SimpleInterval(5min, 90%, )
+	BuildInterval(5min, 90%, 95%, )
+	StepBuildInterval(
+		SimpleInterval(5min, 90%, )
+		SimpleInterval(5min, 95%, )
+		SimpleInterval(5min, 100%, )
+		SimpleInterval(30sec, , easy)
+	)
+	RepeatInterval(count=2, 
+		SimpleInterval(5min, 90%, )
+		SimpleInterval(30sec, , easy)
+	)
+)
+IF (Avg): 0.848917617053206
+TSS: 55.6
+TSS2: 60.5
+Output Unit: w
+Pretty Print:
+	* 5' @ 50w
+	* 5' @ 65w
+	* 5' @ 90w
+	* 5' build from 90w to 95w
+	* 3 x 5' - w/ 30'' easy (90w, 95w, 100w)
+	* 2 x 5' @ 90w - 30'' easy
+Duration (Sec): 2850
+----------------------------
+Input: 
+(10min, easy)
+Normalized: 
+(10min, easy)
+AST: 
+ArrayInterval(
+	SimpleInterval(10min, , easy)
+)
+IF (Avg): 0.01
+TSS: 0
+TSS2: 0
+Output Unit: w
+Pretty Print:
+	* 10' easy
+Duration Unit: min
+Duration (Sec): 600
+----------------------------
+Input: 
+(10s, change to dd3)
+Normalized: 
+(10sec, change to dd3)
+AST: 
+ArrayInterval(
+	SimpleInterval(10sec, , change to dd3)
+)
+IF (Avg): 0.01
+TSS: 0
+TSS2: 0
+Output Unit: w
+Pretty Print:
+	* 10'' change to dd3
+Duration Unit: s
+Duration (Sec): 10
 ----------------------------
