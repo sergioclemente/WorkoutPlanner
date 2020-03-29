@@ -586,6 +586,10 @@ describe('text processor', function () {
         console.assert(actual.indexOf("#wu") == -1);
         textPreprocessor("#sl(4,40)", "4[(40s,45,Left Leg), (15s,45,Both), (40s,45,Right Leg), (15s,45,Both)]");
         textPreprocessor("#o(4,40)", "4[(40s,*,Build), (40s,55,Relaxed)]");
+        textPreprocessor("#dd2", "(10s, Change to DD2)");
+        textPreprocessor("#alt4min", "(4min, Alternate arm pull)");
+        textPreprocessor("#dbl90s", "(90s, Double arm pull)");
+        textPreprocessor("#dd2", "(10s, Change to DD2)");
         textPreprocessor("#sl(4,40) #o(4,40)", "4[(40s,45,Left Leg), (15s,45,Both), (40s,45,Right Leg), (15s,45,Both)] 4[(40s,*,Build), (40s,55,Relaxed)]");
     });
 });

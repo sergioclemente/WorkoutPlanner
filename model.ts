@@ -1,5 +1,4 @@
 module Model {
-
 	var zlib = require('zlib');
 
 	export enum SportType {
@@ -39,7 +38,6 @@ module Model {
 		Meters = 3,
 		Yards = 4,
 	}
-
 	// If you add another time unit, be careful not adding one before MIN_TIME
 	export enum TimeUnit {
 		Unknown = 11 /* MIN_TIME */,
@@ -47,7 +45,6 @@ module Model {
 		Minutes,
 		Hours
 	}
-
 	// Duration of a workout can be either specified as time or distance
 	// We use the | definition of typescript, but we have to be careful
 	// so that the enums don't overlap. 
@@ -977,6 +974,7 @@ module Model {
 			return this.intervals;
 		}
 
+		// TODO: Deprecate this.
 		getTSS(): number {
 			var tssVisitor = new TSSVisitor();
 			VisitorHelper.visitAndFinalize(tssVisitor, this);
@@ -3638,7 +3636,8 @@ module Model {
 						// 9 min (warmup)
 						[
 							"(3min, 55), (3min, 65), (3min, 75)",
-							"(9min, 55, 75)"
+							"(9min, 55, 70)",
+							"(4min, 55), (3min, 65), (2min, 75)",
 						],
 						// 4 min (drill)
 						[
@@ -3653,7 +3652,8 @@ module Model {
 							"4[(5s, *, MAX), (55s, 55)]",
 							"4[(45s, 75, 100), (15s, 55)]",
 							"3[(30sec, *, FAST), (1min, 55, easy)]",
-							"4[(30s, 85, 90, 95, 100), (30s, 55)]"
+							"4[(30s, 85, 90, 95, 100), (30s, 55)]",
+							"4[(15s, 100, FTP), (45s, 55)]",
 						],
 						// static (3min)
 						["(3min, 55)"]
@@ -3744,23 +3744,20 @@ module Model {
 			return number_repeats + "[(" + work_duration_sec + "s,*," + title + "), (" + rest_duration_sec + "s,55,Relaxed)]"
 		}
 
-		// TODO: number_repeats: number, work_duration_sec: number, rest_duration_sec: number
-		private _cadence_intervals(): string {
-			// Not sure yet how to model this.
-			// 2x(2-2-1 Spin Ups @ 75% 90-100-110 rpm)
-			// 5x30s Highest Sustainable Cadence @ L2 - rest 30s very easy
-			// 4[(4min, 60, cadence 80rpm), (3min, 65, cadence 90rpm), (2min, 70, cadence 100rpm), (1min, 75, cadence 110rpm)]
-			//
-			// (3min, 55, cadence @ 65rpm)
-			// (2min, 55, cadence @ 95rpm)
-			// (3min, 55, cadence @ 70rpm)
-			// (2min, 55, cadence @ 100rpm)
-			//
-			// (3min, 55, cadence @ 75rpm)
-			// (2min, 55, cadence @ 105rpm)
-			// (3min, 55, cadence @ 80rpm)
-			// (2min, 55, cadence @ 110rpm)
-			return "<cd>";
+		private _change_dd(dd_door: number) {
+			return stringFormat("(10s, Change to DD{0})", dd_door)
+		}
+
+		private _alternate_arm_pull(duration: string) {
+			return stringFormat("({0}, Alternate arm pull)", duration)
+		}
+
+		private _double_arm_pull(duration: string) {
+			return stringFormat("({0}, Double arm pull)", duration)
+		}
+
+		private _back_pull(duration: string) {
+			return stringFormat("({0}, Back pull)", duration)
 		}
 
 		processOne(input: string): string {
@@ -3768,7 +3765,11 @@ module Model {
 				{ regex: /#wu/, callback: this._warmup, params: [], description: "Warm up" },
 				{ regex: /#sl\((\d*),(\d*)\)/, callback: this._single_leg, params: [ArgType.Number, ArgType.Number], description: "Single Leg Drills." },
 				{ regex: /#o\((\d*),(\d*)\)/, callback: this._open_intervals, params: [ArgType.Number, ArgType.Number], description: "Open Power Intervals." },
-				{ regex: /#c\((\d*),(\d*)\)/, callback: this._cadence_intervals, params: [ArgType.Number, ArgType.Number], description: "Cadence Intervals." }
+				// Vasa swim shortcut
+				{ regex: /#dd(\d+)/, callback: this._change_dd, params: [ArgType.Number], description: "Change DD configuration." },
+				{ regex: /#alt(\d+\w+)/, callback: this._alternate_arm_pull, params: [ArgType.String], description: "Alternate arm pull." },
+				{ regex: /#dbl(\d+\w+)/, callback: this._double_arm_pull, params: [ArgType.String], description: "Double arm pull." },
+				{ regex: /#back(\d+\w+)/, callback: this._back_pull, params: [ArgType.String], description: "Back pull." },
 			];
 
 			for (let i = 0; i < funcs.length; i++) {
@@ -3779,7 +3780,7 @@ module Model {
 					// Parse all parameters from the regex.
 					var func_params = [];
 					if (instance_params.length - 1 != funcs[i].params.length) {
-						console.log("Function call " + input + " is not matching definition.");
+						console.assert("Function call " + input + " is not matching definition.");
 					}
 					for (let j = 1; j < instance_params.length; j++) {
 						let instance_param = instance_params[j];
@@ -3791,7 +3792,7 @@ module Model {
 					}
 					return funcs[i].callback.apply(this, func_params);
 				} else {
-					console.log("regex " + regex + " failed to match " + input);
+					//console.log("regex " + regex + " failed to match " + input);
 				}
 			}
 			return input;
