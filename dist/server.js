@@ -55,7 +55,7 @@ function handleExistentFile(req, res, fs, filename) {
 }
 function handleSendEmail(req, res, uri, params) {
     if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
-        let userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
+        let userProfile = new model.UserProfile(params.ftp, params.tpace, params.swim_ftp, params.css, params.email);
         let builder = new model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
         logRequest(req, 200);
         let ms = new model_server.MailSender(config.smtp.login, config.smtp.password);
@@ -80,13 +80,12 @@ function handleSendEmail(req, res, uri, params) {
             attachments.push(attachment_mrc);
             attachments.push(attachment_ppsmrx);
         }
-        res.write("Sending email...\n");
         ms.send(userProfile.getEmail(), builder.getMRCFileName(), builder.getPrettyPrint("<br />"), attachments, function (status, message) {
             if (status) {
-                res.write("Email successfully sent.\n");
+                res.writeHead(200, {});
             }
             else {
-                res.write("Error while sending email.\n");
+                res.writeHead(500, {});
                 console.log("Error while sending email.");
                 console.log(message);
             }
@@ -121,7 +120,7 @@ function show404(req, res) {
 }
 function handleSaveWorkout(req, res, uri, params) {
     logRequest(req, 200);
-    let userProfile = new model.UserProfile(params.ftp, params.tpace, params.css, params.email);
+    let userProfile = new model.UserProfile(params.ftp, params.tpace, params.swim_ftp, params.css, params.email);
     let builder = new model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
     let db = new model_server.WorkoutDB(config.mysql);
     let w = new model_server.Workout();
