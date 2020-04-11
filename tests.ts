@@ -575,42 +575,16 @@ function GoldenTestPlayer(of: any, input_file: string, golden_file: string) {
 	let separator = "----------------------------\n";
 	let expected_output: string = fs.readFileSync(golden_file).toString();
 	let expected_outputs: string[] = expected_output.split(separator);
-	// Set 'generate_golden' to true if you need to regenerate the files.
 	let generate_golden = false;
 	let final_output: string = "";
 	for (let i = 0; i < test_cases.length; ++i) {
 		let input = test_cases[i];
-		// Skip last one which is a blank.
-		// Extract name and output unit
-		let lines = input.split("\n");
-		let test_case = "";
-		// Extract the name and output_unit if any is provided.
-		for (let j = 0; j < lines.length; ++j) {
-			if (test_case.length > 0) {
-				test_case += "\n";
-			}
-			test_case += lines[j];
-		}
-
-		if (test_case.trim().length == 0) {
-			continue;
-		}
-		let interval = Model.IntervalParser.parse(of, test_case);
-		// Create the visitor for the AbsoluteTimeInterval.
-		var pv = new Model.AbsoluteTimeIntervalVisitor();
-		Model.VisitorHelper.visitAndFinalize(pv, interval);
-
-		let actual_output = "";
-		actual_output += "Input: \n";
-		actual_output += test_case;
-		actual_output += "Titles: \n";
-		for (let ati of pv.getIntervalArray()) {
-			actual_output += ati.getTitle() + "\n";
-		}
+		let actual_output = GoldenTestCasePlayer(of, input);
 
 		if (!generate_golden) {
 			expect_eq_str(expected_outputs[i], actual_output);
 		}
+
 		// final_output is used for writing to the golden_file
 		final_output += actual_output;
 		final_output += separator;
@@ -620,9 +594,42 @@ function GoldenTestPlayer(of: any, input_file: string, golden_file: string) {
 	}
 }
 
+function GoldenTestCasePlayer(of: any, input: string) {
+	// Skip last one which is a blank.
+	// Extract name and output unit
+	let lines = input.split("\n");
+	let test_case = "";
+	// Extract the name and output_unit if any is provided.
+	for (let j = 0; j < lines.length; ++j) {
+		if (test_case.length > 0) {
+			test_case += "\n";
+		}
+		test_case += lines[j];
+	}
+
+	if (test_case.trim().length == 0) {
+		return "";
+	}
+	let interval = Model.IntervalParser.parse(of, test_case);
+	// Create the visitor for the AbsoluteTimeInterval.
+	var pv = new Model.AbsoluteTimeIntervalVisitor();
+	Model.VisitorHelper.visitAndFinalize(pv, interval);
+
+	let actual_output = "";
+	actual_output += "Input: \n";
+	actual_output += test_case;
+	actual_output += "Titles: \n";
+	for (let ati of pv.getIntervalArray()) {
+		actual_output += "(" + ati.getBeginSeconds() + ";" + ati.getEndSeconds() + ") "
+		actual_output += ati.getTitle() + "\n";
+	}
+
+	return actual_output;
+}
+
 describe('Golden Test Player', function () {
-	it('bike', function () {
-		GoldenTestPlayer(of_bike, "./swim_player.input", "./swim_player.golden");
+	it('swim', function () {
+		GoldenTestPlayer(of_swim, "./swim_player.input", "./swim_player.golden");
 	});
 });
 

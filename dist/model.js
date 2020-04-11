@@ -2991,9 +2991,14 @@ var Model;
             return title;
         }
         visitSimpleInterval(interval) {
-            var duration_seconds = interval.getTotalDuration().getSeconds();
+            var duration_seconds = interval.getWorkDuration().getSeconds();
             this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval, this.getTitle(interval)));
             this.time_ += duration_seconds;
+            if (interval.getRestDuration().getSeconds() > 0) {
+                let rest_seconds = interval.getRestDuration().getSeconds();
+                this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + rest_seconds, interval, "rest"));
+                this.time_ += rest_seconds;
+            }
         }
         visitRampBuildInterval(interval) {
             var duration_seconds = interval.getWorkDuration().getSeconds();
