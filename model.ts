@@ -3494,11 +3494,24 @@ module Model {
 		private data_: AbsoluteTimeInterval[] = [];
 		private repeat_stack_ = [];
 		private iteration_stack_ = [];
+		private of_: ObjectFactory;
+
+		constructor(of: ObjectFactory) {
+			super();
+			this.of_ = of;
+		}
 
 		private getTitle(interval: Interval): string {
 			let title = interval.getTitle();
-			if (title.length == 0) {
-				title = interval.getIntensity().toString();
+			// HACK: To avoid plumbing output unit all over the place, just doing something simple for now
+			if (this.of_.getSportType() == SportType.Swim) {
+				title += " " + (interval.getIntensity().getValue() * this.of_.getUserProfile().getSwimFTP()) + "w"
+			} else if (this.of_.getSportType() == SportType.Bike) {
+				title += " " + (interval.getIntensity().getValue() * this.of_.getUserProfile().getBikeFTP()) + "w"
+			} else if (this.of_.getSportType() == SportType.Run) {
+				title += " " + (interval.getIntensity().getValue() * this.of_.getUserProfile().getRunnintTPaceMph()) + "mph";
+			} else {
+				title += interval.getIntensity().toString();
 			}
 			if (this.repeat_stack_.length > 0) {
 				console.assert(this.repeat_stack_.length == this.iteration_stack_.length);
@@ -3546,9 +3559,9 @@ module Model {
 		private data_: AbsoluteTimeInterval[] = [];
 		private durationTotalSeconds_: number = 0;
 
-		constructor(interval: Interval) {
+		constructor(of: ObjectFactory, interval: Interval) {
 			// Create the visitor for the AbsoluteTimeInterval.
-			var pv = new AbsoluteTimeIntervalVisitor();
+			var pv = new AbsoluteTimeIntervalVisitor(of);
 
 			VisitorHelper.visitAndFinalize(pv, interval);
 

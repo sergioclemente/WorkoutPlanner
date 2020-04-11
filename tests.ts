@@ -431,7 +431,7 @@ describe('Swim', function () {
 describe('Player Helper', function () {
 	it('Two intervals, 2 boundaries', function () {
 		let interval = Model.IntervalParser.parse(of_swim, "(10min, 55, t1), (20min, 60, t2)");
-		let ph = new Model.PlayerHelper(interval);
+		let ph = new Model.PlayerHelper(of_other, interval);
 		expect_eq_str("t1", ph.get(0).getInterval().getTitle());
 		expect_eq_str("t1", ph.get(10 * 60).getInterval().getTitle());
 		expect_eq_str("t2", ph.get(20 * 60).getInterval().getTitle());
@@ -612,7 +612,7 @@ function GoldenTestCasePlayer(of: any, input: string) {
 	}
 	let interval = Model.IntervalParser.parse(of, test_case);
 	// Create the visitor for the AbsoluteTimeInterval.
-	var pv = new Model.AbsoluteTimeIntervalVisitor();
+	var pv = new Model.AbsoluteTimeIntervalVisitor(of_swim);
 	Model.VisitorHelper.visitAndFinalize(pv, interval);
 
 	let actual_output = "";

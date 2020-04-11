@@ -71,7 +71,7 @@ class UserProperty extends React.Component {
     }
     _fireOnChange() {
         if (this.props.onChange) {
-            this.props.onChange(this.ftp, this.t_pace, this.swim_css, this.email, this.efficiency_factor);
+            this.props.onChange(this.ftp, this.t_pace, this.swim_css, this.swim_ftp, this.email, this.efficiency_factor);
         }
     }
     render() {

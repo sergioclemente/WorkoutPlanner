@@ -2972,17 +2972,27 @@ var Model;
     }
     Model.AbsoluteTimeInterval = AbsoluteTimeInterval;
     class AbsoluteTimeIntervalVisitor extends BaseVisitor {
-        constructor() {
-            super(...arguments);
+        constructor(of) {
+            super();
             this.time_ = 0;
             this.data_ = [];
             this.repeat_stack_ = [];
             this.iteration_stack_ = [];
+            this.of_ = of;
         }
         getTitle(interval) {
             let title = interval.getTitle();
-            if (title.length == 0) {
-                title = interval.getIntensity().toString();
+            if (this.of_.getSportType() == SportType.Swim) {
+                title += " " + (interval.getIntensity().getValue() * this.of_.getUserProfile().getSwimFTP()) + "w";
+            }
+            else if (this.of_.getSportType() == SportType.Bike) {
+                title += " " + (interval.getIntensity().getValue() * this.of_.getUserProfile().getBikeFTP()) + "w";
+            }
+            else if (this.of_.getSportType() == SportType.Run) {
+                title += " " + (interval.getIntensity().getValue() * this.of_.getUserProfile().getRunnintTPaceMph()) + "mph";
+            }
+            else {
+                title += interval.getIntensity().toString();
             }
             if (this.repeat_stack_.length > 0) {
                 console.assert(this.repeat_stack_.length == this.iteration_stack_.length);
@@ -3022,10 +3032,10 @@ var Model;
     }
     Model.AbsoluteTimeIntervalVisitor = AbsoluteTimeIntervalVisitor;
     class PlayerHelper {
-        constructor(interval) {
+        constructor(of, interval) {
             this.data_ = [];
             this.durationTotalSeconds_ = 0;
-            var pv = new AbsoluteTimeIntervalVisitor();
+            var pv = new AbsoluteTimeIntervalVisitor(of);
             VisitorHelper.visitAndFinalize(pv, interval);
             this.data_ = pv.getIntervalArray();
             this.durationTotalSeconds_ = interval.getTotalDuration().getSeconds();

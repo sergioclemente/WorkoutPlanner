@@ -24,12 +24,13 @@ class Workout extends React.Component {
         }
         this.refresh();
     }
-    _onUserSettingsChanged(ftp, t_pace, swim_css, email, efficiency_factor) {
+    _onUserSettingsChanged(ftp, t_pace, swim_css, swim_ftp, email, efficiency_factor) {
         if (!isNaN(ftp)) {
             this.params.ftp_watts = ftp.toString();
         }
         this.params.t_pace = t_pace;
         this.params.swim_css = swim_css;
+        this.params.swim_ftp = swim_ftp;
         this.params.email = email;
         this.params.efficiency_factor = efficiency_factor;
         this.refresh();
@@ -126,7 +127,7 @@ class Workout extends React.Component {
     }
     render() {
         return (React.createElement("div", null,
-            React.createElement(user_settings_1.default, Object.assign({}, this.props, { ref: 'settings', onChange: (f, t, c, e, ef) => this._onUserSettingsChanged(f, t, c, e, ef) })),
+            React.createElement(user_settings_1.default, Object.assign({}, this.props, { ref: 'settings', onChange: (f, t, c, sf, e, ef) => this._onUserSettingsChanged(f, t, c, sf, e, ef) })),
             React.createElement(workout_input_1.default, Object.assign({}, this.props, { ref: 'input', onChange: (s, o, t, w) => this._onWorkoutInputChanged(s, o, t, w) })),
             React.createElement("table", null,
                 React.createElement("tbody", null,

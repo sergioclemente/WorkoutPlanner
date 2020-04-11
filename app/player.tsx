@@ -18,7 +18,9 @@ export default class PlayerView extends React.Component<any, any> {
 		this.params_ = UI.QueryParams.createCopy(params);
 
 		let builder = this.params_.createWorkoutBuilder();
-		this.playerHelper_ = new Model.PlayerHelper(builder.getInterval());
+
+		let of = new Model.ObjectFactory(this.params_.createUserProfile(), builder.getSportType());
+		this.playerHelper_ = new Model.PlayerHelper(of, builder.getInterval());
 
 		this.state = this.getState();
 	}

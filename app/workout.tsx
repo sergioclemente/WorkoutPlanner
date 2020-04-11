@@ -26,17 +26,17 @@ export default class Workout extends React.Component<any, any> {
 			let input: WorkoutInput = this.refs['input'] as WorkoutInput;
 			input.setOutputUnit(dominant_unit);
 		}
-		
 
 		this.refresh();
 	}
 
-	_onUserSettingsChanged(ftp: number, t_pace: string, swim_css: string, email: string, efficiency_factor: string) {
+	_onUserSettingsChanged(ftp: number, t_pace: string, swim_css: string, swim_ftp: string, email: string, efficiency_factor: string) {
 		if (!isNaN(ftp)) {
 			this.params.ftp_watts = ftp.toString();	
 		}
 		this.params.t_pace = t_pace;
 		this.params.swim_css = swim_css;
+		this.params.swim_ftp = swim_ftp;
 		this.params.email = email;
 		this.params.efficiency_factor = efficiency_factor;
 		this.refresh();
@@ -155,7 +155,7 @@ export default class Workout extends React.Component<any, any> {
 
 	render() {
 		return (<div>
-			<UserSettings {...this.props} ref='settings' onChange={(f, t, c, e, ef) => this._onUserSettingsChanged(f, t, c, e, ef)}></UserSettings>
+			<UserSettings {...this.props} ref='settings' onChange={(f, t, c, sf, e, ef) => this._onUserSettingsChanged(f, t, c, sf, e, ef)}></UserSettings>
 			<WorkoutInput {...this.props} ref='input' onChange={(s, o, t, w) => this._onWorkoutInputChanged(s, o, t, w)}></WorkoutInput>
 			<table>
 				<tbody>
