@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
+const Core = require("../core");
 const Model = require("../model");
 const select_1 = require("./select");
 const select_option_1 = require("./select_option");
@@ -42,18 +43,18 @@ class WorkoutInput extends React.Component {
         }
         var sportTypeEnum = parseInt(sportType);
         let selectUnit = this.refs["unit"];
-        if (sportTypeEnum == Model.SportType.Run) {
-            selectUnit.setSelectedValue(Model.IntensityUnit.MinMi.toString());
+        if (sportTypeEnum == Core.SportType.Run) {
+            selectUnit.setSelectedValue(Core.IntensityUnit.MinMi.toString());
         }
-        else if (sportTypeEnum == Model.SportType.Bike) {
-            selectUnit.setSelectedValue(Model.IntensityUnit.Watts.toString());
+        else if (sportTypeEnum == Core.SportType.Bike) {
+            selectUnit.setSelectedValue(Core.IntensityUnit.Watts.toString());
         }
-        else if (sportTypeEnum == Model.SportType.Swim) {
-            selectUnit.setSelectedValue(Model.IntensityUnit.Per100Yards.toString());
+        else if (sportTypeEnum == Core.SportType.Swim) {
+            selectUnit.setSelectedValue(Core.IntensityUnit.Per100Yards.toString());
         }
         else {
-            console.assert(sportTypeEnum == Model.SportType.Other);
-            selectUnit.setSelectedValue(Model.IntensityUnit.IF.toString());
+            console.assert(sportTypeEnum == Core.SportType.Other);
+            selectUnit.setSelectedValue(Core.IntensityUnit.IF.toString());
         }
         var units = ["yards", "meters", "watts", "if", "hr", "minmi", "mih", "minkm", "kmh", "hr", "per400m"];
         for (let idx in units) {
@@ -61,10 +62,10 @@ class WorkoutInput extends React.Component {
             selectOption.setEnabled(false);
         }
         let map = {};
-        map[Model.SportType.Swim.toString()] = ["watts", "yards", "meters"];
-        map[Model.SportType.Bike.toString()] = ["watts", "if", "hr"];
-        map[Model.SportType.Run.toString()] = ["minmi", "mih", "minkm", "kmh", "hr", "per400m"];
-        map[Model.SportType.Other.toString()] = ["if", "hr"];
+        map[Core.SportType.Swim.toString()] = ["watts", "yards", "meters"];
+        map[Core.SportType.Bike.toString()] = ["watts", "if", "hr"];
+        map[Core.SportType.Run.toString()] = ["minmi", "mih", "minkm", "kmh", "hr", "per400m"];
+        map[Core.SportType.Other.toString()] = ["if", "hr"];
         for (let idx in map[sportType]) {
             let selectOption = this.refs[map[sportType][idx]];
             selectOption.setEnabled(true);
@@ -103,23 +104,23 @@ class WorkoutInput extends React.Component {
                 React.createElement("br", null),
                 "Sport type:",
                 React.createElement(select_1.default, { ref: "sportType", defaultValue: this.props.sport_type, onChange: e => this._onSportTypeChange(e) },
-                    React.createElement(select_option_1.default, { value: Model.SportType.Swim }, "Swim"),
-                    React.createElement(select_option_1.default, { value: Model.SportType.Bike }, "Bike"),
-                    React.createElement(select_option_1.default, { value: Model.SportType.Run }, "Run"),
-                    React.createElement(select_option_1.default, { value: Model.SportType.Other }, "Other")),
+                    React.createElement(select_option_1.default, { value: Core.SportType.Swim }, "Swim"),
+                    React.createElement(select_option_1.default, { value: Core.SportType.Bike }, "Bike"),
+                    React.createElement(select_option_1.default, { value: Core.SportType.Run }, "Run"),
+                    React.createElement(select_option_1.default, { value: Core.SportType.Other }, "Other")),
                 React.createElement("br", null),
                 "Unit:",
                 React.createElement(select_1.default, { ref: "unit", defaultValue: this.props.output_unit, onChange: e => this._onUnitChanged(e) },
-                    React.createElement(select_option_1.default, { ref: "watts", value: Model.IntensityUnit.Watts }, "Watts"),
-                    React.createElement(select_option_1.default, { ref: "minmi", value: Model.IntensityUnit.MinMi }, "min/mi"),
-                    React.createElement(select_option_1.default, { ref: "mih", value: Model.IntensityUnit.Mph }, "mi/h"),
-                    React.createElement(select_option_1.default, { ref: "minkm", value: Model.IntensityUnit.MinKm }, "min/km"),
-                    React.createElement(select_option_1.default, { ref: "kmh", value: Model.IntensityUnit.Kmh }, "km/h"),
-                    React.createElement(select_option_1.default, { ref: "if", value: Model.IntensityUnit.IF }, "IF"),
-                    React.createElement(select_option_1.default, { ref: "yards", value: Model.IntensityUnit.Per100Yards }, "/100yards"),
-                    React.createElement(select_option_1.default, { ref: "meters", value: Model.IntensityUnit.Per100Meters }, "/100m"),
-                    React.createElement(select_option_1.default, { ref: "hr", value: Model.IntensityUnit.HeartRate }, "Heart rate"),
-                    React.createElement(select_option_1.default, { ref: "per400m", value: Model.IntensityUnit.Per400Meters }, "/400m")),
+                    React.createElement(select_option_1.default, { ref: "watts", value: Core.IntensityUnit.Watts }, "Watts"),
+                    React.createElement(select_option_1.default, { ref: "minmi", value: Core.IntensityUnit.MinMi }, "min/mi"),
+                    React.createElement(select_option_1.default, { ref: "mih", value: Core.IntensityUnit.Mph }, "mi/h"),
+                    React.createElement(select_option_1.default, { ref: "minkm", value: Core.IntensityUnit.MinKm }, "min/km"),
+                    React.createElement(select_option_1.default, { ref: "kmh", value: Core.IntensityUnit.Kmh }, "km/h"),
+                    React.createElement(select_option_1.default, { ref: "if", value: Core.IntensityUnit.IF }, "IF"),
+                    React.createElement(select_option_1.default, { ref: "yards", value: Core.IntensityUnit.Per100Yards }, "/100yards"),
+                    React.createElement(select_option_1.default, { ref: "meters", value: Core.IntensityUnit.Per100Meters }, "/100m"),
+                    React.createElement(select_option_1.default, { ref: "hr", value: Core.IntensityUnit.HeartRate }, "Heart rate"),
+                    React.createElement(select_option_1.default, { ref: "per400m", value: Core.IntensityUnit.Per400Meters }, "/400m")),
                 React.createElement("br", null),
                 React.createElement("textarea", { ref: "workout_text", defaultValue: this.props.workout_text, style: { height: "200px", width: "100%" }, onChange: e => this._onWorkoutTextChange(e) }),
                 React.createElement("br", null))));

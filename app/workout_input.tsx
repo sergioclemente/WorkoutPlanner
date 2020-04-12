@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as Core from '../core';
 import * as Model from '../model';
 import Select from './select';
 import SelectOption from './select_option';
@@ -8,17 +9,17 @@ export default class WorkoutInput extends React.Component<any, any> {
 		super(props);
 	}
 
-	getSportType(): Model.SportType {
+	getSportType(): Core.SportType {
 		var sltSportType = this.refs['sportType'] as Select;
 		return parseInt(sltSportType.getSelectedValue());
 	}
 
-	getUnitType(): Model.IntensityUnit {
+	getUnitType(): Core.IntensityUnit {
 		var sltUnit = this.refs['unit'] as Select;
 		return parseInt(sltUnit.getSelectedValue());
 	}
 
-	setOutputUnit(unit: Model.IntensityUnit) {
+	setOutputUnit(unit: Core.IntensityUnit) {
 		let selectUnit: Select = this.refs["unit"] as Select;
 		selectUnit.setSelectedValue(unit.toString());
 	}
@@ -48,17 +49,17 @@ export default class WorkoutInput extends React.Component<any, any> {
 			return;
 		}
 		// Select the default unit.
-		var sportTypeEnum: Model.SportType = parseInt(sportType);
+		var sportTypeEnum: Core.SportType = parseInt(sportType);
 		let selectUnit: Select = this.refs["unit"] as Select;
-		if (sportTypeEnum == Model.SportType.Run) {
-			selectUnit.setSelectedValue(Model.IntensityUnit.MinMi.toString());
-		} else if (sportTypeEnum == Model.SportType.Bike) {
-			selectUnit.setSelectedValue(Model.IntensityUnit.Watts.toString());
-		} else if (sportTypeEnum == Model.SportType.Swim) {
-			selectUnit.setSelectedValue(Model.IntensityUnit.Per100Yards.toString());
+		if (sportTypeEnum == Core.SportType.Run) {
+			selectUnit.setSelectedValue(Core.IntensityUnit.MinMi.toString());
+		} else if (sportTypeEnum == Core.SportType.Bike) {
+			selectUnit.setSelectedValue(Core.IntensityUnit.Watts.toString());
+		} else if (sportTypeEnum == Core.SportType.Swim) {
+			selectUnit.setSelectedValue(Core.IntensityUnit.Per100Yards.toString());
 		} else {
-			console.assert(sportTypeEnum == Model.SportType.Other);
-			selectUnit.setSelectedValue(Model.IntensityUnit.IF.toString());
+			console.assert(sportTypeEnum == Core.SportType.Other);
+			selectUnit.setSelectedValue(Core.IntensityUnit.IF.toString());
 		}
 
 		// Disable all options.
@@ -71,10 +72,10 @@ export default class WorkoutInput extends React.Component<any, any> {
 
 		// Enable just the ones that make sense.
 		let map = {};
-		map[Model.SportType.Swim.toString()] = ["watts", "yards", "meters"];
-		map[Model.SportType.Bike.toString()] = ["watts", "if", "hr"];
-		map[Model.SportType.Run.toString()] = ["minmi", "mih", "minkm", "kmh", "hr", "per400m"];
-		map[Model.SportType.Other.toString()] = ["if", "hr"];
+		map[Core.SportType.Swim.toString()] = ["watts", "yards", "meters"];
+		map[Core.SportType.Bike.toString()] = ["watts", "if", "hr"];
+		map[Core.SportType.Run.toString()] = ["minmi", "mih", "minkm", "kmh", "hr", "per400m"];
+		map[Core.SportType.Other.toString()] = ["if", "hr"];
 		for (let idx in map[sportType]) {
 			let selectOption: SelectOption = this.refs[map[sportType][idx]] as SelectOption;
 			selectOption.setEnabled(true);
@@ -121,24 +122,24 @@ export default class WorkoutInput extends React.Component<any, any> {
 				<br />
 				Sport type:
 					<Select ref="sportType" defaultValue={this.props.sport_type} onChange={e => this._onSportTypeChange(e)}>
-					<SelectOption value={Model.SportType.Swim}>Swim</SelectOption>
-					<SelectOption value={Model.SportType.Bike}>Bike</SelectOption>
-					<SelectOption value={Model.SportType.Run}>Run</SelectOption>
-					<SelectOption value={Model.SportType.Other}>Other</SelectOption>
+					<SelectOption value={Core.SportType.Swim}>Swim</SelectOption>
+					<SelectOption value={Core.SportType.Bike}>Bike</SelectOption>
+					<SelectOption value={Core.SportType.Run}>Run</SelectOption>
+					<SelectOption value={Core.SportType.Other}>Other</SelectOption>
 				</Select>
 				<br />
 				Unit:
 					<Select ref="unit" defaultValue={this.props.output_unit} onChange={e => this._onUnitChanged(e)}>
-					<SelectOption ref="watts" value={Model.IntensityUnit.Watts}>Watts</SelectOption>
-					<SelectOption ref="minmi" value={Model.IntensityUnit.MinMi}>min/mi</SelectOption>
-					<SelectOption ref="mih" value={Model.IntensityUnit.Mph}>mi/h</SelectOption>
-					<SelectOption ref="minkm" value={Model.IntensityUnit.MinKm}>min/km</SelectOption>
-					<SelectOption ref="kmh" value={Model.IntensityUnit.Kmh}>km/h</SelectOption>
-					<SelectOption ref="if" value={Model.IntensityUnit.IF}>IF</SelectOption>
-					<SelectOption ref="yards" value={Model.IntensityUnit.Per100Yards}>/100yards</SelectOption>
-					<SelectOption ref="meters" value={Model.IntensityUnit.Per100Meters}>/100m</SelectOption>
-					<SelectOption ref="hr" value={Model.IntensityUnit.HeartRate}>Heart rate</SelectOption>
-					<SelectOption ref="per400m" value={Model.IntensityUnit.Per400Meters}>/400m</SelectOption>
+					<SelectOption ref="watts" value={Core.IntensityUnit.Watts}>Watts</SelectOption>
+					<SelectOption ref="minmi" value={Core.IntensityUnit.MinMi}>min/mi</SelectOption>
+					<SelectOption ref="mih" value={Core.IntensityUnit.Mph}>mi/h</SelectOption>
+					<SelectOption ref="minkm" value={Core.IntensityUnit.MinKm}>min/km</SelectOption>
+					<SelectOption ref="kmh" value={Core.IntensityUnit.Kmh}>km/h</SelectOption>
+					<SelectOption ref="if" value={Core.IntensityUnit.IF}>IF</SelectOption>
+					<SelectOption ref="yards" value={Core.IntensityUnit.Per100Yards}>/100yards</SelectOption>
+					<SelectOption ref="meters" value={Core.IntensityUnit.Per100Meters}>/100m</SelectOption>
+					<SelectOption ref="hr" value={Core.IntensityUnit.HeartRate}>Heart rate</SelectOption>
+					<SelectOption ref="per400m" value={Core.IntensityUnit.Per400Meters}>/400m</SelectOption>
 				</Select>
 				<br />
 				<textarea ref="workout_text" defaultValue={this.props.workout_text} style={{ height: "200px", width: "100%" }} onChange={e => this._onWorkoutTextChange(e)}>

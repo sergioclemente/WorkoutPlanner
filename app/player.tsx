@@ -2,7 +2,9 @@
 
 import * as React from 'react';
 import * as UI from '../ui';
+import * as Core from '../core';
 import * as Model from '../model';
+import * as Visitor from '../visitor';
 import WorkoutView from './workout_view';
 
 export default class PlayerView extends React.Component<any, any> {
@@ -19,31 +21,31 @@ export default class PlayerView extends React.Component<any, any> {
 
 		let builder = this.params_.createWorkoutBuilder();
 
-		let of = new Model.ObjectFactory(this.params_.createUserProfile(), builder.getSportType());
+		let of = new Core.ObjectFactory(this.params_.createUserProfile(), builder.getSportType());
 		this.playerHelper_ = new Model.PlayerHelper(of, builder.getInterval());
 
 		this.state = this.getState();
 	}
 
 	getState(): any {
-		let bei: Model.AbsoluteTimeInterval = this.playerHelper_.get(this._getElapsedTimeSeconds());
+		let bei: Visitor.AbsoluteTimeInterval = this.playerHelper_.get(this._getElapsedTimeSeconds());
 		if (bei == null) {
 			return {};
 		}
 		return {
 			current_title: bei.getTitle(),
-			elapsed_time: Model.FormatterHelper.formatTime(this._getElapsedTimeMilliseconds(bei)),
-			remaining_time: Model.FormatterHelper.formatTime(this._getRemainingTimeMilliseconds(bei)),
-			total_time_elapsed: Model.FormatterHelper.formatTime(this.stopWatch_.getElapsedTimeMillis()),
-			total_time_workout: Model.FormatterHelper.formatTime(this.playerHelper_.getDurationTotalSeconds() * 1000)
+			elapsed_time: Core.FormatterHelper.formatTime(this._getElapsedTimeMilliseconds(bei)),
+			remaining_time: Core.FormatterHelper.formatTime(this._getRemainingTimeMilliseconds(bei)),
+			total_time_elapsed: Core.FormatterHelper.formatTime(this.stopWatch_.getElapsedTimeMillis()),
+			total_time_workout: Core.FormatterHelper.formatTime(this.playerHelper_.getDurationTotalSeconds() * 1000)
 		};
 	}
 
-	_getElapsedTimeMilliseconds(bei: Model.AbsoluteTimeInterval): number {
+	_getElapsedTimeMilliseconds(bei: Visitor.AbsoluteTimeInterval): number {
 		return this.stopWatch_.getElapsedTimeMillis() - bei.getBeginSeconds() * 1000;
 	}
 
-	_getRemainingTimeMilliseconds(bei: Model.AbsoluteTimeInterval): number {
+	_getRemainingTimeMilliseconds(bei: Visitor.AbsoluteTimeInterval): number {
 		return bei.getEndSeconds() * 1000 - this.stopWatch_.getElapsedTimeMillis();
 	}
 

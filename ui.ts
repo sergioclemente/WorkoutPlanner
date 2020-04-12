@@ -1,4 +1,6 @@
+import * as Core from './core';
 import * as Model from './model';
+import * as Visitor from './visitor';
 
 var zlib = require('zlib');
 
@@ -426,9 +428,9 @@ module UI {
 			return res;
 		}
 
-		createUserProfile(): Model.UserProfile {
+		createUserProfile(): Core.UserProfile {
 			if (this.validate()) {
-				let result = new Model.UserProfile(parseInt(this.ftp_watts), this.t_pace, parseInt(this.swim_ftp), this.swim_css, this.email);
+				let result = new Core.UserProfile(parseInt(this.ftp_watts), this.t_pace, parseInt(this.swim_ftp), this.swim_css, this.email);
 				result.setEfficiencyFactor(parseFloat(this.efficiency_factor));
 				return result;
 			} else {
@@ -447,8 +449,8 @@ module UI {
 			}
 		}
 
-		getDominantUnit(): Model.IntensityUnit {
-			return Model.DominantUnitVisitor.computeIntensity(this.createWorkoutBuilder().getInterval());
+		getDominantUnit(): Core.IntensityUnit {
+			return Visitor.DominantUnitVisitor.computeIntensity(this.createWorkoutBuilder().getInterval());
 
 		}
 	}
@@ -514,6 +516,24 @@ module UI {
 			}
 
 			document.body.removeChild(textArea);
+		}
+	}
+
+	export class SportTypeHelper {
+		// TODO: Can I use toString and or add this to the enum itself?
+		static convertToString(sportType: Core.SportType) {
+			if (sportType == Core.SportType.Bike) {
+				return "Bike";
+			} else if (sportType == Core.SportType.Run) {
+				return "Run";
+			} else if (sportType == Core.SportType.Swim) {
+				return "Swim";
+			} else if (sportType == Core.SportType.Other) {
+				return "Other";
+			} else {
+				console.assert(false);
+				return "";
+			}
 		}
 	}
 

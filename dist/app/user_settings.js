@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
-const Model = require("../model");
+const Core = require("../core");
 const number_input_1 = require("./number_input");
 const email_input_1 = require("./email_input");
 const text_input_1 = require("./text_input");
@@ -28,7 +28,7 @@ class UserProperty extends React.Component {
     }
     _onTPaceChange(t_pace) {
         var tPaceInput = this.refs['t_pace'];
-        var t_pace_mph = Model.SpeedParser.getSpeedInMph(t_pace);
+        var t_pace_mph = Core.SpeedParser.getSpeedInMph(t_pace);
         if (t_pace != null && t_pace_mph > 0) {
             tPaceInput.setError("");
         }
@@ -51,7 +51,7 @@ class UserProperty extends React.Component {
     }
     _onSwimCSSChange(swim_css) {
         var tSwimCss = this.refs['swim_css'];
-        var swim_css_mph = Model.SpeedParser.getSpeedInMph(swim_css);
+        var swim_css_mph = Core.SpeedParser.getSpeedInMph(swim_css);
         if (swim_css != null && swim_css_mph) {
             tSwimCss.setError("");
         }

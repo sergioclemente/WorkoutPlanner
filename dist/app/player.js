@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
 const UI = require("../ui");
+const Core = require("../core");
 const Model = require("../model");
 const workout_view_1 = require("./workout_view");
 class PlayerView extends React.Component {
@@ -14,7 +15,7 @@ class PlayerView extends React.Component {
         this.stopWatch_ = new Model.StopWatch();
         this.params_ = UI.QueryParams.createCopy(params);
         let builder = this.params_.createWorkoutBuilder();
-        let of = new Model.ObjectFactory(this.params_.createUserProfile(), builder.getSportType());
+        let of = new Core.ObjectFactory(this.params_.createUserProfile(), builder.getSportType());
         this.playerHelper_ = new Model.PlayerHelper(of, builder.getInterval());
         this.state = this.getState();
     }
@@ -25,10 +26,10 @@ class PlayerView extends React.Component {
         }
         return {
             current_title: bei.getTitle(),
-            elapsed_time: Model.FormatterHelper.formatTime(this._getElapsedTimeMilliseconds(bei)),
-            remaining_time: Model.FormatterHelper.formatTime(this._getRemainingTimeMilliseconds(bei)),
-            total_time_elapsed: Model.FormatterHelper.formatTime(this.stopWatch_.getElapsedTimeMillis()),
-            total_time_workout: Model.FormatterHelper.formatTime(this.playerHelper_.getDurationTotalSeconds() * 1000)
+            elapsed_time: Core.FormatterHelper.formatTime(this._getElapsedTimeMilliseconds(bei)),
+            remaining_time: Core.FormatterHelper.formatTime(this._getRemainingTimeMilliseconds(bei)),
+            total_time_elapsed: Core.FormatterHelper.formatTime(this.stopWatch_.getElapsedTimeMillis()),
+            total_time_workout: Core.FormatterHelper.formatTime(this.playerHelper_.getDurationTotalSeconds() * 1000)
         };
     }
     _getElapsedTimeMilliseconds(bei) {

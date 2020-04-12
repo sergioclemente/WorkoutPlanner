@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as Model from '../model';
+import * as Core from '../core';
 import NumberInput from './number_input';
 import EmailInput from './email_input';
 import TextInput from './text_input';
@@ -35,7 +35,7 @@ export default class UserProperty extends React.Component<any, any> {
 	}
 	_onTPaceChange(t_pace) {
 		var tPaceInput: NumberInput = this.refs['t_pace'] as NumberInput;
-		var t_pace_mph = Model.SpeedParser.getSpeedInMph(t_pace);
+		var t_pace_mph = Core.SpeedParser.getSpeedInMph(t_pace);
 		if (t_pace != null && t_pace_mph > 0) {
 			tPaceInput.setError("");
 		} else {
@@ -56,7 +56,7 @@ export default class UserProperty extends React.Component<any, any> {
 	}
 	_onSwimCSSChange(swim_css) {
 		var tSwimCss: NumberInput = this.refs['swim_css'] as NumberInput;
-		var swim_css_mph = Model.SpeedParser.getSpeedInMph(swim_css)
+		var swim_css_mph = Core.SpeedParser.getSpeedInMph(swim_css)
 		if (swim_css != null && swim_css_mph) {
 			tSwimCss.setError("");
 		} else {

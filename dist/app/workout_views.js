@@ -5,7 +5,7 @@ const fixed_data_table_1 = require("fixed-data-table");
 const select_1 = require("./select");
 const select_option_1 = require("./select_option");
 const UI = require("../ui");
-const Model = require("../model");
+const Core = require("../core");
 class TitleCell extends React.Component {
     render() {
         var title = this.props.data[this.props.rowIndex][this.props.field];
@@ -17,7 +17,7 @@ class TitleCell extends React.Component {
 class SportTypeCell extends React.Component {
     render() {
         let sportType = this.props.data[this.props.rowIndex][this.props.field];
-        let sportTypeString = Model.SportTypeHelper.convertToString(sportType);
+        let sportTypeString = UI.SportTypeHelper.convertToString(sportType);
         return (React.createElement(fixed_data_table_1.Cell, Object.assign({}, this.props), sportTypeString));
     }
 }
@@ -36,11 +36,11 @@ class TagsCell extends React.Component {
 class DurationCell extends React.Component {
     render() {
         let duration_sec = this.props.data[this.props.rowIndex][this.props.field];
-        let duration = new Model.Duration(Model.TimeUnit.Seconds, duration_sec, duration_sec, 0);
+        let duration = new Core.Duration(Core.TimeUnit.Seconds, duration_sec, duration_sec, 0);
         let time_component = duration.getTimeComponents();
         let format_str = "";
         if (time_component.hours > 0) {
-            format_str = Model.MyMath.round10(time_component.hours + time_component.minutes / 60.0, -1) + "hr";
+            format_str = Core.MyMath.round10(time_component.hours + time_component.minutes / 60.0, -1) + "hr";
         }
         else {
             format_str = time_component.minutes + "min";
@@ -122,7 +122,7 @@ class WorkoutViews extends React.Component {
         }
         for (let i = 0; i < this._rows.length; i++) {
             var row = this._rows[i];
-            if ((sportTypeEnum == Model.SportType.Unknown || row.sport_type == sportTypeEnum)
+            if ((sportTypeEnum == Core.SportType.Unknown || row.sport_type == sportTypeEnum)
                 && shouldIncludeInResult(row)) {
                 filteredRows.push(row);
             }
@@ -137,11 +137,11 @@ class WorkoutViews extends React.Component {
         return (React.createElement("div", null,
             "Workouts",
             React.createElement(select_1.default, { ref: "sportType", defaultValue: this.props.sport_type, onChange: e => this._onSportTypeChange(e) },
-                React.createElement(select_option_1.default, { value: Model.SportType.Unknown }, "All"),
-                React.createElement(select_option_1.default, { value: Model.SportType.Swim }, "Swim"),
-                React.createElement(select_option_1.default, { value: Model.SportType.Bike }, "Bike"),
-                React.createElement(select_option_1.default, { value: Model.SportType.Run }, "Run"),
-                React.createElement(select_option_1.default, { value: Model.SportType.Other }, "Other")),
+                React.createElement(select_option_1.default, { value: Core.SportType.Unknown }, "All"),
+                React.createElement(select_option_1.default, { value: Core.SportType.Swim }, "Swim"),
+                React.createElement(select_option_1.default, { value: Core.SportType.Bike }, "Bike"),
+                React.createElement(select_option_1.default, { value: Core.SportType.Run }, "Run"),
+                React.createElement(select_option_1.default, { value: Core.SportType.Other }, "Other")),
             " ",
             React.createElement("br", null),
             "Filter: ",

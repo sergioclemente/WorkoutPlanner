@@ -2,16 +2,50 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
 const UI = require("../ui");
-const Model = require("../model");
+const Core = require("../core");
+const Visitor = require("../visitor");
 class WorkoutView extends React.Component {
     constructor(params) {
         super(params);
         this.state = this.getState(UI.QueryParams.createCopy(params));
     }
+    getTimeInZones(sportType, intervals) {
+        var zv = new Visitor.ZonesVisitor(sportType);
+        Visitor.VisitorHelper.visitAndFinalize(zv, intervals);
+        return zv.getTimeInZones();
+    }
+    getTimeSeries(intervals) {
+        var pv = new Visitor.DataPointVisitor();
+        Visitor.VisitorHelper.visitAndFinalize(pv, intervals);
+        var list = pv.data.map(function (item) {
+            return {
+                x: item.x.getSeconds() / 60,
+                y: Math.round(item.y.getValue() * 100),
+                tag: item.tag
+            };
+        });
+        var tagToPoints = {};
+        var lastItemTag = null;
+        for (let i = 0; i < list.length; ++i) {
+            let item = list[i];
+            if (tagToPoints[item.tag] == null) {
+                tagToPoints[item.tag] = [];
+            }
+            if (lastItemTag != null) {
+                if (item.tag != lastItemTag) {
+                    tagToPoints[lastItemTag].push({ x: item.x, y: 0 });
+                    tagToPoints[item.tag].push({ x: item.x, y: 0 });
+                }
+            }
+            tagToPoints[item.tag].push(item);
+            lastItemTag = item.tag;
+        }
+        return tagToPoints;
+    }
     getState(params) {
         try {
             var builder = params.createWorkoutBuilder();
-            var time_in_zones_data = builder.getInterval().getTimeInZones(builder.getSportType()).map(function (zone) {
+            var time_in_zones_data = this.getTimeInZones(builder.getSportType(), builder.getInterval()).map(function (zone) {
                 return {
                     y: zone.duration.getSeconds(),
                     legendText: zone.name + "(" + zone.duration.toString() + ")",
@@ -21,7 +55,7 @@ class WorkoutView extends React.Component {
             var workout_steps = builder.getInterval().getIntervals().map(function (value, index) {
                 return builder.getIntervalPretty(value, params.should_round == "true");
             }.bind(this));
-            var avg_pace = builder.getSportType() == Model.SportType.Run ?
+            var avg_pace = builder.getSportType() == Core.SportType.Run ?
                 builder.getAveragePace() : "";
             return ({
                 tss: builder.getTSS(),
@@ -32,7 +66,7 @@ class WorkoutView extends React.Component {
                 distance: builder.getEstimatedDistancePretty(),
                 avg_pace: avg_pace,
                 sport_type: builder.getSportType(),
-                time_series_data: builder.getInterval().getTimeSeries(),
+                time_series_data: this.getTimeSeries(builder.getInterval()),
                 time_in_zones_data: time_in_zones_data,
                 workout_steps: workout_steps,
                 workout_pretty: builder.getPrettyPrint(),
@@ -49,7 +83,7 @@ class WorkoutView extends React.Component {
                 avg_power: 0,
                 distance: "",
                 avg_pace: "",
-                sport_type: Model.SportType.Bike,
+                sport_type: Core.SportType.Bike,
                 time_series_data: [],
                 time_in_zones_data: [],
                 workout_steps: [],
@@ -64,7 +98,7 @@ class WorkoutView extends React.Component {
         this.renderCharts(new_state);
     }
     renderPower() {
-        if (this.state.sport_type == Model.SportType.Bike) {
+        if (this.state.sport_type == Core.SportType.Bike) {
             return (React.createElement("tr", null,
                 React.createElement("td", null, "Average Power"),
                 React.createElement("td", null, this.state.avg_power)));
@@ -79,7 +113,7 @@ class WorkoutView extends React.Component {
             React.createElement("td", null, this.state.distance)));
     }
     renderPace() {
-        if (this.state.sport_type == Model.SportType.Run) {
+        if (this.state.sport_type == Core.SportType.Run) {
             return (React.createElement("tr", null,
                 React.createElement("td", null, "Pace"),
                 React.createElement("td", null, this.state.avg_pace)));

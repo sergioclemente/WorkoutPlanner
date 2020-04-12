@@ -1,5 +1,7 @@
 "use strict";
+const Core = require("./core");
 const Model = require("./model");
+const Visitor = require("./visitor");
 var zlib = require('zlib');
 var UI;
 (function (UI) {
@@ -330,7 +332,7 @@ var UI;
         }
         createUserProfile() {
             if (this.validate()) {
-                let result = new Model.UserProfile(parseInt(this.ftp_watts), this.t_pace, parseInt(this.swim_ftp), this.swim_css, this.email);
+                let result = new Core.UserProfile(parseInt(this.ftp_watts), this.t_pace, parseInt(this.swim_ftp), this.swim_css, this.email);
                 result.setEfficiencyFactor(parseFloat(this.efficiency_factor));
                 return result;
             }
@@ -349,7 +351,7 @@ var UI;
             }
         }
         getDominantUnit() {
-            return Model.DominantUnitVisitor.computeIntensity(this.createWorkoutBuilder().getInterval());
+            return Visitor.DominantUnitVisitor.computeIntensity(this.createWorkoutBuilder().getInterval());
         }
     }
     UI.QueryParams = QueryParams;
@@ -406,5 +408,26 @@ var UI;
         }
     }
     UI.ClipboardHelper = ClipboardHelper;
+    class SportTypeHelper {
+        static convertToString(sportType) {
+            if (sportType == Core.SportType.Bike) {
+                return "Bike";
+            }
+            else if (sportType == Core.SportType.Run) {
+                return "Run";
+            }
+            else if (sportType == Core.SportType.Swim) {
+                return "Swim";
+            }
+            else if (sportType == Core.SportType.Other) {
+                return "Other";
+            }
+            else {
+                console.assert(false);
+                return "";
+            }
+        }
+    }
+    UI.SportTypeHelper = SportTypeHelper;
 })(UI || (UI = {}));
 module.exports = UI;

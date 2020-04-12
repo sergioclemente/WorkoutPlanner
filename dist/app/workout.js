@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
 const UI = require("../ui");
-const Model = require("../model");
+const Core = require("../core");
 const user_settings_1 = require("./user_settings");
 const workout_input_1 = require("./workout_input");
 const workout_view_1 = require("./workout_view");
@@ -17,8 +17,8 @@ class Workout extends React.Component {
         this.params.workout_text = workout_text;
         this.params.workout_title = workout_title;
         let dominant_unit = this.params.getDominantUnit();
-        if (dominant_unit != Model.IntensityUnit.Unknown &&
-            dominant_unit != Model.IntensityUnit.IF) {
+        if (dominant_unit != Core.IntensityUnit.Unknown &&
+            dominant_unit != Core.IntensityUnit.IF) {
             let input = this.refs['input'];
             input.setOutputUnit(dominant_unit);
         }

@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 import * as UI from '../ui';
-import * as Model from '../model';
+import * as Core from '../core';
+import * as Visitor from '../visitor';
 
 export default class WorkoutView extends React.Component<any, any> {
 	constructor(params: any) {
@@ -11,11 +12,53 @@ export default class WorkoutView extends React.Component<any, any> {
 		this.state = this.getState(UI.QueryParams.createCopy(params));
 	}
 
+	// TODO: Clean this dupe
+	getTimeInZones(sportType: Core.SportType, intervals: Core.Interval) {
+		var zv = new Visitor.ZonesVisitor(sportType);
+		Visitor.VisitorHelper.visitAndFinalize(zv, intervals);
+		return zv.getTimeInZones();
+	}
+
+	getTimeSeries(intervals: Core.Interval): any {
+		var pv = new Visitor.DataPointVisitor();
+
+		Visitor.VisitorHelper.visitAndFinalize(pv, intervals);
+
+		// - Massaging the time component
+		var list = pv.data.map(function (item) {
+			return {
+				x: item.x.getSeconds() / 60,
+				y: Math.round(item.y.getValue() * 100),
+				tag: item.tag
+			}
+		});
+
+		// Separate into one list per tag
+		var tagToPoints = {};
+		var lastItemTag = null;
+		for (let i = 0; i < list.length; ++i) {
+			let item = list[i];
+			if (tagToPoints[item.tag] == null) {
+				tagToPoints[item.tag] = [];
+			}
+			if (lastItemTag != null) {
+				if (item.tag != lastItemTag) {
+					tagToPoints[lastItemTag].push({ x: item.x, y: 0 });
+					tagToPoints[item.tag].push({ x: item.x, y: 0 })
+				}
+			}
+			tagToPoints[item.tag].push(item);
+			lastItemTag = item.tag;
+		}
+
+		return tagToPoints;
+	}
+
 	getState(params: UI.QueryParams): any {
 		try {
 			var builder = params.createWorkoutBuilder();
 
-			var time_in_zones_data = builder.getInterval().getTimeInZones(builder.getSportType()).map(
+			var time_in_zones_data = this.getTimeInZones(builder.getSportType(), builder.getInterval()).map(
 				function (zone) {
 					return {
 						y: zone.duration.getSeconds(),
@@ -25,11 +68,11 @@ export default class WorkoutView extends React.Component<any, any> {
 				}
 			);
 
-			var workout_steps = builder.getInterval().getIntervals().map(function (value: Model.Interval, index: number) {
+			var workout_steps = builder.getInterval().getIntervals().map(function (value: Core.Interval, index: number) {
 				return builder.getIntervalPretty(value, params.should_round == "true");
 			}.bind(this));
 
-			var avg_pace = builder.getSportType() == Model.SportType.Run ?
+			var avg_pace = builder.getSportType() == Core.SportType.Run ?
 				builder.getAveragePace() : "";
 
 			return (
@@ -42,7 +85,7 @@ export default class WorkoutView extends React.Component<any, any> {
 					distance: builder.getEstimatedDistancePretty(),
 					avg_pace: avg_pace,
 					sport_type: builder.getSportType(),
-					time_series_data: builder.getInterval().getTimeSeries(),
+					time_series_data: this.getTimeSeries(builder.getInterval()),
 					time_in_zones_data: time_in_zones_data,
 					workout_steps: workout_steps,
 					workout_pretty: builder.getPrettyPrint(),
@@ -60,7 +103,7 @@ export default class WorkoutView extends React.Component<any, any> {
 					avg_power: 0,
 					distance: "",
 					avg_pace: "",
-					sport_type: Model.SportType.Bike,
+					sport_type: Core.SportType.Bike,
 					time_series_data: [],
 					time_in_zones_data: [],
 					workout_steps: [],
@@ -83,7 +126,7 @@ export default class WorkoutView extends React.Component<any, any> {
 	}
 
 	renderPower() {
-		if (this.state.sport_type == Model.SportType.Bike) {
+		if (this.state.sport_type == Core.SportType.Bike) {
 			return (<tr>
 				<td>Average Power</td>
 				<td>{this.state.avg_power}</td>
@@ -101,7 +144,7 @@ export default class WorkoutView extends React.Component<any, any> {
 	}
 
 	renderPace() {
-		if (this.state.sport_type == Model.SportType.Run) {
+		if (this.state.sport_type == Core.SportType.Run) {
 			return (<tr>
 				<td>Pace</td>
 				<td>{this.state.avg_pace}</td>

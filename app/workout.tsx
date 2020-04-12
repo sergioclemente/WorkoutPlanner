@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as UI from '../ui';
-import * as Model from '../model';
+import * as Core from '../core';
 import UserSettings from './user_settings';
 import WorkoutInput from './workout_input';
 import WorkoutView from './workout_view';
@@ -13,16 +13,16 @@ export default class Workout extends React.Component<any, any> {
 		this.params = UI.QueryParams.createCopy(props);
 	}
 
-	_onWorkoutInputChanged(sportType: Model.SportType, outputUnit: Model.IntensityUnit, workout_title: string, workout_text: string) {
+	_onWorkoutInputChanged(sportType: Core.SportType, outputUnit: Core.IntensityUnit, workout_title: string, workout_text: string) {
 		this.params.sport_type = sportType.toString();
 		this.params.output_unit = outputUnit.toString();
 		this.params.workout_text = workout_text;
 		this.params.workout_title = workout_title;
 
-		let dominant_unit : Model.IntensityUnit = this.params.getDominantUnit();
+		let dominant_unit : Core.IntensityUnit = this.params.getDominantUnit();
 		// Don't override the unit if its IF since its too generic.
-		if (dominant_unit != Model.IntensityUnit.Unknown &&
-			dominant_unit != Model.IntensityUnit.IF) {
+		if (dominant_unit != Core.IntensityUnit.Unknown &&
+			dominant_unit != Core.IntensityUnit.IF) {
 			let input: WorkoutInput = this.refs['input'] as WorkoutInput;
 			input.setOutputUnit(dominant_unit);
 		}

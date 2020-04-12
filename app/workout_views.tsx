@@ -6,7 +6,7 @@ import { Table, Column, Cell } from 'fixed-data-table';
 import Select from './select';
 import SelectOption from './select_option';
 import * as UI from '../ui';
-import * as Model from '../model';
+import * as Core from '../core';
 
 class TitleCell extends React.Component<any, any> {
 	render() {
@@ -22,8 +22,8 @@ class TitleCell extends React.Component<any, any> {
 
 class SportTypeCell extends React.Component<any, any> {
 	render() {
-		let sportType: Model.SportType = this.props.data[this.props.rowIndex][this.props.field];
-		let sportTypeString: string = Model.SportTypeHelper.convertToString(sportType);
+		let sportType: Core.SportType = this.props.data[this.props.rowIndex][this.props.field];
+		let sportTypeString: string = UI.SportTypeHelper.convertToString(sportType);
 		return (
 			<Cell {...this.props}>
 				{sportTypeString}
@@ -52,12 +52,12 @@ class TagsCell extends React.Component<any, any> {
 class DurationCell extends React.Component<any, any> {
 	render() {
 		let duration_sec = this.props.data[this.props.rowIndex][this.props.field];
-		let duration = new Model.Duration(Model.TimeUnit.Seconds, duration_sec, duration_sec, 0);
+		let duration = new Core.Duration(Core.TimeUnit.Seconds, duration_sec, duration_sec, 0);
 		let time_component = duration.getTimeComponents();
 		let format_str = "";
 		// Do even a shorter version of duration.toStringShort().
 		if (time_component.hours > 0) {
-			format_str = Model.MyMath.round10(time_component.hours + time_component.minutes/60.0, -1) + "hr"
+			format_str = Core.MyMath.round10(time_component.hours + time_component.minutes/60.0, -1) + "hr"
 		} else {
 			format_str = time_component.minutes + "min";
 		}
@@ -145,7 +145,7 @@ export default class WorkoutViews extends React.Component<any, any> {
 		let sportTypeComp: Select = this.refs["sportType"] as Select;
 		let filterTextComp: HTMLInputElement = this.refs["text"] as HTMLInputElement;
 
-		var sportTypeEnum: Model.SportType = parseInt(sportTypeComp.getSelectedValue());
+		var sportTypeEnum: Core.SportType = parseInt(sportTypeComp.getSelectedValue());
 		var filterText = filterTextComp.value;
 		var filteredRows = [];
 
@@ -170,7 +170,7 @@ export default class WorkoutViews extends React.Component<any, any> {
 
 		for (let i = 0; i < this._rows.length; i++) {
 			var row = this._rows[i];
-			if ((sportTypeEnum == Model.SportType.Unknown || row.sport_type == sportTypeEnum)
+			if ((sportTypeEnum == Core.SportType.Unknown || row.sport_type == sportTypeEnum)
 				&& shouldIncludeInResult(row)) {
 				filteredRows.push(row);
 			}
@@ -190,11 +190,11 @@ export default class WorkoutViews extends React.Component<any, any> {
 		var { filteredRows } = this.state;
 		return (<div>Workouts
 			<Select ref="sportType" defaultValue={this.props.sport_type} onChange={e => this._onSportTypeChange(e)}>
-				<SelectOption value={Model.SportType.Unknown}>All</SelectOption>
-				<SelectOption value={Model.SportType.Swim}>Swim</SelectOption>
-				<SelectOption value={Model.SportType.Bike}>Bike</SelectOption>
-				<SelectOption value={Model.SportType.Run}>Run</SelectOption>
-				<SelectOption value={Model.SportType.Other}>Other</SelectOption>
+				<SelectOption value={Core.SportType.Unknown}>All</SelectOption>
+				<SelectOption value={Core.SportType.Swim}>Swim</SelectOption>
+				<SelectOption value={Core.SportType.Bike}>Bike</SelectOption>
+				<SelectOption value={Core.SportType.Run}>Run</SelectOption>
+				<SelectOption value={Core.SportType.Other}>Other</SelectOption>
 			</Select> <br />
 			Filter: <input ref="text" value={this._params.getTitle()} onChange={e => this._onTextFilterChange(e)}></input>
 			<Table
