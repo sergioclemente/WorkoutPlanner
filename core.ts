@@ -561,10 +561,10 @@ module Model {
 			return res.getWorkDuration();
 		}
 		getRestDuration(): Duration {
-			var durations = this.intervals.map(function (cur) {
+			let durations = this.intervals.map(function (cur) {
 				return cur.getRestDuration();
 			});
-			return Duration.combineArray(durations);
+			return Duration.combineArray(durations); 
 		}
 		getTotalDuration(): Duration {
 			return Duration.combine(this.getWorkDuration(), this.getRestDuration());
@@ -596,6 +596,14 @@ module Model {
 
 		getWorkDuration(): Duration {
 			var baseDuration = super.getWorkDuration();
+			var durationRaw = baseDuration.getValue() * this.repeatCount;
+			var durationSecs = baseDuration.getSeconds() * this.repeatCount;
+			var durationMiles = baseDuration.getDistanceInMiles() * this.repeatCount;
+			return new Duration(baseDuration.getUnit(), durationRaw, durationSecs, durationMiles);
+		}
+
+		getRestDuration(): Duration {
+			var baseDuration = super.getRestDuration();
 			var durationRaw = baseDuration.getValue() * this.repeatCount;
 			var durationSecs = baseDuration.getSeconds() * this.repeatCount;
 			var durationMiles = baseDuration.getDistanceInMiles() * this.repeatCount;

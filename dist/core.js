@@ -476,7 +476,7 @@ var Model;
             return res.getWorkDuration();
         }
         getRestDuration() {
-            var durations = this.intervals.map(function (cur) {
+            let durations = this.intervals.map(function (cur) {
                 return cur.getRestDuration();
             });
             return Duration.combineArray(durations);
@@ -506,6 +506,13 @@ var Model;
         }
         getWorkDuration() {
             var baseDuration = super.getWorkDuration();
+            var durationRaw = baseDuration.getValue() * this.repeatCount;
+            var durationSecs = baseDuration.getSeconds() * this.repeatCount;
+            var durationMiles = baseDuration.getDistanceInMiles() * this.repeatCount;
+            return new Duration(baseDuration.getUnit(), durationRaw, durationSecs, durationMiles);
+        }
+        getRestDuration() {
+            var baseDuration = super.getRestDuration();
             var durationRaw = baseDuration.getValue() * this.repeatCount;
             var durationSecs = baseDuration.getSeconds() * this.repeatCount;
             var durationMiles = baseDuration.getDistanceInMiles() * this.repeatCount;

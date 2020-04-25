@@ -462,7 +462,7 @@ var Model;
             return title;
         }
         escapeString(input) {
-            return input.replace("\"", "\\\"");
+            return input.replace(/"/g, "");
         }
         visitSimpleInterval(interval) {
             var duration = interval.getWorkDuration().getSeconds();
@@ -490,7 +490,16 @@ var Model;
                 this.content += `\t\t<Cooldown Duration="${duration}" PowerLow="${intensityStart}" PowerHigh="${intensityEnd}"/>\n`;
             }
         }
+        visitRepeatInterval(interval) {
+            if (interval.getIntervals().length > 2 ||
+                interval.getIntervals()[0].getIntensity().getValue() > interval.getIntervals()[1].getIntensity().getValue()) {
+            }
+            else {
+                super.visitRepeatInterval(interval);
+            }
+        }
         getContent() {
+            console.log(this.content);
             return this.content;
         }
     }

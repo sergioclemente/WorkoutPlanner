@@ -96,3 +96,5 @@
 {output_unit=w}
 (10s, change to dd3)
 -- EOT
+5[(1min, double arm, 15s)]
+-- EOT

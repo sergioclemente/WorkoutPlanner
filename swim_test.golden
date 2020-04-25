@@ -64,13 +64,13 @@ ArrayInterval(
 )
 IF (Avg): 1
 TSS: 9.4
-TSS2: 10.3
+TSS2: 11.1
 Dominant Unit: %
 Pretty Print:
 	* 2 x 200 neg split on 2'50'' off 3'20''
 Duration Unit: yards
 Yards: 400
-Duration (Sec): 370
+Duration (Sec): 400
 ----------------------------
 Input: 
 (500y, *, free)
@@ -660,4 +660,23 @@ Pretty Print:
 	* 10'' change to dd3
 Duration Unit: s
 Duration (Sec): 10
+----------------------------
+Input: 
+5[(1min, double arm, 15s)]
+-- EOTNormalized: 
+5[(1min, double arm, 15sec)]
+AST: 
+ArrayInterval(
+	RepeatInterval(count=5, 
+		SimpleInterval(1min, , double arm, 15sec)
+	)
+)
+IF (Avg): 0.01
+TSS: 0
+TSS2: 0
+Dominant Unit: %
+Pretty Print:
+	* 5 x 1' double arm w/ 15'' rest
+Duration Unit: min
+Duration (Sec): 375
 ----------------------------

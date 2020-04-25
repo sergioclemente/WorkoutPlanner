@@ -536,7 +536,7 @@ module Model {
 			return title;
 		}
 		escapeString(input: string) {
-			return input.replace("\"", "\\\"");
+			return input.replace(/"/g, "")
 		}
 		visitSimpleInterval(interval: SimpleInterval) {
 			var duration = interval.getWorkDuration().getSeconds();
@@ -563,7 +563,16 @@ module Model {
 				this.content += `\t\t<Cooldown Duration="${duration}" PowerLow="${intensityStart}" PowerHigh="${intensityEnd}"/>\n`;
 			}
 		}
+		visitRepeatInterval(interval: RepeatInterval) {
+			if (interval.getIntervals().length > 2 ||
+			    interval.getIntervals()[0].getIntensity().getValue() > interval.getIntervals()[1].getIntensity().getValue())	{
+					// new behavior
+			} else {
+				super.visitRepeatInterval(interval);
+			}
+		}
 		getContent(): string {
+			console.log(this.content)
 			return this.content;
 		}
 	}
