@@ -536,7 +536,7 @@ module Model {
 			return title;
 		}
 		escapeString(input: string) {
-			return input.replace("\"", "\\\"");
+			return input.replace(/"/g, "")
 		}
 		visitSimpleInterval(interval: SimpleInterval) {
 			var duration = interval.getWorkDuration().getSeconds();
@@ -563,6 +563,9 @@ module Model {
 				this.content += `\t\t<Cooldown Duration="${duration}" PowerLow="${intensityStart}" PowerHigh="${intensityEnd}"/>\n`;
 			}
 		}
+		// visitRepeatInterval(interval: RepeatInterval) {
+			
+		// }
 		getContent(): string {
 			return this.content;
 		}

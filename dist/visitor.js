@@ -462,7 +462,7 @@ var Model;
             return title;
         }
         escapeString(input) {
-            return input.replace("\"", "\\\"");
+            return input.replace(/"/g, "");
         }
         visitSimpleInterval(interval) {
             var duration = interval.getWorkDuration().getSeconds();
