@@ -542,7 +542,7 @@ module Model {
 			var duration = interval.getWorkDuration().getSeconds();
 			var title = this.escapeString(this.getIntervalTitle(interval));
 			if (interval.getIntensity().getOriginalUnit() == IntensityUnit.FreeRide) {
-				this.content += `\t\t<FreeRide Duration="${duration}"  Pace="0">\n`;//TODO Configure PACE
+				this.content += `\t\t<FreeRide Duration="${duration}" Pace="0">\n`;//TODO Configure PACE
 				this.content += `\t\t\t<textevent timeoffset="0" message="${title}"/>\n`;
 				this.content += `\t\t</FreeRide>\n`;
 			} else {
