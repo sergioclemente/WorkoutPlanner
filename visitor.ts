@@ -465,9 +465,9 @@ module Model {
 			if (interval.getRestDuration().getValue() > 0) {
 				// Rest interval
 				this.initX(interval.getRestDuration());
-				this.data.push(new Point(this.x, Intensity.ZeroIntensity, title, this.getIntervalTag(interval)));
+				this.data.push(new Point(this.x, Intensity.ZeroIntensity, title, "rest"));
 				this.incrementX(interval.getRestDuration());
-				this.data.push(new Point(this.x, Intensity.ZeroIntensity, title, this.getIntervalTag(interval)));
+				this.data.push(new Point(this.x, Intensity.ZeroIntensity, title, "rest"));
 			}
 		}
 		visitRampBuildInterval(interval: RampBuildInterval) {

@@ -1,0 +1,126 @@
+Input: (5min, 100, work, 10s)
+(5min, *, 20s)
+-- EOT
+[
+    {
+        "x": {
+            "unit": 13,
+            "value": 0,
+            "estimatedDistanceInMiles": 0,
+            "estimatedDurationInSeconds": 0
+        },
+        "y": {
+            "ifValue": 1,
+            "originalUnit": 0,
+            "originalValue": 1
+        },
+        "label": "5' work @ 100% w/ 10'' rest",
+        "tag": "if"
+    },
+    {
+        "x": {
+            "unit": 13,
+            "value": 5,
+            "estimatedDistanceInMiles": 0.20053475935828874,
+            "estimatedDurationInSeconds": 300
+        },
+        "y": {
+            "ifValue": 1,
+            "originalUnit": 0,
+            "originalValue": 1
+        },
+        "label": "5' work @ 100% w/ 10'' rest",
+        "tag": "if"
+    },
+    {
+        "x": {
+            "unit": 13,
+            "value": 5,
+            "estimatedDistanceInMiles": 0.20053475935828874,
+            "estimatedDurationInSeconds": 300
+        },
+        "y": {
+            "ifValue": 0,
+            "originalUnit": 0,
+            "originalValue": 0
+        },
+        "label": "5' work @ 100% w/ 10'' rest",
+        "tag": "rest"
+    },
+    {
+        "x": {
+            "unit": 12,
+            "value": 310,
+            "estimatedDistanceInMiles": 0.20053475935828874,
+            "estimatedDurationInSeconds": 310
+        },
+        "y": {
+            "ifValue": 0,
+            "originalUnit": 0,
+            "originalValue": 0
+        },
+        "label": "5' work @ 100% w/ 10'' rest",
+        "tag": "rest"
+    },
+    {
+        "x": {
+            "unit": 12,
+            "value": 310,
+            "estimatedDistanceInMiles": 0.20053475935828874,
+            "estimatedDurationInSeconds": 310
+        },
+        "y": {
+            "ifValue": 0.5,
+            "originalUnit": 11,
+            "originalValue": 0
+        },
+        "label": "5'",
+        "tag": "free-ride"
+    },
+    {
+        "x": {
+            "unit": 12,
+            "value": 610,
+            "estimatedDistanceInMiles": 0.30080213903743314,
+            "estimatedDurationInSeconds": 610
+        },
+        "y": {
+            "ifValue": 0.5,
+            "originalUnit": 11,
+            "originalValue": 0
+        },
+        "label": "5'",
+        "tag": "free-ride"
+    },
+    {
+        "x": {
+            "unit": 12,
+            "value": 610,
+            "estimatedDistanceInMiles": 0.30080213903743314,
+            "estimatedDurationInSeconds": 610
+        },
+        "y": {
+            "ifValue": 0,
+            "originalUnit": 0,
+            "originalValue": 0
+        },
+        "label": "5'",
+        "tag": "rest"
+    },
+    {
+        "x": {
+            "unit": 12,
+            "value": 630,
+            "estimatedDistanceInMiles": 0.30080213903743314,
+            "estimatedDurationInSeconds": 630
+        },
+        "y": {
+            "ifValue": 0,
+            "originalUnit": 0,
+            "originalValue": 0
+        },
+        "label": "5'",
+        "tag": "rest"
+    }
+]
+----------------------------

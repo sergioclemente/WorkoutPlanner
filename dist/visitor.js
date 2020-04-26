@@ -397,9 +397,9 @@ var Model;
             this.data.push(new Point(this.x, interval.getIntensity(), title, this.getIntervalTag(interval)));
             if (interval.getRestDuration().getValue() > 0) {
                 this.initX(interval.getRestDuration());
-                this.data.push(new Point(this.x, core_1.Intensity.ZeroIntensity, title, this.getIntervalTag(interval)));
+                this.data.push(new Point(this.x, core_1.Intensity.ZeroIntensity, title, "rest"));
                 this.incrementX(interval.getRestDuration());
-                this.data.push(new Point(this.x, core_1.Intensity.ZeroIntensity, title, this.getIntervalTag(interval)));
+                this.data.push(new Point(this.x, core_1.Intensity.ZeroIntensity, title, "rest"));
             }
         }
         visitRampBuildInterval(interval) {

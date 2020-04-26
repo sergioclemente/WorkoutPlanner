@@ -20,31 +20,16 @@ function handleExistentFile(req, res, fs, filename) {
     if (stat.isDirectory()) {
         filename += '/index.html';
     }
-    let req_mod_date = req.headers["if-modified-since"];
-    let mtime = stat.mtime;
-    if (req_mod_date != null) {
-        req_mod_date = new Date(req_mod_date);
-        if (req_mod_date.toUTCString() == mtime.toUTCString()) {
-            console.log("Serving " + filename + " from cache. FileTS=" + mtime.toUTCString() + " HeaderTS=" + req_mod_date.toUTCString());
-            res.writeHead(304, {
-                "Last-Modified": mtime.toUTCString()
-            });
-            res.end();
-            return;
-        }
-    }
     const raw = fs.createReadStream(filename);
     if (/\bdeflate\b/.test(accept_encoding)) {
         res.writeHead(200, {
             'Content-Encoding': 'deflate',
-            'Last-Modified': mtime.toUTCString()
         });
         raw.pipe(zlib.createDeflate()).pipe(res);
     }
     else if (/\bgzip\b/.test(accept_encoding)) {
         res.writeHead(200, {
             'Content-Encoding': 'gzip',
-            'Last-Modified': mtime.toUTCString()
         });
         raw.pipe(zlib.createGzip()).pipe(res);
     }

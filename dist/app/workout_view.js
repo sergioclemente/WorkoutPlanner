@@ -18,9 +18,15 @@ class WorkoutView extends React.Component {
         var pv = new Visitor.DataPointVisitor();
         Visitor.VisitorHelper.visitAndFinalize(pv, intervals);
         var list = pv.data.map(function (item) {
+            let duration = item.x;
+            let intensity = item.y;
+            let y = intensity.getValue();
+            if (Core.Intensity.equals(intensity, Core.Intensity.ZeroIntensity)) {
+                y = 0.4;
+            }
             return {
-                x: item.x.getSeconds() / 60,
-                y: Math.round(item.y.getValue() * 100),
+                x: duration.getSeconds() / 60,
+                y: Math.round(y * 100),
                 tag: item.tag
             };
         });
@@ -139,6 +145,7 @@ class WorkoutView extends React.Component {
                 type: "area",
                 fillOpacity: 0.3,
                 markerType: "none",
+                bevelEnabled: true,
                 dataPoints: state.time_series_data[key]
             });
         }
@@ -159,7 +166,7 @@ class WorkoutView extends React.Component {
                 axisY: {
                     title: "intensity",
                     labelAngle: 45,
-                    minimum: 40,
+                    minimum: 30,
                     suffix: "%",
                     gridThickness: 0,
                 },

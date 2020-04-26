@@ -26,9 +26,17 @@ export default class WorkoutView extends React.Component<any, any> {
 
 		// - Massaging the time component
 		var list = pv.data.map(function (item) {
+			let duration = item.x;
+			let intensity = item.y;
+			let y = intensity.getValue();
+
+			// If its Zero, lets add as a dummy intensity.
+			if (Core.Intensity.equals(intensity, Core.Intensity.ZeroIntensity)) {
+				y = 0.4;
+			}
 			return {
-				x: item.x.getSeconds() / 60,
-				y: Math.round(item.y.getValue() * 100),
+				x: duration.getSeconds() / 60,
+				y: Math.round(y * 100),
 				tag: item.tag
 			}
 		});
@@ -177,6 +185,7 @@ export default class WorkoutView extends React.Component<any, any> {
 					type: "area",
 					fillOpacity: 0.3,
 					markerType: "none",
+					bevelEnabled: true,
 					dataPoints: state.time_series_data[key]
 				}
 			);
@@ -201,7 +210,7 @@ export default class WorkoutView extends React.Component<any, any> {
 				axisY: {
 					title: "intensity",
 					labelAngle: 45,
-					minimum: 40,
+					minimum: 30,
 					suffix: "%",
 					gridThickness: 0,
 				},

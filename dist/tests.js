@@ -348,7 +348,7 @@ describe('Golden Test', function () {
         GoldenTest(of_run, "./run_test.input", "./run_test.golden");
     });
 });
-function GoldenTestPlayer(of, input_file, golden_file) {
+function GoldenTestGeneric(of, input_file, golden_file, callback) {
     let fs = require('fs');
     let input = fs.readFileSync(input_file).toString();
     let test_cases = input.toString().split("-- EOT\n");
@@ -359,7 +359,7 @@ function GoldenTestPlayer(of, input_file, golden_file) {
     let final_output = "";
     for (let i = 0; i < test_cases.length; ++i) {
         let input = test_cases[i];
-        let actual_output = GoldenTestCasePlayer(of, input);
+        let actual_output = callback(of, input);
         if (!generate_golden) {
             expect_eq_str(expected_outputs[i], actual_output);
         }
@@ -397,7 +397,7 @@ function GoldenTestCasePlayer(of, input) {
 }
 describe('Golden Test Player', function () {
     it('swim', function () {
-        GoldenTestPlayer(of_swim, "./swim_player.input", "./swim_player.golden");
+        GoldenTestGeneric(of_swim, "./swim_player.input", "./swim_player.golden", GoldenTestCasePlayer);
     });
 });
 describe('NumberAndUnitParser', function () {
@@ -447,58 +447,26 @@ describe('moving average', function () {
 });
 describe('File Generation', function () {
     it('Golden Files', function () {
-        GoldenTestFileGeneration(of_bike, "file_generation.input", "file_generation.golden");
+        GoldenTestGeneric(of_bike, "file_generation.input", "file_generation.golden", GoldenTestFileGenerationTestCase);
     });
 });
-function GoldenTestFileGeneration(of, input_file, golden_file) {
-    let fs = require('fs');
-    let input = fs.readFileSync(input_file).toString();
-    let test_cases = input.toString().split("-- EOT\n");
-    let separator = "----------------------------\n";
-    let expected_output = fs.readFileSync(golden_file).toString();
-    let expected_outputs = expected_output.split(separator);
-    let generate_golden = false;
-    let final_output = "";
-    for (let i = 0; i < test_cases.length; ++i) {
-        let input = test_cases[i];
-        let actual_output = GoldenTestFileGenerationTestCase(of, input);
-        if (!generate_golden) {
-            expect_eq_str(expected_outputs[i], actual_output);
-        }
-        final_output += actual_output;
-        final_output += separator;
-    }
-    if (generate_golden) {
-        fs.writeFileSync(golden_file, final_output);
-    }
-}
 function GoldenTestFileGenerationTestCase(of, input) {
     let interval = Model.IntervalParser.parse(of, input);
     let result = "";
     result += `Input: ${input}\n`;
     {
-        let zwift = new Visitor.ZwiftDataVisitor("untitled_workout");
-        Visitor.VisitorHelper.visitAndFinalize(zwift, interval);
-        result += "Zwift: \n";
-        result += zwift.getContent();
-        result += "\n";
-    }
-    {
-        let mrc = new Visitor.MRCCourseDataVisitor("untitled_workout");
-        Visitor.VisitorHelper.visitAndFinalize(mrc, interval);
-        result += "MRC: \n";
-        result += mrc.getContent();
-        result += "\n";
-    }
-    {
-        let ppsmrx = new Visitor.PPSMRXCourseDataVisitor("untitled_workout");
-        Visitor.VisitorHelper.visitAndFinalize(ppsmrx, interval);
-        result += "PPSMRX: \n";
-        result += ppsmrx.getContent();
+        let data_point = new Visitor.DataPointVisitor();
+        Visitor.VisitorHelper.visitAndFinalize(data_point, interval);
+        result += JSON.stringify(data_point.data, undefined, 4);
         result += "\n";
     }
     return result;
 }
+describe('Data Point Visitor', function () {
+    it('Golden Files', function () {
+        GoldenTestGeneric(of_swim, "data_point.input", "data_point.golden", GoldenTestFileGenerationTestCase);
+    });
+});
 function computePower(input_workout, expected_np, expected_avg) {
     let np_visitor = new Visitor.NPVisitor();
     var interval = Model.IntervalParser.parse(of_bike, input_workout);
