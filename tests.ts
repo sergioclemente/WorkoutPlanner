@@ -267,136 +267,114 @@ describe('Player Helper', function () {
 	});
 });
 
+describe('Golden Test', function () {
+	it('swim', function () {
+		GoldenTestGeneric(of_swim, "./swim_test.input", "./swim_test.golden", GoldenTestCase);
+	});
+	it('bike', function () {
+		GoldenTestGeneric(of_bike, "./bike_test.input", "./bike_test.golden", GoldenTestCase);
+	});
+	it('run', function () {
+		GoldenTestGeneric(of_run, "./run_test.input", "./run_test.golden", GoldenTestCase);
+	});
+});
 
-// TODO: Refactor this function, its becoming a bit of a mess.
-function GoldenTest(of: any, input_file: string, golden_file: string) {
-	let fs = require('fs');
-	let input: string = fs.readFileSync(input_file).toString();
-	let test_cases = input.toString().split("-- EOT\n");
-	let separator = "----------------------------\n";
-	let expected_output: string = fs.readFileSync(golden_file).toString();
-	let expected_outputs: string[] = expected_output.split(separator);
-	// Set 'generate_golden' to true if you need to regenerate the files.
-	let generate_golden = false;
-	let final_output: string = "";
-	for (let i = 0; i < test_cases.length; ++i) {
-		let input = test_cases[i];
-		// Skip last one which is a blank.
-		// Extract name and output unit
-		let lines = input.split("\n");
-		let test_case = "";
-		let name = "";
-		let output_unit: Core.IntensityUnit = Core.IntensityUnit.Unknown;
-		// Extract the name and output_unit if any is provided.
-		for (let j = 0; j < lines.length; ++j) {
-			// If there is any parameter, process them.
-			if (lines[j].startsWith("{")) {
-				console.assert(lines[j].endsWith("}"));
-				let assignment = lines[j].slice(1, lines[j].length - 1).split("=");
-				switch (assignment[0]) {
-					case "name":
-						name = assignment[1];
-						break;
-					case "output_unit":
-						output_unit = Core.IntensityUnitHelper.toIntensityUnit(assignment[1]);
-						break;
-				}
-			} else {
-				if (test_case.length > 0) {
-					test_case += "\n";
-				}
-				test_case += lines[j];
+function GoldenTestCase(of: Core.ObjectFactory, input: string) : string {
+	// Skip last one which is a blank.
+	// Extract name and output unit
+	let lines = input.split("\n");
+	let test_case = "";
+	let name = "";
+	let output_unit: Core.IntensityUnit = Core.IntensityUnit.Unknown;
+	// Extract the name and output_unit if any is provided.
+	for (let j = 0; j < lines.length; ++j) {
+		// If there is any parameter, process them.
+		if (lines[j].startsWith("{")) {
+			console.assert(lines[j].endsWith("}"));
+			let assignment = lines[j].slice(1, lines[j].length - 1).split("=");
+			switch (assignment[0]) {
+				case "name":
+					name = assignment[1];
+					break;
+				case "output_unit":
+					output_unit = Core.IntensityUnitHelper.toIntensityUnit(assignment[1]);
+					break;
 			}
-		}
-
-		if (test_case.trim().length == 0) {
-			continue;
-		}
-		let builder = new Model.WorkoutBuilder(up, of.getSportType(), output_unit)
-		builder.withDefinition("title", test_case);
-
-		let interval = builder.getInterval();
-		let actual_output = "";
-		if (name.length > 0) {
-			actual_output += string_format("Name: {0}\n", name);
-		}
-		actual_output += "Input: \n";
-		actual_output += test_case;
-		let normalized_text = Model.IntervalParser.normalize(of, test_case);
-		actual_output += "Normalized: \n";
-		actual_output += normalized_text;
-		actual_output += "\n";
-		actual_output += "AST: \n";
-		actual_output += Visitor.TreePrinterVisitor.Print(interval);
-		actual_output += string_format("IF (Avg): {0}\n", interval.getIntensity().getValue());
-		actual_output += string_format("TSS2: {0}\n", builder.getTSS2());
-
-		// Get the dominant unit and pretty print.
-		let dominant_intensity_unit = Visitor.DominantUnitVisitor.computeIntensity(interval);
-		if (dominant_intensity_unit != Core.IntensityUnit.Unknown || output_unit != Core.IntensityUnit.Unknown) {
-			let presentation_unit: Core.IntensityUnit;
-			if (output_unit != Core.IntensityUnit.Unknown) {
-				presentation_unit = output_unit;
-				actual_output += string_format("Output Unit: {0}\n", Core.IntensityUnitHelper.toString(output_unit));
-			} else {
-				presentation_unit = dominant_intensity_unit;
-				actual_output += string_format("Dominant Unit: {0}\n", Core.IntensityUnitHelper.toString(dominant_intensity_unit));
+		} else {
+			if (test_case.length > 0) {
+				test_case += "\n";
 			}
-
-			var workout_steps = interval.getIntervals().map(function (interval_1: any, index: number) {
-				return "\t* " + Visitor.WorkoutTextVisitor.getIntervalTitle(interval_1, of.getUserProfile(), of.getSportType(), presentation_unit, /*round_values=*/false);
-			}.bind(this));
-			actual_output += "Pretty Print:\n";
-			actual_output += workout_steps.join("\n") + "\n";
+			test_case += lines[j];
 		}
-		let duration_unit = Visitor.DominantUnitVisitor.computeDuration(interval);
-		if (duration_unit != Core.DistanceUnit.Unknown) {
-			actual_output += string_format("Duration Unit: {0}\n", Core.DurationUnitHelper.toString(duration_unit));
-			if (duration_unit == Core.DistanceUnit.Yards) {
-				actual_output += string_format("Yards: {0}\n", interval.getTotalDuration().getValueInUnit(Core.DistanceUnit.Yards));
-			} else if (duration_unit == Core.DistanceUnit.Meters) {
-				actual_output += string_format("Meters: {0}\n", interval.getTotalDuration().getValueInUnit(Core.DistanceUnit.Meters));
-			} else if (duration_unit == Core.DistanceUnit.Kilometers) {
-				actual_output += string_format("Kilometers: {0}\n", interval.getTotalDuration().getValueInUnit(Core.DistanceUnit.Kilometers));
-			} else {
-				if (dominant_intensity_unit != null && dominant_intensity_unit != Core.IntensityUnit.Unknown) {
-					if (of.getSportType() == Core.SportType.Run) {
-						if (dominant_intensity_unit == Core.IntensityUnit.Kmh ||
-							dominant_intensity_unit == Core.IntensityUnit.MinKm ||
-							dominant_intensity_unit == Core.IntensityUnit.Per400Meters) {
-							actual_output += string_format("Kilometers: {0}\n", interval.getWorkDuration().toStringDistance(Core.DistanceUnit.Kilometers));
-						} else {
-							actual_output += string_format("Miles: {0}\n", interval.getWorkDuration().toStringDistance(Core.DistanceUnit.Miles));
-						}
+	}
+
+	if (test_case.trim().length == 0) {
+		return "";
+	}
+	let builder = new Model.WorkoutBuilder(up, of.getSportType(), output_unit)
+	builder.withDefinition("title", test_case);
+
+	let interval = builder.getInterval();
+	let actual_output = "";
+	if (name.length > 0) {
+		actual_output += string_format("Name: {0}\n", name);
+	}
+	actual_output += "Input: \n";
+	actual_output += test_case;
+	let normalized_text = Model.IntervalParser.normalize(of, test_case);
+	actual_output += "Normalized: \n";
+	actual_output += normalized_text;
+	actual_output += "\n";
+	actual_output += "AST: \n";
+	actual_output += Visitor.TreePrinterVisitor.Print(interval);
+	actual_output += string_format("IF (Avg): {0}\n", interval.getIntensity().getValue());
+	actual_output += string_format("TSS2: {0}\n", builder.getTSS2());
+
+	// Get the dominant unit and pretty print.
+	let dominant_intensity_unit = Visitor.DominantUnitVisitor.computeIntensity(interval);
+	if (dominant_intensity_unit != Core.IntensityUnit.Unknown || output_unit != Core.IntensityUnit.Unknown) {
+		let presentation_unit: Core.IntensityUnit;
+		if (output_unit != Core.IntensityUnit.Unknown) {
+			presentation_unit = output_unit;
+			actual_output += string_format("Output Unit: {0}\n", Core.IntensityUnitHelper.toString(output_unit));
+		} else {
+			presentation_unit = dominant_intensity_unit;
+			actual_output += string_format("Dominant Unit: {0}\n", Core.IntensityUnitHelper.toString(dominant_intensity_unit));
+		}
+
+		var workout_steps = interval.getIntervals().map(function (interval_1: any, index: number) {
+			return "\t* " + Visitor.WorkoutTextVisitor.getIntervalTitle(interval_1, of.getUserProfile(), of.getSportType(), presentation_unit, /*round_values=*/false);
+		}.bind(this));
+		actual_output += "Pretty Print:\n";
+		actual_output += workout_steps.join("\n") + "\n";
+	}
+	let duration_unit = Visitor.DominantUnitVisitor.computeDuration(interval);
+	if (duration_unit != Core.DistanceUnit.Unknown) {
+		actual_output += string_format("Duration Unit: {0}\n", Core.DurationUnitHelper.toString(duration_unit));
+		if (duration_unit == Core.DistanceUnit.Yards) {
+			actual_output += string_format("Yards: {0}\n", interval.getTotalDuration().getValueInUnit(Core.DistanceUnit.Yards));
+		} else if (duration_unit == Core.DistanceUnit.Meters) {
+			actual_output += string_format("Meters: {0}\n", interval.getTotalDuration().getValueInUnit(Core.DistanceUnit.Meters));
+		} else if (duration_unit == Core.DistanceUnit.Kilometers) {
+			actual_output += string_format("Kilometers: {0}\n", interval.getTotalDuration().getValueInUnit(Core.DistanceUnit.Kilometers));
+		} else {
+			if (dominant_intensity_unit != null && dominant_intensity_unit != Core.IntensityUnit.Unknown) {
+				if (of.getSportType() == Core.SportType.Run) {
+					if (dominant_intensity_unit == Core.IntensityUnit.Kmh ||
+						dominant_intensity_unit == Core.IntensityUnit.MinKm ||
+						dominant_intensity_unit == Core.IntensityUnit.Per400Meters) {
+						actual_output += string_format("Kilometers: {0}\n", interval.getWorkDuration().toStringDistance(Core.DistanceUnit.Kilometers));
+					} else {
+						actual_output += string_format("Miles: {0}\n", interval.getWorkDuration().toStringDistance(Core.DistanceUnit.Miles));
 					}
 				}
 			}
 		}
+	}
 
-		actual_output += string_format("Duration (Sec): {0}\n", interval.getTotalDuration().getSeconds());
-		if (!generate_golden) {
-			expect_eq_str(expected_outputs[i], actual_output);
-		}
-		// final_output is used for writing to the golden_file
-		final_output += actual_output;
-		final_output += separator;
-	}
-	if (generate_golden) {
-		fs.writeFileSync(golden_file, final_output);
-	}
+	actual_output += string_format("Duration (Sec): {0}\n", interval.getTotalDuration().getSeconds());
+	return actual_output;
 }
-
-describe('Golden Test', function () {
-	it('swim', function () {
-		GoldenTest(of_swim, "./swim_test.input", "./swim_test.golden");
-	});
-	it('bike', function () {
-		GoldenTest(of_bike, "./bike_test.input", "./bike_test.golden");
-	});
-	it('run', function () {
-		GoldenTest(of_run, "./run_test.input", "./run_test.golden");
-	});
-});
 
 function GoldenTestGeneric(of: any, input_file: string, golden_file: string, callback: ( of: any, input: string ) => string) {
 	let fs = require('fs');
@@ -411,6 +389,10 @@ function GoldenTestGeneric(of: any, input_file: string, golden_file: string, cal
 		let input = test_cases[i];
 		let actual_output = callback(of, input);
 
+		if (actual_output.length == 0) {
+			continue;
+		}
+
 		if (!generate_golden) {
 			expect_eq_str(expected_outputs[i], actual_output);
 		}
@@ -424,7 +406,13 @@ function GoldenTestGeneric(of: any, input_file: string, golden_file: string, cal
 	}
 }
 
-function GoldenTestCasePlayer(of: Core.ObjectFactory, input: string) {
+describe('Golden Test Player', function () {
+	it('swim', function () {
+		GoldenTestGeneric(of_swim, "./swim_player.input", "./swim_player.golden", GoldenPlayerTestCase);
+	});
+});
+
+function GoldenPlayerTestCase(of: Core.ObjectFactory, input: string) : string {
 	// Skip last one which is a blank.
 	// Extract name and output unit
 	let lines = input.split("\n");
@@ -456,12 +444,6 @@ function GoldenTestCasePlayer(of: Core.ObjectFactory, input: string) {
 
 	return actual_output;
 }
-
-describe('Golden Test Player', function () {
-	it('swim', function () {
-		GoldenTestGeneric(of_swim, "./swim_player.input", "./swim_player.golden", GoldenTestCasePlayer);
-	});
-});
 
 describe('NumberAndUnitParser', function () {
 	it('Per400m', function () {
@@ -520,11 +502,17 @@ describe('moving average', function () {
 
 describe('File Generation', function () {
 	it('Golden Files', function () {
-		GoldenTestGeneric(of_bike, "file_generation.input", "file_generation.golden", GoldenTestFileGenerationTestCase);
+		GoldenTestGeneric(of_bike, "file_generation.input", "file_generation.golden", GoldenFileGenerationTestCase);
 	});
 });
 
-function GoldenTestFileGenerationTestCase(of: Core.ObjectFactory, input: string) : string {
+describe('Data Point Visitor', function () {
+	it('Golden Files', function () {
+		GoldenTestGeneric(of_swim, "data_point.input", "data_point.golden", GoldenFileGenerationTestCase);
+	});
+});
+
+function GoldenFileGenerationTestCase(of: Core.ObjectFactory, input: string) : string {
 	let interval = Model.IntervalParser.parse(of, input);
 
 	let result = "";
@@ -540,13 +528,6 @@ function GoldenTestFileGenerationTestCase(of: Core.ObjectFactory, input: string)
 
 	return result;
 }
-
-describe('Data Point Visitor', function () {
-	it('Golden Files', function () {
-		GoldenTestGeneric(of_swim, "data_point.input", "data_point.golden", GoldenTestFileGenerationTestCase);
-	});
-});
-
 
 function computePower(input_workout: string, expected_np: number, expected_avg: number) {
 	let np_visitor = new Visitor.NPVisitor();

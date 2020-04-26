@@ -1316,16 +1316,21 @@ module Model {
 			var duration_seconds = interval.getWorkDuration().getSeconds();
 			this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval, this.getTitle(interval)));
 			this.time_ += duration_seconds;
-			if (interval.getRestDuration().getSeconds() > 0) {
-				let rest_seconds = interval.getRestDuration().getSeconds();
-				this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + rest_seconds, interval, "rest"));
-				this.time_ += rest_seconds;
-			}
+			this.visitRestInterval(interval);
 		}
 		visitRampBuildInterval(interval: RampBuildInterval) {
 			var duration_seconds = interval.getWorkDuration().getSeconds();
 			this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval, this.getTitle(interval)));
 			this.time_ += duration_seconds;
+			this.visitRestInterval(interval);
+		}
+
+		visitRestInterval(interval: BaseInterval) {
+			if (interval.getRestDuration().getSeconds() > 0) {
+				let rest_seconds = interval.getRestDuration().getSeconds();
+				this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + rest_seconds, interval, "rest"));
+				this.time_ += rest_seconds;
+			}
 		}
 
 		getIntervalArray(): AbsoluteTimeInterval[] {
