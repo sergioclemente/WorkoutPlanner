@@ -565,16 +565,20 @@ module Model {
 		}
 
 		visitRepeatInterval(interval: RepeatInterval) {
-			if (interval.getIntervals().length > 2 ||
+			if (interval.getIntervals().length == 2 ||
 			    interval.getIntervals()[0].getIntensity().getValue() > interval.getIntervals()[1].getIntensity().getValue())	{
-					// new behavior
+				let repeat_count = interval.getIntervals().length;
+				let on_duration = interval.getIntervals()[0].getWorkDuration().getSeconds();
+				let off_duration = interval.getIntervals()[1].getWorkDuration().getSeconds();
+				let on_power = interval.getIntervals()[0].getIntensity().getValue();
+				let off_power = interval.getIntervals()[1].getIntensity().getValue();
+				this.content += `\t\t<IntervalsT Repeat="${repeat_count}" OnDuration="${on_duration}" OffDuration="${off_duration}" OnPower="${on_power}" OffPower="${off_power}" />\n`
 			} else {
 				super.visitRepeatInterval(interval);
 			}
 		}
 
 		getContent(): string {
-			console.log(this.content)
 			return this.content;
 		}
 	}
