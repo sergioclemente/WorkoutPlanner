@@ -728,20 +728,25 @@ module Model {
     export class RampBuildInterval extends BaseInterval {
         private startIntensity: Intensity;
         private endIntensity: Intensity;
-        private duration: Duration;
+		private work_duration: Duration;
+		private rest_duration: Duration;
 
-        constructor(title: string, startIntensity: Intensity, endIntensity: Intensity, duration: Duration) {
+        constructor(title: string, startIntensity: Intensity, endIntensity: Intensity, work_duration: Duration, rest_duration: Duration) {
             super(title);
             this.startIntensity = startIntensity;
             this.endIntensity = endIntensity;
-            this.duration = duration;
+			this.work_duration = work_duration;
+			this.rest_duration = rest_duration;
         }
         getIntensity(): Intensity {
             return RampBuildInterval.computeAverageIntensity(this.startIntensity, this.endIntensity);
         }
-        getWorkDuration(): Duration {
-            return this.duration;
-        }
+        getWorkDuration() : Duration {
+            return this.work_duration;
+		}
+		getRestDuration() : Duration {
+			return this.rest_duration;
+		}
         getStartIntensity(): Intensity {
             return this.startIntensity;
         }

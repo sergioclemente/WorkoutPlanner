@@ -621,17 +621,21 @@ var Model;
     }
     Model.SimpleInterval = SimpleInterval;
     class RampBuildInterval extends BaseInterval {
-        constructor(title, startIntensity, endIntensity, duration) {
+        constructor(title, startIntensity, endIntensity, work_duration, rest_duration) {
             super(title);
             this.startIntensity = startIntensity;
             this.endIntensity = endIntensity;
-            this.duration = duration;
+            this.work_duration = work_duration;
+            this.rest_duration = rest_duration;
         }
         getIntensity() {
             return RampBuildInterval.computeAverageIntensity(this.startIntensity, this.endIntensity);
         }
         getWorkDuration() {
-            return this.duration;
+            return this.work_duration;
+        }
+        getRestDuration() {
+            return this.rest_duration;
         }
         getStartIntensity() {
             return this.startIntensity;

@@ -572,7 +572,7 @@ ArrayInterval(
 	SimpleInterval(5min, 50%, )
 	SimpleInterval(5min, 65%, )
 	SimpleInterval(5min, 90%, )
-	BuildInterval(5min, 90%, 95%, )
+	RampBuildInterval(5min, 90%, 95%, , )
 	StepBuildInterval(
 		SimpleInterval(5min, 90%, )
 		SimpleInterval(5min, 95%, )
@@ -630,7 +630,7 @@ Duration (Sec): 10
 ----------------------------
 Input: 
 5[(1min, double arm, 15s)]
--- EOTNormalized: 
+Normalized: 
 5[(1min, double arm, 15sec)]
 AST: 
 ArrayInterval(
@@ -645,4 +645,22 @@ Pretty Print:
 	* 5 x 1' double arm w/ 15'' rest
 Duration Unit: min
 Duration (Sec): 375
+----------------------------
+Input: 
+8[(1min, 100w, 105w, 30s)]
+Normalized: 
+8[(1min, 100, 105)]
+AST: 
+ArrayInterval(
+	RepeatInterval(count=8, 
+		RampBuildInterval(1min, 100w, 105w, , 30sec)
+	)
+)
+IF (Avg): 1.0253048327204939
+TSS2: 20.5
+Dominant Unit: w
+Pretty Print:
+	* 8 x 1' build from 100w to 105w
+Duration Unit: min
+Duration (Sec): 720
 ----------------------------

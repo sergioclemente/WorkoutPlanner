@@ -1,6 +1,6 @@
 Input: (5min, 100, work, 10s)
 (5min, *, 20s)
--- EOT
+
 [
     {
         "x": {
@@ -121,6 +121,71 @@ Input: (5min, 100, work, 10s)
         },
         "label": "5'",
         "tag": "rest"
+    }
+]
+----------------------------
+Input: 2[(1min, 105w, 110w, 30s)]
+-- EOT
+[
+    {
+        "x": {
+            "unit": 13,
+            "value": 0,
+            "estimatedDistanceInMiles": 0,
+            "estimatedDurationInSeconds": 0
+        },
+        "y": {
+            "ifValue": 1.05,
+            "originalUnit": 1,
+            "originalValue": 105
+        },
+        "label": "1' @ 105w",
+        "tag": "if"
+    },
+    {
+        "x": {
+            "unit": 13,
+            "value": 1,
+            "estimatedDistanceInMiles": 0.042112299465240643,
+            "estimatedDurationInSeconds": 60
+        },
+        "y": {
+            "ifValue": 1.05,
+            "originalUnit": 1,
+            "originalValue": 105
+        },
+        "label": "1' @ 105w",
+        "tag": "if"
+    },
+    {
+        "x": {
+            "unit": 13,
+            "value": 1,
+            "estimatedDistanceInMiles": 0.042112299465240643,
+            "estimatedDurationInSeconds": 60
+        },
+        "y": {
+            "ifValue": 1.1,
+            "originalUnit": 1,
+            "originalValue": 110
+        },
+        "label": "30'' @ 110w",
+        "tag": "if"
+    },
+    {
+        "x": {
+            "unit": 12,
+            "value": 90,
+            "estimatedDistanceInMiles": 0.06417112299465241,
+            "estimatedDurationInSeconds": 90
+        },
+        "y": {
+            "ifValue": 1.1,
+            "originalUnit": 1,
+            "originalValue": 110
+        },
+        "label": "30'' @ 110w",
+        "tag": "if"
     }
 ]
 ----------------------------

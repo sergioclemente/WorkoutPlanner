@@ -64,7 +64,7 @@ var Model;
         }
         visitRampBuildInterval(interval) {
             this.indent();
-            this.output += core_1.stringFormat("BuildInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getStartIntensity()), TreePrinterVisitor.getIntensityPretty(interval.getEndIntensity()), interval.getTitle());
+            this.output += core_1.stringFormat("RampBuildInterval({0}, {1}, {2}, {3}, {4})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getStartIntensity()), TreePrinterVisitor.getIntensityPretty(interval.getEndIntensity()), interval.getTitle(), interval.getRestDuration().toString());
         }
         visitRepeatInterval(interval) {
             this.indent();
@@ -395,12 +395,7 @@ var Model;
             this.data.push(new Point(this.x, interval.getIntensity(), title, this.getIntervalTag(interval)));
             this.incrementX(interval.getWorkDuration());
             this.data.push(new Point(this.x, interval.getIntensity(), title, this.getIntervalTag(interval)));
-            if (interval.getRestDuration().getValue() > 0) {
-                this.initX(interval.getRestDuration());
-                this.data.push(new Point(this.x, core_1.Intensity.ZeroIntensity, title, "rest"));
-                this.incrementX(interval.getRestDuration());
-                this.data.push(new Point(this.x, core_1.Intensity.ZeroIntensity, title, "rest"));
-            }
+            this.visitRestPart(interval, title);
         }
         visitRampBuildInterval(interval) {
             var title = WorkoutTextVisitor.getIntervalTitle(interval);
@@ -408,6 +403,15 @@ var Model;
             this.data.push(new Point(this.x, interval.getStartIntensity(), title, this.getIntervalTag(interval)));
             this.incrementX(interval.getWorkDuration());
             this.data.push(new Point(this.x, interval.getEndIntensity(), title, this.getIntervalTag(interval)));
+            this.visitRestPart(interval, title);
+        }
+        visitRestPart(interval, title) {
+            if (interval.getRestDuration().getValue() > 0) {
+                this.initX(interval.getRestDuration());
+                this.data.push(new Point(this.x, core_1.Intensity.ZeroIntensity, title, "rest"));
+                this.incrementX(interval.getRestDuration());
+                this.data.push(new Point(this.x, core_1.Intensity.ZeroIntensity, title, "rest"));
+            }
         }
     }
     Model.DataPointVisitor = DataPointVisitor;

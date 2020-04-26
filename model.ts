@@ -331,8 +331,12 @@ module Model {
 								let startIntensity = intensities[0];
 								let endIntensity = intensities[1]
 								let intensity = RampBuildInterval.computeAverageIntensity(startIntensity, endIntensity);
-								let duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
-								interval = new RampBuildInterval(title.trim(), startIntensity, endIntensity, duration);
+								let work_duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
+								let rest_duration = Duration.ZeroDuration;
+								if (durationUnits.length > 1 && durationValues.length > 1) {
+									rest_duration = factory.createDuration(intensity, durationUnits[1], durationValues[1]);
+								}
+								interval = new RampBuildInterval(title.trim(), startIntensity, endIntensity, work_duration, rest_duration);
 							} else if (intensities.length == 1) {
 								// Simple interval
 								let intensity = intensities[0];

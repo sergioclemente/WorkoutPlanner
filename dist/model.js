@@ -242,8 +242,12 @@ var Model;
                                 let startIntensity = intensities[0];
                                 let endIntensity = intensities[1];
                                 let intensity = core_1.RampBuildInterval.computeAverageIntensity(startIntensity, endIntensity);
-                                let duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
-                                interval = new core_1.RampBuildInterval(title.trim(), startIntensity, endIntensity, duration);
+                                let work_duration = factory.createDuration(intensity, durationUnits[0], durationValues[0]);
+                                let rest_duration = core_1.Duration.ZeroDuration;
+                                if (durationUnits.length > 1 && durationValues.length > 1) {
+                                    rest_duration = factory.createDuration(intensity, durationUnits[1], durationValues[1]);
+                                }
+                                interval = new core_1.RampBuildInterval(title.trim(), startIntensity, endIntensity, work_duration, rest_duration);
                             }
                             else if (intensities.length == 1) {
                                 let intensity = intensities[0];

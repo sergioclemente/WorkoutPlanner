@@ -66,7 +66,7 @@ module Model {
 		}
 		visitRampBuildInterval(interval: RampBuildInterval): void {
 			this.indent();
-			this.output += stringFormat("BuildInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getStartIntensity()), TreePrinterVisitor.getIntensityPretty(interval.getEndIntensity()), interval.getTitle());
+			this.output += stringFormat("RampBuildInterval({0}, {1}, {2}, {3}, {4})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getStartIntensity()), TreePrinterVisitor.getIntensityPretty(interval.getEndIntensity()), interval.getTitle(), interval.getRestDuration().toString());
 		}
 
 		visitRepeatInterval(interval: RepeatInterval) {
@@ -462,6 +462,19 @@ module Model {
 			this.data.push(new Point(this.x, interval.getIntensity(), title, this.getIntervalTag(interval)));
 			this.incrementX(interval.getWorkDuration());
 			this.data.push(new Point(this.x, interval.getIntensity(), title, this.getIntervalTag(interval)));
+			this.visitRestPart(interval, title);
+		}
+
+		visitRampBuildInterval(interval: RampBuildInterval) {
+			var title = WorkoutTextVisitor.getIntervalTitle(interval);
+			this.initX(interval.getWorkDuration());
+			this.data.push(new Point(this.x, interval.getStartIntensity(), title, this.getIntervalTag(interval)));
+			this.incrementX(interval.getWorkDuration());
+			this.data.push(new Point(this.x, interval.getEndIntensity(), title, this.getIntervalTag(interval)));
+			this.visitRestPart(interval, title);
+		}
+
+		visitRestPart(interval: BaseInterval, title: string) {
 			if (interval.getRestDuration().getValue() > 0) {
 				// Rest interval
 				this.initX(interval.getRestDuration());
@@ -469,13 +482,6 @@ module Model {
 				this.incrementX(interval.getRestDuration());
 				this.data.push(new Point(this.x, Intensity.ZeroIntensity, title, "rest"));
 			}
-		}
-		visitRampBuildInterval(interval: RampBuildInterval) {
-			var title = WorkoutTextVisitor.getIntervalTitle(interval);
-			this.initX(interval.getWorkDuration());
-			this.data.push(new Point(this.x, interval.getStartIntensity(), title, this.getIntervalTag(interval)));
-			this.incrementX(interval.getWorkDuration());
-			this.data.push(new Point(this.x, interval.getEndIntensity(), title, this.getIntervalTag(interval)));
 		}
 	}
 

@@ -1,3 +1,5 @@
 (5min, 100, work, 10s)
 (5min, *, 20s)
 -- EOT
+2[(1min, 105w, 110w, 30s)]
+-- EOT

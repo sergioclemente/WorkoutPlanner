@@ -4,7 +4,7 @@ Normalized:
 (10min, 55, 75)
 AST: 
 ArrayInterval(
-	BuildInterval(10min, 55%, 75%, )
+	RampBuildInterval(10min, 55%, 75%, , )
 )
 IF (Avg): 0.6576473218982952
 TSS2: 7.7
@@ -68,7 +68,7 @@ Normalized:
 (1min, 60, 80)
 AST: 
 ArrayInterval(
-	BuildInterval(1min, 60%, 80%, )
+	RampBuildInterval(1min, 60%, 80%, , )
 )
 IF (Avg): 0.7071067811865476
 TSS2: 0.8
@@ -120,7 +120,7 @@ Normalized:
 (1min, 55, 75)
 AST: 
 ArrayInterval(
-	BuildInterval(1min, 55%, 75%, )
+	RampBuildInterval(1min, 55%, 75%, , )
 )
 IF (Avg): 0.6576473218982952
 TSS2: 0.8
@@ -152,7 +152,7 @@ Normalized:
 (20min, 55, 75, Warm up)
 AST: 
 ArrayInterval(
-	BuildInterval(20min, 55%, 75%, Warm up)
+	RampBuildInterval(20min, 55%, 75%, Warm up, )
 )
 IF (Avg): 0.6576473218982952
 TSS2: 15.3
@@ -169,7 +169,7 @@ Normalized:
 AST: 
 ArrayInterval(
 	RepeatInterval(count=4, 
-		BuildInterval(45sec, 75%, 100%, )
+		RampBuildInterval(45sec, 75%, 100%, , )
 		SimpleInterval(15sec, 55%, )
 	)
 )
@@ -429,7 +429,7 @@ Normalized:
 (1min, 50, 100, build to ftp)
 AST: 
 ArrayInterval(
-	BuildInterval(1min, 155w, 310w, build to ftp)
+	RampBuildInterval(1min, 155w, 310w, build to ftp, )
 )
 IF (Avg): 0.7905694150420949
 TSS2: 1.1
@@ -586,7 +586,7 @@ Normalized:
 AST: 
 ArrayInterval(
 	RepeatInterval(count=4, 
-		BuildInterval(45sec, 75%, 100%, )
+		RampBuildInterval(45sec, 75%, 100%, , )
 		SimpleInterval(15sec, 55%, )
 	)
 )
@@ -725,7 +725,7 @@ Normalized:
 (10min, 75, 100)
 AST: 
 ArrayInterval(
-	BuildInterval(10min, 75%, 100%, )
+	RampBuildInterval(10min, 75%, 100%, , )
 )
 IF (Avg): 0.8838834764831844
 TSS2: 13.3
@@ -741,7 +741,7 @@ Normalized:
 (10min, 100, 75)
 AST: 
 ArrayInterval(
-	BuildInterval(10min, 100%, 75%, )
+	RampBuildInterval(10min, 100%, 75%, , )
 )
 IF (Avg): 0.8838834764831844
 TSS2: 13.3
@@ -757,7 +757,7 @@ Normalized:
 (10min, 55, 75)
 AST: 
 ArrayInterval(
-	BuildInterval(10min, 55%, 75%, )
+	RampBuildInterval(10min, 55%, 75%, , )
 )
 IF (Avg): 0.6576473218982952
 TSS2: 7.7
