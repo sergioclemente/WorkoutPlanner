@@ -563,6 +563,7 @@ module Model {
 				this.content += `\t\t<Cooldown Duration="${duration}" PowerLow="${intensityStart}" PowerHigh="${intensityEnd}"/>\n`;
 			}
 		}
+
 		visitRepeatInterval(interval: RepeatInterval) {
 			if (interval.getIntervals().length > 2 ||
 			    interval.getIntervals()[0].getIntensity().getValue() > interval.getIntervals()[1].getIntensity().getValue())	{
@@ -571,6 +572,7 @@ module Model {
 				super.visitRepeatInterval(interval);
 			}
 		}
+
 		getContent(): string {
 			console.log(this.content)
 			return this.content;
