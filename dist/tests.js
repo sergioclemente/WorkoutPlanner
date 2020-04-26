@@ -459,7 +459,7 @@ function GoldenTestFileGeneration(of, input_file, golden_file) {
     let separator = "----------------------------\n";
     let expected_output = fs.readFileSync(golden_file).toString();
     let expected_outputs = expected_output.split(separator);
-    let generate_golden = true;
+    let generate_golden = false;
     let final_output = "";
     for (let i = 0; i < test_cases.length; ++i) {
         let input = test_cases[i];
