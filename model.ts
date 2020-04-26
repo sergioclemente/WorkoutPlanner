@@ -1,5 +1,5 @@
 import {SportType, ObjectFactory, UserProfile, Duration, DistanceUnit, Intensity, ArrayInterval, RepeatInterval, StepBuildInterval, Interval, SimpleInterval, DurationUnit, DurationUnitHelper, IntensityUnitHelper, IntensityUnit, RampBuildInterval, CommentInterval, stringFormat, MyMath, TimeUnitHelper, TimeUnit, PreconditionsCheck, FormatterHelper} from './core';
-import {UnparserVisitor, NPVisitor, FTP, VisitorHelper, ZonesVisitor, TSSVisitor, AbsoluteTimeInterval, AbsoluteTimeIntervalVisitor, WorkoutTextVisitor, MRCCourseDataVisitor, ZwiftDataVisitor, PPSMRXCourseDataVisitor} from './visitor';
+import {UnparserVisitor, NPVisitor, FTP, VisitorHelper, ZonesVisitor, AbsoluteTimeInterval, AbsoluteTimeIntervalVisitor, WorkoutTextVisitor, MRCCourseDataVisitor, ZwiftDataVisitor, PPSMRXCourseDataVisitor} from './visitor';
 
 module Model {
 	var zlib = require('zlib');
@@ -640,17 +640,6 @@ module Model {
 		getIntensityFriendly(intensity: Intensity, roundValues: boolean) {
 			var f = new WorkoutTextVisitor(this.userProfile, this.sportType, this.outputUnit, roundValues);
 			return f.getIntensityPretty(intensity);
-		}
-
-		getTSS(): number {
-			// TODO: Deprecate this.
-			var tssVisitor = new TSSVisitor();
-			VisitorHelper.visitAndFinalize(tssVisitor, this.intervals);
-			let tss = tssVisitor.getTSS();
-			if (isNaN(tss) || !isFinite(tss)) {
-				return 0;
-			}
-			return tss;
 		}
 
 		getTSS2(): number {

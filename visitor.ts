@@ -308,37 +308,6 @@ module Model {
 		}
 	}
 
-	// TSS = [(s x NP x IF) / (FTP x 3600)] x 100
-	// IF = NP / FTP
-	// TSS = [(s x NP x NP/FTP) / (FTP x 3600)] x 100
-	// TSS = [s x (NP / FTP) ^ 2] / 36
-	export class TSSVisitor extends BaseVisitor {
-		private tss: number = 0;
-
-		visitSimpleInterval(interval: SimpleInterval): void {
-			var duration = interval.getWorkDuration().getSeconds();
-			var intensity = interval.getIntensity().getValue();
-			var val = duration * Math.pow(intensity, 2);
-			this.tss += val;
-		}
-		visitRampBuildInterval(interval: RampBuildInterval): void {
-			var startIntensity = interval.getStartIntensity().getValue();
-			var endIntensity = interval.getEndIntensity().getValue();
-			var duration = interval.getWorkDuration().getSeconds();
-
-			// Right way to estimate the intensity is by doing incremental of 1 sec
-			for (var t = 0; t < duration; t++) {
-				var intensity = startIntensity + (endIntensity - startIntensity) * (t / duration);
-				var val = 1 * Math.pow(intensity, 2);
-				this.tss += val;
-			}
-		}
-
-		getTSS(): number {
-			return MyMath.round10(this.tss / 36, -1);
-		}
-    }
-
 	export class ZonesMap {
 		public static getZoneMap(sportType: SportType) {
 			if (sportType == SportType.Bike || sportType == SportType.Other) {

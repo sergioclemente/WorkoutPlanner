@@ -10,7 +10,6 @@ ArrayInterval(
 	SimpleInterval(1km, 5min/km, )
 )
 IF (Avg): 0.8635076320941238
-TSS: 10.8
 TSS2: 11.3
 Output Unit: mi/h
 Pretty Print:
@@ -31,7 +30,6 @@ ArrayInterval(
 	SimpleInterval(45sec, 100%, )
 )
 IF (Avg): 1
-TSS: 2.5
 TSS2: 2.5
 Dominant Unit: %
 Pretty Print:
@@ -48,7 +46,6 @@ ArrayInterval(
 	SimpleInterval(2mi, 6:00min/mi, threshold)
 )
 IF (Avg): 1
-TSS: 20
 TSS2: 20
 Dominant Unit: min/mi
 Pretty Print:
@@ -66,7 +63,6 @@ ArrayInterval(
 	SimpleInterval(2mi, 80%, )
 )
 IF (Avg): 0.8
-TSS: 16
 TSS2: 16
 Dominant Unit: %
 Pretty Print:
@@ -89,7 +85,6 @@ ArrayInterval(
 	SimpleInterval(10min, 70%, )
 )
 IF (Avg): 0.8225975119502044
-TSS: 20.3
 TSS2: 19.7
 Dominant Unit: %
 Pretty Print:
@@ -108,7 +103,6 @@ ArrayInterval(
 	SimpleInterval(2mi, 7:00min/mi, )
 )
 IF (Avg): 0.8571428571428571
-TSS: 17.1
 TSS2: 18
 Dominant Unit: min/mi
 Pretty Print:
@@ -128,7 +122,6 @@ ArrayInterval(
 	SimpleInterval(5sec, 6:00min/mi, )
 )
 IF (Avg): 1
-TSS: 0.3
 TSS2: 0.3
 Duration Unit: s
 Duration (Sec): 9
@@ -142,7 +135,6 @@ ArrayInterval(
 	SimpleInterval(45min, 3.7min/km, )
 )
 IF (Avg): 0.9986322732385723
-TSS: 74.8
 TSS2: 74.9
 Dominant Unit: min/km
 Pretty Print:
@@ -160,7 +152,6 @@ ArrayInterval(
 	SimpleInterval(1hr, 6:00min/mi, )
 )
 IF (Avg): 1
-TSS: 100
 TSS2: 100
 Dominant Unit: min/mi
 Pretty Print:
@@ -178,7 +169,6 @@ ArrayInterval(
 	SimpleInterval(1hr, 6:00min/mi, )
 )
 IF (Avg): 1
-TSS: 100
 TSS2: 100
 Dominant Unit: min/mi
 Pretty Print:
@@ -196,7 +186,6 @@ ArrayInterval(
 	SimpleInterval(10sec, 60%, relaxed)
 )
 IF (Avg): 0.6
-TSS: 0.1
 TSS2: 0.1
 Output Unit: min/mi
 Pretty Print:
@@ -214,7 +203,6 @@ ArrayInterval(
 	SimpleInterval(10sec, , relaxed)
 )
 IF (Avg): 0.01
-TSS: 0
 TSS2: 0
 Dominant Unit: %
 Pretty Print:
@@ -232,7 +220,6 @@ ArrayInterval(
 	SimpleInterval(1mi, 100%, threshold)
 )
 IF (Avg): 1
-TSS: 10
 TSS2: 10
 Output Unit: /400meters
 Pretty Print:

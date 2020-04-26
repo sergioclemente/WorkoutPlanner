@@ -481,15 +481,6 @@ var Model;
             var f = new visitor_1.WorkoutTextVisitor(this.userProfile, this.sportType, this.outputUnit, roundValues);
             return f.getIntensityPretty(intensity);
         }
-        getTSS() {
-            var tssVisitor = new visitor_1.TSSVisitor();
-            visitor_1.VisitorHelper.visitAndFinalize(tssVisitor, this.intervals);
-            let tss = tssVisitor.getTSS();
-            if (isNaN(tss) || !isFinite(tss)) {
-                return 0;
-            }
-            return tss;
-        }
         getTSS2() {
             return TSSCalculator.compute(this.intervals);
         }

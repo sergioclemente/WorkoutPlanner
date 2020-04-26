@@ -9,7 +9,6 @@ ArrayInterval(
 	SimpleInterval(10sec, 0%, )
 )
 IF (Avg): 0.9459053029269173
-TSS: 2.4
 TSS2: 2.5
 Dominant Unit: %
 Pretty Print:
@@ -26,7 +25,6 @@ ArrayInterval(
 	SimpleInterval(10min, *, TT)
 )
 IF (Avg): 0.5
-TSS: 4.2
 TSS2: 4.2
 Dominant Unit: free-ride
 Pretty Print:
@@ -43,7 +41,6 @@ ArrayInterval(
 	SimpleInterval(500yards, 100%, free)
 )
 IF (Avg): 1
-TSS: 11.8
 TSS2: 11.8
 Dominant Unit: %
 Pretty Print:
@@ -63,7 +60,6 @@ ArrayInterval(
 	)
 )
 IF (Avg): 1
-TSS: 9.4
 TSS2: 11.1
 Dominant Unit: %
 Pretty Print:
@@ -81,7 +77,6 @@ ArrayInterval(
 	SimpleInterval(500yards, *, free)
 )
 IF (Avg): 0.5
-TSS: 5.9
 TSS2: 5.9
 Dominant Unit: free-ride
 Pretty Print:
@@ -99,7 +94,6 @@ ArrayInterval(
 	SimpleInterval(500yards, 90%, warmup, 50sec)
 )
 IF (Avg): 0.9000000000000001
-TSS: 10.6
 TSS2: 11.8
 Dominant Unit: %
 Pretty Print:
@@ -117,7 +111,6 @@ ArrayInterval(
 	SimpleInterval(400yards, CSS+10, warmup, 30sec)
 )
 IF (Avg): 0.8947368421052629
-TSS: 8.5
 TSS2: 9.2
 Dominant Unit: offset-seconds
 Pretty Print:
@@ -135,7 +128,6 @@ ArrayInterval(
 	Comment(Comment 123)
 )
 IF (Avg): 0
-TSS: 0
 TSS2: 0
 Duration (Sec): 0
 ----------------------------
@@ -148,7 +140,6 @@ ArrayInterval(
 	SimpleInterval(10min, 100%, CSS, 2min)
 )
 IF (Avg): 1
-TSS: 16.7
 TSS2: 20
 Dominant Unit: %
 Pretty Print:
@@ -165,7 +156,6 @@ ArrayInterval(
 	SimpleInterval(500m, 100%, warmup)
 )
 IF (Avg): 1
-TSS: 12.9
 TSS2: 12.9
 Dominant Unit: %
 Pretty Print:
@@ -183,7 +173,6 @@ ArrayInterval(
 	SimpleInterval(500m, 100%, warmup)
 )
 IF (Avg): 1
-TSS: 12.9
 TSS2: 12.9
 Dominant Unit: %
 Pretty Print:
@@ -203,7 +192,6 @@ ArrayInterval(
 	SimpleInterval(200m, 80%, easy)
 )
 IF (Avg): 0.938083151964686
-TSS: 17
 TSS2: 16.4
 Dominant Unit: %
 Pretty Print:
@@ -222,7 +210,6 @@ ArrayInterval(
 	SimpleInterval(500yards, 100%, warmup)
 )
 IF (Avg): 1
-TSS: 11.8
 TSS2: 11.8
 Dominant Unit: %
 Pretty Print:
@@ -240,7 +227,6 @@ ArrayInterval(
 	SimpleInterval(500yards, 100%, warmup)
 )
 IF (Avg): 1
-TSS: 11.8
 TSS2: 11.8
 Dominant Unit: %
 Pretty Print:
@@ -258,7 +244,6 @@ ArrayInterval(
 	SimpleInterval(500yards, 90%, warmup, 50sec)
 )
 IF (Avg): 0.9000000000000001
-TSS: 10.6
 TSS2: 11.8
 Output Unit: /100yards
 Pretty Print:
@@ -276,7 +261,6 @@ ArrayInterval(
 	SimpleInterval(100yards, 100%, strong, 10sec)
 )
 IF (Avg): 1
-TSS: 2.4
 TSS2: 2.6
 Output Unit: /100yards
 Pretty Print:
@@ -294,7 +278,6 @@ ArrayInterval(
 	SimpleInterval(500yards, CSS+10, warmup, 50sec)
 )
 IF (Avg): 0.8947368421052629
-TSS: 10.6
 TSS2: 11.7
 Output Unit: /100yards
 Pretty Print:
@@ -312,7 +295,6 @@ ArrayInterval(
 	SimpleInterval(500yards, , warmup, 50sec)
 )
 IF (Avg): 0.01
-TSS: 0.1
 TSS2: 0
 Output Unit: /100yards
 Pretty Print:
@@ -330,7 +312,6 @@ ArrayInterval(
 	SimpleInterval(500yards, CSS-5, warmup, 50sec)
 )
 IF (Avg): 1.0624999999999998
-TSS: 12.5
 TSS2: 14.6
 Output Unit: /100yards
 Pretty Print:
@@ -348,7 +329,6 @@ ArrayInterval(
 	SimpleInterval(500yards, CSS-10, warmup, 50sec)
 )
 IF (Avg): 1.1333333333333333
-TSS: 13.4
 TSS2: 14.7
 Output Unit: /100yards
 Pretty Print:
@@ -366,7 +346,6 @@ ArrayInterval(
 	SimpleInterval(500yards, , warmup, 50sec)
 )
 IF (Avg): 0.01
-TSS: 0.1
 TSS2: 0
 Dominant Unit: %
 Pretty Print:
@@ -384,7 +363,6 @@ ArrayInterval(
 	SimpleInterval(500yards, CSS+10, warmup, 50sec)
 )
 IF (Avg): 0.8947368421052629
-TSS: 10.6
 TSS2: 11.7
 Dominant Unit: offset-seconds
 Pretty Print:
@@ -402,7 +380,6 @@ ArrayInterval(
 	SimpleInterval(100yards, CSS-5, strong, 15sec)
 )
 IF (Avg): 1.0624999999999998
-TSS: 2.5
 TSS2: 3.1
 Dominant Unit: offset-seconds
 Pretty Print:
@@ -420,7 +397,6 @@ ArrayInterval(
 	SimpleInterval(100yards, CSS, strong, 20sec)
 )
 IF (Avg): 1
-TSS: 2.4
 TSS2: 2.9
 Dominant Unit: offset-seconds
 Pretty Print:
@@ -438,7 +414,6 @@ ArrayInterval(
 	SimpleInterval(100yards, CSS, strong, 5sec)
 )
 IF (Avg): 1
-TSS: 2.4
 TSS2: 2.5
 Dominant Unit: offset-seconds
 Pretty Print:
@@ -456,7 +431,6 @@ ArrayInterval(
 	SimpleInterval(400yards, , free)
 )
 IF (Avg): 0.01
-TSS: 0.1
 TSS2: 0
 Dominant Unit: %
 Pretty Print:
@@ -474,7 +448,6 @@ ArrayInterval(
 	SimpleInterval(300yards, , pull)
 )
 IF (Avg): 0.01
-TSS: 0.1
 TSS2: 0
 Dominant Unit: %
 Pretty Print:
@@ -492,7 +465,6 @@ ArrayInterval(
 	SimpleInterval(300yards, , pull, 10sec)
 )
 IF (Avg): 0.01
-TSS: 0.1
 TSS2: 0
 Dominant Unit: %
 Pretty Print:
@@ -510,7 +482,6 @@ ArrayInterval(
 	SimpleInterval(300yards, CSS, Tempo trainer)
 )
 IF (Avg): 1
-TSS: 7.1
 TSS2: 7.1
 Output Unit: /25yards
 Pretty Print:
@@ -567,7 +538,6 @@ ArrayInterval(
 	SimpleInterval(5min, 40%, easy)
 )
 IF (Avg): 0.708655460702499
-TSS: 50.6
 TSS2: 57.2
 Dominant Unit: %
 Pretty Print:
@@ -615,7 +585,6 @@ ArrayInterval(
 	)
 )
 IF (Avg): 0.848917617053206
-TSS: 55.6
 TSS2: 60.5
 Output Unit: w
 Pretty Print:
@@ -636,7 +605,6 @@ ArrayInterval(
 	SimpleInterval(10min, , easy)
 )
 IF (Avg): 0.01
-TSS: 0
 TSS2: 0
 Output Unit: w
 Pretty Print:
@@ -653,7 +621,6 @@ ArrayInterval(
 	SimpleInterval(10sec, , change to dd3)
 )
 IF (Avg): 0.01
-TSS: 0
 TSS2: 0
 Output Unit: w
 Pretty Print:
@@ -672,7 +639,6 @@ ArrayInterval(
 	)
 )
 IF (Avg): 0.01
-TSS: 0
 TSS2: 0
 Dominant Unit: %
 Pretty Print:

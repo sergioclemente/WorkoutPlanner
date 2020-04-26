@@ -58,7 +58,6 @@ class WorkoutView extends React.Component {
             var avg_pace = builder.getSportType() == Core.SportType.Run ?
                 builder.getAveragePace() : "";
             return ({
-                tss: builder.getTSS(),
                 tss_from_if: builder.getTSS2(),
                 time: builder.getTimePretty(),
                 intensity: builder.getIF(),
@@ -195,9 +194,6 @@ class WorkoutView extends React.Component {
                             React.createElement("b", null, "Metric")),
                         React.createElement("td", null,
                             React.createElement("b", null, "Value"))),
-                    React.createElement("tr", null,
-                        React.createElement("td", null, "TSS"),
-                        React.createElement("td", null, this.state.tss)),
                     React.createElement("tr", null,
                         React.createElement("td", null, "TSS\u00AE"),
                         React.createElement("td", null, this.state.tss_from_if)),

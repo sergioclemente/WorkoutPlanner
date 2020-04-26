@@ -77,7 +77,6 @@ export default class WorkoutView extends React.Component<any, any> {
 
 			return (
 				{
-					tss: builder.getTSS(),
 					tss_from_if: builder.getTSS2(),
 					time: builder.getTimePretty(),
 					intensity: builder.getIF(),
@@ -241,10 +240,6 @@ export default class WorkoutView extends React.Component<any, any> {
 					<tr>
 						<td><b>Metric</b></td>
 						<td><b>Value</b></td>
-					</tr>
-					<tr>
-						<td>TSS</td>
-						<td>{this.state.tss}</td>
 					</tr>
 					<tr>
 						<td>TSS&reg;</td>

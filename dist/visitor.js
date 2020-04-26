@@ -260,32 +260,6 @@ var Model;
         }
     }
     Model.DominantUnitVisitor = DominantUnitVisitor;
-    class TSSVisitor extends BaseVisitor {
-        constructor() {
-            super(...arguments);
-            this.tss = 0;
-        }
-        visitSimpleInterval(interval) {
-            var duration = interval.getWorkDuration().getSeconds();
-            var intensity = interval.getIntensity().getValue();
-            var val = duration * Math.pow(intensity, 2);
-            this.tss += val;
-        }
-        visitRampBuildInterval(interval) {
-            var startIntensity = interval.getStartIntensity().getValue();
-            var endIntensity = interval.getEndIntensity().getValue();
-            var duration = interval.getWorkDuration().getSeconds();
-            for (var t = 0; t < duration; t++) {
-                var intensity = startIntensity + (endIntensity - startIntensity) * (t / duration);
-                var val = 1 * Math.pow(intensity, 2);
-                this.tss += val;
-            }
-        }
-        getTSS() {
-            return core_1.MyMath.round10(this.tss / 36, -1);
-        }
-    }
-    Model.TSSVisitor = TSSVisitor;
     class ZonesMap {
         static getZoneMap(sportType) {
             if (sportType == core_1.SportType.Bike || sportType == core_1.SportType.Other) {
