@@ -96,8 +96,6 @@ describe('Bugs', function () {
 	});
 });
 
-// TODO: Add test for half MINUTES
-
 describe('Combine duration', function () {
 	it('Combine two distances', function () {
 		let dur = Core.Duration.combine(new Core.Duration(Core.DistanceUnit.Yards, 100, 0, 0), new Core.Duration(Core.DistanceUnit.Yards, 200, 0, 0));
