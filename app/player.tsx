@@ -81,6 +81,9 @@ export default class PlayerView extends React.Component<any, any> {
 		// Check current interval duration and play sound accordingly.
 		let bei = this.playerHelper_.get(this._getElapsedTimeSeconds());
 		if (bei == null) {
+			this._pauseAudioElement("end", false);
+			clearInterval(this.intervalId_);
+			this.intervalId_ = null;
 			return;
 		}
 
@@ -164,7 +167,11 @@ export default class PlayerView extends React.Component<any, any> {
 			<audio ref="countdown" hidden={false}>
 				<source src="countdown.wav" type="audio/wav" />
 				Your browser does not support the audio element.
-					</audio>
+			</audio>
+			<audio ref="end" hidden={false}>
+				<source src="end.wav" type="audio/wav" />
+				Your browser does not support the audio element.
+			</audio>
 		</div>);
 	}
 }

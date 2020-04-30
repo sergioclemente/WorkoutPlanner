@@ -8,3 +8,5 @@
 -- EOT
 3[(1min, 90), (2min, 100), (1min, 55)]
 -- EOT
+2[(20s, *, MAX EFFORT), (40s, 40, easy coasting), (2min, 55)]
+-- EOT

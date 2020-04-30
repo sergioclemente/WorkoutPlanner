@@ -540,7 +540,7 @@ module Model {
 		}
 
 		visitRepeatInterval(interval: RepeatInterval) {
-			if (interval.getIntervals().length == 2 ||
+			if (interval.getIntervals().length == 2 &&
 			    interval.getIntervals()[0].getIntensity().getValue() > interval.getIntervals()[1].getIntensity().getValue())	{
 				let repeat_count = interval.getIntervals().length;
 				let on_duration = interval.getIntervals()[0].getWorkDuration().getSeconds();

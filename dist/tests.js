@@ -437,10 +437,37 @@ describe('File Generation', function () {
 });
 describe('Data Point Visitor', function () {
     it('Golden Files', function () {
-        GoldenTestGeneric(of_swim, "data_point.input", "data_point.golden", GoldenFileGenerationTestCase);
+        GoldenTestGeneric(of_swim, "data_point.input", "data_point.golden", DataPointGenerationTestCase);
     });
 });
 function GoldenFileGenerationTestCase(of, input) {
+    let interval = Model.IntervalParser.parse(of, input);
+    let result = "";
+    result += `Input: ${input}\n`;
+    {
+        result += `Zwift:\n`;
+        let zwift = new Visitor.ZwiftDataVisitor("untitled");
+        Visitor.VisitorHelper.visitAndFinalize(zwift, interval);
+        result += zwift.getContent();
+        result += "\n";
+    }
+    {
+        result += `MRC:\n`;
+        let mrc = new Visitor.MRCCourseDataVisitor("untitled");
+        Visitor.VisitorHelper.visitAndFinalize(mrc, interval);
+        result += mrc.getContent();
+        result += "\n";
+    }
+    {
+        result += `PPSMRX:\n`;
+        let pps = new Visitor.PPSMRXCourseDataVisitor("untitled");
+        Visitor.VisitorHelper.visitAndFinalize(pps, interval);
+        result += pps.getContent();
+        result += "\n";
+    }
+    return result;
+}
+function DataPointGenerationTestCase(of, input) {
     let interval = Model.IntervalParser.parse(of, input);
     let result = "";
     result += `Input: ${input}\n`;

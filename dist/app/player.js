@@ -64,6 +64,9 @@ class PlayerView extends React.Component {
         this.setState(this.getState());
         let bei = this.playerHelper_.get(this._getElapsedTimeSeconds());
         if (bei == null) {
+            this._pauseAudioElement("end", false);
+            clearInterval(this.intervalId_);
+            this.intervalId_ = null;
             return;
         }
         let durationIntervalMilliseconds = bei.getDurationSeconds() * 1000;
@@ -143,6 +146,9 @@ class PlayerView extends React.Component {
             React.createElement(workout_view_1.default, Object.assign({}, this.props, { ref: 'view' })),
             React.createElement("audio", { ref: "countdown", hidden: false },
                 React.createElement("source", { src: "countdown.wav", type: "audio/wav" }),
+                "Your browser does not support the audio element."),
+            React.createElement("audio", { ref: "end", hidden: false },
+                React.createElement("source", { src: "end.wav", type: "audio/wav" }),
                 "Your browser does not support the audio element.")));
     }
 }
