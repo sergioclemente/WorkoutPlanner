@@ -471,7 +471,7 @@ var Model;
         visitRepeatInterval(interval) {
             if (interval.getIntervals().length == 2 &&
                 interval.getIntervals()[0].getIntensity().getValue() > interval.getIntervals()[1].getIntensity().getValue()) {
-                let repeat_count = interval.getIntervals().length;
+                let repeat_count = interval.getRepeatCount();
                 let on_duration = interval.getIntervals()[0].getWorkDuration().getSeconds();
                 let off_duration = interval.getIntervals()[1].getWorkDuration().getSeconds();
                 let on_power = interval.getIntervals()[0].getIntensity().getValue();

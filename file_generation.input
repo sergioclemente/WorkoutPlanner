@@ -10,3 +10,12 @@
 -- EOT
 2[(20s, *, MAX EFFORT), (40s, 40, easy coasting), (2min, 55)]
 -- EOT
+(12min, 55, 70)
+8[(15s, *, Spin ups), (15s, 55)]
+5[(30s, 85, 90, 95, 100, 105), (30s, 55)]
+(5min, *, rest - prepare for 5s all out)
+2[(5s, All out, *), (2min, *, rest)]
+(5min, 55,  prepare for 20min all out)
+[(20m, 104, All out), (5min, 50), 4[(15s, 120), (45s, 50)], (5min, 50)]
+[(20s, *, prepare for 1min all out), (1min, *, All out), (10min, 50)]
+-- EOT
