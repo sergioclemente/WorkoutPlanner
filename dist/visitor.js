@@ -796,20 +796,23 @@ var Model;
             if (interval.getIntensity().getOriginalUnit() == core_1.IntensityUnit.FreeRide) {
                 return;
             }
-            if (interval.getIntensity().getValue() == 0) {
-                this.result += " rest";
+            let handled = false;
+            if (core_1.Intensity.equals(interval.getIntensity(), core_1.Intensity.ZeroIntensity)) {
+                if (title == null) {
+                    this.result += " rest";
+                }
+                handled = true;
             }
-            else if (interval.getIntensity().isEasy() && !this.disableEasyTitle) {
-                let title = interval.getTitle();
-                if (title == null || title.trim().length == 0) {
+            else if (core_1.Intensity.equals(interval.getIntensity(), core_1.Intensity.EasyIntensity)) {
+                if (title == null) {
                     this.result += " easy";
                 }
-                if (interval.getRestDuration().getSeconds() > 0) {
-                    this.result += " w/ " + interval.getRestDuration().toStringShort(this.sportType == core_1.SportType.Swim) + " rest";
-                    return;
-                }
+                handled = true;
             }
-            else {
+            if (handled && interval.getRestDuration().getSeconds() > 0) {
+                this.result += " w/ " + interval.getRestDuration().toStringShort(this.sportType == core_1.SportType.Swim) + " rest";
+            }
+            if (!handled) {
                 if (this.sportType == core_1.SportType.Swim && this.outputUnit != core_1.IntensityUnit.Watts) {
                     var total_duration = interval.getTotalDuration();
                     if (total_duration.getSeconds() != interval.getWorkDuration().getSeconds()) {
@@ -835,6 +838,12 @@ var Model;
             }
         }
         getIntensityPretty(intensity) {
+            if (core_1.Intensity.equals(intensity, core_1.Intensity.ZeroIntensity)) {
+                return "rest";
+            }
+            else if (core_1.Intensity.equals(intensity, core_1.Intensity.EasyIntensity)) {
+                return "easy";
+            }
             if (this.outputUnit == core_1.IntensityUnit.HeartRate) {
                 var bpm = 0;
                 if (this.sportType == core_1.SportType.Bike) {
@@ -1122,19 +1131,29 @@ var Model;
             this.iteration_stack_ = [];
             this.of_ = of;
         }
-        getTitle(interval) {
-            let title = interval.getTitle();
-            if (this.of_.getSportType() == core_1.SportType.Swim) {
-                title += " " + (interval.getIntensity().getValue() * this.of_.getUserProfile().getSwimFTP()) + "w";
-            }
-            else if (this.of_.getSportType() == core_1.SportType.Bike) {
-                title += " " + (interval.getIntensity().getValue() * this.of_.getUserProfile().getBikeFTP()) + "w";
-            }
-            else if (this.of_.getSportType() == core_1.SportType.Run) {
-                title += " " + (interval.getIntensity().getValue() * this.of_.getUserProfile().getRunnintTPaceMph()) + "mph";
+        round(value) {
+            return core_1.MyMath.round10(value, -1);
+        }
+        getTitle(title, intensities) {
+            let intensity_pretty = intensities.map(function (intensity) {
+                if (this.of_.getSportType() == core_1.SportType.Swim) {
+                    return this.round(intensity.getValue() * this.of_.getUserProfile().getSwimFTP()) + "w";
+                }
+                else if (this.of_.getSportType() == core_1.SportType.Bike) {
+                    return this.round(intensity.getValue() * this.of_.getUserProfile().getBikeFTP()) + "w";
+                }
+                else if (this.of_.getSportType() == core_1.SportType.Run) {
+                    return this.round(intensity.getValue() * this.of_.getUserProfile().getRunnintTPaceMph()) + "mph";
+                }
+                else {
+                    return intensity.toString();
+                }
+            }.bind(this));
+            if (core_1.Intensity.equals(intensities[0], core_1.Intensity.EasyIntensity)) {
+                title += " easy";
             }
             else {
-                title += interval.getIntensity().toString();
+                title += " " + intensity_pretty.join(" - ");
             }
             if (this.repeat_stack_.length > 0) {
                 console.assert(this.repeat_stack_.length == this.iteration_stack_.length);
@@ -1144,13 +1163,13 @@ var Model;
         }
         visitSimpleInterval(interval) {
             var duration_seconds = interval.getWorkDuration().getSeconds();
-            this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval, this.getTitle(interval)));
+            this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval, this.getTitle(interval.getTitle(), [interval.getIntensity()])));
             this.time_ += duration_seconds;
             this.visitRestInterval(interval);
         }
         visitRampBuildInterval(interval) {
             var duration_seconds = interval.getWorkDuration().getSeconds();
-            this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval, this.getTitle(interval)));
+            this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + duration_seconds, interval, this.getTitle(interval.getTitle(), [interval.getStartIntensity(), interval.getEndIntensity()])));
             this.time_ += duration_seconds;
             this.visitRestInterval(interval);
         }
