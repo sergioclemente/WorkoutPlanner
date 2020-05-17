@@ -4,27 +4,30 @@
   "description": "A simple generator of workouts for swim/bike/run",
   "main": "dist/server.js",
   "scripts": {
-    "start": "cd dist && node server.js",
+    "start": "./build.sh && cd dist && node server.js",
     "test": "./build.sh"
   },
   "dependencies": {
-    "fixed-data-table": "^0.6.5",
-    "gmail-send": "^1.2.14",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "sqlite3": "^4.1.1",
-    "typescript": "^3.4.4",
     "@types/fixed-data-table": "^0.6.35",
     "@types/jasmine": "^3.3.12",
     "@types/mocha": "^7.0.2",
     "@types/node": "^14.0.1",
+    "@types/react": "^16.9.35",
+    "@types/react-dom": "^16.9.8",
     "@types/sqlite3": "^3.1.5",
+    "copy-webpack-plugin": "^6.0.1",
+    "fixed-data-table": "^0.6.5",
+    "gmail-send": "^1.2.14",
     "mocha": "^7.1.2",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "sqlite3": "^4.1.1",
+    "typescript": "^3.4.4",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
   },
   "engines": {
-    "node": "6.9.0"
+    "node": "14.x"
   },
   "repository": {
     "type": "git",
