@@ -1,8 +1,6 @@
 import {SportType, ObjectFactory, UserProfile, Duration, DistanceUnit, Intensity, ArrayInterval, RepeatInterval, StepBuildInterval, Interval, SimpleInterval, DurationUnit, DurationUnitHelper, IntensityUnitHelper, IntensityUnit, RampBuildInterval, CommentInterval, stringFormat, MyMath, TimeUnitHelper, TimeUnit, PreconditionsCheck, FormatterHelper} from './core';
 import {UnparserVisitor, NPVisitor, FTP, VisitorHelper, ZonesVisitor, AbsoluteTimeInterval, AbsoluteTimeIntervalVisitor, WorkoutTextVisitor, MRCCourseDataVisitor, ZwiftDataVisitor, PPSMRXCourseDataVisitor} from './visitor';
 
-var zlib = require('zlib');
-
 export interface Parser {
 	// Returns the last valid char.
 	// On success: Returns a position higher than |pos|.
@@ -715,8 +713,6 @@ export class WorkoutBuilder {
 		var result = workout_text;
 		result += new_line;
 		result += new_line;
-		result += "web+wp://";
-		result += zlib.deflateSync(this.workoutDefinition).toString('base64');
 
 		return result
 	}

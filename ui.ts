@@ -2,8 +2,6 @@ import * as Core from './core';
 import * as Model from './model';
 import * as Visitor from './visitor';
 
-var zlib = require('zlib');
-
 function loadPersistedValue(id: string): string {
 	if (window.localStorage) {
 		var result = window.localStorage.getItem(id);
@@ -141,16 +139,6 @@ export class QueryParams {
 		}
 		if (params.email != null && params.email.trim() != 0) {
 			this.email = params.email;
-		}
-
-		// Load the workout when its encoded
-		if (params.wh != null) {
-			if (params.wh.startsWith("web+wp://")) {
-				var workout_hash = params.wh.substr(9, params.wh.length);
-				var buffer = zlib.inflateSync(new Buffer(workout_hash, 'base64')).toString('utf8');
-				console.assert(buffer != null);
-				this.workout_text = buffer;
-			}
 		}
 
 		if (params.page != null && params.page.trim() != 0) {
