@@ -291,6 +291,7 @@ export class IntervalParser {
 							// 2) 2x (45s @ 75% and 100% w/ 15s rest)
 							// Will assume the former, since the latter is less common.
 							if (repeatInterval.getRepeatCount() > 1 &&
+							    intensities.length > 0 &&
 								(intensities.length == repeatInterval.getRepeatCount()
 									|| (DurationUnitHelper.areDurationUnitsSame(durationUnits) && durationValues.length == repeatInterval.getRepeatCount()))) {
 								// OK this should not be a RepeatInterval, it should be

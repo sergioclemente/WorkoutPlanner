@@ -163,3 +163,11 @@ Titles:
 (0;10)  100w - 110w
 (10;15) rest
 ----------------------------
+Input: 
+2[(150s, alternate arm, 30s)]
+Titles: 
+(0;150) alternate arm easy 1/2
+(150;180) rest
+(180;330) alternate arm easy 2/2
+(330;360) rest
+----------------------------

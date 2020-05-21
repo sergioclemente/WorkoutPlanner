@@ -1316,6 +1316,9 @@ export class ObjectFactory {
 	}
 
 	createDuration(intensity: Intensity, unit: DurationUnit, value: number): Duration {
+		PreconditionsCheck.assertTrue(typeof(intensity) != 'undefined');
+		PreconditionsCheck.assertIsNumber(value, "value");
+
 		var estimatedDistanceInMiles = 0;
 		var estimatedTimeInSeconds = 0;
 

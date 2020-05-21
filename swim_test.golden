@@ -664,3 +664,21 @@ Pretty Print:
 Duration Unit: min
 Duration (Sec): 720
 ----------------------------
+Input: 
+2[(150s, alternate arm, 30s)]
+Normalized: 
+2[(2:30min, alternate arm, 30sec)]
+AST: 
+ArrayInterval(
+	RepeatInterval(count=2, 
+		SimpleInterval(2:30min, , alternate arm, 30sec)
+	)
+)
+IF (Avg): 0.01
+TSS2: 0
+Dominant Unit: %
+Pretty Print:
+	* 2 x 2'30'' alternate arm w/ 30'' rest
+Duration Unit: s
+Duration (Sec): 360
+----------------------------

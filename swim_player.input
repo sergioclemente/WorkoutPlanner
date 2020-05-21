@@ -22,3 +22,5 @@
 -- EOT
 (10s, 100, 110, 5s)
 -- EOT
+2[(150s, alternate arm, 30s)]
+-- EOT
