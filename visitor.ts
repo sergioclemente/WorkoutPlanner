@@ -1319,6 +1319,8 @@ export class AbsoluteTimeIntervalVisitor extends BaseVisitor {
 		// HACK: Making something simple and just checking the first intensity.
 		if (Intensity.equals(intensities[0], Intensity.EasyIntensity)) {
 			title += " easy";
+		} else if (Intensity.equals(intensities[0], Intensity.ZeroIntensity)) {
+			title += " rest";
 		} else {
 			title += " " + intensity_pretty.join(" - ");
 		}
@@ -1326,7 +1328,7 @@ export class AbsoluteTimeIntervalVisitor extends BaseVisitor {
 			console.assert(this.repeat_stack_.length == this.iteration_stack_.length);
 			title += " " + this.iteration_stack_[this.iteration_stack_.length - 1] + "/" + this.repeat_stack_[this.repeat_stack_.length - 1];
 		}
-		return title;
+		return title.trim();
 	}
 
 	visitSimpleInterval(interval: SimpleInterval) {
@@ -1345,7 +1347,7 @@ export class AbsoluteTimeIntervalVisitor extends BaseVisitor {
 	visitRestInterval(interval: BaseInterval) {
 		if (interval.getRestDuration().getSeconds() > 0) {
 			let rest_seconds = interval.getRestDuration().getSeconds();
-			this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + rest_seconds, interval, "rest"));
+			this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + rest_seconds, interval, this.getTitle("", [Intensity.ZeroIntensity])));
 			this.time_ += rest_seconds;
 		}
 	}

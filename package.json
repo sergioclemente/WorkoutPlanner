@@ -1,5 +1,5 @@
 {
-  "name": "WorkoutPlanner",
+  "name": "workout_planner",
   "version": "0.1.5",
   "description": "A simple generator of workouts for swim/bike/run",
   "main": "dist/server.js",

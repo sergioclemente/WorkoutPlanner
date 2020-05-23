@@ -1152,6 +1152,9 @@ class AbsoluteTimeIntervalVisitor extends BaseVisitor {
         if (core_1.Intensity.equals(intensities[0], core_1.Intensity.EasyIntensity)) {
             title += " easy";
         }
+        else if (core_1.Intensity.equals(intensities[0], core_1.Intensity.ZeroIntensity)) {
+            title += " rest";
+        }
         else {
             title += " " + intensity_pretty.join(" - ");
         }
@@ -1159,7 +1162,7 @@ class AbsoluteTimeIntervalVisitor extends BaseVisitor {
             console.assert(this.repeat_stack_.length == this.iteration_stack_.length);
             title += " " + this.iteration_stack_[this.iteration_stack_.length - 1] + "/" + this.repeat_stack_[this.repeat_stack_.length - 1];
         }
-        return title;
+        return title.trim();
     }
     visitSimpleInterval(interval) {
         var duration_seconds = interval.getWorkDuration().getSeconds();
@@ -1176,7 +1179,7 @@ class AbsoluteTimeIntervalVisitor extends BaseVisitor {
     visitRestInterval(interval) {
         if (interval.getRestDuration().getSeconds() > 0) {
             let rest_seconds = interval.getRestDuration().getSeconds();
-            this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + rest_seconds, interval, "rest"));
+            this.data_.push(new AbsoluteTimeInterval(this.time_, this.time_ + rest_seconds, interval, this.getTitle("", [core_1.Intensity.ZeroIntensity])));
             this.time_ += rest_seconds;
         }
     }
