@@ -121,19 +121,6 @@ describe('UserProfile', function () {
 });
 
 
-
-// StepBuildInterval basic tests
-var duration1min = new Core.Duration(Core.TimeUnit.Seconds, 60, 60, 0);
-var duration30s = new Core.Duration(Core.TimeUnit.Seconds, 30, 30, 0);
-var si1min80 = new Core.SimpleInterval("", new Core.Intensity(80), duration1min, Core.Duration.ZeroDuration);
-var si1min90 = new Core.SimpleInterval("", new Core.Intensity(90), duration1min, Core.Duration.ZeroDuration);
-var si1min100 = new Core.SimpleInterval("", new Core.Intensity(100), duration1min, Core.Duration.ZeroDuration);
-var si30s50 = new Core.SimpleInterval("", new Core.Intensity(50), duration30s, Core.Duration.ZeroDuration);
-
-var sbi = new Core.StepBuildInterval("", [si1min80, si1min90, si1min100, si30s50]);
-expect_eq_nbr(3, sbi.getRepeatCount());
-expect_eq_nbr(3 * 60 + 3 * 30, sbi.getWorkDuration().getSeconds());
-
 describe('zone visitor', function () {
 	it('1', function () {
 		expect_eq_nbr(1, Visitor.ZonesVisitor.getZone(Core.SportType.Bike, 0.50));

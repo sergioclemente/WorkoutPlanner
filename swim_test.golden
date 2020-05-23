@@ -565,7 +565,7 @@ Input:
 (5min, 65)
 (5min, 90)
 (5min, 90, 95)
-3[(5min, 90, 95, 100), (30sec, easy)]
+[(5min, 90), (30sec, easy), (5min, 95), (30sec, easy), (5min, 100), (30sec, easy)]
 2[(5min, 90), (30sec, easy)]
 AST: 
 ArrayInterval(
@@ -573,9 +573,11 @@ ArrayInterval(
 	SimpleInterval(5min, 65%, )
 	SimpleInterval(5min, 90%, )
 	RampBuildInterval(5min, 90%, 95%, , )
-	StepBuildInterval(
+	ArrayInterval(
 		SimpleInterval(5min, 90%, )
+		SimpleInterval(30sec, , easy)
 		SimpleInterval(5min, 95%, )
+		SimpleInterval(30sec, , easy)
 		SimpleInterval(5min, 100%, )
 		SimpleInterval(30sec, , easy)
 	)
@@ -584,15 +586,15 @@ ArrayInterval(
 		SimpleInterval(30sec, , easy)
 	)
 )
-IF (Avg): 0.848917617053206
-TSS2: 60.5
+IF (Avg): 0.8379988694879952
+TSS2: 59.7
 Output Unit: w
 Pretty Print:
 	* 5' @ 50w
 	* 5' @ 65w
 	* 5' @ 90w
 	* 5' build from 90w to 95w
-	* 3 x 5' - w/ 30'' easy (90w, 95w, 100w)
+	* (5' @ 90w, 30'' easy, 5' @ 95w, 30'' easy, 5' @ 100w) - w/ 30'' easy
 	* 2 x 5' @ 90w - 30'' easy
 Duration (Sec): 2850
 ----------------------------
@@ -649,7 +651,7 @@ Duration (Sec): 375
 Input: 
 8[(1min, 100w, 105w, 30s)]
 Normalized: 
-8[(1min, 100, 105)]
+8[(1min, 100, 105, 30sec)]
 AST: 
 ArrayInterval(
 	RepeatInterval(count=8, 
@@ -681,4 +683,22 @@ Pretty Print:
 	* 2 x 2'30'' alternate arm w/ 30'' rest
 Duration Unit: s
 Duration (Sec): 360
+----------------------------
+Input: 
+2[(1min, 105w, 110w, 30s)]
+Normalized: 
+2[(1min, 105, 110, 30sec)]
+AST: 
+ArrayInterval(
+	RepeatInterval(count=2, 
+		RampBuildInterval(1min, 105w, 110w, , 30sec)
+	)
+)
+IF (Avg): 1.0752906583803283
+TSS2: 5.9
+Output Unit: w
+Pretty Print:
+	* 2 x 1' build from 105w to 110w
+Duration Unit: min
+Duration (Sec): 180
 ----------------------------

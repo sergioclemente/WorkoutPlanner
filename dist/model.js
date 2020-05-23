@@ -173,6 +173,7 @@ class IntervalParser {
         var result = new core_1.ArrayInterval("Workout", []);
         var stack = [];
         stack.push(result);
+        let step_build_set = new Set();
         for (var i = 0; i < input.length; i++) {
             var ch = input[i];
             if (ch == "(") {
@@ -215,22 +216,40 @@ class IntervalParser {
                         if (stack[stack.length - 1] instanceof core_1.RepeatInterval) {
                             var repeatInterval = (stack[stack.length - 1]);
                             if (repeatInterval.getRepeatCount() > 1 &&
-                                intensities.length > 0 &&
-                                (intensities.length == repeatInterval.getRepeatCount()
-                                    || (core_1.DurationUnitHelper.areDurationUnitsSame(durationUnits) && durationValues.length == repeatInterval.getRepeatCount()))) {
+                                intensities.length > 0 && durationValues.length > 0 &&
+                                (intensities.length == repeatInterval.getRepeatCount() && durationValues.length == 1 ||
+                                    core_1.DurationUnitHelper.areDurationUnitsSame(durationUnits) && durationValues.length == repeatInterval.getRepeatCount() && intensities.length == 1)) {
                                 stack.pop();
                                 stack[stack.length - 1].getIntervals().pop();
-                                var step_intervals = [];
-                                for (let k = 0; k < repeatInterval.getRepeatCount(); k++) {
-                                    var durationUnit = k < durationUnits.length ? durationUnits[k] : durationUnits[0];
-                                    var durationValue = k < durationValues.length ? durationValues[k] : durationValues[0];
-                                    var intensity = k < intensities.length ? intensities[k] : intensities[0];
-                                    var step_duration = factory.createDuration(intensity, durationUnit, durationValue);
-                                    step_intervals.push(new core_1.SimpleInterval(title.trim(), intensity, step_duration, core_1.Duration.ZeroDuration));
+                                let step_intervals = [];
+                                if (intensities.length == 1) {
+                                    console.assert(durationValues.length == repeatInterval.getRepeatCount());
+                                    console.assert(durationUnits.length == repeatInterval.getRepeatCount());
+                                    for (let k = 0; k < repeatInterval.getRepeatCount(); k++) {
+                                        var durationUnit = durationUnits[k];
+                                        var durationValue = durationValues[k];
+                                        var intensity = intensities[0];
+                                        var step_duration = factory.createDuration(intensity, durationUnit, durationValue);
+                                        step_intervals.push(new core_1.SimpleInterval(title.trim(), intensity, step_duration, core_1.Duration.ZeroDuration));
+                                    }
                                 }
-                                var bsi = new core_1.StepBuildInterval(title.trim(), step_intervals);
+                                else if (durationValues.length == 1) {
+                                    console.assert(intensities.length == repeatInterval.getRepeatCount());
+                                    for (let k = 0; k < repeatInterval.getRepeatCount(); k++) {
+                                        var durationUnit = durationUnits[0];
+                                        var durationValue = durationValues[0];
+                                        var intensity = intensities[k];
+                                        var step_duration = factory.createDuration(intensity, durationUnit, durationValue);
+                                        step_intervals.push(new core_1.SimpleInterval(title.trim(), intensity, step_duration, core_1.Duration.ZeroDuration));
+                                    }
+                                }
+                                else {
+                                    console.assert(false);
+                                }
+                                var bsi = new core_1.ArrayInterval(title.trim(), step_intervals);
                                 stack[stack.length - 1].getIntervals().push(bsi);
                                 stack.push(bsi);
+                                step_build_set.add(bsi);
                                 break;
                             }
                         }
@@ -265,7 +284,18 @@ class IntervalParser {
                             }
                             interval = new core_1.SimpleInterval(title.trim(), intensity, duration, restDuration);
                         }
-                        stack[stack.length - 1].getIntervals().push(interval);
+                        let parent = (stack[stack.length - 1]);
+                        if (step_build_set.has(parent)) {
+                            let old_intervals = [...parent.getIntervals()];
+                            parent.getIntervals().length = 0;
+                            for (let i = 0; i < old_intervals.length; i += 1) {
+                                parent.getIntervals().push(old_intervals[i]);
+                                parent.getIntervals().push(interval);
+                            }
+                        }
+                        else {
+                            stack[stack.length - 1].getIntervals().push(interval);
+                        }
                         break;
                     }
                     else if (ch == ",") {

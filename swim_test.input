@@ -102,3 +102,6 @@
 -- EOT
 2[(150s, alternate arm, 30s)]
 -- EOT
+{output_unit=w}
+2[(1min, 105w, 110w, 30s)]
+-- EOT

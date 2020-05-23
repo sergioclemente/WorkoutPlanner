@@ -11,9 +11,6 @@ class VisitorHelper {
         if (interval instanceof core_1.SimpleInterval) {
             return visitor.visitSimpleInterval(interval);
         }
-        else if (interval instanceof core_1.StepBuildInterval) {
-            return visitor.visitStepBuildInterval(interval);
-        }
         else if (interval instanceof core_1.RampBuildInterval) {
             return visitor.visitRampBuildInterval(interval);
         }
@@ -50,17 +47,6 @@ class TreePrinterVisitor {
         else {
             this.output += core_1.stringFormat("SimpleInterval({0}, {1}, {2})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getIntensity()), interval.getTitle());
         }
-    }
-    visitStepBuildInterval(interval) {
-        this.indent();
-        this.output += "StepBuildInterval(\n";
-        this.indentation++;
-        for (var i = 0; i < interval.getIntervals().length; i++) {
-            VisitorHelper.visit(this, interval.getIntervals()[i]);
-        }
-        this.indentation--;
-        this.indent();
-        this.output += ")\n";
     }
     visitRampBuildInterval(interval) {
         this.indent();
@@ -115,12 +101,6 @@ class TreePrinterVisitor {
 exports.TreePrinterVisitor = TreePrinterVisitor;
 class BaseVisitor {
     visitCommentInterval() {
-    }
-    visitStepBuildInterval(interval) {
-        for (var i = 0; i < interval.getRepeatCount(); i++) {
-            VisitorHelper.visit(this, interval.getStepInterval(i));
-            VisitorHelper.visit(this, interval.getRestInterval());
-        }
     }
     visitRepeatInterval(interval) {
         for (var i = 0; i < interval.getRepeatCount(); i++) {
@@ -760,33 +740,6 @@ class WorkoutTextVisitor {
             }
         }
     }
-    visitStepBuildInterval(interval) {
-        this.result += interval.getRepeatCount() + " x ";
-        if (interval.areAllIntensitiesSame()) {
-            this.result += this.getIntensityPretty(interval.getStepInterval(0).getIntensity());
-            this.result += " - w/ ";
-            this.visitRestInterval(interval.getRestInterval());
-            this.result += " (";
-            for (var i = 0; i < interval.getRepeatCount(); i++) {
-                this.result += interval.getStepInterval(i).getWorkDuration().toStringShort(this.sportType == core_1.SportType.Swim);
-                this.result += ", ";
-            }
-            this.result = this.result.slice(0, this.result.length - 2);
-            this.result += ")";
-        }
-        else {
-            this.result += interval.getStepInterval(0).getWorkDuration().toStringShort(this.sportType == core_1.SportType.Swim);
-            this.result += " - w/ ";
-            this.visitRestInterval(interval.getRestInterval());
-            this.result += " (";
-            for (var i = 0; i < interval.getRepeatCount(); i++) {
-                this.result += this.getIntensityPretty(interval.getStepInterval(i).getIntensity());
-                this.result += ", ";
-            }
-            this.result = this.result.slice(0, this.result.length - 2);
-            this.result += ")";
-        }
-    }
     visitSimpleInterval(interval) {
         this.result += interval.getWorkDuration().toStringShort(this.sportType == core_1.SportType.Swim);
         let title = this.getIntervalTitle(interval);
@@ -997,37 +950,6 @@ class UnparserVisitor {
         this.output += core_1.stringFormat("({0})", params.join(", "));
         this.addSeparator();
     }
-    visitStepBuildInterval(interval) {
-        this.level++;
-        this.output += interval.getRepeatCount().toString();
-        this.output += "[";
-        if (interval.areAllIntensitiesSame()) {
-            this.output += "(";
-            this.output += this.getIntensityPretty(interval.getStepInterval(0).getIntensity());
-            for (let i = 0; i < interval.getRepeatCount(); i++) {
-                this.output += ", ";
-                this.output += this.getDurationPretty(interval.getStepInterval(i).getTotalDuration());
-            }
-            this.output += ")";
-            this.addSeparator();
-            VisitorHelper.visit(this, interval.getRestInterval());
-        }
-        else {
-            console.assert(interval.areAllDurationsSame());
-            let params = [];
-            params.push(this.getDurationPretty(interval.getStepInterval(0).getTotalDuration()));
-            for (let i = 0; i < interval.getRepeatCount(); i++) {
-                params.push(this.getIntensityPretty(interval.getStepInterval(i).getIntensity()));
-            }
-            this.output += core_1.stringFormat("({0})", params.join(", "));
-            this.addSeparator();
-            VisitorHelper.visit(this, interval.getRestInterval());
-        }
-        this.trimSeparator();
-        this.output += "]";
-        this.level--;
-        this.addSeparator();
-    }
     visitRampBuildInterval(interval) {
         this.level++;
         let params = [];
@@ -1036,6 +958,11 @@ class UnparserVisitor {
         params.push(this.getIntensityPretty(interval.getEndIntensity()));
         if (interval.getTitle().length != 0) {
             params.push(interval.getTitle());
+        }
+        if (interval.getRestDuration().getValue() != 0) {
+            let duration_rest_pretty = this.getDurationPretty(interval.getRestDuration());
+            console.assert(duration_rest_pretty.length > 0, "" + interval.getRestDuration());
+            params.push(duration_rest_pretty);
         }
         this.output += core_1.stringFormat("({0})", params.join(", "));
         this.level--;

@@ -1,4 +1,4 @@
-import {SportType, Duration, UserProfile, ObjectFactory, DistanceUnit, StepBuildInterval, Intensity, BaseInterval, Interval, RepeatInterval, ArrayInterval, SimpleInterval, DurationUnit, DurationUnitHelper, IntensityUnitHelper, IntensityUnit, RampBuildInterval, CommentInterval, stringFormat, MyMath, TimeUnit, PreconditionsCheck, FormatterHelper} from './core';
+import {SportType, Duration, UserProfile, ObjectFactory, DistanceUnit, Intensity, BaseInterval, Interval, RepeatInterval, ArrayInterval, SimpleInterval, DurationUnit, DurationUnitHelper, IntensityUnitHelper, IntensityUnit, RampBuildInterval, CommentInterval, stringFormat, MyMath, TimeUnit, PreconditionsCheck, FormatterHelper} from './core';
 
 export class VisitorHelper {
 	static visitAndFinalize(visitor: Visitor, interval: Interval): any {
@@ -8,8 +8,6 @@ export class VisitorHelper {
 	static visit(visitor: Visitor, interval: Interval): any {
 		if (interval instanceof SimpleInterval) {
 			return visitor.visitSimpleInterval(<SimpleInterval>interval);
-		} else if (interval instanceof StepBuildInterval) {
-			return visitor.visitStepBuildInterval(<StepBuildInterval>interval);
 		} else if (interval instanceof RampBuildInterval) {
 			return visitor.visitRampBuildInterval(<RampBuildInterval>interval);
 		} else if (interval instanceof RepeatInterval) {
@@ -28,7 +26,6 @@ export class VisitorHelper {
 export interface Visitor {
 	visitCommentInterval(interval: CommentInterval): void;
 	visitSimpleInterval(interval: SimpleInterval): void;
-	visitStepBuildInterval(interval: StepBuildInterval): void;
 	visitRampBuildInterval(interval: RampBuildInterval): void;
 	visitRepeatInterval(interval: RepeatInterval): void;
 	visitArrayInterval(interval: ArrayInterval): void;
@@ -51,17 +48,6 @@ export class TreePrinterVisitor implements Visitor {
 		} else {
 			this.output += stringFormat("SimpleInterval({0}, {1}, {2})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getIntensity()), interval.getTitle());
 		}
-	}
-	visitStepBuildInterval(interval: StepBuildInterval): void {
-		this.indent();
-		this.output += "StepBuildInterval(\n"
-		this.indentation++;
-		for (var i = 0; i < interval.getIntervals().length; i++) {
-			VisitorHelper.visit(this, interval.getIntervals()[i]);
-		}
-		this.indentation--;
-		this.indent();
-		this.output += ")\n";
 	}
 	visitRampBuildInterval(interval: RampBuildInterval): void {
 		this.indent();
@@ -125,16 +111,6 @@ export abstract class BaseVisitor implements Visitor {
 	}
 
 	abstract visitSimpleInterval(interval: SimpleInterval): void;
-	visitStepBuildInterval(interval: StepBuildInterval): void {
-		// Generic implementation
-		for (var i = 0; i < interval.getRepeatCount(); i++) {
-			// step interval
-			VisitorHelper.visit(this, interval.getStepInterval(i));
-
-			// rest interval
-			VisitorHelper.visit(this, interval.getRestInterval());
-		}
-	}
 	abstract visitRampBuildInterval(interval: RampBuildInterval): void;
 
 	visitRepeatInterval(interval: RepeatInterval) {
@@ -886,44 +862,6 @@ export class WorkoutTextVisitor implements Visitor {
 		}
 	}
 
-	visitStepBuildInterval(interval: StepBuildInterval): void {
-		this.result += interval.getRepeatCount() + " x ";
-
-		// There are two types of step build interval
-		// 1) Same duration - different intensities
-		// 2) Different duration - same intensities
-		// case 1
-		if (interval.areAllIntensitiesSame()) {
-			this.result += this.getIntensityPretty(interval.getStepInterval(0).getIntensity());
-			this.result += " - w/ ";
-			this.visitRestInterval(interval.getRestInterval());
-
-			this.result += " (";
-			for (var i = 0; i < interval.getRepeatCount(); i++) {
-				this.result += interval.getStepInterval(i).getWorkDuration().toStringShort(this.sportType == SportType.Swim);
-				this.result += ", ";
-			}
-
-			// remove extra ", "
-			this.result = this.result.slice(0, this.result.length - 2);
-			this.result += ")";
-		} else {
-			this.result += interval.getStepInterval(0).getWorkDuration().toStringShort(this.sportType == SportType.Swim);
-
-			this.result += " - w/ ";
-			this.visitRestInterval(interval.getRestInterval());
-
-			this.result += " (";
-			for (var i = 0; i < interval.getRepeatCount(); i++) {
-				this.result += this.getIntensityPretty(interval.getStepInterval(i).getIntensity());
-				this.result += ", ";
-			}
-			// remove extra ", "
-			this.result = this.result.slice(0, this.result.length - 2);
-			this.result += ")";
-		}
-	}
-
 	// SimpleInterval
 	visitSimpleInterval(interval: SimpleInterval): void {
 		this.result += interval.getWorkDuration().toStringShort(this.sportType == SportType.Swim);
@@ -1142,39 +1080,6 @@ export class UnparserVisitor implements Visitor {
 		this.output += stringFormat("({0})", params.join(", "));
 		this.addSeparator();
 	}
-	visitStepBuildInterval(interval: StepBuildInterval): void {
-		// TODO: Refactor this to use params as well
-		this.level++;
-		this.output += interval.getRepeatCount().toString();
-		this.output += "[";
-		if (interval.areAllIntensitiesSame()) {
-			this.output += "(";
-			// Get any step as all the durations are the same.
-			this.output += this.getIntensityPretty(interval.getStepInterval(0).getIntensity());
-			for (let i = 0; i < interval.getRepeatCount(); i++) {
-				this.output += ", ";
-				this.output += this.getDurationPretty(interval.getStepInterval(i).getTotalDuration());
-			}
-			this.output += ")";
-			this.addSeparator();
-			VisitorHelper.visit(this, interval.getRestInterval());
-		} else {
-			console.assert(interval.areAllDurationsSame())
-			let params = []
-			params.push(this.getDurationPretty(interval.getStepInterval(0).getTotalDuration()));
-			// Get any step as all the durations are the same.				
-			for (let i = 0; i < interval.getRepeatCount(); i++) {
-				params.push(this.getIntensityPretty(interval.getStepInterval(i).getIntensity()));
-			}
-			this.output += stringFormat("({0})", params.join(", "));
-			this.addSeparator();
-			VisitorHelper.visit(this, interval.getRestInterval());
-		}
-		this.trimSeparator();
-		this.output += "]";
-		this.level--;
-		this.addSeparator();
-	}
 	visitRampBuildInterval(interval: RampBuildInterval): void {
 		this.level++;
 		let params = []
@@ -1183,6 +1088,11 @@ export class UnparserVisitor implements Visitor {
 		params.push(this.getIntensityPretty(interval.getEndIntensity()));
 		if (interval.getTitle().length != 0) {
 			params.push(interval.getTitle());
+		}
+		if (interval.getRestDuration().getValue() != 0) {
+			let duration_rest_pretty = this.getDurationPretty(interval.getRestDuration());
+			console.assert(duration_rest_pretty.length > 0, "" + interval.getRestDuration())
+			params.push(duration_rest_pretty);
 		}
 		this.output += stringFormat("({0})", params.join(", "));
 		this.level--;

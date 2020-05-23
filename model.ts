@@ -1,4 +1,4 @@
-import {SportType, ObjectFactory, UserProfile, Duration, DistanceUnit, Intensity, ArrayInterval, RepeatInterval, StepBuildInterval, Interval, SimpleInterval, DurationUnit, DurationUnitHelper, IntensityUnitHelper, IntensityUnit, RampBuildInterval, CommentInterval, stringFormat, MyMath, TimeUnitHelper, TimeUnit, PreconditionsCheck, FormatterHelper} from './core';
+import {SportType, ObjectFactory, UserProfile, Duration, DistanceUnit, Intensity, ArrayInterval, RepeatInterval, Interval, SimpleInterval, DurationUnit, DurationUnitHelper, IntensityUnitHelper, IntensityUnit, RampBuildInterval, CommentInterval, stringFormat, MyMath, TimeUnitHelper, TimeUnit, PreconditionsCheck, FormatterHelper} from './core';
 import {UnparserVisitor, NPVisitor, FTP, VisitorHelper, ZonesVisitor, AbsoluteTimeInterval, AbsoluteTimeIntervalVisitor, WorkoutTextVisitor, MRCCourseDataVisitor, ZwiftDataVisitor, PPSMRXCourseDataVisitor} from './visitor';
 
 export interface Parser {
@@ -228,6 +228,10 @@ export class IntervalParser {
 		var stack = [];
 		stack.push(result);
 
+		// This is a required hack in order to track the StepBuildIntervals so we can
+		// interleave rest intervals in between work intervals.
+		let step_build_set = new Set<ArrayInterval>();
+
 		for (var i = 0; i < input.length; i++) {
 			var ch = input[i];
 
@@ -291,31 +295,52 @@ export class IntervalParser {
 							// 2) 2x (45s @ 75% and 100% w/ 15s rest)
 							// Will assume the former, since the latter is less common.
 							if (repeatInterval.getRepeatCount() > 1 &&
-							    intensities.length > 0 &&
-								(intensities.length == repeatInterval.getRepeatCount()
-									|| (DurationUnitHelper.areDurationUnitsSame(durationUnits) && durationValues.length == repeatInterval.getRepeatCount()))) {
+							    intensities.length > 0 && durationValues.length > 0 &&
+								(intensities.length == repeatInterval.getRepeatCount() && durationValues.length == 1 ||
+								  DurationUnitHelper.areDurationUnitsSame(durationUnits) && durationValues.length == repeatInterval.getRepeatCount() && intensities.length == 1)) {
 								// OK this should not be a RepeatInterval, it should be
-								// a StepBuildInterval instead
+								// a StepBuildInterval instead.
 
 								// Remove the ArrayInterval from the top and from the parent
 								stack.pop();
 								stack[stack.length - 1].getIntervals().pop();
 
-								// add the new intervals
-								var step_intervals = [];
-								for (let k = 0; k < repeatInterval.getRepeatCount(); k++) {
-									var durationUnit: DurationUnit = k < durationUnits.length ? durationUnits[k] : durationUnits[0];
-									var durationValue: number = k < durationValues.length ? durationValues[k] : durationValues[0];
-									var intensity: Intensity = k < intensities.length ? intensities[k] : intensities[0];
-									var step_duration: Duration = factory.createDuration(intensity, durationUnit, durationValue);
-									step_intervals.push(new SimpleInterval(title.trim(), intensity, step_duration, Duration.ZeroDuration));
+								// StepBuildInterval was deprecated, so let's simply inline them
+								// as it simplifies the implementation a little bit.
+								// When all workouts don't depend on it we can go ahead and remove this
+								// parser logic.
+								let step_intervals = [];
+
+								if (intensities.length == 1) {
+									console.assert(durationValues.length == repeatInterval.getRepeatCount());
+									console.assert(durationUnits.length == repeatInterval.getRepeatCount());
+
+									for (let k = 0; k < repeatInterval.getRepeatCount(); k++) {
+										var durationUnit: DurationUnit = durationUnits[k];
+										var durationValue: number = durationValues[k];
+										var intensity: Intensity = intensities[0];
+										var step_duration: Duration = factory.createDuration(intensity, durationUnit, durationValue);
+										step_intervals.push(new SimpleInterval(title.trim(), intensity, step_duration, Duration.ZeroDuration));
+									}
+								} else if (durationValues.length == 1) {
+									console.assert(intensities.length == repeatInterval.getRepeatCount());
+
+									for (let k = 0; k < repeatInterval.getRepeatCount(); k++) {
+										var durationUnit: DurationUnit = durationUnits[0];
+										var durationValue: number = durationValues[0];
+										var intensity: Intensity = intensities[k];
+										var step_duration: Duration = factory.createDuration(intensity, durationUnit, durationValue);
+										step_intervals.push(new SimpleInterval(title.trim(), intensity, step_duration, Duration.ZeroDuration));
+									}
+								} else {
+									console.assert(false);
 								}
 
-								var bsi = new StepBuildInterval(title.trim(), step_intervals);
-
 								// put back to the parent and top of the stack
+								var bsi = new ArrayInterval(title.trim(), step_intervals);
 								stack[stack.length - 1].getIntervals().push(bsi);
 								stack.push(bsi);
+								step_build_set.add(bsi);
 								break;
 							}
 						}
@@ -355,7 +380,18 @@ export class IntervalParser {
 							interval = new SimpleInterval(title.trim(), intensity, duration, restDuration);
 						}
 
-						stack[stack.length - 1].getIntervals().push(interval);
+						let parent = <ArrayInterval>(stack[stack.length - 1]);
+						if (step_build_set.has(parent)) {
+							// HACK: We have to interleave the intervals
+							let old_intervals = [...parent.getIntervals()];
+							parent.getIntervals().length = 0;
+							for (let i = 0; i < old_intervals.length; i += 1) {
+								parent.getIntervals().push(old_intervals[i]);
+								parent.getIntervals().push(interval);
+							}
+						} else {
+							stack[stack.length - 1].getIntervals().push(interval);
+						}
 						break;
 					} else if (ch == ",") {
 						numIndex++;

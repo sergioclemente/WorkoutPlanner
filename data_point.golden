@@ -139,53 +139,113 @@ Input: 2[(1min, 105w, 110w, 30s)]
             "originalUnit": 1,
             "originalValue": 105
         },
-        "label": "1' @ 105w",
+        "label": "1' build from 105w to 110w",
         "tag": "if"
     },
     {
         "x": {
             "unit": 13,
             "value": 1,
-            "estimatedDistanceInMiles": 0.042112299465240643,
+            "estimatedDistanceInMiles": 0.04312663068370301,
             "estimatedDurationInSeconds": 60
+        },
+        "y": {
+            "ifValue": 1.1,
+            "originalUnit": 1,
+            "originalValue": 110
+        },
+        "label": "1' build from 105w to 110w",
+        "tag": "if"
+    },
+    {
+        "x": {
+            "unit": 13,
+            "value": 1,
+            "estimatedDistanceInMiles": 0.04312663068370301,
+            "estimatedDurationInSeconds": 60
+        },
+        "y": {
+            "ifValue": 0,
+            "originalUnit": 0,
+            "originalValue": 0
+        },
+        "label": "1' build from 105w to 110w",
+        "tag": "rest"
+    },
+    {
+        "x": {
+            "unit": 12,
+            "value": 90,
+            "estimatedDistanceInMiles": 0.06468994602555452,
+            "estimatedDurationInSeconds": 90
+        },
+        "y": {
+            "ifValue": 0,
+            "originalUnit": 0,
+            "originalValue": 0
+        },
+        "label": "1' build from 105w to 110w",
+        "tag": "rest"
+    },
+    {
+        "x": {
+            "unit": 12,
+            "value": 90,
+            "estimatedDistanceInMiles": 0.06468994602555452,
+            "estimatedDurationInSeconds": 90
         },
         "y": {
             "ifValue": 1.05,
             "originalUnit": 1,
             "originalValue": 105
         },
-        "label": "1' @ 105w",
-        "tag": "if"
-    },
-    {
-        "x": {
-            "unit": 13,
-            "value": 1,
-            "estimatedDistanceInMiles": 0.042112299465240643,
-            "estimatedDurationInSeconds": 60
-        },
-        "y": {
-            "ifValue": 1.1,
-            "originalUnit": 1,
-            "originalValue": 110
-        },
-        "label": "30'' @ 110w",
+        "label": "1' build from 105w to 110w",
         "tag": "if"
     },
     {
         "x": {
             "unit": 12,
-            "value": 90,
-            "estimatedDistanceInMiles": 0.06417112299465241,
-            "estimatedDurationInSeconds": 90
+            "value": 150,
+            "estimatedDistanceInMiles": 0.10781657670925753,
+            "estimatedDurationInSeconds": 150
         },
         "y": {
             "ifValue": 1.1,
             "originalUnit": 1,
             "originalValue": 110
         },
-        "label": "30'' @ 110w",
+        "label": "1' build from 105w to 110w",
         "tag": "if"
+    },
+    {
+        "x": {
+            "unit": 12,
+            "value": 150,
+            "estimatedDistanceInMiles": 0.10781657670925753,
+            "estimatedDurationInSeconds": 150
+        },
+        "y": {
+            "ifValue": 0,
+            "originalUnit": 0,
+            "originalValue": 0
+        },
+        "label": "1' build from 105w to 110w",
+        "tag": "rest"
+    },
+    {
+        "x": {
+            "unit": 12,
+            "value": 180,
+            "estimatedDistanceInMiles": 0.12937989205110903,
+            "estimatedDurationInSeconds": 180
+        },
+        "y": {
+            "ifValue": 0,
+            "originalUnit": 0,
+            "originalValue": 0
+        },
+        "label": "1' build from 105w to 110w",
+        "tag": "rest"
     }
 ]
 ----------------------------

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ObjectFactory = exports.UserProfile = exports.SpeedParser = exports.MyMath = exports.stringFormat = exports.FormatterHelper = exports.TimeUnitHelper = exports.IntensityUnitHelper = exports.DistanceUnitHelper = exports.RampBuildInterval = exports.SimpleInterval = exports.CommentInterval = exports.StepBuildInterval = exports.RepeatInterval = exports.ArrayInterval = exports.BaseInterval = exports.Intensity = exports.Duration = exports.DurationUnitHelper = exports.PreconditionsCheck = exports.IntensityUnit = exports.TimeUnit = exports.DistanceUnit = exports.SportType = void 0;
+exports.ObjectFactory = exports.UserProfile = exports.SpeedParser = exports.MyMath = exports.stringFormat = exports.FormatterHelper = exports.TimeUnitHelper = exports.IntensityUnitHelper = exports.DistanceUnitHelper = exports.RampBuildInterval = exports.SimpleInterval = exports.CommentInterval = exports.RepeatInterval = exports.ArrayInterval = exports.BaseInterval = exports.Intensity = exports.Duration = exports.DurationUnitHelper = exports.PreconditionsCheck = exports.IntensityUnit = exports.TimeUnit = exports.DistanceUnit = exports.SportType = void 0;
 var SportType;
 (function (SportType) {
     SportType[SportType["Unknown"] = -1] = "Unknown";
@@ -529,73 +529,6 @@ class RepeatInterval extends ArrayInterval {
     }
 }
 exports.RepeatInterval = RepeatInterval;
-class StepBuildInterval extends ArrayInterval {
-    constructor(title, intervals) {
-        super(title, intervals);
-    }
-    getIntensity() {
-        var intensities = this.intervals.map(function (value) {
-            return value.getIntensity();
-        });
-        var repeatCount = this.getRepeatCount();
-        var weights = this.intervals.map(function (value) {
-            return value.getWorkDuration().getSeconds() * repeatCount;
-        });
-        return Intensity.combine(intensities, weights);
-    }
-    getRepeatCount() {
-        return this.intervals.length - 1;
-    }
-    getStepInterval(idx) {
-        return this.intervals[idx];
-    }
-    getRestInterval() {
-        return this.intervals[this.intervals.length - 1];
-    }
-    areAllIntensitiesSame() {
-        var first_intensity = this.intervals[0].getIntensity().getValue();
-        for (var i = 1; i < this.intervals.length - 1; i++) {
-            var cur_intensity = this.intervals[i].getIntensity().getValue();
-            if (cur_intensity != first_intensity) {
-                return false;
-            }
-        }
-        return true;
-    }
-    areAllDurationsSame() {
-        let first_duration = this.intervals[0].getWorkDuration().getSeconds();
-        for (var i = 1; i < this.intervals.length - 1; i++) {
-            var cur_duration = this.intervals[i].getWorkDuration();
-            if (cur_duration.getSeconds() != first_duration) {
-                return false;
-            }
-        }
-        return true;
-    }
-    getWorkDuration() {
-        var durations = [];
-        for (var i = 0; i < this.intervals.length; i++) {
-            durations[i] = this.intervals[i].getWorkDuration();
-        }
-        if (durations.length < 2) {
-            return durations[0];
-        }
-        else if (durations.length <= 2) {
-            return Duration.combine(durations[0], durations[1]);
-        }
-        else {
-            var duration = Duration.combine(durations[0], durations[1]);
-            for (var i = 2; i < durations.length - 1; i++) {
-                duration = Duration.combine(duration, durations[i]);
-            }
-            for (var i = 0; i < this.getRepeatCount(); i++) {
-                duration = Duration.combine(duration, durations[durations.length - 1]);
-            }
-            return duration;
-        }
-    }
-}
-exports.StepBuildInterval = StepBuildInterval;
 class CommentInterval extends BaseInterval {
     constructor(title) {
         super(title);
