@@ -1,12 +1,13 @@
-let http = require('http');
-let zlib = require('zlib');
-let path = require("path");
-let fs = require("fs");
-let url = require("url");
+import * as http from 'http'
+import * as zlib from 'zlib'
+import * as path from 'path'
+import * as fs from 'fs'
+import * as url from 'url'
 
-let model = require("./model");
-let model_server = require("./model_server");
-let config = require('./config');
+import * as Core from './core';
+import * as Model from './model';
+import * as ModelServer from './model_server';
+import * as Config from './config';
 
 function logRequest(req: any, code: number) {
     let user_agent: string = req.headers['user-agent'];
@@ -61,17 +62,17 @@ function handleExistentFile(req, res, fs, filename: string) {
 
 function handleSendEmail(req, res, uri: string, params) {
     if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
-        let userProfile = new model.UserProfile(params.ftp, params.tpace, params.swim_ftp, params.css, params.email);
-        let builder = new model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
+        let userProfile = new Core.UserProfile(params.ftp, params.tpace, params.swim_ftp, params.css, params.email);
+        let builder = new Model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
         logRequest(req, 200);
 
         // sending email
-        let ms = new model_server.MailSender(config.smtp.login, config.smtp.password);
+        let ms = new ModelServer.MailSender(Config.Values.smtp.login, Config.Values.smtp.password);
 
         let attachments = [];
 
         // Just send the attachment if its a bike workout
-        if (builder.getSportType() == model.SportType.Bike) {
+        if (builder.getSportType() == Core.SportType.Bike) {
             let attachment_mrc = {
                 name: builder.getMRCFileName(),
                 data: builder.getMRCFile(),
@@ -111,7 +112,7 @@ function handleSendEmail(req, res, uri: string, params) {
 
 function handleGetWorkouts(req, res, uri, params) {
     logRequest(req, 200);
-    var db = new model_server.WorkoutDB(config.mysql);
+    var db = new ModelServer.WorkoutDB(Config.Values.mysql);
     db.getAll(function (err, workouts) {
         if (err) {
             res.write("Error: " + err);
@@ -133,15 +134,15 @@ function show404(req, res) {
 
 function handleSaveWorkout(req, res, uri: string, params) {
     logRequest(req, 200);
-    let userProfile = new model.UserProfile(params.ftp, params.tpace, params.swim_ftp, params.css, params.email);
-    let builder = new model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
-    let db = new model_server.WorkoutDB(config.mysql);
-    let w = new model_server.Workout();
+    let userProfile = new Core.UserProfile(params.ftp, params.tpace, params.swim_ftp, params.css, params.email);
+    let builder = new Model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
+    let db = new ModelServer.WorkoutDB(Config.Values.mysql);
+    let w = new ModelServer.Workout();
     w.title = params.t;
     w.value = builder.getNormalizedWorkoutDefinition();
     w.tags = "";
     w.duration_sec = builder.getInterval().getTotalDuration().getSeconds();
-    w.tss = builder.getInterval().getTSS();
+    w.tss = builder.getTSS2();
     w.sport_type = params.st;
 
     db.add(w);
@@ -204,5 +205,5 @@ http.createServer(function (req, res) {
         console.log(err2.stack);
         return;
     }
-}).listen(config.port, '0.0.0.0');
-console.log('Server running at http://0.0.0.0:' + config.port);
+}).listen(Config.Values.port, '0.0.0.0');
+console.log('Server running at http://0.0.0.0:' + Config.Values.port);

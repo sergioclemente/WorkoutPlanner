@@ -1,8 +1,7 @@
 /// <reference path="./node_modules/@types/sqlite3/index.d.ts"/>
 
-var sqlite3 = require('sqlite3').verbose();
-
-import 'fs'
+import * as sqlite3 from 'sqlite3'
+import * as fs from 'fs'
 
 module ModelServer {
 	class ScopedFilename {

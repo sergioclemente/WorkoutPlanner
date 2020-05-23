@@ -1,6 +1,6 @@
 "use strict";
-var sqlite3 = require('sqlite3').verbose();
-require("fs");
+const sqlite3 = require("sqlite3");
+const fs = require("fs");
 var ModelServer;
 (function (ModelServer) {
     class ScopedFilename {
