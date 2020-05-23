@@ -4,7 +4,7 @@
   "description": "A simple generator of workouts for swim/bike/run",
   "main": "dist/server.js",
   "scripts": {
-    "start": "./build.sh && cd dist && node server.js",
+    "start": "cd dist && node server.js",
     "test": "./build.sh"
   },
   "dependencies": {
