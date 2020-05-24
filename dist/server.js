@@ -13,7 +13,7 @@ function logRequest(req, tag, data) {
     console.log(`[request-${tag}] Request Data: ${JSON.stringify(data)}`);
 }
 function handleExistentFile(req, res, request_id, fs, filename) {
-    let accept_encoding = req.headers['accept-encoding'];
+    let accept_encoding = (req.headers['accept-encoding']);
     if (!accept_encoding) {
         accept_encoding = '';
     }
@@ -21,10 +21,9 @@ function handleExistentFile(req, res, request_id, fs, filename) {
     if (stat.isDirectory()) {
         filename += '/index.html';
     }
-    let req_mod_date = req.headers["if-modified-since"];
     let mtime = stat.mtime;
-    if (req_mod_date != null) {
-        req_mod_date = new Date(req_mod_date);
+    if (req.headers["if-modified-since"] != null) {
+        let req_mod_date = new Date(req.headers["if-modified-since"]);
         console.log(`request_id: ${request_id} path: ${filename} Cache still valid? ${req_mod_date != null && mtime != null && req_mod_date.toUTCString() == mtime.toUTCString()}. Request_date:${req_mod_date.toUTCString()} - File_date:${mtime.toUTCString()}`);
     }
     const raw = fs.createReadStream(filename);
@@ -49,8 +48,17 @@ function handleExistentFile(req, res, request_id, fs, filename) {
 }
 function handleSendEmail(req, res, uri, params) {
     if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
-        let userProfile = new Core.UserProfile(params.ftp, params.tpace, params.swim_ftp, params.css, params.email);
-        let builder = new Model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
+        let ftp = parseInt((params.ftp));
+        let swim_ftp = parseInt((params.swim_ftp));
+        let tpace = (params.tpace);
+        let css = (params.css);
+        let email = (params.email);
+        let st = parseInt((params.st));
+        let ou = parseInt((params.ou));
+        let t = (params.t);
+        let w = (params.w);
+        let userProfile = new Core.UserProfile(ftp, tpace, swim_ftp, css, email);
+        let builder = new Model.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
         let ms = new ModelServer.MailSender(Config.Values.smtp.login, Config.Values.smtp.password);
         let attachments = [];
         if (builder.getSportType() == Core.SportType.Bike) {
@@ -110,17 +118,26 @@ function show404(req, res) {
     res.end();
 }
 function handleSaveWorkout(req, res, uri, params) {
-    let userProfile = new Core.UserProfile(params.ftp, params.tpace, params.swim_ftp, params.css, params.email);
-    let builder = new Model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
+    let ftp = parseInt((params.ftp));
+    let swim_ftp = parseInt((params.swim_ftp));
+    let tpace = (params.tpace);
+    let css = (params.css);
+    let email = (params.email);
+    let st = parseInt((params.st));
+    let ou = parseInt((params.ou));
+    let t = (params.t);
+    let w = (params.w);
+    let userProfile = new Core.UserProfile(ftp, tpace, swim_ftp, css, email);
+    let builder = new Model.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
     let db = new ModelServer.WorkoutDB(Config.Values.mysql);
-    let w = new ModelServer.Workout();
-    w.title = params.t;
-    w.value = builder.getNormalizedWorkoutDefinition();
-    w.tags = "";
-    w.duration_sec = builder.getInterval().getTotalDuration().getSeconds();
-    w.tss = builder.getTSS2();
-    w.sport_type = params.st;
-    db.add(w);
+    let workout = new ModelServer.Workout();
+    workout.title = t;
+    workout.value = builder.getNormalizedWorkoutDefinition();
+    workout.tags = "";
+    workout.duration_sec = builder.getInterval().getTotalDuration().getSeconds();
+    workout.tss = builder.getTSS2();
+    workout.sport_type = st;
+    db.add(workout);
     res.end();
     return true;
 }

@@ -2,7 +2,7 @@ import * as UI from './ui';
 import * as Core from './core';
 import * as Model from './model';
 import * as Visitor from './visitor';
-import 'mocha';
+import {describe, it} from 'mocha';
 import * as Assert from 'assert'
 
 // Usage: 

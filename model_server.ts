@@ -1,5 +1,3 @@
-/// <reference path="./node_modules/@types/sqlite3/index.d.ts"/>
-
 import * as sqlite3 from 'sqlite3'
 import * as fs from 'fs'
 

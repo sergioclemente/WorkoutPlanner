@@ -8,13 +8,14 @@ import * as Core from './core';
 import * as Model from './model';
 import * as ModelServer from './model_server';
 import * as Config from './config';
+import { ParsedUrlQuery } from 'querystring'
 
-function logRequest(req: any, tag: string, data: any) {
+function logRequest(req: http.IncomingMessage, tag: string, data: any) {
     console.log(`[request-${tag}] Request Data: ${JSON.stringify(data)}`);
 }
 
-function handleExistentFile(req, res, request_id: number, fs, filename: string) {
-    let accept_encoding: string = req.headers['accept-encoding'];
+function handleExistentFile(req: http.IncomingMessage, res: http.ServerResponse, request_id: number, fs, filename: string) {
+    let accept_encoding = <string>(req.headers['accept-encoding']);
     if (!accept_encoding) {
         accept_encoding = '';
     }
@@ -24,10 +25,9 @@ function handleExistentFile(req, res, request_id: number, fs, filename: string) 
     }
     // Handle 304 (Not modified files).
     // TODO: Need to fix this bug.
-    let req_mod_date = req.headers["if-modified-since"];
     let mtime = stat.mtime;
-    if (req_mod_date != null) {
-        req_mod_date = new Date(req_mod_date);
+    if (req.headers["if-modified-since"] != null) {
+        let req_mod_date = new Date(req.headers["if-modified-since"]);
         console.log(`request_id: ${request_id} path: ${filename} Cache still valid? ${req_mod_date != null && mtime != null && req_mod_date.toUTCString() == mtime.toUTCString()}. Request_date:${req_mod_date.toUTCString()} - File_date:${mtime.toUTCString()}`)
         // if (req_mod_date.toUTCString() == mtime.toUTCString()) {
         //     console.log("Serving " + filename + " from cache. FileTS=" + mtime.toUTCString() + " HeaderTS=" + req_mod_date.toUTCString())
@@ -59,12 +59,22 @@ function handleExistentFile(req, res, request_id: number, fs, filename: string) 
     }
 }
 
-function handleSendEmail(req, res, uri: string, params) {
+function handleSendEmail(req: http.IncomingMessage, res: http.ServerResponse, uri: string, params: ParsedUrlQuery) {
     if (params.w && params.ftp && params.tpace && params.st && params.ou && params.email) {
-        let userProfile = new Core.UserProfile(params.ftp, params.tpace, params.swim_ftp, params.css, params.email);
-        let builder = new Model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
+        let ftp = parseInt(<string>(params.ftp))
+        let swim_ftp = parseInt(<string>(params.swim_ftp))
+        let tpace = <string>(params.tpace)
+        let css = <string>(params.css)
+        let email = <string>(params.email)
+        let st = parseInt(<string>(params.st))
+        let ou = parseInt(<string>(params.ou))
+        let t = <string>(params.t)
+        let w = <string>(params.w)
 
-        // sending email
+        let userProfile = new Core.UserProfile(ftp, tpace, swim_ftp, css, email);
+        let builder = new Model.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
+
+        // Sending email
         let ms = new ModelServer.MailSender(Config.Values.smtp.login, Config.Values.smtp.password);
 
         let attachments = [];
@@ -108,7 +118,7 @@ function handleSendEmail(req, res, uri: string, params) {
     }
 }
 
-function handleGetWorkouts(req, res, uri, params) {
+function handleGetWorkouts(req: http.IncomingMessage, res: http.ServerResponse, uri: string, params: ParsedUrlQuery) {
     var db = new ModelServer.WorkoutDB(Config.Values.mysql);
     db.getAll(function (err, workouts) {
         if (err) {
@@ -122,36 +132,46 @@ function handleGetWorkouts(req, res, uri, params) {
     return true;
 }
 
-function show404(req, res) {
+function show404(req: http.IncomingMessage, res: http.ServerResponse) {
     res.writeHead(404, { "Content-Type": "text/plain" });
     res.write("404 Not Found\n");
     res.end();
 }
 
-function handleSaveWorkout(req, res, uri: string, params) {
-    let userProfile = new Core.UserProfile(params.ftp, params.tpace, params.swim_ftp, params.css, params.email);
-    let builder = new Model.WorkoutBuilder(userProfile, parseInt(params.st), parseInt(params.ou)).withDefinition(params.t, params.w);
-    let db = new ModelServer.WorkoutDB(Config.Values.mysql);
-    let w = new ModelServer.Workout();
-    w.title = params.t;
-    w.value = builder.getNormalizedWorkoutDefinition();
-    w.tags = "";
-    w.duration_sec = builder.getInterval().getTotalDuration().getSeconds();
-    w.tss = builder.getTSS2();
-    w.sport_type = params.st;
+function handleSaveWorkout(req: http.IncomingMessage, res: http.ServerResponse, uri: string, params: ParsedUrlQuery) {
+    let ftp = parseInt(<string>(params.ftp))
+    let swim_ftp = parseInt(<string>(params.swim_ftp))
+    let tpace = <string>(params.tpace)
+    let css = <string>(params.css)
+    let email = <string>(params.email)
+    let st = parseInt(<string>(params.st))
+    let ou = parseInt(<string>(params.ou))
+    let t = <string>(params.t)
+    let w = <string>(params.w)
 
-    db.add(w);
+    let userProfile = new Core.UserProfile(ftp, tpace, swim_ftp, css, email);
+    let builder = new Model.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
+    let db = new ModelServer.WorkoutDB(Config.Values.mysql);
+    let workout = new ModelServer.Workout();
+    workout.title = t;
+    workout.value = builder.getNormalizedWorkoutDefinition();
+    workout.tags = "";
+    workout.duration_sec = builder.getInterval().getTotalDuration().getSeconds();
+    workout.tss = builder.getTSS2();
+    workout.sport_type = st;
+
+    db.add(workout);
     res.end();
 
     return true;
 }
 
-http.createServer(function (req, res) {
+http.createServer(function (req: http.IncomingMessage, res: http.ServerResponse) {
     try {
         // TODO: Propagate this request id.
         let request_id = Math.round(Math.random()*1_000_000_000)
         let parsed_url = url.parse(req.url, true);
-        let uri: string = parsed_url.pathname;
+        let uri = parsed_url.pathname;
 
         logRequest(req, 'start',
             {
