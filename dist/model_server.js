@@ -1,6 +1,8 @@
 "use strict";
 const sqlite3 = require("sqlite3");
 const fs = require("fs");
+const pg = require("pg");
+const Config = require("./config");
 var ModelServer;
 (function (ModelServer) {
     class ScopedFilename {
@@ -61,7 +63,21 @@ var ModelServer;
     class Workout {
     }
     ModelServer.Workout = Workout;
-    class WorkoutDB {
+    class WorkoutDBFactory {
+        static createWorkoutDB() {
+            if (Config.Values.dbtype == "sqlite3") {
+                return new WorkoutDBSqlite3(Config.Values.mysql);
+            }
+            else if (Config.Values.dbtype == "pgsql") {
+                return new WorkoutDBPosgresql(Config.Values.pgsql.connectionString);
+            }
+            else {
+                return null;
+            }
+        }
+    }
+    ModelServer.WorkoutDBFactory = WorkoutDBFactory;
+    class WorkoutDBSqlite3 {
         constructor(connection_string) {
             this.connection_string = null;
             this.connection_string = connection_string;
@@ -104,6 +120,57 @@ var ModelServer;
             }.bind(this));
         }
     }
-    ModelServer.WorkoutDB = WorkoutDB;
+    ModelServer.WorkoutDBSqlite3 = WorkoutDBSqlite3;
+    class WorkoutDBPosgresql {
+        constructor(connection_string) {
+            this.connection_string = null;
+            this.connection_string = connection_string;
+        }
+        add(workout) {
+            const client = new pg.Client({ connectionString: this.connection_string });
+            client.connect();
+            client.query("INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES ($1, $2, $3, $4, $5, $6)", [workout.title, workout.value, workout.tags, workout.duration_sec, Math.round(workout.tss), workout.sport_type], (err, res) => {
+                if (err) {
+                    console.log(`Error while executing query ${err}`);
+                }
+                console.log(res);
+                client.end();
+            });
+        }
+        getAll(callback) {
+            const client = new pg.Client({ connectionString: this.connection_string });
+            client.connect();
+            const query = {
+                name: 'get-name',
+                text: 'SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id DESC;',
+                rowMode: 'array',
+            };
+            let workouts = [];
+            client
+                .query(query)
+                .then(res => {
+                for (let i = 0; i < res.rowCount; i++) {
+                    let row = res.rows[i];
+                    let workout = new Workout();
+                    workout.id = parseInt(row[0]);
+                    workout.title = row[1];
+                    workout.value = row[2];
+                    workout.tags = row[3];
+                    workout.duration_sec = parseInt(row[4]);
+                    workout.tss = parseInt(row[5]);
+                    workout.sport_type = parseInt(row[6]);
+                    workouts.push(workout);
+                }
+                callback("", workouts);
+                client.end();
+            })
+                .catch(e => {
+                console.error(e.stack);
+                callback(e.message, workouts);
+                client.end();
+            });
+        }
+    }
+    ModelServer.WorkoutDBPosgresql = WorkoutDBPosgresql;
 })(ModelServer || (ModelServer = {}));
 module.exports = ModelServer;

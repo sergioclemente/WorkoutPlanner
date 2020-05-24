@@ -16,9 +16,10 @@
     "fixed-data-table": "^0.6.5",
     "gmail-send": "^1.2.14",
     "mocha": "^7.1.2",
+    "pg": "^8.2.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "sqlite3": "^4.1.1",
+    "sqlite3": "^4.2.0",
     "typescript": "^3.4.4",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
@@ -32,5 +33,7 @@
   },
   "keywords": [],
   "license": "GNU GPL",
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/pg": "^7.14.3"
+  }
 }

@@ -1,5 +1,7 @@
 import * as sqlite3 from 'sqlite3'
 import * as fs from 'fs'
+import * as pg from 'pg'
+import * as Config from './config';
 
 module ModelServer {
 	class ScopedFilename {
@@ -81,7 +83,24 @@ module ModelServer {
 		public sport_type: number;
 	}
 
-	export class WorkoutDB {
+	export interface IWorkoutDB {
+		add(workout: Workout): void;
+		getAll(callback: (err: string, w: Workout[]) => void): void;
+	}
+
+	export class WorkoutDBFactory {
+		public static createWorkoutDB() : IWorkoutDB{
+			if (Config.Values.dbtype == "sqlite3")  {
+				return new WorkoutDBSqlite3(Config.Values.mysql);
+			} else if (Config.Values.dbtype == "pgsql") {
+				return new WorkoutDBPosgresql(Config.Values.pgsql.connectionString);
+			} else {
+				return null;
+			}
+		}
+	}
+
+	export class WorkoutDBSqlite3 implements IWorkoutDB {
 		private connection_string = null;
 
 		constructor(connection_string: string) {
@@ -125,6 +144,64 @@ module ModelServer {
 				}
 				db.close();
 			}.bind(this));
+		}
+	}
+
+	export class WorkoutDBPosgresql implements IWorkoutDB {
+		private connection_string = null;
+
+		constructor(connection_string: string) {
+			this.connection_string = connection_string;
+		}
+
+		add(workout: Workout): void {
+			const client = new pg.Client({connectionString: this.connection_string});
+			client.connect();
+			client.query("INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES ($1, $2, $3, $4, $5, $6)",
+				[workout.title, workout.value, workout.tags, workout.duration_sec, Math.round(workout.tss), workout.sport_type],
+				(err, res) => {
+					if (err) {
+						console.log(`Error while executing query ${err}`);
+					}
+					console.log(res);
+					client.end();
+			  });
+		}
+		getAll(callback: (err: string, w: Workout[]) => void): void {
+			const client = new pg.Client({connectionString: this.connection_string});
+			client.connect();
+
+			const query = {
+				name: 'get-name',
+				text: 'SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id DESC;',
+				rowMode: 'array',
+			  }
+
+			  let workouts = [];
+
+			  client
+			  .query(query)
+			  .then(res => {
+				for (let i = 0; i < res.rowCount; i++) {
+					let row = res.rows[i];
+					let workout = new Workout();
+					workout.id = parseInt(row[0]);
+					workout.title = row[1];
+					workout.value = row[2];
+					workout.tags = row[3];
+					workout.duration_sec = parseInt(row[4]);
+					workout.tss = parseInt(row[5]);
+					workout.sport_type = parseInt(row[6]);
+					workouts.push(workout);
+				}
+				callback("", workouts);
+				client.end();
+			  })
+			  .catch(e => {
+				console.error(e.stack);
+				callback(e.message, workouts);
+				client.end();
+			  });
 		}
 	}
 

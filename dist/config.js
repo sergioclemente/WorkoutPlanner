@@ -10,6 +10,10 @@ let Values = (() => {
         password: process.env.GMAIL_PASSWORD || ""
     };
     Values.mysql = (process.env.SQLITE_PATH || "app.db");
+    Values.dbtype = (process.env.DB_TYPE || "pgsql");
+    Values.pgsql = {
+        connectionString: (process.env.DATABASE_URL || 'postgresql:///sergioclementefilho')
+    };
     return Values;
 })();
 exports.Values = Values;

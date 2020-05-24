@@ -99,7 +99,7 @@ function handleSendEmail(req, res, uri, params) {
     }
 }
 function handleGetWorkouts(req, res, uri, params) {
-    var db = new ModelServer.WorkoutDB(Config.Values.mysql);
+    var db = ModelServer.WorkoutDBFactory.createWorkoutDB();
     db.getAll(function (err, workouts) {
         if (err) {
             res.write("Error: " + err);
@@ -129,7 +129,7 @@ function handleSaveWorkout(req, res, uri, params) {
     let w = (params.w);
     let userProfile = new Core.UserProfile(ftp, tpace, swim_ftp, css, email);
     let builder = new Model.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
-    let db = new ModelServer.WorkoutDB(Config.Values.mysql);
+    let db = ModelServer.WorkoutDBFactory.createWorkoutDB();
     let workout = new ModelServer.Workout();
     workout.title = t;
     workout.value = builder.getNormalizedWorkoutDefinition();

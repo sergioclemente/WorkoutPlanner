@@ -119,7 +119,7 @@ function handleSendEmail(req: http.IncomingMessage, res: http.ServerResponse, ur
 }
 
 function handleGetWorkouts(req: http.IncomingMessage, res: http.ServerResponse, uri: string, params: ParsedUrlQuery) {
-    var db = new ModelServer.WorkoutDB(Config.Values.mysql);
+    var db = ModelServer.WorkoutDBFactory.createWorkoutDB();
     db.getAll(function (err, workouts) {
         if (err) {
             res.write("Error: " + err);
@@ -151,7 +151,7 @@ function handleSaveWorkout(req: http.IncomingMessage, res: http.ServerResponse, 
 
     let userProfile = new Core.UserProfile(ftp, tpace, swim_ftp, css, email);
     let builder = new Model.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
-    let db = new ModelServer.WorkoutDB(Config.Values.mysql);
+    let db = ModelServer.WorkoutDBFactory.createWorkoutDB();
     let workout = new ModelServer.Workout();
     workout.title = t;
     workout.value = builder.getNormalizedWorkoutDefinition();
