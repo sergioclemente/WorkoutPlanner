@@ -3,6 +3,7 @@ const sqlite3 = require("sqlite3");
 const fs = require("fs");
 const pg = require("pg");
 const Config = require("./config");
+const Sentry = require("@sentry/node");
 var ModelServer;
 (function (ModelServer) {
     class ScopedFilename {
@@ -15,6 +16,27 @@ var ModelServer;
         }
     }
     ;
+    class Logger {
+        static init() {
+            if (Config.Values.sentry == null || Config.Values.sentry.length == 0) {
+                console.log("Initializing sentry locally");
+                const sentryTestkit = require("sentry-testkit");
+                const { sentryTransport } = sentryTestkit();
+                Sentry.init({
+                    dsn: 'https://foo@obar/123',
+                    transport: sentryTransport
+                });
+            }
+            else {
+                console.log(`Initializing sentry with config ${Config.Values.sentry}`);
+                Sentry.init({ dsn: Config.Values.sentry });
+            }
+        }
+        static error(msg) {
+            Sentry.captureException(new Error(msg));
+        }
+    }
+    ModelServer.Logger = Logger;
     class MailSender {
         constructor(user, password) {
             this.user = user;
@@ -66,9 +88,11 @@ var ModelServer;
     class WorkoutDBFactory {
         static createWorkoutDB() {
             if (Config.Values.dbtype == "sqlite3") {
+                console.log(`Sqlite3 path ${Config.Values.mysql}`);
                 return new WorkoutDBSqlite3(Config.Values.mysql);
             }
             else if (Config.Values.dbtype == "pgsql") {
+                console.log(`Pgsql connstr ${Config.Values.pgsql.connectionString}`);
                 return new WorkoutDBPosgresql(Config.Values.pgsql.connectionString);
             }
             else {
@@ -82,12 +106,17 @@ var ModelServer;
             this.connection_string = null;
             this.connection_string = connection_string;
         }
-        add(workout) {
+        add(workout, callback) {
             var db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READWRITE);
             try {
                 var stmt = db.prepare("INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES (?, ?, ?, ?, ?, ?)");
                 stmt.run(workout.title, workout.value, workout.tags, workout.duration_sec, workout.tss, workout.sport_type);
                 stmt.finalize();
+                callback("");
+            }
+            catch (error) {
+                Logger.error(JSON.stringify(error));
+                callback("Error while adding workout");
             }
             finally {
                 db.close();
@@ -98,7 +127,7 @@ var ModelServer;
             var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id DESC";
             db.all(sql, function (err, rows) {
                 if (err) {
-                    console.log(err);
+                    Logger.error(err);
                     callback("Error while reading row from db", null);
                 }
                 else {
@@ -126,15 +155,18 @@ var ModelServer;
             this.connection_string = null;
             this.connection_string = connection_string;
         }
-        add(workout) {
+        add(workout, callback) {
             const client = new pg.Client({ connectionString: this.connection_string });
             client.connect();
             client.query("INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES ($1, $2, $3, $4, $5, $6)", [workout.title, workout.value, workout.tags, workout.duration_sec, Math.round(workout.tss), workout.sport_type], (err, res) => {
-                if (err) {
-                    console.log(`Error while executing query ${err}`);
-                }
-                console.log(res);
                 client.end();
+                if (err) {
+                    Logger.error(err.message);
+                    callback(err.message);
+                }
+                else {
+                    callback("");
+                }
             });
         }
         getAll(callback) {
@@ -165,7 +197,7 @@ var ModelServer;
                 client.end();
             })
                 .catch(e => {
-                console.error(e.stack);
+                Logger.error(e.message);
                 callback(e.message, workouts);
                 client.end();
             });

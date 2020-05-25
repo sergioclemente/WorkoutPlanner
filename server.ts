@@ -107,8 +107,7 @@ function handleSendEmail(req: http.IncomingMessage, res: http.ServerResponse, ur
                     res.writeHead(200, {});
                 } else {
                     res.writeHead(500, {});
-                    console.log("Error while sending email.");
-                    console.log(message);
+                    ModelServer.Logger.error(message);
                 }
                 res.end();
             });
@@ -122,7 +121,8 @@ function handleGetWorkouts(req: http.IncomingMessage, res: http.ServerResponse, 
     var db = ModelServer.WorkoutDBFactory.createWorkoutDB();
     db.getAll(function (err, workouts) {
         if (err) {
-            res.write("Error: " + err);
+            res.writeHead(500);
+            res.end();
         } else {
             res.writeHead(200, { "Content-Type": "application/json" });
             res.write(JSON.stringify(workouts));
@@ -160,11 +160,18 @@ function handleSaveWorkout(req: http.IncomingMessage, res: http.ServerResponse, 
     workout.tss = builder.getTSS2();
     workout.sport_type = st;
 
-    db.add(workout);
-    res.end();
+    db.add(workout, function (err: string) {
+        if (err != null && err.length > 0) {
+            res.writeHead(500);
+        }
+        res.end();
+    });
+
 
     return true;
 }
+
+ModelServer.Logger.init();
 
 http.createServer(function (req: http.IncomingMessage, res: http.ServerResponse) {
     try {
@@ -215,8 +222,7 @@ http.createServer(function (req: http.IncomingMessage, res: http.ServerResponse)
                     res.writeHead(500, { "Content-Type": "text/plain" });
                     res.write("Oops... Server error\n");
                     res.end();
-                    console.log(err1.message);
-                    console.log(err1.stack);
+                    ModelServer.Logger.error(err1.message);
                 }
                 logRequest(req, 'end', 
                     {
@@ -230,8 +236,7 @@ http.createServer(function (req: http.IncomingMessage, res: http.ServerResponse)
         res.writeHead(500, { "Content-Type": "text/plain" });
         res.write("Oops... Server error\n");
         res.end();
-        console.log(err2.message);
-        console.log(err2.stack);
+        ModelServer.Logger.error(err2.message);
     }
 }).listen(Config.Values.port, '0.0.0.0');
 console.log('Server running at http://0.0.0.0:' + Config.Values.port);

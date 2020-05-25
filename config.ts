@@ -9,5 +9,6 @@ export class Values {
   static pgsql = {
     connectionString: (process.env.DATABASE_URL || 'postgresql:///sergioclementefilho')
   };
+  static sentry = (process.env.SENTRY_DSN || "");
 }
 

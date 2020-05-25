@@ -14,6 +14,7 @@ let Values = (() => {
     Values.pgsql = {
         connectionString: (process.env.DATABASE_URL || 'postgresql:///sergioclementefilho')
     };
+    Values.sentry = (process.env.SENTRY_DSN || "");
     return Values;
 })();
 exports.Values = Values;

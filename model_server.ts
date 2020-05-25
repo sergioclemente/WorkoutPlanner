@@ -2,6 +2,7 @@ import * as sqlite3 from 'sqlite3'
 import * as fs from 'fs'
 import * as pg from 'pg'
 import * as Config from './config';
+import * as Sentry from '@sentry/node';
 
 module ModelServer {
 	class ScopedFilename {
@@ -16,6 +17,28 @@ module ModelServer {
 			fs.unlinkSync(this.name);
 		}
 	};
+
+	export class Logger {
+		public static init() : void {
+			if (Config.Values.sentry == null || Config.Values.sentry.length == 0) {
+				console.log("Initializing sentry locally");
+				const sentryTestkit = require("sentry-testkit");
+			
+				const { sentryTransport } = sentryTestkit();
+			
+				Sentry.init({
+					dsn: 'https://foo@obar/123',
+					transport: sentryTransport
+				  })
+			} else {
+				console.log(`Initializing sentry with config ${Config.Values.sentry}`);
+				Sentry.init({ dsn: Config.Values.sentry });
+			}
+		}
+		public static error(msg: string) : void {
+			Sentry.captureException(new Error(msg));
+		}
+	}
 
 	export class MailSender {
 		user: string;
@@ -84,15 +107,17 @@ module ModelServer {
 	}
 
 	export interface IWorkoutDB {
-		add(workout: Workout): void;
+		add(workout: Workout, callback: (err:string) => void): void;
 		getAll(callback: (err: string, w: Workout[]) => void): void;
 	}
 
 	export class WorkoutDBFactory {
 		public static createWorkoutDB() : IWorkoutDB{
 			if (Config.Values.dbtype == "sqlite3")  {
+				console.log(`Sqlite3 path ${Config.Values.mysql}`);
 				return new WorkoutDBSqlite3(Config.Values.mysql);
 			} else if (Config.Values.dbtype == "pgsql") {
+				console.log(`Pgsql connstr ${Config.Values.pgsql.connectionString}`);
 				return new WorkoutDBPosgresql(Config.Values.pgsql.connectionString);
 			} else {
 				return null;
@@ -107,13 +132,17 @@ module ModelServer {
 			this.connection_string = connection_string;
 		}
 
-		add(workout: Workout): void {
+		add(workout: Workout, callback: (err:string) => void): void {
 			var db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READWRITE);
 			try {
 				// Use prepared statements since it takes care of escaping the parameters.
 				var stmt = db.prepare("INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES (?, ?, ?, ?, ?, ?)");
 				stmt.run(workout.title, workout.value, workout.tags, workout.duration_sec, workout.tss, workout.sport_type);
 				stmt.finalize();
+				callback("");
+			} catch (error) {
+				Logger.error(JSON.stringify(error));
+				callback("Error while adding workout");
 			} finally {
 				db.close();
 			}
@@ -125,7 +154,7 @@ module ModelServer {
 
 			db.all(sql, function (err, rows) {
 				if (err) {
-					console.log(err);
+					Logger.error(err);
 					callback("Error while reading row from db", null);
 				} else {
 					let result = [];
@@ -154,17 +183,19 @@ module ModelServer {
 			this.connection_string = connection_string;
 		}
 
-		add(workout: Workout): void {
+		add(workout: Workout, callback: (err: string) => void): void {
 			const client = new pg.Client({connectionString: this.connection_string});
 			client.connect();
 			client.query("INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES ($1, $2, $3, $4, $5, $6)",
 				[workout.title, workout.value, workout.tags, workout.duration_sec, Math.round(workout.tss), workout.sport_type],
 				(err, res) => {
-					if (err) {
-						console.log(`Error while executing query ${err}`);
-					}
-					console.log(res);
 					client.end();
+					if (err) {
+						Logger.error(err.message);
+						callback(err.message);
+					} else {
+						callback("");
+					}
 			  });
 		}
 		getAll(callback: (err: string, w: Workout[]) => void): void {
@@ -198,7 +229,7 @@ module ModelServer {
 				client.end();
 			  })
 			  .catch(e => {
-				console.error(e.stack);
+				Logger.error(e.message);
 				callback(e.message, workouts);
 				client.end();
 			  });
