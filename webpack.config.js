@@ -4,7 +4,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 let dist_folder = path.resolve(__dirname, 'dist') + "/";
 
 module.exports = {
-  mode: 'production',
+  mode: 'development',
   entry: './dist/index.js',
   output: {
     path: dist_folder,
