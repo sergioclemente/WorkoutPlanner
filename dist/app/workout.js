@@ -17,7 +17,8 @@ class Workout extends React.Component {
         this.params.workout_text = workout_text;
         this.params.workout_title = workout_title;
         let dominant_unit = this.params.getDominantUnit();
-        if (dominant_unit != Core.IntensityUnit.Unknown &&
+        if (dominant_unit != null &&
+            dominant_unit != Core.IntensityUnit.Unknown &&
             dominant_unit != Core.IntensityUnit.IF) {
             let input = this.refs['input'];
             input.setOutputUnit(dominant_unit);

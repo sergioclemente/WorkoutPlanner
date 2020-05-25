@@ -79,7 +79,7 @@ class WorkoutView extends React.Component {
             });
         }
         catch (err) {
-            console.log("error:" + err.message);
+            console.log("error in workout_view.getState():" + err.message);
             return ({
                 tss: 0,
                 tss_from_if: 0,

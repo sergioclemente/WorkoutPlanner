@@ -21,7 +21,8 @@ export default class Workout extends React.Component<any, any> {
 
 		let dominant_unit : Core.IntensityUnit = this.params.getDominantUnit();
 		// Don't override the unit if its IF since its too generic.
-		if (dominant_unit != Core.IntensityUnit.Unknown &&
+		if (dominant_unit != null &&
+			dominant_unit != Core.IntensityUnit.Unknown &&
 			dominant_unit != Core.IntensityUnit.IF) {
 			let input: WorkoutInput = this.refs['input'] as WorkoutInput;
 			input.setOutputUnit(dominant_unit);

@@ -100,7 +100,7 @@ export default class WorkoutView extends React.Component<any, any> {
 				}
 			);
 		} catch (err) {
-			console.log("error:" + err.message);
+			console.log("error in workout_view.getState():" + err.message);
 			return (
 				{
 					tss: 0,

@@ -436,8 +436,12 @@ export class QueryParams {
 	}
 
 	getDominantUnit(): Core.IntensityUnit {
-		return Visitor.DominantUnitVisitor.computeIntensity(this.createWorkoutBuilder().getInterval());
-
+		try {
+			let workout_builder = this.createWorkoutBuilder();
+			return workout_builder != null ? Visitor.DominantUnitVisitor.computeIntensity(workout_builder.getInterval()) : null;
+		} catch (Error) {
+			return Core.IntensityUnit.Unknown;
+		}
 	}
 }
 
