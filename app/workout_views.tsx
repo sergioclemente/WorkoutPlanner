@@ -105,10 +105,10 @@ export default class WorkoutViews extends React.Component<any, any> {
 
 			for (let i = 0; i < rows.length; i++) {
 				let params = new UI.QueryParams();
-				params.workout_text = rows[i].value;
-				params.workout_title = rows[i].title;
-				params.sport_type = rows[i].sport_type.toString();
-				params.page = "wv";
+				params.workout_text.value = rows[i].value;
+				params.workout_title.value = rows[i].title;
+				params.sport_type.value = rows[i].sport_type.toString();
+				params.page.value = "wv";
 				// Tags are separated by comma. e.g. speed, awc
 				let tags_array = rows[i].tags.split(",").map(x => x.trim());
 				for (let j = 0; j < tags_array.length; j++) {

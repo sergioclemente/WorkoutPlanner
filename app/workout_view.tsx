@@ -77,7 +77,7 @@ export default class WorkoutView extends React.Component<any, any> {
 			);
 
 			var workout_steps = builder.getInterval().getIntervals().map(function (value: Core.Interval, index: number) {
-				return builder.getIntervalPretty(value, params.should_round == "true");
+				return builder.getIntervalPretty(value, params.should_round.value == "true");
 			}.bind(this));
 
 			var avg_pace = builder.getSportType() == Core.SportType.Run ?
@@ -96,7 +96,7 @@ export default class WorkoutView extends React.Component<any, any> {
 					time_in_zones_data: time_in_zones_data,
 					workout_steps: workout_steps,
 					workout_pretty: builder.getPrettyPrint(),
-					workout_text: params.workout_text,
+					workout_text: params.workout_text.value,
 				}
 			);
 		} catch (err) {

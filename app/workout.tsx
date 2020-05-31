@@ -14,10 +14,10 @@ export default class Workout extends React.Component<any, any> {
 	}
 
 	_onWorkoutInputChanged(sportType: Core.SportType, outputUnit: Core.IntensityUnit, workout_title: string, workout_text: string) {
-		this.params.sport_type = sportType.toString();
-		this.params.output_unit = outputUnit.toString();
-		this.params.workout_text = workout_text;
-		this.params.workout_title = workout_title;
+		this.params.sport_type.value = sportType.toString();
+		this.params.output_unit.value = outputUnit.toString();
+		this.params.workout_text.value = workout_text;
+		this.params.workout_title.value = workout_title;
 
 		let dominant_unit : Core.IntensityUnit = this.params.getDominantUnit();
 		// Don't override the unit if its IF since its too generic.
@@ -33,13 +33,13 @@ export default class Workout extends React.Component<any, any> {
 
 	_onUserSettingsChanged(ftp: number, t_pace: string, swim_css: string, swim_ftp: string, email: string, efficiency_factor: string) {
 		if (!isNaN(ftp)) {
-			this.params.ftp_watts = ftp.toString();	
+			this.params.ftp_watts.value = ftp.toString();	
 		}
-		this.params.t_pace = t_pace;
-		this.params.swim_css = swim_css;
-		this.params.swim_ftp = swim_ftp;
-		this.params.email = email;
-		this.params.efficiency_factor = efficiency_factor;
+		this.params.t_pace.value = t_pace;
+		this.params.swim_css.value = swim_css;
+		this.params.swim_ftp.value = swim_ftp;
+		this.params.email.value = email;
+		this.params.efficiency_factor.value = efficiency_factor;
 		this.refresh();
 	}
 
@@ -59,7 +59,7 @@ export default class Workout extends React.Component<any, any> {
 
 	refreshUrls() {
 		let params = UI.QueryParams.createCopy(this.params);
-		params.page = "player";
+		params.page.value = "player";
 		
 		this._setHref("player_link", params.getURL());
 
@@ -134,7 +134,7 @@ export default class Workout extends React.Component<any, any> {
 	}
 
 	_onCheckedChanged() : void {
-		this.params.should_round = "" + this._shouldRound();
+		this.params.should_round.value = "" + this._shouldRound();
 		this.refresh();
 	}
 

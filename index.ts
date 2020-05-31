@@ -11,12 +11,12 @@ function _init() {
     // Use params as react expects a plain object
     let params = new QueryParams();
     var params_wrapper = Object.assign(new Object(), params);
-    if (params.page == 'list') {
+    if (params.page.value == 'list') {
         ReactDOM.render(
             React.createElement(WorkoutViews),
             document.getElementById('main')
         );
-    } else if (params.page == 'player') {
+    } else if (params.page.value == 'player') {
         ReactDOM.render(
             React.createElement(PlayerView, params_wrapper),
             document.getElementById('main')

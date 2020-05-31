@@ -5,15 +5,17 @@ const Core = require("../core");
 const number_input_1 = require("./number_input");
 const email_input_1 = require("./email_input");
 const text_input_1 = require("./text_input");
+const ui_1 = require("../ui");
 class UserProperty extends React.Component {
     constructor(params) {
         super(params);
-        this.ftp = parseInt(params.ftp_watts);
-        this.email = params.email;
-        this.t_pace = params.t_pace;
-        this.swim_ftp = params.swim_ftp;
-        this.swim_css = params.swim_css;
-        this.efficiency_factor = params.efficiency_factor;
+        let query_params = ui_1.QueryParams.createCopy(params);
+        this.ftp = parseInt(query_params.ftp_watts.value);
+        this.email = query_params.email.value;
+        this.t_pace = query_params.t_pace.value;
+        this.swim_ftp = query_params.swim_ftp.value;
+        this.swim_css = query_params.swim_css.value;
+        this.efficiency_factor = query_params.efficiency_factor.value;
     }
     _onFtpChange(ftp) {
         var ftpInput = this.refs['ftp'];

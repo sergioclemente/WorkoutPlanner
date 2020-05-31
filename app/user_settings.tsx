@@ -3,6 +3,7 @@ import * as Core from '../core';
 import NumberInput from './number_input';
 import EmailInput from './email_input';
 import TextInput from './text_input';
+import { QueryParams } from '../ui';
 
 export default class UserProperty extends React.Component<any, any> {
 	private ftp: number;
@@ -14,13 +15,14 @@ export default class UserProperty extends React.Component<any, any> {
 
 	constructor(params: any) {
 		super(params);
+		let query_params = QueryParams.createCopy(params);
 
-		this.ftp = parseInt(params.ftp_watts);
-		this.email = params.email;
-		this.t_pace = params.t_pace;
-		this.swim_ftp = params.swim_ftp;
-		this.swim_css = params.swim_css;
-		this.efficiency_factor = params.efficiency_factor;
+		this.ftp = parseInt(query_params.ftp_watts.value);
+		this.email = query_params.email.value;
+		this.t_pace = query_params.t_pace.value;
+		this.swim_ftp = query_params.swim_ftp.value;
+		this.swim_css = query_params.swim_css.value;
+		this.efficiency_factor = query_params.efficiency_factor.value;
 	}
 
 	_onFtpChange(ftp) {

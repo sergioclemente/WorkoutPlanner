@@ -61,20 +61,124 @@ export class QueryParamsList {
 	}
 }
 
-export class QueryParams {
-	public ftp_watts: string;
-	public t_pace: string;
-	public swim_ftp: string;
-	public swim_css: string;
-	public email: string;
-	public efficiency_factor: string;
+class ParamArg {
+	public property_name: string;
+	public url_name: string;
+	public value: string;
+	public required: boolean;
 
-	public workout_title: string;
-	public workout_text: string;
-	public sport_type: string;
-	public output_unit: string;
-	public page: string;
-	public should_round: string;
+	constructor(property_name: string, url_name: string, required: boolean) {
+		this.property_name = property_name;
+		this.url_name = url_name;
+		this.required = required;
+	}
+
+	hasValue() : boolean {
+		return typeof (this.value) != 'undefined' && (this.value != "" && this.value.trim().length > 0);
+	}
+
+	validate() : boolean {
+		return !this.required || this.hasValue();
+	}
+
+	getValue() : string {
+		if (this.hasValue()) {
+			return this.value;
+		} else {
+			return null;
+		}
+	}
+
+	encodeUrl() : string {
+		return `${this.url_name}=${encodeURIComponent(this.value)}`;
+	}
+}
+
+export class QueryParams {
+
+	private ftp_watts_ = new ParamArg("ftp_watts", "ftp", /*required=*/true);
+	private t_pace_ = new ParamArg("t_pace", "tpace", /*required=*/true);
+	private swim_ftp_ = new ParamArg("swim_ftp", "swim_ftp", /*required=*/true);
+	private swim_css_ = new ParamArg("swim_css", "css", /*required=*/true);
+	private email_ = new ParamArg("email", "email", /*required=*/true);
+	private efficiency_factor_ = new ParamArg("efficiency_factor", "ef", /*required=*/true);
+	private workout_title_ = new ParamArg("workout_title", "t", /*required=*/false);
+	private workout_text_ = new ParamArg("workout_text", "w", /*required=*/false);
+	private sport_type_ = new ParamArg("sport_type", "st", /*required=*/true);
+	private output_unit_ = new ParamArg("output_unit", "ou", /*required=*/true);
+	private page_ = new ParamArg("page", "page", /*required=*/true);
+	private should_round_ = new ParamArg("should_round", "should_round", /*required=*/false);
+
+	public params: ParamArg[] = [
+		this.ftp_watts_,
+		this.t_pace_,
+		this.swim_ftp_,
+		this.swim_css_,
+		this.email_,
+		this.efficiency_factor_,
+		this.workout_title_,
+		this.workout_text_,
+		this.sport_type_,
+		this.output_unit_,
+		this.page_,
+		this.should_round_,
+	];
+
+	get ftp_watts() : ParamArg {
+		return this.ftp_watts_;
+	}
+
+	get t_pace() : ParamArg {
+		return this.t_pace_;
+	}
+
+	get swim_ftp() : ParamArg {
+		return this.swim_ftp_;
+	}
+
+	get swim_css() : ParamArg {
+		return this.swim_css_;
+	}
+
+	get email() : ParamArg {
+		return this.email_;
+	}
+
+	get efficiency_factor() : ParamArg {
+		return this.efficiency_factor_;
+	}
+
+	get workout_title() : ParamArg {
+		return this.workout_title_;
+	}
+	get workout_text() : ParamArg {
+		return this.workout_text_;
+	}
+
+	get sport_type() : ParamArg {
+		return this.sport_type_;
+	}
+
+	get output_unit() : ParamArg {
+		return this.output_unit_;
+	}
+
+	get page() : ParamArg {
+		return this.page_;
+	}
+
+	get should_round() : ParamArg {
+		return this.should_round_;
+	}
+
+	private setUrlParamValue(url_name: string, value: string) {
+		for (let i = 0; i < this.params.length; i++) {
+			let qp : ParamArg = this.params[i];
+			if (qp.url_name == url_name) {
+				qp.value = value;
+			}
+		}
+	}
 
 	constructor() {
 		if (!this.validate()) {
@@ -83,341 +187,68 @@ export class QueryParams {
 		}
 	}
 
-	static createCopy(params: QueryParams): QueryParams {
+	static createCopy(other: QueryParams): QueryParams {
 		var ret = new QueryParams();
-		ret.workout_title = params.workout_title;
-		ret.workout_text = params.workout_text;
-		ret.ftp_watts = params.ftp_watts;
-		ret.t_pace = params.t_pace;
-		ret.swim_ftp = params.swim_ftp;
-		ret.swim_css = params.swim_css;
-		ret.efficiency_factor = params.efficiency_factor;
-		ret.sport_type = params.sport_type;
-		ret.output_unit = params.output_unit;
-		ret.email = params.email;
-		ret.page = params.page;
-		ret.should_round = params.should_round;
+		for (let i = 0; i < other.params.length; i++) {
+			ret.params[i].value = other.params[i].value;
+		}
 		return ret;
 	}
 
-	loadFromURL(): void {
-		var params = getQueryParams();
-		if (params.t != null && params.t.trim() != 0) {
-			this.workout_title = params.t;
-		}
-
-		if (params.w != null && params.w.trim() != 0) {
-			this.workout_text = params.w;
-		}
-
-		if (params.ftp != null && params.ftp.trim() != 0) {
-			this.ftp_watts = params.ftp;
-		}
-
-		if (params.tpace != null && params.tpace.trim() != 0) {
-			this.t_pace = params.tpace;
-		}
-
-		if (params.swim_ftp != null && params.swim_ftp.trim() != 0) {
-			this.swim_ftp = params.swim_ftp;
-		}
-
-		if (params.css != null && params.css.trim() != 0) {
-			this.swim_css = params.css;
-		}
-
-		if (params.ef != null && params.ef.trim() != 0) {
-			this.efficiency_factor = params.ef;
-		}
-
-		if (params.st != null && params.st.trim() != 0) {
-			this.sport_type = params.st;
-		}
-
-		if (params.ou != null && params.ou.trim() != 0) {
-			this.output_unit = params.ou;
-		}
-		if (params.email != null && params.email.trim() != 0) {
-			this.email = params.email;
-		}
-
-		if (params.page != null && params.page.trim() != 0) {
-			this.page = params.page;
-		}
-
-		if (params.should_round != null && params.should_round.trim() != 0) {
-			this.should_round = params.should_round;
-		}
-	}
-
-	loadFromStorage(): void {
-		{
-			let value = loadPersistedValue("title");
+	loadFromStorage() : void {
+		for (let i = 0; i < this.params.length; i++) {
+			let qp : ParamArg = this.params[i];
+			let value = loadPersistedValue(qp.property_name);
 			if (value != null && value.trim().length != 0) {
-				this.workout_title = value;
-			}
-		}
-
-		{
-			let value = loadPersistedValue("workout");
-			if (value != null && value.trim().length != 0) {
-				this.workout_text = value;
-			}
-		}
-
-		{
-			let value = loadPersistedValue("ftp_watts");
-			if (value != null && value.trim().length != 0) {
-				this.ftp_watts = value;
-			}
-		}
-
-		{
-			let value = loadPersistedValue("t_pace");
-			if (value != null && value.trim().length != 0) {
-				this.t_pace = value;
-			}
-		}
-
-
-		{
-			let value = loadPersistedValue("swim_ftp");
-			if (value != null && value.trim().length != 0) {
-				this.swim_ftp = value;
-			}
-		}
-
-		{
-			let value = loadPersistedValue("swim_css");
-			if (value != null && value.trim().length != 0) {
-				this.swim_css = value;
-			}
-		}
-
-		{
-			let value = loadPersistedValue("ef");
-			if (value != null && value.trim().length != 0) {
-				this.efficiency_factor = value;
-			}
-		}
-
-		{
-			let value = loadPersistedValue("sport_type");
-			if (value != null && value.trim().length != 0) {
-				this.sport_type = value;
-			}
-		}
-
-		{
-			let value = loadPersistedValue("output_unit");
-			if (value != null && value.trim().length != 0) {
-				this.output_unit = value;
-			}
-		}
-
-		{
-			let value = loadPersistedValue("email");
-			if (value != null && value.trim().length != 0) {
-				this.email = value;
-			}
-		}
-
-		{
-			let value = loadPersistedValue("efficiency_factor");
-			if (value != null && value.trim().length != 0) {
-				this.efficiency_factor = value;
-			}
-		}
-
-		{
-			let value = loadPersistedValue("page");
-			if (value != null && value.trim().length != 0) {
-				this.page = value;
-			}
-		}
-
-		{
-			let value = loadPersistedValue("should_round");
-			if (value != null && value.trim().length != 0) {
-				this.should_round = value;
+				qp.value = value;
 			}
 		}
 	}
 
 	saveToStorage(): void {
-		if (this.hasWorkoutTitle()) {
-			setPersistedValue("title", this.workout_title);
-		}
-
-		if (this.hasWorkoutText()) {
-			setPersistedValue("workout", this.workout_text);
-		}
-
-		if (this.hasFtpWatts()) {
-			setPersistedValue("ftp_watts", this.ftp_watts);
-		}
-
-		if (this.hasTPace()) {
-			setPersistedValue("t_pace", this.t_pace);
-		}
-
-		if (this.hasSwimFTP()) {
-			setPersistedValue("swim_ftp", this.swim_ftp);
-		}
-
-		if (this.hasSwimCSS()) {
-			setPersistedValue("swim_css", this.swim_css);
-		}
-
-		if (this.hasEfficiencyFactor()) {
-			setPersistedValue("ef", this.efficiency_factor);
-		}
-
-		if (this.hasSportType()) {
-			setPersistedValue("sport_type", this.sport_type);
-		}
-
-
-		if (this.hasOutputUnit()) {
-			setPersistedValue("output_unit", this.output_unit);
-		}
-
-		if (this.hasEmail()) {
-			setPersistedValue("email", this.email);
-		}
-
-		if (this.hasEfficiencyFactor()) {
-			setPersistedValue("efficiency_factor", this.efficiency_factor);
-		}
-
-		if (this.hasPage()) {
-			setPersistedValue("page", this.page);
-		}
-
-		if (this.hasShouldRound()) {
-			setPersistedValue("should_round", this.should_round);
+		for (let i = 0; i < this.params.length; i++) {
+			let qp : ParamArg = this.params[i];
+			if (qp.hasValue()) {
+				setPersistedValue(qp.property_name, qp.value);
+			}
 		}
 	}
 
-	hasWorkoutTitle(): boolean {
-		return typeof (this.workout_title) != 'undefined' && this.workout_title != "";
-	}
-
-	hasWorkoutText(): boolean {
-		return typeof (this.workout_text) != 'undefined' && this.workout_text != "";
-	}
-
-	hasFtpWatts(): boolean {
-		return typeof (this.ftp_watts) != 'undefined' && this.ftp_watts != "";
-	}
-
-	hasTPace(): boolean {
-		return typeof (this.t_pace) != 'undefined' && this.t_pace != "";
-	}
-
-	hasSwimFTP(): boolean {
-		return typeof (this.swim_ftp) != 'undefined' && this.swim_ftp != "";
-	}
-
-	hasSwimCSS(): boolean {
-		return typeof (this.swim_css) != 'undefined' && this.swim_css != "";
-	}
-
-	hasEfficiencyFactor(): boolean {
-		return typeof (this.efficiency_factor) != 'undefined' && this.efficiency_factor != "";
-	}
-
-	hasSportType(): boolean {
-		return typeof (this.sport_type) != 'undefined' && this.sport_type != "";
-	}
-
-	hasOutputUnit(): boolean {
-		return typeof (this.output_unit) != 'undefined' && this.output_unit != "";
-	}
-
-	hasEmail(): boolean {
-		return typeof (this.email) != 'undefined' && this.email != "";
-	}
-
-	hasPage(): boolean {
-		return typeof (this.page) != 'undefined' && this.page != "";
-	}
-
-	hasShouldRound(): boolean {
-		return typeof (this.should_round) != 'undefined' && this.should_round != "";
+	loadFromURL(): void {
+		var query_params = getQueryParams();
+		for (let key in query_params) {
+			let value = query_params[key];
+			if (value != 'undefined' && typeof(value) != 'undefined') {
+				this.setUrlParamValue(key, value);
+			}
+		}
 	}
 
 	validate(): boolean {
-		return this.hasWorkoutText() &&
-			this.hasFtpWatts() &&
-			this.hasTPace() &&
-			this.hasSwimFTP() &&
-			this.hasSwimCSS() &&
-			this.hasEfficiencyFactor() &&
-			this.hasSportType() &&
-			this.hasOutputUnit() &&
-			this.hasEmail();
-		// intentially missed the title, page and should_round. the default will be the main page
+		for (let i = 0; i < this.params.length; i++) {
+			let qp : ParamArg = this.params[i];
+			if (!qp.validate()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	getURL(): string {
-		let res = "?";
+		// Let's get the encoded url for each param.
+		let params_string = this.params.map(function (value: ParamArg) : string {
+			return value.hasValue() ? value.encodeUrl() : null;
+		})
+		// Exclude nulls.
+		params_string = params_string.filter(v => v != null)
 
-		if (this.hasWorkoutTitle()) {
-			res += "t=" + encodeURIComponent(this.workout_title);
-		}
-
-		if (this.hasWorkoutText()) {
-			res += "&w=" + encodeURIComponent(this.workout_text);
-		}
-
-		if (this.hasSportType()) {
-			res += "&st=" + encodeURIComponent(this.sport_type);
-		}
-
-		if (this.hasFtpWatts()) {
-			res += "&ftp=" + encodeURIComponent(this.ftp_watts);
-		}
-
-		if (this.hasTPace()) {
-			res += "&tpace=" + encodeURIComponent(this.t_pace);
-		}
-
-		if (this.hasSwimFTP()) {
-			res += "&swim_ftp=" + encodeURIComponent(this.swim_ftp);
-		}
-
-		if (this.hasSwimCSS()) {
-			res += "&css=" + encodeURIComponent(this.swim_css);
-		}
-
-		if (this.hasEfficiencyFactor()) {
-			res += "&ef=" + encodeURIComponent(this.efficiency_factor);
-		}
-
-		if (this.hasOutputUnit()) {
-			res += "&ou=" + encodeURIComponent(this.output_unit);
-		}
-
-		if (this.hasEmail()) {
-			res += "&email=" + encodeURIComponent(this.email);
-		}
-
-		if (this.hasPage()) {
-			res += "&page=" + encodeURIComponent(this.page);
-		}
-
-		if (this.hasShouldRound()) {
-			res += "&sr=" + encodeURIComponent(this.should_round);
-		}
-
-		return res;
+		return "?" + params_string.join("&");
 	}
 
 	createUserProfile(): Core.UserProfile {
 		if (this.validate()) {
-			let result = new Core.UserProfile(parseInt(this.ftp_watts), this.t_pace, parseInt(this.swim_ftp), this.swim_css, this.email);
-			result.setEfficiencyFactor(parseFloat(this.efficiency_factor));
+			let result = new Core.UserProfile(parseInt(this.ftp_watts.value), this.t_pace.value, parseInt(this.swim_ftp.value), this.swim_css.value, this.email.value);
+			result.setEfficiencyFactor(parseFloat(this.efficiency_factor.value));
 			return result;
 		} else {
 			return null;
@@ -427,8 +258,8 @@ export class QueryParams {
 	createWorkoutBuilder(): Model.WorkoutBuilder {
 		if (this.validate()) {
 			let result = new Model.WorkoutBuilder(this.createUserProfile(),
-				parseInt(this.sport_type), parseInt(this.output_unit));
-			result.withDefinition(this.workout_title, this.workout_text);
+				parseInt(this.sport_type.value), parseInt(this.output_unit.value));
+			result.withDefinition(this.workout_title.value, this.workout_text.value);
 			return result;
 		} else {
 			return null;

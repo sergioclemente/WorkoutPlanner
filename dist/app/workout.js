@@ -12,10 +12,10 @@ class Workout extends React.Component {
         this.params = UI.QueryParams.createCopy(props);
     }
     _onWorkoutInputChanged(sportType, outputUnit, workout_title, workout_text) {
-        this.params.sport_type = sportType.toString();
-        this.params.output_unit = outputUnit.toString();
-        this.params.workout_text = workout_text;
-        this.params.workout_title = workout_title;
+        this.params.sport_type.value = sportType.toString();
+        this.params.output_unit.value = outputUnit.toString();
+        this.params.workout_text.value = workout_text;
+        this.params.workout_title.value = workout_title;
         let dominant_unit = this.params.getDominantUnit();
         if (dominant_unit != null &&
             dominant_unit != Core.IntensityUnit.Unknown &&
@@ -27,13 +27,13 @@ class Workout extends React.Component {
     }
     _onUserSettingsChanged(ftp, t_pace, swim_css, swim_ftp, email, efficiency_factor) {
         if (!isNaN(ftp)) {
-            this.params.ftp_watts = ftp.toString();
+            this.params.ftp_watts.value = ftp.toString();
         }
-        this.params.t_pace = t_pace;
-        this.params.swim_css = swim_css;
-        this.params.swim_ftp = swim_ftp;
-        this.params.email = email;
-        this.params.efficiency_factor = efficiency_factor;
+        this.params.t_pace.value = t_pace;
+        this.params.swim_css.value = swim_css;
+        this.params.swim_ftp.value = swim_ftp;
+        this.params.email.value = email;
+        this.params.efficiency_factor.value = efficiency_factor;
         this.refresh();
     }
     componentDidMount() {
@@ -47,7 +47,7 @@ class Workout extends React.Component {
     }
     refreshUrls() {
         let params = UI.QueryParams.createCopy(this.params);
-        params.page = "player";
+        params.page.value = "player";
         this._setHref("player_link", params.getURL());
         window.history.pushState('Object', 'Title', this.params.getURL());
     }
@@ -111,7 +111,7 @@ class Workout extends React.Component {
         return this.refs["round"].checked;
     }
     _onCheckedChanged() {
-        this.params.should_round = "" + this._shouldRound();
+        this.params.should_round.value = "" + this._shouldRound();
         this.refresh();
     }
     _downloadFile(fileName, content) {
