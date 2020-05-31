@@ -3,26 +3,27 @@
 import * as React from 'react';
 import * as UI from '../ui';
 import * as Core from '../core';
-import * as Model from '../model';
+import * as User from '../user';
+import * as Player from '../player';
 import * as Visitor from '../visitor';
 import WorkoutView from './workout_view';
 
 export default class PlayerView extends React.Component<any, any> {
-	private stopWatch_: Model.StopWatch = null;
-	private params_: UI.QueryParams = null;
-	private playerHelper_: Model.PlayerHelper = null;
+	private stopWatch_: Player.StopWatch = null;
+	private params_: UI.QueryParamsWorkoutView = null;
+	private playerHelper_: Player.PlayerHelper = null;
 	private intervalId_: NodeJS.Timeout = null;
 
 	constructor(params: any) {
 		super(params);
 
-		this.stopWatch_ = new Model.StopWatch();
-		this.params_ = UI.QueryParams.createCopy(params);
+		this.stopWatch_ = new Player.StopWatch();
+		this.params_ = UI.QueryParamsWorkoutView.createCopy(params);
 
 		let builder = this.params_.createWorkoutBuilder();
 
-		let of = new Core.ObjectFactory(this.params_.createUserProfile(), builder.getSportType());
-		this.playerHelper_ = new Model.PlayerHelper(of, builder.getInterval());
+		let of = new User.ObjectFactory(this.params_.createUserProfile(), builder.getSportType());
+		this.playerHelper_ = new Player.PlayerHelper(of, builder.getInterval());
 
 		this.state = this.getState();
 	}

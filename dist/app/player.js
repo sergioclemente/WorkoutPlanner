@@ -3,7 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
 const UI = require("../ui");
 const Core = require("../core");
-const Model = require("../model");
+const User = require("../user");
+const Player = require("../player");
 const workout_view_1 = require("./workout_view");
 class PlayerView extends React.Component {
     constructor(params) {
@@ -12,11 +13,11 @@ class PlayerView extends React.Component {
         this.params_ = null;
         this.playerHelper_ = null;
         this.intervalId_ = null;
-        this.stopWatch_ = new Model.StopWatch();
-        this.params_ = UI.QueryParams.createCopy(params);
+        this.stopWatch_ = new Player.StopWatch();
+        this.params_ = UI.QueryParamsWorkoutView.createCopy(params);
         let builder = this.params_.createWorkoutBuilder();
-        let of = new Core.ObjectFactory(this.params_.createUserProfile(), builder.getSportType());
-        this.playerHelper_ = new Model.PlayerHelper(of, builder.getInterval());
+        let of = new User.ObjectFactory(this.params_.createUserProfile(), builder.getSportType());
+        this.playerHelper_ = new Player.PlayerHelper(of, builder.getInterval());
         this.state = this.getState();
     }
     getState() {

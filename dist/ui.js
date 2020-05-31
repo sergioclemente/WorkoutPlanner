@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SportTypeHelper = exports.ClipboardHelper = exports.FieldValidator = exports.QueryParams = exports.QueryParamsList = void 0;
+exports.SportTypeHelper = exports.ClipboardHelper = exports.FieldValidator = exports.QueryParamsWorkoutView = exports.QueryParamsList = exports.ParamArg = void 0;
 const Core = require("./core");
-const Model = require("./model");
+const Model = require("./builder");
 const Visitor = require("./visitor");
+const User = require("./user");
 function loadPersistedValue(id) {
     if (window.localStorage) {
         var result = window.localStorage.getItem(id);
@@ -18,39 +19,6 @@ function setPersistedValue(id, value) {
         window.localStorage.setItem(id, value);
     }
 }
-class QueryParamsList {
-    constructor() {
-        this.loadFromURL();
-    }
-    loadFromURL() {
-        var params = getQueryParams();
-        this.sport_type_ = params.st;
-        this.title_ = params.title || "";
-        return this.validate();
-    }
-    validate() {
-        return typeof (this.sport_type_) != 'undefined' && this.sport_type_ != "";
-    }
-    getURL() {
-        return "?page=list&st=" + encodeURIComponent(this.sport_type_) + "&title=" + encodeURIComponent(this.title_);
-    }
-    getSportType() {
-        return this.sport_type_;
-    }
-    setSportType(st) {
-        this.sport_type_ = st;
-    }
-    setTitle(title) {
-        this.title_ = title;
-    }
-    getTitle() {
-        return this.title_;
-    }
-    pushToHistory() {
-        window.history.pushState('Object', 'Title', this.getURL());
-    }
-}
-exports.QueryParamsList = QueryParamsList;
 class ParamArg {
     constructor(property_name, url_name, required) {
         this.property_name = property_name;
@@ -75,8 +43,87 @@ class ParamArg {
         return `${this.url_name}=${encodeURIComponent(this.value)}`;
     }
 }
-class QueryParams {
+exports.ParamArg = ParamArg;
+class BaseQueryParams {
+    getParams() {
+        return [];
+    }
+    validate() {
+        for (let i = 0; i < this.getParams().length; i++) {
+            let qp = this.getParams()[i];
+            if (!qp.validate()) {
+                return false;
+            }
+        }
+        return true;
+    }
+    loadFromStorage() {
+        for (let i = 0; i < this.getParams().length; i++) {
+            let qp = this.getParams()[i];
+            let value = loadPersistedValue(qp.property_name);
+            if (value != null && value.trim().length != 0) {
+                qp.value = value;
+            }
+        }
+    }
+    loadFromURL() {
+        var query_params = getQueryParams();
+        for (let key in query_params) {
+            let value = query_params[key];
+            if (value != 'undefined' && typeof (value) != 'undefined') {
+                this.setUrlParamValue(key, value);
+            }
+        }
+    }
+    setUrlParamValue(url_name, value) {
+        for (let i = 0; i < this.getParams().length; i++) {
+            let qp = this.getParams()[i];
+            if (qp.url_name == url_name) {
+                qp.value = value;
+            }
+        }
+    }
+    getURL() {
+        let params_string = this.getParams().map(function (value) {
+            return value.hasValue() ? value.encodeUrl() : null;
+        });
+        params_string = params_string.filter(v => v != null);
+        return "?" + params_string.join("&");
+    }
+}
+class QueryParamsList extends BaseQueryParams {
     constructor() {
+        super();
+        this.sport_type_ = new ParamArg("sport_type", "st", true);
+        this.title_ = new ParamArg("title", "title", false);
+        this.page_ = new ParamArg("page", "page", true);
+        if (!this.validate()) {
+            this.loadFromStorage();
+            this.loadFromURL();
+        }
+        this.page_.value = "list";
+    }
+    getParams() {
+        return [
+            this.sport_type_,
+            this.title_,
+            this.page_
+        ];
+    }
+    get sport_type() {
+        return this.sport_type_;
+    }
+    get title() {
+        return this.title_;
+    }
+    pushToHistory() {
+        window.history.pushState('Object', 'Title', this.getURL());
+    }
+}
+exports.QueryParamsList = QueryParamsList;
+class QueryParamsWorkoutView extends BaseQueryParams {
+    constructor() {
+        super();
         this.ftp_watts_ = new ParamArg("ftp_watts", "ftp", true);
         this.t_pace_ = new ParamArg("t_pace", "tpace", true);
         this.swim_ftp_ = new ParamArg("swim_ftp", "swim_ftp", true);
@@ -89,7 +136,13 @@ class QueryParams {
         this.output_unit_ = new ParamArg("output_unit", "ou", true);
         this.page_ = new ParamArg("page", "page", true);
         this.should_round_ = new ParamArg("should_round", "should_round", false);
-        this.params = [
+        if (!this.validate()) {
+            this.loadFromStorage();
+            this.loadFromURL();
+        }
+    }
+    getParams() {
+        return [
             this.ftp_watts_,
             this.t_pace_,
             this.swim_ftp_,
@@ -103,10 +156,6 @@ class QueryParams {
             this.page_,
             this.should_round_,
         ];
-        if (!this.validate()) {
-            this.loadFromStorage();
-            this.loadFromURL();
-        }
     }
     get ftp_watts() {
         return this.ftp_watts_;
@@ -144,67 +193,21 @@ class QueryParams {
     get should_round() {
         return this.should_round_;
     }
-    setUrlParamValue(url_name, value) {
-        for (let i = 0; i < this.params.length; i++) {
-            let qp = this.params[i];
-            if (qp.url_name == url_name) {
-                qp.value = value;
-            }
-        }
-    }
     static createCopy(other) {
-        var ret = new QueryParams();
-        for (let i = 0; i < other.params.length; i++) {
-            ret.params[i].value = other.params[i].value;
-        }
-        return ret;
-    }
-    loadFromStorage() {
-        for (let i = 0; i < this.params.length; i++) {
-            let qp = this.params[i];
-            let value = loadPersistedValue(qp.property_name);
-            if (value != null && value.trim().length != 0) {
-                qp.value = value;
-            }
-        }
+        return Object.assign(new QueryParamsWorkoutView(), other);
     }
     saveToStorage() {
-        for (let i = 0; i < this.params.length; i++) {
-            let qp = this.params[i];
+        for (let i = 0; i < this.getParams().length; i++) {
+            let qp = this.getParams()[i];
             if (qp.hasValue()) {
                 setPersistedValue(qp.property_name, qp.value);
             }
         }
     }
-    loadFromURL() {
-        var query_params = getQueryParams();
-        for (let key in query_params) {
-            let value = query_params[key];
-            if (value != 'undefined' && typeof (value) != 'undefined') {
-                this.setUrlParamValue(key, value);
-            }
-        }
-    }
-    validate() {
-        for (let i = 0; i < this.params.length; i++) {
-            let qp = this.params[i];
-            if (!qp.validate()) {
-                return false;
-            }
-        }
-        return true;
-    }
-    getURL() {
-        let params_string = this.params.map(function (value) {
-            return value.hasValue() ? value.encodeUrl() : null;
-        });
-        params_string = params_string.filter(v => v != null);
-        return "?" + params_string.join("&");
-    }
     createUserProfile() {
         if (this.validate()) {
-            let result = new Core.UserProfile(parseInt(this.ftp_watts.value), this.t_pace.value, parseInt(this.swim_ftp.value), this.swim_css.value, this.email.value);
-            result.setEfficiencyFactor(parseFloat(this.efficiency_factor.value));
+            let result = new User.UserProfile(parseInt(this.ftp_watts.value), this.t_pace.value, parseInt(this.swim_ftp.value), this.swim_css.value, this.email.value);
+            result.efficiency_factor = parseFloat(this.efficiency_factor.value);
             return result;
         }
         else {
@@ -231,7 +234,7 @@ class QueryParams {
         }
     }
 }
-exports.QueryParams = QueryParams;
+exports.QueryParamsWorkoutView = QueryParamsWorkoutView;
 function getQueryParams() {
     var qs = document.location.search;
     qs = qs.split("+").join(" ");

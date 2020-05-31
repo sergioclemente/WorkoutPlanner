@@ -4,12 +4,12 @@ import * as ReactDOM from 'react-dom'
 import Workout from './app/workout'
 import WorkoutViews from './app/workout_views'
 import PlayerView from './app/player'
-import {QueryParams} from './ui';
+import {QueryParamsWorkoutView} from './ui';
 
 
 function _init() {
     // Use params as react expects a plain object
-    let params = new QueryParams();
+    let params = new QueryParamsWorkoutView();
     var params_wrapper = Object.assign(new Object(), params);
     if (params.page.value == 'list') {
         ReactDOM.render(

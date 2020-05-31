@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AbsoluteTimeIntervalVisitor = exports.AbsoluteTimeInterval = exports.UnparserVisitor = exports.WorkoutTextVisitor = exports.PPSMRXCourseDataVisitor = exports.MRCCourseDataVisitor = exports.ZwiftDataVisitor = exports.DataPointVisitor = exports.Point = exports.ZonesVisitor = exports.ZonesMap = exports.DominantUnitVisitor = exports.NPVisitor = exports.FTP = exports.MovingAverage = exports.BaseVisitor = exports.TreePrinterVisitor = exports.VisitorHelper = void 0;
+exports.WorkoutFileGenerator = exports.TSSCalculator = exports.AbsoluteTimeIntervalVisitor = exports.AbsoluteTimeInterval = exports.UnparserVisitor = exports.WorkoutTextVisitor = exports.PPSMRXCourseDataVisitor = exports.MRCCourseDataVisitor = exports.ZwiftDataVisitor = exports.DataPointVisitor = exports.Point = exports.ZonesVisitor = exports.ZonesMap = exports.DominantUnitVisitor = exports.NPVisitor = exports.FTP = exports.MovingAverage = exports.BaseVisitor = exports.TreePrinterVisitor = exports.VisitorHelper = void 0;
 const core_1 = require("./core");
 class VisitorHelper {
     static visitAndFinalize(visitor, interval) {
@@ -800,10 +800,10 @@ class WorkoutTextVisitor {
         if (this.outputUnit == core_1.IntensityUnit.HeartRate) {
             var bpm = 0;
             if (this.sportType == core_1.SportType.Bike) {
-                bpm = this.userProfile.getBikeFTP() / this.userProfile.getEfficiencyFactor();
+                bpm = this.userProfile.bike_ftp / this.userProfile.efficiency_factor;
             }
             else if (this.sportType == core_1.SportType.Run) {
-                bpm = (1760 * this.userProfile.getRunnintTPaceMph()) / (60 * this.userProfile.getEfficiencyFactor());
+                bpm = (1760 * this.userProfile.getRunningTPaceMph()) / (60 * this.userProfile.efficiency_factor);
             }
             return Math.round(intensity.getValue() * bpm) + "bpm";
         }
@@ -818,10 +818,10 @@ class WorkoutTextVisitor {
         if (this.outputUnit == core_1.IntensityUnit.Watts) {
             let ftp = 0;
             if (this.sportType == core_1.SportType.Bike) {
-                ftp = this.userProfile.getBikeFTP();
+                ftp = this.userProfile.bike_ftp;
             }
             else if (this.sportType == core_1.SportType.Swim) {
-                ftp = this.userProfile.getSwimFTP();
+                ftp = this.userProfile.swim_ftp;
             }
             else {
                 console.assert(false, core_1.stringFormat("Invalid sportType {0}", this.sportType));
@@ -838,7 +838,7 @@ class WorkoutTextVisitor {
             return intensity.toString();
         }
         else if (this.sportType == core_1.SportType.Run) {
-            var minMi = this.userProfile.getPaceMinMi(intensity);
+            var minMi = this.userProfile.getRunningPaceMinMi(intensity);
             var outputValue = core_1.IntensityUnitHelper.convertTo(minMi, core_1.IntensityUnit.MinMi, this.outputUnit);
             if (this.outputUnit == core_1.IntensityUnit.Kmh || this.outputUnit == core_1.IntensityUnit.Mph) {
                 return core_1.MyMath.round10(outputValue, -1) + core_1.IntensityUnitHelper.toString(this.outputUnit);
@@ -1063,14 +1063,14 @@ class AbsoluteTimeIntervalVisitor extends BaseVisitor {
     }
     getTitle(title, intensities) {
         let intensity_pretty = intensities.map(function (intensity) {
-            if (this.of_.getSportType() == core_1.SportType.Swim) {
-                return this.round(intensity.getValue() * this.of_.getUserProfile().getSwimFTP()) + "w";
+            if (this.of_.sport_type == core_1.SportType.Swim) {
+                return this.round(intensity.getValue() * this.of_.user_profile.swim_ftp) + "w";
             }
-            else if (this.of_.getSportType() == core_1.SportType.Bike) {
-                return this.round(intensity.getValue() * this.of_.getUserProfile().getBikeFTP()) + "w";
+            else if (this.of_.sport_type == core_1.SportType.Bike) {
+                return this.round(intensity.getValue() * this.of_.user_profile.bike_ftp) + "w";
             }
-            else if (this.of_.getSportType() == core_1.SportType.Run) {
-                return this.round(intensity.getValue() * this.of_.getUserProfile().getRunnintTPaceMph()) + "mph";
+            else if (this.of_.sport_type == core_1.SportType.Run) {
+                return this.round(intensity.getValue() * this.of_.user_profile.getRunnintTPaceMph()) + "mph";
             }
             else {
                 return intensity.toString();
@@ -1126,3 +1126,50 @@ class AbsoluteTimeIntervalVisitor extends BaseVisitor {
     }
 }
 exports.AbsoluteTimeIntervalVisitor = AbsoluteTimeIntervalVisitor;
+class TSSCalculator {
+    static compute(interval) {
+        let np = new NPVisitor();
+        VisitorHelper.visitAndFinalize(np, interval);
+        let avg = interval.getIntensity().getValue() * exports.FTP;
+        let s = interval.getTotalDuration().getSeconds();
+        return core_1.MyMath.round10((s * np.getIF() * exports.FTP * avg) / (36 * exports.FTP * exports.FTP), -1);
+    }
+}
+exports.TSSCalculator = TSSCalculator;
+class WorkoutFileGenerator {
+    constructor(workoutTitle, intervals) {
+        this.workoutTitle = workoutTitle;
+        this.intervals = intervals;
+    }
+    getMRCFile() {
+        var dataVisitor = new MRCCourseDataVisitor(this.getMRCFileName());
+        VisitorHelper.visitAndFinalize(dataVisitor, this.intervals);
+        return dataVisitor.getContent();
+    }
+    getZWOFile() {
+        var zwift = new ZwiftDataVisitor(this.getBaseFileName());
+        VisitorHelper.visitAndFinalize(zwift, this.intervals);
+        return zwift.getContent();
+    }
+    getPPSMRXFile() {
+        var zwift = new PPSMRXCourseDataVisitor(this.getBaseFileName());
+        VisitorHelper.visitAndFinalize(zwift, this.intervals);
+        return zwift.getContent();
+    }
+    getZWOFileName() {
+        return this.getBaseFileName() + ".zwo";
+    }
+    getMRCFileName() {
+        return this.getBaseFileName() + ".mrc";
+    }
+    getPPSMRXFileName() {
+        return this.getBaseFileName() + ".ppsmrx";
+    }
+    getBaseFileName() {
+        if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
+            return this.workoutTitle;
+        }
+        return "Untitled";
+    }
+}
+exports.WorkoutFileGenerator = WorkoutFileGenerator;

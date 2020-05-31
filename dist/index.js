@@ -7,7 +7,7 @@ const workout_views_1 = require("./app/workout_views");
 const player_1 = require("./app/player");
 const ui_1 = require("./ui");
 function _init() {
-    let params = new ui_1.QueryParams();
+    let params = new ui_1.QueryParamsWorkoutView();
     var params_wrapper = Object.assign(new Object(), params);
     if (params.page.value == 'list') {
         ReactDOM.render(React.createElement(workout_views_1.default), document.getElementById('main'));

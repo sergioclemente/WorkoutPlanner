@@ -3,7 +3,7 @@ import * as Core from '../core';
 import NumberInput from './number_input';
 import EmailInput from './email_input';
 import TextInput from './text_input';
-import { QueryParams } from '../ui';
+import { QueryParamsWorkoutView } from '../ui';
 
 export default class UserProperty extends React.Component<any, any> {
 	private ftp: number;
@@ -15,7 +15,7 @@ export default class UserProperty extends React.Component<any, any> {
 
 	constructor(params: any) {
 		super(params);
-		let query_params = QueryParams.createCopy(params);
+		let query_params = QueryParamsWorkoutView.createCopy(params);
 
 		this.ftp = parseInt(query_params.ftp_watts.value);
 		this.email = query_params.email.value;

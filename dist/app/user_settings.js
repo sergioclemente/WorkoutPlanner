@@ -9,7 +9,7 @@ const ui_1 = require("../ui");
 class UserProperty extends React.Component {
     constructor(params) {
         super(params);
-        let query_params = ui_1.QueryParams.createCopy(params);
+        let query_params = ui_1.QueryParamsWorkoutView.createCopy(params);
         this.ftp = parseInt(query_params.ftp_watts.value);
         this.email = query_params.email.value;
         this.t_pace = query_params.t_pace.value;

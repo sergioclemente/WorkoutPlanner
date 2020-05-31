@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as Core from '../core';
-import * as Model from '../model';
+import * as PreProcessor from '../preprocessor'
 import Select from './select';
 import SelectOption from './select_option';
 
@@ -88,7 +88,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 
 	_onWorkoutTextChange(e) {
 		let workoutText = this.refs['workout_text'] as HTMLTextAreaElement;
-		let wp = new Model.TextPreprocessor(this.getSportType());
+		let wp = new PreProcessor.TextPreprocessor(this.getSportType());
 		workoutText.value = wp.process(workoutText.value);
 		if (workoutText.value == "") {
 			// clear the title if the user cleared the value. this

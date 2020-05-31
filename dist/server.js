@@ -6,8 +6,9 @@ const path = require("path");
 const fs = require("fs");
 const url = require("url");
 const Core = require("./core");
-const Model = require("./model");
+const Model = require("./builder");
 const ModelServer = require("./model_server");
+const User = require("./user");
 const Config = require("./config");
 function logRequest(req, tag, data) {
     console.log(`[request-${tag}] Request Data: ${JSON.stringify(data)}`);
@@ -57,7 +58,7 @@ function handleSendEmail(req, res, uri, params) {
         let ou = parseInt((params.ou));
         let t = (params.t);
         let w = (params.w);
-        let userProfile = new Core.UserProfile(ftp, tpace, swim_ftp, css, email);
+        let userProfile = new User.UserProfile(ftp, tpace, swim_ftp, css, email);
         let builder = new Model.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
         let ms = new ModelServer.MailSender(Config.Values.smtp.login, Config.Values.smtp.password);
         let attachments = [];
@@ -81,7 +82,7 @@ function handleSendEmail(req, res, uri, params) {
             attachments.push(attachment_mrc);
             attachments.push(attachment_ppsmrx);
         }
-        ms.send(userProfile.getEmail(), builder.getMRCFileName(), builder.getPrettyPrint("<br />"), attachments, function (status, message) {
+        ms.send(userProfile.email, builder.getMRCFileName(), builder.getPrettyPrint("<br />"), attachments, function (status, message) {
             if (status) {
                 res.writeHead(200, {});
             }
@@ -127,7 +128,7 @@ function handleSaveWorkout(req, res, uri, params) {
     let ou = parseInt((params.ou));
     let t = (params.t);
     let w = (params.w);
-    let userProfile = new Core.UserProfile(ftp, tpace, swim_ftp, css, email);
+    let userProfile = new User.UserProfile(ftp, tpace, swim_ftp, css, email);
     let builder = new Model.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
     let db = ModelServer.WorkoutDBFactory.createWorkoutDB();
     let workout = new ModelServer.Workout();

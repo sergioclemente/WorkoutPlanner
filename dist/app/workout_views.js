@@ -72,7 +72,7 @@ class WorkoutViews extends React.Component {
         if (req.status == 200) {
             var rows = JSON.parse(req.responseText);
             for (let i = 0; i < rows.length; i++) {
-                let params = new UI.QueryParams();
+                let params = new UI.QueryParamsWorkoutView();
                 params.workout_text.value = rows[i].value;
                 params.workout_title.value = rows[i].title;
                 params.sport_type.value = rows[i].sport_type.toString();
@@ -127,8 +127,8 @@ class WorkoutViews extends React.Component {
                 filteredRows.push(row);
             }
         }
-        this._params.setSportType(sportTypeEnum.toString());
-        this._params.setTitle(filterText);
+        this._params.sport_type.value = sportTypeEnum.toString();
+        this._params.title.value = filterText;
         this._params.pushToHistory();
         this.setState({ filteredRows: filteredRows });
     }
@@ -145,7 +145,7 @@ class WorkoutViews extends React.Component {
             " ",
             React.createElement("br", null),
             "Filter: ",
-            React.createElement("input", { ref: "text", value: this._params.getTitle(), onChange: e => this._onTextFilterChange(e) }),
+            React.createElement("input", { ref: "text", value: this._params.title.value, onChange: e => this._onTextFilterChange(e) }),
             React.createElement(fixed_data_table_1.Table, { ref: "tbl", rowsCount: filteredRows.length, rowHeight: 50, headerHeight: 50, width: 900, height: 800 },
                 React.createElement(fixed_data_table_1.Column, { header: React.createElement(fixed_data_table_1.Cell, null, "Type"), cell: React.createElement(SportTypeCell, { data: filteredRows, field: "sport_type" }, " "), width: 60 }),
                 React.createElement(fixed_data_table_1.Column, { header: React.createElement(fixed_data_table_1.Cell, null, "Title"), cell: React.createElement(TitleCell, { data: filteredRows, field: "title", link: "link" }, " "), width: 300 }),

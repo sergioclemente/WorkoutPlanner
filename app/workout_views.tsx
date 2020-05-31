@@ -104,7 +104,7 @@ export default class WorkoutViews extends React.Component<any, any> {
 			var rows = JSON.parse(req.responseText);
 
 			for (let i = 0; i < rows.length; i++) {
-				let params = new UI.QueryParams();
+				let params = new UI.QueryParamsWorkoutView();
 				params.workout_text.value = rows[i].value;
 				params.workout_title.value = rows[i].title;
 				params.sport_type.value = rows[i].sport_type.toString();
@@ -176,8 +176,8 @@ export default class WorkoutViews extends React.Component<any, any> {
 		}
 
 		// Update the sport type (And url)
-		this._params.setSportType(sportTypeEnum.toString());
-		this._params.setTitle(filterText);
+		this._params.sport_type.value = sportTypeEnum.toString();
+		this._params.title.value = filterText;
 		this._params.pushToHistory();
 
 
@@ -195,7 +195,7 @@ export default class WorkoutViews extends React.Component<any, any> {
 				<SelectOption value={Core.SportType.Run}>Run</SelectOption>
 				<SelectOption value={Core.SportType.Other}>Other</SelectOption>
 			</Select> <br />
-			Filter: <input ref="text" value={this._params.getTitle()} onChange={e => this._onTextFilterChange(e)}></input>
+			Filter: <input ref="text" value={this._params.title.value} onChange={e => this._onTextFilterChange(e)}></input>
 			<Table
 				ref="tbl"
 				rowsCount={filteredRows.length}

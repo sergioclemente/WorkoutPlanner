@@ -7,7 +7,7 @@ const Visitor = require("../visitor");
 class WorkoutView extends React.Component {
     constructor(params) {
         super(params);
-        this.state = this.getState(UI.QueryParams.createCopy(params));
+        this.state = this.getState(UI.QueryParamsWorkoutView.createCopy(params));
     }
     getTimeInZones(sportType, intervals) {
         var zv = new Visitor.ZonesVisitor(sportType);

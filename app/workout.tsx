@@ -6,11 +6,11 @@ import WorkoutInput from './workout_input';
 import WorkoutView from './workout_view';
 
 export default class Workout extends React.Component<any, any> {
-	params: UI.QueryParams;
+	params: UI.QueryParamsWorkoutView;
 
 	constructor(props: any) {
 		super(props);
-		this.params = UI.QueryParams.createCopy(props);
+		this.params = UI.QueryParamsWorkoutView.createCopy(props);
 	}
 
 	_onWorkoutInputChanged(sportType: Core.SportType, outputUnit: Core.IntensityUnit, workout_title: string, workout_text: string) {
@@ -58,7 +58,7 @@ export default class Workout extends React.Component<any, any> {
 	}
 
 	refreshUrls() {
-		let params = UI.QueryParams.createCopy(this.params);
+		let params = UI.QueryParamsWorkoutView.createCopy(this.params);
 		params.page.value = "player";
 		
 		this._setHref("player_link", params.getURL());

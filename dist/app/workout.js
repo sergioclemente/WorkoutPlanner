@@ -9,7 +9,7 @@ const workout_view_1 = require("./workout_view");
 class Workout extends React.Component {
     constructor(props) {
         super(props);
-        this.params = UI.QueryParams.createCopy(props);
+        this.params = UI.QueryParamsWorkoutView.createCopy(props);
     }
     _onWorkoutInputChanged(sportType, outputUnit, workout_title, workout_text) {
         this.params.sport_type.value = sportType.toString();
@@ -46,7 +46,7 @@ class Workout extends React.Component {
         this.params.saveToStorage();
     }
     refreshUrls() {
-        let params = UI.QueryParams.createCopy(this.params);
+        let params = UI.QueryParamsWorkoutView.createCopy(this.params);
         params.page.value = "player";
         this._setHref("player_link", params.getURL());
         window.history.pushState('Object', 'Title', this.params.getURL());

@@ -5,8 +5,9 @@ import * as fs from 'fs'
 import * as url from 'url'
 
 import * as Core from './core';
-import * as Model from './model';
+import * as Model from './builder';
 import * as ModelServer from './model_server';
+import * as User from './user';
 import * as Config from './config';
 import { ParsedUrlQuery } from 'querystring'
 
@@ -71,7 +72,7 @@ function handleSendEmail(req: http.IncomingMessage, res: http.ServerResponse, ur
         let t = <string>(params.t)
         let w = <string>(params.w)
 
-        let userProfile = new Core.UserProfile(ftp, tpace, swim_ftp, css, email);
+        let userProfile = new User.UserProfile(ftp, tpace, swim_ftp, css, email);
         let builder = new Model.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
 
         // Sending email
@@ -101,7 +102,7 @@ function handleSendEmail(req: http.IncomingMessage, res: http.ServerResponse, ur
             attachments.push(attachment_ppsmrx);
         }
 
-        ms.send(userProfile.getEmail(), builder.getMRCFileName(), builder.getPrettyPrint("<br />"), attachments,
+        ms.send(userProfile.email, builder.getMRCFileName(), builder.getPrettyPrint("<br />"), attachments,
             function (status, message) {
                 if (status) {
                     res.writeHead(200, {});
@@ -149,7 +150,7 @@ function handleSaveWorkout(req: http.IncomingMessage, res: http.ServerResponse, 
     let t = <string>(params.t)
     let w = <string>(params.w)
 
-    let userProfile = new Core.UserProfile(ftp, tpace, swim_ftp, css, email);
+    let userProfile = new User.UserProfile(ftp, tpace, swim_ftp, css, email);
     let builder = new Model.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
     let db = ModelServer.WorkoutDBFactory.createWorkoutDB();
     let workout = new ModelServer.Workout();
@@ -157,7 +158,7 @@ function handleSaveWorkout(req: http.IncomingMessage, res: http.ServerResponse, 
     workout.value = builder.getNormalizedWorkoutDefinition();
     workout.tags = "";
     workout.duration_sec = builder.getInterval().getTotalDuration().getSeconds();
-    workout.tss = builder.getTSS2();
+    workout.tss = builder.getTSS();
     workout.sport_type = st;
 
     db.add(workout, function (err: string) {

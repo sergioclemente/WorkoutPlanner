@@ -9,7 +9,7 @@ export default class WorkoutView extends React.Component<any, any> {
 	constructor(params: any) {
 		super(params);
 
-		this.state = this.getState(UI.QueryParams.createCopy(params));
+		this.state = this.getState(UI.QueryParamsWorkoutView.createCopy(params));
 	}
 
 	// TODO: Clean this dupe
@@ -62,7 +62,7 @@ export default class WorkoutView extends React.Component<any, any> {
 		return tagToPoints;
 	}
 
-	getState(params: UI.QueryParams): any {
+	getState(params: UI.QueryParamsWorkoutView): any {
 		try {
 			var builder = params.createWorkoutBuilder();
 
@@ -85,7 +85,7 @@ export default class WorkoutView extends React.Component<any, any> {
 
 			return (
 				{
-					tss_from_if: builder.getTSS2(),
+					tss_from_if: builder.getTSS(),
 					time: builder.getTimePretty(),
 					intensity: builder.getIF(),
 					avg_power: builder.getAveragePower(),
@@ -121,7 +121,7 @@ export default class WorkoutView extends React.Component<any, any> {
 		}
 	}
 
-	refresh(params: UI.QueryParams) {
+	refresh(params: UI.QueryParamsWorkoutView) {
 		var new_state = this.getState(params);
 
 		this.setState(

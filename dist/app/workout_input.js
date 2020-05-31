@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
 const Core = require("../core");
-const Model = require("../model");
+const PreProcessor = require("../preprocessor");
 const select_1 = require("./select");
 const select_option_1 = require("./select_option");
 class WorkoutInput extends React.Component {
@@ -76,7 +76,7 @@ class WorkoutInput extends React.Component {
     }
     _onWorkoutTextChange(e) {
         let workoutText = this.refs['workout_text'];
-        let wp = new Model.TextPreprocessor(this.getSportType());
+        let wp = new PreProcessor.TextPreprocessor(this.getSportType());
         workoutText.value = wp.process(workoutText.value);
         if (workoutText.value == "") {
             let workoutTitle = this.refs['workout_title'];

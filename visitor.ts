@@ -1,4 +1,5 @@
-import {SportType, Duration, UserProfile, ObjectFactory, DistanceUnit, Intensity, BaseInterval, Interval, RepeatInterval, ArrayInterval, SimpleInterval, DurationUnit, DurationUnitHelper, IntensityUnitHelper, IntensityUnit, RampBuildInterval, CommentInterval, stringFormat, MyMath, TimeUnit, PreconditionsCheck, FormatterHelper} from './core';
+import {SportType, Duration, DistanceUnit, Intensity, BaseInterval, Interval, RepeatInterval, ArrayInterval, SimpleInterval, DurationUnit, DurationUnitHelper, IntensityUnitHelper, IntensityUnit, RampBuildInterval, CommentInterval, stringFormat, MyMath, TimeUnit, PreconditionsCheck, FormatterHelper} from './core';
+import {UserProfile, ObjectFactory} from './user'
 
 export class VisitorHelper {
 	static visitAndFinalize(visitor: Visitor, interval: Interval): any {
@@ -930,11 +931,11 @@ export class WorkoutTextVisitor implements Visitor {
 		if (this.outputUnit == IntensityUnit.HeartRate) {
 			var bpm = 0;
 			if (this.sportType == SportType.Bike) {
-				bpm = this.userProfile.getBikeFTP() / this.userProfile.getEfficiencyFactor();
+				bpm = this.userProfile.bike_ftp / this.userProfile.efficiency_factor;
 			} else if (this.sportType == SportType.Run) {
 				// 1760 yards
 				// http://home.trainingpeaks.com/blog/article/the-efficiency-factor-in-running
-				bpm = (1760 * this.userProfile.getRunnintTPaceMph()) / (60 * this.userProfile.getEfficiencyFactor());
+				bpm = (1760 * this.userProfile.getRunningTPaceMph()) / (60 * this.userProfile.efficiency_factor);
 			}
 			return Math.round(intensity.getValue() * bpm) + "bpm";
 		}
@@ -950,9 +951,9 @@ export class WorkoutTextVisitor implements Visitor {
 		if (this.outputUnit == IntensityUnit.Watts) {
 			let ftp = 0;
 			if (this.sportType == SportType.Bike) {
-				ftp = this.userProfile.getBikeFTP();
+				ftp = this.userProfile.bike_ftp;
 			} else if (this.sportType == SportType.Swim) {
-				ftp = this.userProfile.getSwimFTP();
+				ftp = this.userProfile.swim_ftp;
 			} else {
 				console.assert(false, stringFormat("Invalid sportType {0}", this.sportType));
 			}
@@ -966,7 +967,7 @@ export class WorkoutTextVisitor implements Visitor {
 		if (this.sportType == SportType.Bike) {
 			return intensity.toString();
 		} else if (this.sportType == SportType.Run) {
-			var minMi = this.userProfile.getPaceMinMi(intensity);
+			var minMi = this.userProfile.getRunningPaceMinMi(intensity);
 			var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, this.outputUnit);
 			if (this.outputUnit == IntensityUnit.Kmh || this.outputUnit == IntensityUnit.Mph) {
 				return MyMath.round10(outputValue, -1) + IntensityUnitHelper.toString(this.outputUnit);
@@ -1215,12 +1216,12 @@ export class AbsoluteTimeIntervalVisitor extends BaseVisitor {
 	private getTitle(title: string, intensities: Intensity[]): string {
 		// HACK: To avoid plumbing output unit all over the place, just doing something simple for now
 		let intensity_pretty = intensities.map(function(intensity: Intensity) {
-			if (this.of_.getSportType() == SportType.Swim) {
-				return this.round(intensity.getValue() * this.of_.getUserProfile().getSwimFTP()) + "w";
-			} else if (this.of_.getSportType() == SportType.Bike) {
-				return this.round(intensity.getValue() * this.of_.getUserProfile().getBikeFTP()) + "w";
-			} else if (this.of_.getSportType() == SportType.Run) {
-				return this.round(intensity.getValue() * this.of_.getUserProfile().getRunnintTPaceMph()) + "mph";
+			if (this.of_.sport_type == SportType.Swim) {
+				return this.round(intensity.getValue() * this.of_.user_profile.swim_ftp) + "w";
+			} else if (this.of_.sport_type == SportType.Bike) {
+				return this.round(intensity.getValue() * this.of_.user_profile.bike_ftp) + "w";
+			} else if (this.of_.sport_type == SportType.Run) {
+				return this.round(intensity.getValue() * this.of_.user_profile.getRunnintTPaceMph()) + "mph";
 			} else {
 				return intensity.toString();
 			}
@@ -1281,3 +1282,67 @@ export class AbsoluteTimeIntervalVisitor extends BaseVisitor {
 	}
 }
 
+// TSS = [(s x NP x IF) / (FTP x 3600)] x 100
+// TSS = [(s x NP x IF) / (FTP x 36)]
+// IF = AVG_POWER / FTP
+// TSS = [s x NP x (AVG_POWER / FTP)] / (FTP x 36)
+// TSS = [(s x NP x AVG_POWER) / FTP] / (FTP x 36)
+// TSS = (s x NP x AVG_POWER) / (36 * FTP^2)
+// 
+// 
+export class TSSCalculator {
+	static compute(interval: Interval): number {
+		let np = new NPVisitor();
+		VisitorHelper.visitAndFinalize(np, interval);
+		let avg = interval.getIntensity().getValue() * FTP;
+		let s = interval.getTotalDuration().getSeconds();
+		return MyMath.round10((s * np.getIF() * FTP * avg) / (36 * FTP * FTP), -1);
+	}
+}
+
+export class WorkoutFileGenerator {
+	private workoutTitle: string;
+	private intervals: ArrayInterval;
+
+	constructor(workoutTitle: string, intervals: ArrayInterval) {
+		this.workoutTitle = workoutTitle;
+		this.intervals = intervals;
+	}
+
+	getMRCFile(): string {
+		var dataVisitor = new MRCCourseDataVisitor(this.getMRCFileName());
+		VisitorHelper.visitAndFinalize(dataVisitor, this.intervals);
+		return dataVisitor.getContent();
+	}
+
+	getZWOFile(): string {
+		var zwift = new ZwiftDataVisitor(this.getBaseFileName());
+		VisitorHelper.visitAndFinalize(zwift, this.intervals);
+		return zwift.getContent();
+	}
+
+	getPPSMRXFile(): string {
+		var zwift = new PPSMRXCourseDataVisitor(this.getBaseFileName());
+		VisitorHelper.visitAndFinalize(zwift, this.intervals);
+		return zwift.getContent();
+	}
+
+	getZWOFileName(): string {
+		return this.getBaseFileName() + ".zwo";
+	}
+
+	getMRCFileName(): string {
+		return this.getBaseFileName() + ".mrc";
+	}
+
+	getPPSMRXFileName(): string {
+		return this.getBaseFileName() + ".ppsmrx";
+	}
+
+	getBaseFileName(): string {
+		if (typeof (this.workoutTitle) != 'undefined' && this.workoutTitle.length != 0) {
+			return this.workoutTitle;
+		}
+		return "Untitled";
+	}
+}
