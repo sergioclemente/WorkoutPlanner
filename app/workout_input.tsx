@@ -1,14 +1,27 @@
 import * as React from 'react';
 import * as Core from '../core';
 import * as PreProcessor from '../preprocessor'
+import * as UI from '../ui';
 import Select from './select';
 import SelectOption from './select_option';
 
 export default class WorkoutInput extends React.Component<any, any> {
+	private sport_type: Core.SportType;
+	private output_unit: Core.IntensityUnit;
+	private workout_title: string;
+	private workout_text: string;
+
 	constructor(props: any) {
 		super(props);
+		
+		let params = UI.QueryParamsWorkoutView.createCopy(props);
+		this.sport_type = parseInt(params.sport_type.value);
+		this.output_unit = parseInt(params.output_unit.value);
+		this.workout_title = params.workout_title.value;
+		this.workout_text = params.workout_text.value;
 	}
 
+	// TODO: Clean this up
 	getSportType(): Core.SportType {
 		var sltSportType = this.refs['sportType'] as Select;
 		return parseInt(sltSportType.getSelectedValue());
@@ -118,10 +131,10 @@ export default class WorkoutInput extends React.Component<any, any> {
 		return (<div>
 			<h1> Workout Settings </h1>
 			<form>
-				Title: <input ref="workout_title" defaultValue={this.props.workout_title} onChange={e => this._onWorkoutTitleChange(e)} />
+				Title: <input ref="workout_title" defaultValue={this.workout_title} onChange={e => this._onWorkoutTitleChange(e)} />
 				<br />
 				Sport type:
-					<Select ref="sportType" defaultValue={this.props.sport_type} onChange={e => this._onSportTypeChange(e)}>
+					<Select ref="sportType" defaultValue={this.sport_type} onChange={e => this._onSportTypeChange(e)}>
 					<SelectOption value={Core.SportType.Swim}>Swim</SelectOption>
 					<SelectOption value={Core.SportType.Bike}>Bike</SelectOption>
 					<SelectOption value={Core.SportType.Run}>Run</SelectOption>
@@ -129,7 +142,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 				</Select>
 				<br />
 				Unit:
-					<Select ref="unit" defaultValue={this.props.output_unit} onChange={e => this._onUnitChanged(e)}>
+					<Select ref="unit" defaultValue={this.output_unit} onChange={e => this._onUnitChanged(e)}>
 					<SelectOption ref="watts" value={Core.IntensityUnit.Watts}>Watts</SelectOption>
 					<SelectOption ref="minmi" value={Core.IntensityUnit.MinMi}>min/mi</SelectOption>
 					<SelectOption ref="mih" value={Core.IntensityUnit.Mph}>mi/h</SelectOption>
@@ -142,7 +155,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 					<SelectOption ref="per400m" value={Core.IntensityUnit.Per400Meters}>/400m</SelectOption>
 				</Select>
 				<br />
-				<textarea ref="workout_text" defaultValue={this.props.workout_text} style={{ height: "200px", width: "100%" }} onChange={e => this._onWorkoutTextChange(e)}>
+				<textarea ref="workout_text" defaultValue={this.workout_text} style={{ height: "200px", width: "100%" }} onChange={e => this._onWorkoutTextChange(e)}>
 				</textarea>
 				<br />
 			</form>

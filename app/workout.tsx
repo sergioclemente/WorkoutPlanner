@@ -4,6 +4,7 @@ import * as Core from '../core';
 import UserSettings from './user_settings';
 import WorkoutInput from './workout_input';
 import WorkoutView from './workout_view';
+import { DominantUnitVisitor } from '../visitor';
 
 export default class Workout extends React.Component<any, any> {
 	params: UI.QueryParamsWorkoutView;
@@ -13,13 +14,22 @@ export default class Workout extends React.Component<any, any> {
 		this.params = UI.QueryParamsWorkoutView.createCopy(props);
 	}
 
+	getDominantUnit(params: UI.QueryParamsWorkoutView) {
+		try {
+			let workout_builder = params.createWorkoutBuilder();
+			return workout_builder != null ? DominantUnitVisitor.computeIntensity(workout_builder.getInterval()) : null;
+		} catch (Error) {
+			return Core.IntensityUnit.Unknown;
+		}
+	}
+
 	_onWorkoutInputChanged(sportType: Core.SportType, outputUnit: Core.IntensityUnit, workout_title: string, workout_text: string) {
 		this.params.sport_type.value = sportType.toString();
 		this.params.output_unit.value = outputUnit.toString();
 		this.params.workout_text.value = workout_text;
 		this.params.workout_title.value = workout_title;
 
-		let dominant_unit : Core.IntensityUnit = this.params.getDominantUnit();
+		let dominant_unit : Core.IntensityUnit = this.getDominantUnit(this.params);
 		// Don't override the unit if its IF since its too generic.
 		if (dominant_unit != null &&
 			dominant_unit != Core.IntensityUnit.Unknown &&
@@ -59,11 +69,13 @@ export default class Workout extends React.Component<any, any> {
 
 	refreshUrls() {
 		let params = UI.QueryParamsWorkoutView.createCopy(this.params);
-		params.page.value = "player";
-		
-		this._setHref("player_link", params.getURL());
-
 		window.history.pushState('Object', 'Title', this.params.getURL());
+		
+		params.page.value = "player";
+		this._setHref("player_link", params.getURL());	
+		
+		params.page.value = "list";
+		this._setHref("list_link", params.getURL());
 	}
 
 	_setHref(element_ref: string, url: string) {
@@ -166,7 +178,7 @@ export default class Workout extends React.Component<any, any> {
 						<td><a href="#" onClick={(e) => this._onPrettyPrint()}>Pretty print</a></td>
 						<td><a ref="email_send_workout" href="#" onClick={(e) => this._onEmailWorkout()}>Email Workout</a></td>
 						<td><a ref="save_workout" href="#" onClick={(e) => this._onSaveWorkout()}>Save Workout</a></td>
-						<td><a href="?page=list">List Workouts</a></td>
+						<td><a ref="list_link">List Workouts</a></td>
 					</tr>
 				</tbody>
 			</table>

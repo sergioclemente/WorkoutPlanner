@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WorkoutBuilder = void 0;
-const core_1 = require("./core");
-const user_1 = require("./user");
-const visitor_1 = require("./visitor");
-const parser_1 = require("./parser");
+const Parser = require("./parser");
+const Visitor = require("./visitor");
+const Core = require("./core");
+const User = require("./user");
 class WorkoutBuilder {
     constructor(userProfile, sportType, outputUnit) {
-        core_1.PreconditionsCheck.assertIsNumber(sportType, "sportType");
-        core_1.PreconditionsCheck.assertIsNumber(outputUnit, "outputUnit");
+        Core.PreconditionsCheck.assertIsNumber(sportType, "sportType");
+        Core.PreconditionsCheck.assertIsNumber(outputUnit, "outputUnit");
         this.userProfile = userProfile;
         this.sportType = sportType;
         this.outputUnit = outputUnit;
@@ -23,55 +23,55 @@ class WorkoutBuilder {
         return this.workoutTitle;
     }
     getNormalizedWorkoutDefinition() {
-        let object_factory = new user_1.ObjectFactory(this.userProfile, this.sportType);
-        return parser_1.IntervalParser.normalize(object_factory, this.workoutDefinition);
+        let object_factory = new User.ObjectFactory(this.userProfile, this.sportType);
+        return Parser.IntervalParser.normalize(object_factory, this.workoutDefinition);
     }
     withDefinition(workoutTitle, workoutDefinition) {
-        let object_factory = new user_1.ObjectFactory(this.userProfile, this.sportType);
-        this.intervals = parser_1.IntervalParser.parse(object_factory, workoutDefinition);
+        let object_factory = new User.ObjectFactory(this.userProfile, this.sportType);
+        this.intervals = Parser.IntervalParser.parse(object_factory, workoutDefinition);
         this.workoutTitle = workoutTitle;
         this.workoutDefinition = workoutDefinition;
         return this;
     }
     getIntensityFriendly(intensity, roundValues) {
-        var f = new visitor_1.WorkoutTextVisitor(this.userProfile, this.sportType, this.outputUnit, roundValues);
+        var f = new Visitor.WorkoutTextVisitor(this.userProfile, this.sportType, this.outputUnit, roundValues);
         return f.getIntensityPretty(intensity);
     }
-    getTSS2() {
-        return visitor_1.TSSCalculator.compute(this.intervals);
+    getTSS() {
+        return Visitor.TSSCalculator.compute(this.intervals);
     }
     getTimePretty() {
         return this.intervals.getTotalDuration().toTimeStringLong();
     }
     getIF() {
-        return core_1.MyMath.round10(this.intervals.getIntensity().getValue() * 100, -1);
+        return Core.MyMath.round10(this.intervals.getIntensity().getValue() * 100, -1);
     }
     getAveragePower() {
-        return core_1.MyMath.round10(this.userProfile.bike_ftp * this.intervals.getIntensity().getValue(), -1);
+        return Core.MyMath.round10(this.userProfile.bike_ftp * this.intervals.getIntensity().getValue(), -1);
     }
     getIntervalPretty(interval, roundValues) {
-        return visitor_1.WorkoutTextVisitor.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit, roundValues);
+        return Visitor.WorkoutTextVisitor.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit, roundValues);
     }
     getEstimatedDistancePretty() {
-        if (this.sportType == core_1.SportType.Swim) {
-            return this.intervals.getWorkDuration().toStringDistance(core_1.DistanceUnit.Yards);
+        if (this.sportType == Core.SportType.Swim) {
+            return this.intervals.getWorkDuration().toStringDistance(Core.DistanceUnit.Yards);
         }
         else {
-            return this.intervals.getWorkDuration().toStringDistance(core_1.DistanceUnit.Miles);
+            return this.intervals.getWorkDuration().toStringDistance(Core.DistanceUnit.Miles);
         }
     }
     getAveragePace() {
         var minMi = this.userProfile.getRunningPaceMinMi(this.intervals.getIntensity());
         let outputUnit = this.outputUnit;
-        if (outputUnit == core_1.IntensityUnit.HeartRate) {
-            outputUnit = core_1.IntensityUnit.MinMi;
+        if (outputUnit == Core.IntensityUnit.HeartRate) {
+            outputUnit = Core.IntensityUnit.MinMi;
         }
-        var outputValue = core_1.IntensityUnitHelper.convertTo(minMi, core_1.IntensityUnit.MinMi, outputUnit);
-        if (outputUnit == core_1.IntensityUnit.Kmh || outputUnit == core_1.IntensityUnit.Mph) {
-            return core_1.MyMath.round10(outputValue, -1) + core_1.IntensityUnitHelper.toString(outputUnit);
+        var outputValue = Core.IntensityUnitHelper.convertTo(minMi, Core.IntensityUnit.MinMi, outputUnit);
+        if (outputUnit == Core.IntensityUnit.Kmh || outputUnit == Core.IntensityUnit.Mph) {
+            return Core.MyMath.round10(outputValue, -1) + Core.IntensityUnitHelper.toString(outputUnit);
         }
         else {
-            return core_1.FormatterHelper.formatNumber(outputValue, 60, ":", core_1.IntensityUnitHelper.toString(outputUnit));
+            return Core.FormatterHelper.formatNumber(outputValue, 60, ":", Core.IntensityUnitHelper.toString(outputUnit));
         }
     }
     getStepsList(new_line) {
@@ -98,27 +98,27 @@ class WorkoutBuilder {
         return result;
     }
     getMRCFile() {
-        let wfg = new visitor_1.WorkoutFileGenerator(this.workoutTitle, this.intervals);
+        let wfg = new Visitor.WorkoutFileGenerator(this.workoutTitle, this.intervals);
         return wfg.getMRCFile();
     }
     getZWOFile() {
-        let wfg = new visitor_1.WorkoutFileGenerator(this.workoutTitle, this.intervals);
+        let wfg = new Visitor.WorkoutFileGenerator(this.workoutTitle, this.intervals);
         return wfg.getZWOFile();
     }
     getPPSMRXFile() {
-        let wfg = new visitor_1.WorkoutFileGenerator(this.workoutTitle, this.intervals);
+        let wfg = new Visitor.WorkoutFileGenerator(this.workoutTitle, this.intervals);
         return wfg.getPPSMRXFile();
     }
     getZWOFileName() {
-        let wfg = new visitor_1.WorkoutFileGenerator(this.workoutTitle, this.intervals);
+        let wfg = new Visitor.WorkoutFileGenerator(this.workoutTitle, this.intervals);
         return wfg.getZWOFileName();
     }
     getMRCFileName() {
-        let wfg = new visitor_1.WorkoutFileGenerator(this.workoutTitle, this.intervals);
+        let wfg = new Visitor.WorkoutFileGenerator(this.workoutTitle, this.intervals);
         return wfg.getMRCFileName();
     }
     getPPSMRXFileName() {
-        let wfg = new visitor_1.WorkoutFileGenerator(this.workoutTitle, this.intervals);
+        let wfg = new Visitor.WorkoutFileGenerator(this.workoutTitle, this.intervals);
         return wfg.getPPSMRXFileName();
     }
 }

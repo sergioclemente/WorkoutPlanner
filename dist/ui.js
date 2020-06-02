@@ -2,9 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SportTypeHelper = exports.ClipboardHelper = exports.FieldValidator = exports.QueryParamsWorkoutView = exports.QueryParamsList = exports.ParamArg = void 0;
 const Core = require("./core");
-const Model = require("./builder");
-const Visitor = require("./visitor");
 const User = require("./user");
+const Builder = require("./builder");
 function loadPersistedValue(id) {
     if (window.localStorage) {
         var result = window.localStorage.getItem(id);
@@ -20,10 +19,12 @@ function setPersistedValue(id, value) {
     }
 }
 class ParamArg {
-    constructor(property_name, url_name, required) {
+    constructor(property_name, url_name, required, persist) {
         this.property_name = property_name;
         this.url_name = url_name;
         this.required = required;
+        this.persist = persist;
+        this.value = "";
     }
     hasValue() {
         return typeof (this.value) != 'undefined' && (this.value != "" && this.value.trim().length > 0);
@@ -60,6 +61,9 @@ class BaseQueryParams {
     loadFromStorage() {
         for (let i = 0; i < this.getParams().length; i++) {
             let qp = this.getParams()[i];
+            if (!qp.persist) {
+                continue;
+            }
             let value = loadPersistedValue(qp.property_name);
             if (value != null && value.trim().length != 0) {
                 qp.value = value;
@@ -83,6 +87,14 @@ class BaseQueryParams {
             }
         }
     }
+    setPropParamValue(property_name, value) {
+        for (let i = 0; i < this.getParams().length; i++) {
+            let qp = this.getParams()[i];
+            if (qp.property_name == property_name) {
+                qp.value = value;
+            }
+        }
+    }
     getURL() {
         let params_string = this.getParams().map(function (value) {
             return value.hasValue() ? value.encodeUrl() : null;
@@ -94,14 +106,11 @@ class BaseQueryParams {
 class QueryParamsList extends BaseQueryParams {
     constructor() {
         super();
-        this.sport_type_ = new ParamArg("sport_type", "st", true);
-        this.title_ = new ParamArg("title", "title", false);
-        this.page_ = new ParamArg("page", "page", true);
-        if (!this.validate()) {
-            this.loadFromStorage();
-            this.loadFromURL();
-        }
-        this.page_.value = "list";
+        this.sport_type_ = new ParamArg("sport_type", "st", true, true);
+        this.title_ = new ParamArg("title", "title", false, true);
+        this.page_ = new ParamArg("page", "p", false, false);
+        this.loadFromStorage();
+        this.loadFromURL();
     }
     getParams() {
         return [
@@ -124,22 +133,20 @@ exports.QueryParamsList = QueryParamsList;
 class QueryParamsWorkoutView extends BaseQueryParams {
     constructor() {
         super();
-        this.ftp_watts_ = new ParamArg("ftp_watts", "ftp", true);
-        this.t_pace_ = new ParamArg("t_pace", "tpace", true);
-        this.swim_ftp_ = new ParamArg("swim_ftp", "swim_ftp", true);
-        this.swim_css_ = new ParamArg("swim_css", "css", true);
-        this.email_ = new ParamArg("email", "email", true);
-        this.efficiency_factor_ = new ParamArg("efficiency_factor", "ef", true);
-        this.workout_title_ = new ParamArg("workout_title", "t", false);
-        this.workout_text_ = new ParamArg("workout_text", "w", false);
-        this.sport_type_ = new ParamArg("sport_type", "st", true);
-        this.output_unit_ = new ParamArg("output_unit", "ou", true);
-        this.page_ = new ParamArg("page", "page", true);
-        this.should_round_ = new ParamArg("should_round", "should_round", false);
-        if (!this.validate()) {
-            this.loadFromStorage();
-            this.loadFromURL();
-        }
+        this.ftp_watts_ = new ParamArg("ftp_watts", "ftp", true, true);
+        this.t_pace_ = new ParamArg("t_pace", "tpace", true, true);
+        this.swim_ftp_ = new ParamArg("swim_ftp", "swim_ftp", true, true);
+        this.swim_css_ = new ParamArg("swim_css", "css", true, true);
+        this.email_ = new ParamArg("email", "email", true, true);
+        this.efficiency_factor_ = new ParamArg("efficiency_factor", "ef", true, true);
+        this.workout_title_ = new ParamArg("workout_title", "t", false, true);
+        this.workout_text_ = new ParamArg("workout_text", "w", false, true);
+        this.sport_type_ = new ParamArg("sport_type", "st", true, true);
+        this.output_unit_ = new ParamArg("output_unit", "ou", true, true);
+        this.page_ = new ParamArg("page", "p", false, false);
+        this.should_round_ = new ParamArg("should_round", "sr", false, true);
+        this.loadFromStorage();
+        this.loadFromURL();
     }
     getParams() {
         return [
@@ -194,12 +201,16 @@ class QueryParamsWorkoutView extends BaseQueryParams {
         return this.should_round_;
     }
     static createCopy(other) {
-        return Object.assign(new QueryParamsWorkoutView(), other);
+        let ret = new QueryParamsWorkoutView();
+        for (let param_arg of Object.values(other)) {
+            ret.setPropParamValue(param_arg.property_name, param_arg.value);
+        }
+        return ret;
     }
     saveToStorage() {
         for (let i = 0; i < this.getParams().length; i++) {
             let qp = this.getParams()[i];
-            if (qp.hasValue()) {
+            if (qp.persist && qp.hasValue()) {
                 setPersistedValue(qp.property_name, qp.value);
             }
         }
@@ -216,21 +227,12 @@ class QueryParamsWorkoutView extends BaseQueryParams {
     }
     createWorkoutBuilder() {
         if (this.validate()) {
-            let result = new Model.WorkoutBuilder(this.createUserProfile(), parseInt(this.sport_type.value), parseInt(this.output_unit.value));
+            let result = new Builder.WorkoutBuilder(this.createUserProfile(), parseInt(this.sport_type.value), parseInt(this.output_unit.value));
             result.withDefinition(this.workout_title.value, this.workout_text.value);
             return result;
         }
         else {
             return null;
-        }
-    }
-    getDominantUnit() {
-        try {
-            let workout_builder = this.createWorkoutBuilder();
-            return workout_builder != null ? Visitor.DominantUnitVisitor.computeIntensity(workout_builder.getInterval()) : null;
-        }
-        catch (Error) {
-            return Core.IntensityUnit.Unknown;
         }
     }
 }

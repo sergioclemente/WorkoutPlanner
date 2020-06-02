@@ -6,8 +6,8 @@ const path = require("path");
 const fs = require("fs");
 const url = require("url");
 const Core = require("./core");
-const Model = require("./builder");
 const ModelServer = require("./model_server");
+const Builder = require("./builder");
 const User = require("./user");
 const Config = require("./config");
 function logRequest(req, tag, data) {
@@ -59,7 +59,7 @@ function handleSendEmail(req, res, uri, params) {
         let t = (params.t);
         let w = (params.w);
         let userProfile = new User.UserProfile(ftp, tpace, swim_ftp, css, email);
-        let builder = new Model.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
+        let builder = new Builder.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
         let ms = new ModelServer.MailSender(Config.Values.smtp.login, Config.Values.smtp.password);
         let attachments = [];
         if (builder.getSportType() == Core.SportType.Bike) {
@@ -129,14 +129,14 @@ function handleSaveWorkout(req, res, uri, params) {
     let t = (params.t);
     let w = (params.w);
     let userProfile = new User.UserProfile(ftp, tpace, swim_ftp, css, email);
-    let builder = new Model.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
+    let builder = new Builder.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
     let db = ModelServer.WorkoutDBFactory.createWorkoutDB();
     let workout = new ModelServer.Workout();
     workout.title = t;
     workout.value = builder.getNormalizedWorkoutDefinition();
     workout.tags = "";
     workout.duration_sec = builder.getInterval().getTotalDuration().getSeconds();
-    workout.tss = builder.getTSS2();
+    workout.tss = builder.getTSS();
     workout.sport_type = st;
     db.add(workout, function (err) {
         if (err != null && err.length > 0) {

@@ -1,7 +1,6 @@
 import * as Core from './core';
-import * as Model from './builder';
-import * as Visitor from './visitor';
 import * as User from './user'
+import * as Builder from './builder'
 
 function loadPersistedValue(id: string): string {
 	if (window.localStorage) {
@@ -23,11 +22,14 @@ export class ParamArg {
 	public url_name: string;
 	public value: string;
 	public required: boolean;
+	public persist: boolean;
 
-	constructor(property_name: string, url_name: string, required: boolean) {
+	constructor(property_name: string, url_name: string, required: boolean, persist: boolean) {
 		this.property_name = property_name;
 		this.url_name = url_name;
 		this.required = required;
+		this.persist = persist;
+		this.value = "";
 	}
 
 	hasValue() : boolean {
@@ -70,6 +72,9 @@ class BaseQueryParams {
 	loadFromStorage() : void {
 		for (let i = 0; i < this.getParams().length; i++) {
 			let qp : ParamArg = this.getParams()[i];
+			if (!qp.persist) {
+				continue;
+			}
 			let value = loadPersistedValue(qp.property_name);
 			if (value != null && value.trim().length != 0) {
 				qp.value = value;
@@ -87,10 +92,19 @@ class BaseQueryParams {
 		}
 	}
 
-	private setUrlParamValue(url_name: string, value: string) {
+	protected setUrlParamValue(url_name: string, value: string) {
 		for (let i = 0; i < this.getParams().length; i++) {
 			let qp : ParamArg = this.getParams()[i];
 			if (qp.url_name == url_name) {
+				qp.value = value;
+			}
+		}
+	}
+
+	protected setPropParamValue(property_name: string, value: string) {
+		for (let i = 0; i < this.getParams().length; i++) {
+			let qp : ParamArg = this.getParams()[i];
+			if (qp.property_name == property_name) {
 				qp.value = value;
 			}
 		}
@@ -109,18 +123,15 @@ class BaseQueryParams {
 }
 
 export class QueryParamsList extends BaseQueryParams {
-	private sport_type_ = new ParamArg("sport_type", "st", /*required=*/true);
-	private title_ = new ParamArg("title", "title", /*required=*/false);
-	private page_ = new ParamArg("page", "page", /*required=*/true);
+	private sport_type_ = new ParamArg("sport_type", "st", /*required=*/true, /*persist=*/true);
+	private title_ = new ParamArg("title", "title", /*required=*/false, /*persist=*/true);
+	private page_ = new ParamArg("page", "p", /*required=*/false, /*persist=*/false);
 
 	constructor() {
 		super();
 
-		if (!this.validate()) {
-			this.loadFromStorage();
-			this.loadFromURL();
-		}
-		this.page_.value = "list";
+		this.loadFromStorage();
+		this.loadFromURL();
 	}
 
 	protected getParams() : ParamArg[] {
@@ -145,18 +156,18 @@ export class QueryParamsList extends BaseQueryParams {
 }
 
 export class QueryParamsWorkoutView extends BaseQueryParams {
-	private ftp_watts_ = new ParamArg("ftp_watts", "ftp", /*required=*/true);
-	private t_pace_ = new ParamArg("t_pace", "tpace", /*required=*/true);
-	private swim_ftp_ = new ParamArg("swim_ftp", "swim_ftp", /*required=*/true);
-	private swim_css_ = new ParamArg("swim_css", "css", /*required=*/true);
-	private email_ = new ParamArg("email", "email", /*required=*/true);
-	private efficiency_factor_ = new ParamArg("efficiency_factor", "ef", /*required=*/true);
-	private workout_title_ = new ParamArg("workout_title", "t", /*required=*/false);
-	private workout_text_ = new ParamArg("workout_text", "w", /*required=*/false);
-	private sport_type_ = new ParamArg("sport_type", "st", /*required=*/true);
-	private output_unit_ = new ParamArg("output_unit", "ou", /*required=*/true);
-	private page_ = new ParamArg("page", "page", /*required=*/true);
-	private should_round_ = new ParamArg("should_round", "should_round", /*required=*/false);
+	private ftp_watts_ = new ParamArg("ftp_watts", "ftp", /*required=*/true, /*persist=*/true);
+	private t_pace_ = new ParamArg("t_pace", "tpace", /*required=*/true, /*persist=*/true);
+	private swim_ftp_ = new ParamArg("swim_ftp", "swim_ftp", /*required=*/true, /*persist=*/true);
+	private swim_css_ = new ParamArg("swim_css", "css", /*required=*/true, /*persist=*/true);
+	private email_ = new ParamArg("email", "email", /*required=*/true, /*persist=*/true);
+	private efficiency_factor_ = new ParamArg("efficiency_factor", "ef", /*required=*/true, /*persist=*/true);
+	private workout_title_ = new ParamArg("workout_title", "t", /*required=*/false, /*persist=*/true);
+	private workout_text_ = new ParamArg("workout_text", "w", /*required=*/false, /*persist=*/true);
+	private sport_type_ = new ParamArg("sport_type", "st", /*required=*/true, /*persist=*/true);
+	private output_unit_ = new ParamArg("output_unit", "ou", /*required=*/true, /*persist=*/true);
+	private page_ = new ParamArg("page", "p", /*required=*/false, /*persist=*/false);
+	private should_round_ = new ParamArg("should_round", "sr", /*required=*/false, /*persist=*/true);
 
 	protected getParams() : ParamArg[] {
 		return [
@@ -225,20 +236,22 @@ export class QueryParamsWorkoutView extends BaseQueryParams {
 	constructor() {
 		super();
 
-		if (!this.validate()) {
-			this.loadFromStorage();
-			this.loadFromURL();
-		}
+		this.loadFromStorage();
+		this.loadFromURL();
 	}
 
 	static createCopy(other: QueryParamsWorkoutView): QueryParamsWorkoutView {
-		return Object.assign(new QueryParamsWorkoutView(), other);
+		let ret = new QueryParamsWorkoutView();
+		for (let param_arg of Object.values(other)) {
+			ret.setPropParamValue(param_arg.property_name, param_arg.value);
+		}
+		return ret;
 	}
 
 	saveToStorage(): void {
 		for (let i = 0; i < this.getParams().length; i++) {
 			let qp : ParamArg = this.getParams()[i];
-			if (qp.hasValue()) {
+			if (qp.persist && qp.hasValue()) {
 				setPersistedValue(qp.property_name, qp.value);
 			}
 		}
@@ -254,23 +267,14 @@ export class QueryParamsWorkoutView extends BaseQueryParams {
 		}
 	}
 
-	createWorkoutBuilder(): Model.WorkoutBuilder {
+	createWorkoutBuilder(): Builder.WorkoutBuilder {
 		if (this.validate()) {
-			let result = new Model.WorkoutBuilder(this.createUserProfile(),
+			let result = new Builder.WorkoutBuilder(this.createUserProfile(),
 				parseInt(this.sport_type.value), parseInt(this.output_unit.value));
 			result.withDefinition(this.workout_title.value, this.workout_text.value);
 			return result;
 		} else {
 			return null;
-		}
-	}
-
-	getDominantUnit(): Core.IntensityUnit {
-		try {
-			let workout_builder = this.createWorkoutBuilder();
-			return workout_builder != null ? Visitor.DominantUnitVisitor.computeIntensity(workout_builder.getInterval()) : null;
-		} catch (Error) {
-			return Core.IntensityUnit.Unknown;
 		}
 	}
 }

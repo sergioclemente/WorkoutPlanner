@@ -6,17 +6,27 @@ const Core = require("../core");
 const user_settings_1 = require("./user_settings");
 const workout_input_1 = require("./workout_input");
 const workout_view_1 = require("./workout_view");
+const visitor_1 = require("../visitor");
 class Workout extends React.Component {
     constructor(props) {
         super(props);
         this.params = UI.QueryParamsWorkoutView.createCopy(props);
+    }
+    getDominantUnit(params) {
+        try {
+            let workout_builder = params.createWorkoutBuilder();
+            return workout_builder != null ? visitor_1.DominantUnitVisitor.computeIntensity(workout_builder.getInterval()) : null;
+        }
+        catch (Error) {
+            return Core.IntensityUnit.Unknown;
+        }
     }
     _onWorkoutInputChanged(sportType, outputUnit, workout_title, workout_text) {
         this.params.sport_type.value = sportType.toString();
         this.params.output_unit.value = outputUnit.toString();
         this.params.workout_text.value = workout_text;
         this.params.workout_title.value = workout_title;
-        let dominant_unit = this.params.getDominantUnit();
+        let dominant_unit = this.getDominantUnit(this.params);
         if (dominant_unit != null &&
             dominant_unit != Core.IntensityUnit.Unknown &&
             dominant_unit != Core.IntensityUnit.IF) {
@@ -47,9 +57,11 @@ class Workout extends React.Component {
     }
     refreshUrls() {
         let params = UI.QueryParamsWorkoutView.createCopy(this.params);
+        window.history.pushState('Object', 'Title', this.params.getURL());
         params.page.value = "player";
         this._setHref("player_link", params.getURL());
-        window.history.pushState('Object', 'Title', this.params.getURL());
+        params.page.value = "list";
+        this._setHref("list_link", params.getURL());
     }
     _setHref(element_ref, url) {
         var anchor = this.refs[element_ref];
@@ -144,7 +156,7 @@ class Workout extends React.Component {
                         React.createElement("td", null,
                             React.createElement("a", { ref: "save_workout", href: "#", onClick: (e) => this._onSaveWorkout() }, "Save Workout")),
                         React.createElement("td", null,
-                            React.createElement("a", { href: "?page=list" }, "List Workouts"))))),
+                            React.createElement("a", { ref: "list_link" }, "List Workouts"))))),
             React.createElement("input", { type: "checkbox", ref: "round", onChange: this._onCheckedChanged.bind(this) }),
             "Round intensities ",
             React.createElement("br", null),

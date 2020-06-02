@@ -277,7 +277,7 @@ function GoldenTestCase(of, input) {
     actual_output += "AST: \n";
     actual_output += Visitor.TreePrinterVisitor.Print(interval);
     actual_output += string_format("IF (Avg): {0}\n", interval.getIntensity().getValue());
-    actual_output += string_format("TSS2: {0}\n", builder.getTSS2());
+    actual_output += string_format("TSS2: {0}\n", builder.getTSS());
     let dominant_intensity_unit = Visitor.DominantUnitVisitor.computeIntensity(interval);
     if (dominant_intensity_unit != Core.IntensityUnit.Unknown || output_unit != Core.IntensityUnit.Unknown) {
         let presentation_unit;

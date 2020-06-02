@@ -3,11 +3,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
 const Core = require("../core");
 const PreProcessor = require("../preprocessor");
+const UI = require("../ui");
 const select_1 = require("./select");
 const select_option_1 = require("./select_option");
 class WorkoutInput extends React.Component {
     constructor(props) {
         super(props);
+        let params = UI.QueryParamsWorkoutView.createCopy(props);
+        this.sport_type = parseInt(params.sport_type.value);
+        this.output_unit = parseInt(params.output_unit.value);
+        this.workout_title = params.workout_title.value;
+        this.workout_text = params.workout_text.value;
     }
     getSportType() {
         var sltSportType = this.refs['sportType'];
@@ -100,17 +106,17 @@ class WorkoutInput extends React.Component {
             React.createElement("h1", null, " Workout Settings "),
             React.createElement("form", null,
                 "Title: ",
-                React.createElement("input", { ref: "workout_title", defaultValue: this.props.workout_title, onChange: e => this._onWorkoutTitleChange(e) }),
+                React.createElement("input", { ref: "workout_title", defaultValue: this.workout_title, onChange: e => this._onWorkoutTitleChange(e) }),
                 React.createElement("br", null),
                 "Sport type:",
-                React.createElement(select_1.default, { ref: "sportType", defaultValue: this.props.sport_type, onChange: e => this._onSportTypeChange(e) },
+                React.createElement(select_1.default, { ref: "sportType", defaultValue: this.sport_type, onChange: e => this._onSportTypeChange(e) },
                     React.createElement(select_option_1.default, { value: Core.SportType.Swim }, "Swim"),
                     React.createElement(select_option_1.default, { value: Core.SportType.Bike }, "Bike"),
                     React.createElement(select_option_1.default, { value: Core.SportType.Run }, "Run"),
                     React.createElement(select_option_1.default, { value: Core.SportType.Other }, "Other")),
                 React.createElement("br", null),
                 "Unit:",
-                React.createElement(select_1.default, { ref: "unit", defaultValue: this.props.output_unit, onChange: e => this._onUnitChanged(e) },
+                React.createElement(select_1.default, { ref: "unit", defaultValue: this.output_unit, onChange: e => this._onUnitChanged(e) },
                     React.createElement(select_option_1.default, { ref: "watts", value: Core.IntensityUnit.Watts }, "Watts"),
                     React.createElement(select_option_1.default, { ref: "minmi", value: Core.IntensityUnit.MinMi }, "min/mi"),
                     React.createElement(select_option_1.default, { ref: "mih", value: Core.IntensityUnit.Mph }, "mi/h"),
@@ -122,7 +128,7 @@ class WorkoutInput extends React.Component {
                     React.createElement(select_option_1.default, { ref: "hr", value: Core.IntensityUnit.HeartRate }, "Heart rate"),
                     React.createElement(select_option_1.default, { ref: "per400m", value: Core.IntensityUnit.Per400Meters }, "/400m")),
                 React.createElement("br", null),
-                React.createElement("textarea", { ref: "workout_text", defaultValue: this.props.workout_text, style: { height: "200px", width: "100%" }, onChange: e => this._onWorkoutTextChange(e) }),
+                React.createElement("textarea", { ref: "workout_text", defaultValue: this.workout_text, style: { height: "200px", width: "100%" }, onChange: e => this._onWorkoutTextChange(e) }),
                 React.createElement("br", null))));
     }
 }

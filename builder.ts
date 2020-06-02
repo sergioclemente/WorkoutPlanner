@@ -1,30 +1,30 @@
-import {SportType, DistanceUnit, Intensity, ArrayInterval, Interval, IntensityUnitHelper, IntensityUnit, MyMath, PreconditionsCheck, FormatterHelper} from './core';
-import {ObjectFactory, UserProfile} from './user'
-import {WorkoutTextVisitor, WorkoutFileGenerator, TSSCalculator} from './visitor';
-import { IntervalParser } from './parser';
+import * as Parser from './parser';
+import * as Visitor from './visitor';
+import * as Core from './core';
+import * as User from './user'
 
 export class WorkoutBuilder {
-	private userProfile: UserProfile;
-	private sportType: SportType;
-	private outputUnit: IntensityUnit;
-	private intervals: ArrayInterval;
+	private userProfile: User.UserProfile;
+	private sportType: Core.SportType;
+	private outputUnit: Core.IntensityUnit;
+	private intervals: Core.ArrayInterval;
 	private workoutDefinition: string;
 	private workoutTitle: string;
 
-	constructor(userProfile: UserProfile, sportType: SportType, outputUnit: IntensityUnit) {
-		PreconditionsCheck.assertIsNumber(sportType, "sportType");
-		PreconditionsCheck.assertIsNumber(outputUnit, "outputUnit");
+	constructor(userProfile: User.UserProfile, sportType: Core.SportType, outputUnit: Core.IntensityUnit) {
+		Core.PreconditionsCheck.assertIsNumber(sportType, "sportType");
+		Core.PreconditionsCheck.assertIsNumber(outputUnit, "outputUnit");
 
 		this.userProfile = userProfile;
 		this.sportType = sportType;
 		this.outputUnit = outputUnit;
 	}
 
-	getInterval(): ArrayInterval {
+	getInterval(): Core.ArrayInterval {
 		return this.intervals;
 	}
 
-	getSportType(): SportType {
+	getSportType(): Core.SportType {
 		return this.sportType;
 	}
 
@@ -33,13 +33,13 @@ export class WorkoutBuilder {
 	}
 
 	getNormalizedWorkoutDefinition(): string {
-		let object_factory = new ObjectFactory(this.userProfile, this.sportType);
-		return IntervalParser.normalize(object_factory, this.workoutDefinition);
+		let object_factory = new User.ObjectFactory(this.userProfile, this.sportType);
+		return Parser.IntervalParser.normalize(object_factory, this.workoutDefinition);
 	}
 
 	withDefinition(workoutTitle: string, workoutDefinition: string): WorkoutBuilder {
-		let object_factory = new ObjectFactory(this.userProfile, this.sportType);
-		this.intervals = IntervalParser.parse(
+		let object_factory = new User.ObjectFactory(this.userProfile, this.sportType);
+		this.intervals = Parser.IntervalParser.parse(
 			object_factory,
 			workoutDefinition
 		);
@@ -48,13 +48,13 @@ export class WorkoutBuilder {
 		return this;
 	}
 
-	getIntensityFriendly(intensity: Intensity, roundValues: boolean) {
-		var f = new WorkoutTextVisitor(this.userProfile, this.sportType, this.outputUnit, roundValues);
+	getIntensityFriendly(intensity: Core.Intensity, roundValues: boolean) {
+		var f = new Visitor.WorkoutTextVisitor(this.userProfile, this.sportType, this.outputUnit, roundValues);
 		return f.getIntensityPretty(intensity);
 	}
 
 	getTSS(): number {
-		return TSSCalculator.compute(this.intervals);
+		return Visitor.TSSCalculator.compute(this.intervals);
 	}
 
 	getTimePretty(): string {
@@ -62,43 +62,43 @@ export class WorkoutBuilder {
 	}
 
 	getIF(): number {
-		return MyMath.round10(this.intervals.getIntensity().getValue() * 100, -1);
+		return Core.MyMath.round10(this.intervals.getIntensity().getValue() * 100, -1);
 	}
 
 	getAveragePower(): number {
-		return MyMath.round10(this.userProfile.bike_ftp * this.intervals.getIntensity().getValue(), -1);
+		return Core.MyMath.round10(this.userProfile.bike_ftp * this.intervals.getIntensity().getValue(), -1);
 	}
 
-	getIntervalPretty(interval: Interval, roundValues: boolean) {
-		return WorkoutTextVisitor.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit, roundValues);
+	getIntervalPretty(interval: Core.Interval, roundValues: boolean) {
+		return Visitor.WorkoutTextVisitor.getIntervalTitle(interval, this.userProfile, this.sportType, this.outputUnit, roundValues);
 	}
 
 	getEstimatedDistancePretty(): string {
-		if (this.sportType == SportType.Swim) {
-			return this.intervals.getWorkDuration().toStringDistance(DistanceUnit.Yards);
+		if (this.sportType == Core.SportType.Swim) {
+			return this.intervals.getWorkDuration().toStringDistance(Core.DistanceUnit.Yards);
 		} else {
-			return this.intervals.getWorkDuration().toStringDistance(DistanceUnit.Miles);
+			return this.intervals.getWorkDuration().toStringDistance(Core.DistanceUnit.Miles);
 		}
 	}
 
 	getAveragePace(): string {
 		var minMi = this.userProfile.getRunningPaceMinMi(this.intervals.getIntensity());
 		let outputUnit = this.outputUnit;
-		if (outputUnit == IntensityUnit.HeartRate) {
-			outputUnit = IntensityUnit.MinMi;
+		if (outputUnit == Core.IntensityUnit.HeartRate) {
+			outputUnit = Core.IntensityUnit.MinMi;
 		}
-		var outputValue = IntensityUnitHelper.convertTo(minMi, IntensityUnit.MinMi, outputUnit);
-		if (outputUnit == IntensityUnit.Kmh || outputUnit == IntensityUnit.Mph) {
-			return MyMath.round10(outputValue, -1) + IntensityUnitHelper.toString(outputUnit);
+		var outputValue = Core.IntensityUnitHelper.convertTo(minMi, Core.IntensityUnit.MinMi, outputUnit);
+		if (outputUnit == Core.IntensityUnit.Kmh || outputUnit == Core.IntensityUnit.Mph) {
+			return Core.MyMath.round10(outputValue, -1) + Core.IntensityUnitHelper.toString(outputUnit);
 		} else {
-			return FormatterHelper.formatNumber(outputValue, 60, ":", IntensityUnitHelper.toString(outputUnit));
+			return Core.FormatterHelper.formatNumber(outputValue, 60, ":", Core.IntensityUnitHelper.toString(outputUnit));
 		}
 	}
 
 	getStepsList(new_line: string): string {
 		var result = "";
 
-		this.intervals.getIntervals().forEach(function (interval: Interval) {
+		this.intervals.getIntervals().forEach(function (interval: Core.Interval) {
 			result += ("* " + this.getIntervalPretty(interval) + new_line);
 		}.bind(this));
 
@@ -128,31 +128,31 @@ export class WorkoutBuilder {
 	}
 
 	getMRCFile(): string {
-		let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
+		let wfg = new Visitor.WorkoutFileGenerator(this.workoutTitle, this.intervals);
 		return wfg.getMRCFile();
 	}
 
 	getZWOFile(): string {
-		let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
+		let wfg = new Visitor.WorkoutFileGenerator(this.workoutTitle, this.intervals);
 		return wfg.getZWOFile();
 	}
 
 	getPPSMRXFile(): string {
-		let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
+		let wfg = new Visitor.WorkoutFileGenerator(this.workoutTitle, this.intervals);
 		return wfg.getPPSMRXFile();
 	}
 
 	getZWOFileName(): string {
-		let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
+		let wfg = new Visitor.WorkoutFileGenerator(this.workoutTitle, this.intervals);
 		return wfg.getZWOFileName();
 	}
 	getMRCFileName(): string {
-		let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
+		let wfg = new Visitor.WorkoutFileGenerator(this.workoutTitle, this.intervals);
 		return wfg.getMRCFileName();
 	}
 
 	getPPSMRXFileName(): string {
-		let wfg = new WorkoutFileGenerator(this.workoutTitle, this.intervals);
+		let wfg = new Visitor.WorkoutFileGenerator(this.workoutTitle, this.intervals);
 		return wfg.getPPSMRXFileName();
 	}
 };

@@ -64,7 +64,7 @@ class WorkoutView extends React.Component {
             var avg_pace = builder.getSportType() == Core.SportType.Run ?
                 builder.getAveragePace() : "";
             return ({
-                tss_from_if: builder.getTSS2(),
+                tss_from_if: builder.getTSS(),
                 time: builder.getTimePretty(),
                 intensity: builder.getIF(),
                 avg_power: builder.getAveragePower(),

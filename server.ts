@@ -5,8 +5,8 @@ import * as fs from 'fs'
 import * as url from 'url'
 
 import * as Core from './core';
-import * as Model from './builder';
 import * as ModelServer from './model_server';
+import * as Builder from './builder';
 import * as User from './user';
 import * as Config from './config';
 import { ParsedUrlQuery } from 'querystring'
@@ -73,7 +73,7 @@ function handleSendEmail(req: http.IncomingMessage, res: http.ServerResponse, ur
         let w = <string>(params.w)
 
         let userProfile = new User.UserProfile(ftp, tpace, swim_ftp, css, email);
-        let builder = new Model.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
+        let builder = new Builder.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
 
         // Sending email
         let ms = new ModelServer.MailSender(Config.Values.smtp.login, Config.Values.smtp.password);
@@ -151,7 +151,7 @@ function handleSaveWorkout(req: http.IncomingMessage, res: http.ServerResponse, 
     let w = <string>(params.w)
 
     let userProfile = new User.UserProfile(ftp, tpace, swim_ftp, css, email);
-    let builder = new Model.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
+    let builder = new Builder.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
     let db = ModelServer.WorkoutDBFactory.createWorkoutDB();
     let workout = new ModelServer.Workout();
     workout.title = t;
