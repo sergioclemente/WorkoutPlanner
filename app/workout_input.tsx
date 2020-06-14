@@ -101,7 +101,10 @@ export default class WorkoutInput extends React.Component<any, any> {
 
 	_onWorkoutTextChange(e) {
 		let workoutText = this.refs['workout_text'] as HTMLTextAreaElement;
-		let wp = new PreProcessor.TextPreprocessor(this.getSportType());
+		// HACK: Right now only time we can safely detect if its indoor its if its swim and output unit
+		// its watts.
+		let is_indoor = this.getSportType() == Core.SportType.Swim && this.getUnitType() == Core.IntensityUnit.Watts;
+		let wp = new PreProcessor.TextPreprocessor(new PreProcessor.TextPreprocessorContext(this.getSportType(), /*is_indoor=*/is_indoor));
 		workoutText.value = wp.process(workoutText.value);
 		if (workoutText.value == "") {
 			// clear the title if the user cleared the value. this

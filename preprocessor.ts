@@ -5,16 +5,25 @@ enum ArgType {
 	String
 };
 
-// Class that processes the input like #wu and replaces with macros.
-export class TextPreprocessor {
-	sport_type: SportType;
+export class TextPreprocessorContext {
+	is_indoor_: boolean;
+	sport_type_: SportType; 
 
-	constructor(sport_type: SportType) {
-		this.sport_type = sport_type;
+	constructor(sport_type: SportType, is_indoor: boolean) {
+		this.sport_type_ = sport_type;
+		this.is_indoor_ = is_indoor;
 	}
 
-	private _randBool(): boolean {
-		return this._rand(0, 2) == 1;
+	get sport_type() { return this.sport_type_;}
+	get is_indoor() { return this.is_indoor_; }
+}
+
+// Class that processes the input like #wu and replaces with macros.
+export class TextPreprocessor {
+	context_: TextPreprocessorContext;
+
+	constructor(context: TextPreprocessorContext) {
+		this.context_ = context;
 	}
 
 	// Generated a number in [min, max)
@@ -33,9 +42,9 @@ export class TextPreprocessor {
 	private _warmup(): string {
 		let warmup_text = "";
 		let warmup_groups = [];
-		if (this.sport_type == SportType.Bike) {
+		if (this.context_.sport_type == SportType.Bike) {
 			// Are we going to do the british warmup?
-			if (this._randBool()) {
+			if (this._rand(0, 5) == 0) { // 20% of chance
 				// Yes.
 				warmup_text = `(5min, *, 90rpm - Smooth pedaling)
 (2min, *, 95rpm - Smooth pedaling)
@@ -83,7 +92,7 @@ export class TextPreprocessor {
 					warmup_text += this._randElement(warmup_groups[i]);
 				}
 			}
-		} else if (this.sport_type == SportType.Run) {
+		} else if (this.context_.sport_type == SportType.Run) {
 			warmup_groups = [
 				[
 					"3[(10s, 0, arm swings)]",
@@ -102,46 +111,66 @@ export class TextPreprocessor {
 			for (let i = 0; i < warmup_groups.length; i++) {
 				warmup_text += this._randElement(warmup_groups[i]);
 			}
-		} else if (this.sport_type == SportType.Swim) {
-			warmup_groups = [
-				// Free
-				[
-					"(300y, +10, free)",
-					"(400y, +10, free)",
-					"(500y, +10, free)"
-				],
-				// Kick
-				[
-					"(200y, kick, +10)",
-					"(300yards, as 50 kick w/ board - 50 free)",
-					"3[(100y, Butterfly on the back)]",
-					"(200y, Butterfly Kick with fins on your back)",
-					"6[(50, Streamline kick on left/side)]"
-				],
-				// Drill
-				[
-					"8[(50yards, Drill on first 25, free, build on second 50)]",
-					"4[(50yards, Swim GOLF - Descend each one), \"10s rest\"]",
-					"3[(100y, single arm freestyle right side, free, single arm freestyle left side, free)]",
-					"4[(75y, unco left; swim; unco right)]",
-					"4[(50yards, scull and free by 25)]",
-					"(200y, +10, pull)"
-				],
-				// Pre-main set
-				[
-					// TODO: Allow probabilities or weight
-					"4[(25yards, sprint)]",
-					""
-				],
-				// Build
-				[
-					"8[(50y, +0, build 1-4)]",
-					"6[(50yards, 100, build)]",
-					"4[(50yards, Swim descend 1-4), \"10s rest\"]",
-					"4[(100yards, add 25yards of hard swimming on every 100)]",
-					"4[(100y, descend 1-4)]"
+		} else if (this.context_.sport_type == SportType.Swim) {
+
+			if (this.context_.is_indoor_) {
+				warmup_groups = [
+					// Alternate arm ~5min
+					[
+						"2[(2min, alternate arm pull, 30s)]",
+						"(5min, alternate arm pull)",
+					],
+					// Double arm ~4-5min
+					[
+						"(10s, Change to DD3), 6[(30s, double arm, 15s)]",
+						"(10s, Change to DD5), 8[(15s, double arm pull, 15s)]"
+					],
+					// Transition
+					[
+						"(10s, Change to DD4), 4[(20s, 80% of 1 min power), (40s, easy)]"
+					],
 				]
-			];
+			} else {
+				warmup_groups = [
+					// Free
+					[
+						"(300y, +10, free)",
+						"(400y, +10, free)",
+						"(500y, +10, free)"
+					],
+					// Kick
+					[
+						"(200y, kick, +10)",
+						"(300yards, as 50 kick w/ board - 50 free)",
+						"3[(100y, Butterfly on the back)]",
+						"(200y, Butterfly Kick with fins on your back)",
+						"6[(50, Streamline kick on left/side)]"
+					],
+					// Drill
+					[
+						"8[(50yards, Drill on first 25, free, build on second 50)]",
+						"4[(50yards, Swim GOLF - Descend each one), \"10s rest\"]",
+						"3[(100y, single arm freestyle right side, free, single arm freestyle left side, free)]",
+						"4[(75y, unco left; swim; unco right)]",
+						"4[(50yards, scull and free by 25)]",
+						"(200y, +10, pull)"
+					],
+					// Pre-main set
+					[
+						// TODO: Allow probabilities or weight
+						"4[(25yards, sprint)]",
+						""
+					],
+					// Build
+					[
+						"8[(50y, +0, build 1-4)]",
+						"6[(50yards, 100, build)]",
+						"4[(50yards, Swim descend 1-4), \"10s rest\"]",
+						"4[(100yards, add 25yards of hard swimming on every 100)]",
+						"4[(100y, descend 1-4)]"
+					]
+				];
+			}
 			for (let i = 0; i < warmup_groups.length; i++) {
 				warmup_text += this._randElement(warmup_groups[i]);
 			}

@@ -389,13 +389,13 @@ mocha_1.describe('NumberAndUnitParser', function () {
     });
 });
 function textPreprocessor(input, expected) {
-    let tp = new PreProcessor.TextPreprocessor(Core.SportType.Bike);
+    let tp = new PreProcessor.TextPreprocessor(new PreProcessor.TextPreprocessorContext(Core.SportType.Bike, false));
     let actual = tp.process(input);
     expect_eq_str(expected, actual);
 }
 mocha_1.describe('text processor', function () {
     mocha_1.it('simple', function () {
-        let tp = new PreProcessor.TextPreprocessor(Core.SportType.Bike);
+        let tp = new PreProcessor.TextPreprocessor(new PreProcessor.TextPreprocessorContext(Core.SportType.Bike, false));
         let actual = tp.process("#wu");
         console.assert(actual.indexOf("#wu") == -1);
         textPreprocessor("#sl(4,40)", "4[(40s,45,Left Leg), (15s,45,Both), (40s,45,Right Leg), (15s,45,Both)]");

@@ -444,7 +444,7 @@ describe('NumberAndUnitParser', function () {
 });
 
 function textPreprocessor(input: string, expected: string) {
-	let tp = new PreProcessor.TextPreprocessor(Core.SportType.Bike);
+	let tp = new PreProcessor.TextPreprocessor(new PreProcessor.TextPreprocessorContext(Core.SportType.Bike, /*is_indoor=*/false));
 	let actual = tp.process(input);
 	expect_eq_str(expected, actual);
 }
@@ -453,7 +453,7 @@ describe('text processor', function () {
 	it('simple', function () {
 		// Make sure #wu gets resolved. Its a random output so we cannot
 		// check against a static value unless we override the random generator.
-		let tp = new PreProcessor.TextPreprocessor(Core.SportType.Bike);
+		let tp = new PreProcessor.TextPreprocessor(new PreProcessor.TextPreprocessorContext(Core.SportType.Bike, /*is_indoor=*/false));
 		let actual = tp.process("#wu");
 		console.assert(actual.indexOf("#wu") == -1);
 

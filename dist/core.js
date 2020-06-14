@@ -175,273 +175,267 @@ class DurationUnitHelper {
     }
 }
 exports.DurationUnitHelper = DurationUnitHelper;
-let Duration = (() => {
-    class Duration {
-        constructor(unit, value, estimatedDurationInSeconds, estimatedDistanceInMiles) {
-            PreconditionsCheck.assertIsNumber(unit, "unit");
-            PreconditionsCheck.assertIsNumber(value, "value");
-            PreconditionsCheck.assertIsNumber(estimatedDurationInSeconds, "estimatedDurationInSeconds");
-            PreconditionsCheck.assertIsNumber(estimatedDistanceInMiles, "estimatedDistanceInMiles");
-            this.unit = unit;
-            this.value = value;
-            if (estimatedDistanceInMiles == 0 && DurationUnitHelper.isDistance(unit)) {
-                this.estimatedDistanceInMiles = DurationUnitHelper.getDistanceMiles(unit, value);
+class Duration {
+    constructor(unit, value, estimatedDurationInSeconds, estimatedDistanceInMiles) {
+        PreconditionsCheck.assertIsNumber(unit, "unit");
+        PreconditionsCheck.assertIsNumber(value, "value");
+        PreconditionsCheck.assertIsNumber(estimatedDurationInSeconds, "estimatedDurationInSeconds");
+        PreconditionsCheck.assertIsNumber(estimatedDistanceInMiles, "estimatedDistanceInMiles");
+        this.unit = unit;
+        this.value = value;
+        if (estimatedDistanceInMiles == 0 && DurationUnitHelper.isDistance(unit)) {
+            this.estimatedDistanceInMiles = DurationUnitHelper.getDistanceMiles(unit, value);
+        }
+        else {
+            this.estimatedDistanceInMiles = estimatedDistanceInMiles;
+        }
+        if (estimatedDurationInSeconds == 0 && DurationUnitHelper.isTime(unit)) {
+            this.estimatedDurationInSeconds = DurationUnitHelper.getDurationSeconds(unit, value);
+        }
+        else {
+            this.estimatedDurationInSeconds = estimatedDurationInSeconds;
+        }
+    }
+    getUnit() {
+        return this.unit;
+    }
+    getValue() {
+        return this.value;
+    }
+    getSeconds() {
+        if (isNaN(this.estimatedDurationInSeconds) || !isFinite(this.estimatedDurationInSeconds)) {
+            return 0;
+        }
+        return this.estimatedDurationInSeconds;
+    }
+    getDistanceInMiles() {
+        return this.estimatedDistanceInMiles;
+    }
+    getValueInUnit(unitTo) {
+        PreconditionsCheck.assertTrue(unitTo != DistanceUnit.Unknown);
+        if (unitTo == DistanceUnit.Unknown) {
+            return MyMath.round10(this.value, -1);
+        }
+        else {
+            if (DurationUnitHelper.isDistance(unitTo)) {
+                var value = DistanceUnitHelper.convertTo(this.getDistanceInMiles(), DistanceUnit.Miles, unitTo);
+                return MyMath.round10(value, -1);
             }
             else {
-                this.estimatedDistanceInMiles = estimatedDistanceInMiles;
-            }
-            if (estimatedDurationInSeconds == 0 && DurationUnitHelper.isTime(unit)) {
-                this.estimatedDurationInSeconds = DurationUnitHelper.getDurationSeconds(unit, value);
-            }
-            else {
-                this.estimatedDurationInSeconds = estimatedDurationInSeconds;
-            }
-        }
-        getUnit() {
-            return this.unit;
-        }
-        getValue() {
-            return this.value;
-        }
-        getSeconds() {
-            if (isNaN(this.estimatedDurationInSeconds) || !isFinite(this.estimatedDurationInSeconds)) {
-                return 0;
-            }
-            return this.estimatedDurationInSeconds;
-        }
-        getDistanceInMiles() {
-            return this.estimatedDistanceInMiles;
-        }
-        getValueInUnit(unitTo) {
-            PreconditionsCheck.assertTrue(unitTo != DistanceUnit.Unknown);
-            if (unitTo == DistanceUnit.Unknown) {
                 return MyMath.round10(this.value, -1);
             }
+        }
+    }
+    toStringDistance(unitTo) {
+        return this.getValueInUnit(unitTo) + DurationUnitHelper.toString(unitTo);
+    }
+    getTimeComponents() {
+        var hours = (this.estimatedDurationInSeconds / 3600) | 0;
+        return {
+            hours: hours,
+            minutes: ((this.estimatedDurationInSeconds - hours * 3600) / 60) | 0,
+            seconds: (this.estimatedDurationInSeconds % 60) | 0
+        };
+    }
+    toTimeStringLong() {
+        var result = "";
+        var time = this.getTimeComponents();
+        let unit = "";
+        if (time.hours != 0) {
+            result += time.hours;
+            unit = "hr";
+        }
+        if (time.minutes != 0) {
+            if (result.length > 0) {
+                result += ":";
+            }
             else {
-                if (DurationUnitHelper.isDistance(unitTo)) {
-                    var value = DistanceUnitHelper.convertTo(this.getDistanceInMiles(), DistanceUnit.Miles, unitTo);
-                    return MyMath.round10(value, -1);
-                }
-                else {
-                    return MyMath.round10(this.value, -1);
-                }
+                unit = "min";
             }
+            result += time.minutes;
         }
-        toStringDistance(unitTo) {
-            return this.getValueInUnit(unitTo) + DurationUnitHelper.toString(unitTo);
+        if (time.seconds != 0) {
+            if (result.length > 0) {
+                result += ":";
+            }
+            else {
+                unit = "sec";
+            }
+            result += time.seconds;
         }
-        getTimeComponents() {
-            var hours = (this.estimatedDurationInSeconds / 3600) | 0;
-            return {
-                hours: hours,
-                minutes: ((this.estimatedDurationInSeconds - hours * 3600) / 60) | 0,
-                seconds: (this.estimatedDurationInSeconds % 60) | 0
-            };
+        return result + unit;
+    }
+    toTimeStringShort() {
+        var result = "";
+        var time = this.getTimeComponents();
+        if (time.hours != 0) {
+            return this.toTimeStringLong();
         }
-        toTimeStringLong() {
-            var result = "";
-            var time = this.getTimeComponents();
-            let unit = "";
-            if (time.hours != 0) {
-                result += time.hours;
-                unit = "hr";
-            }
-            if (time.minutes != 0) {
-                if (result.length > 0) {
-                    result += ":";
-                }
-                else {
-                    unit = "min";
-                }
-                result += time.minutes;
-            }
-            if (time.seconds != 0) {
-                if (result.length > 0) {
-                    result += ":";
-                }
-                else {
-                    unit = "sec";
-                }
-                result += time.seconds;
-            }
-            return result + unit;
+        if (time.minutes != 0) {
+            result += time.minutes + "'";
         }
-        toTimeStringShort() {
-            var result = "";
-            var time = this.getTimeComponents();
-            if (time.hours != 0) {
-                return this.toTimeStringLong();
-            }
-            if (time.minutes != 0) {
-                result += time.minutes + "'";
-            }
-            if (time.seconds != 0) {
-                result += FormatterHelper.enforceDigits(time.seconds, 2) + "''";
-            }
-            return result;
+        if (time.seconds != 0) {
+            result += FormatterHelper.enforceDigits(time.seconds, 2) + "''";
         }
-        toStringShort(omitUnit) {
-            if (!DurationUnitHelper.isTime(this.unit)) {
-                if (omitUnit) {
-                    return this.getValueInUnit(this.unit) + "";
-                }
-                else {
-                    return this.toStringDistance(this.unit);
-                }
-            }
-            return this.toTimeStringShort();
-        }
-        toString() {
-            if (DurationUnitHelper.isTime(this.unit)) {
-                return this.toTimeStringLong();
+        return result;
+    }
+    toStringShort(omitUnit) {
+        if (!DurationUnitHelper.isTime(this.unit)) {
+            if (omitUnit) {
+                return this.getValueInUnit(this.unit) + "";
             }
             else {
                 return this.toStringDistance(this.unit);
             }
         }
-        static combine(dur1, dur2) {
-            var estTime = dur1.getSeconds() + dur2.getSeconds();
-            var estDistance = dur1.getDistanceInMiles() + dur2.getDistanceInMiles();
-            if (dur1.getUnit() == dur2.getUnit()) {
-                return new Duration(dur1.getUnit(), dur1.getValue() + dur2.getValue(), estTime, estDistance);
-            }
-            if (dur1.getValue() == 0) {
-                return dur2;
-            }
-            if (dur2.getValue() == 0) {
-                return dur1;
-            }
-            if (DurationUnitHelper.isTime(dur1.getUnit())) {
-                if (DurationUnitHelper.isTime(dur2.getUnit())) {
-                    var time1 = DurationUnitHelper.getDurationSeconds(dur1.getUnit(), dur1.getValue());
-                    var time2 = DurationUnitHelper.getDurationSeconds(dur2.getUnit(), dur2.getValue());
-                    return new Duration(TimeUnit.Seconds, time1 + time2, estTime, estDistance);
-                }
-                else {
-                    var time_sum = dur1.getSeconds() + dur2.getSeconds();
-                    return new Duration(TimeUnit.Seconds, time_sum, estTime, estDistance);
-                }
-            }
-            else {
-                if (DurationUnitHelper.isTime(dur2.getUnit())) {
-                    var time_sum = dur1.getSeconds() + dur2.getSeconds();
-                    return new Duration(TimeUnit.Seconds, time_sum, estTime, estDistance);
-                }
-                else {
-                    var distance1 = DurationUnitHelper.getDistanceMiles(dur1.getUnit(), dur1.getValue());
-                    var distance2 = DurationUnitHelper.getDistanceMiles(dur2.getUnit(), dur2.getValue());
-                    return new Duration(DistanceUnit.Miles, distance1 + distance2, estTime, estDistance);
-                }
-            }
+        return this.toTimeStringShort();
+    }
+    toString() {
+        if (DurationUnitHelper.isTime(this.unit)) {
+            return this.toTimeStringLong();
         }
-        static combineArray(durations) {
-            return durations.reduce(function (prev, cur) {
-                return Duration.combine(prev, cur);
-            });
+        else {
+            return this.toStringDistance(this.unit);
         }
     }
-    Duration.ZeroDuration = new Duration(TimeUnit.Seconds, 0, 0, 0);
-    return Duration;
-})();
+    static combine(dur1, dur2) {
+        var estTime = dur1.getSeconds() + dur2.getSeconds();
+        var estDistance = dur1.getDistanceInMiles() + dur2.getDistanceInMiles();
+        if (dur1.getUnit() == dur2.getUnit()) {
+            return new Duration(dur1.getUnit(), dur1.getValue() + dur2.getValue(), estTime, estDistance);
+        }
+        if (dur1.getValue() == 0) {
+            return dur2;
+        }
+        if (dur2.getValue() == 0) {
+            return dur1;
+        }
+        if (DurationUnitHelper.isTime(dur1.getUnit())) {
+            if (DurationUnitHelper.isTime(dur2.getUnit())) {
+                var time1 = DurationUnitHelper.getDurationSeconds(dur1.getUnit(), dur1.getValue());
+                var time2 = DurationUnitHelper.getDurationSeconds(dur2.getUnit(), dur2.getValue());
+                return new Duration(TimeUnit.Seconds, time1 + time2, estTime, estDistance);
+            }
+            else {
+                var time_sum = dur1.getSeconds() + dur2.getSeconds();
+                return new Duration(TimeUnit.Seconds, time_sum, estTime, estDistance);
+            }
+        }
+        else {
+            if (DurationUnitHelper.isTime(dur2.getUnit())) {
+                var time_sum = dur1.getSeconds() + dur2.getSeconds();
+                return new Duration(TimeUnit.Seconds, time_sum, estTime, estDistance);
+            }
+            else {
+                var distance1 = DurationUnitHelper.getDistanceMiles(dur1.getUnit(), dur1.getValue());
+                var distance2 = DurationUnitHelper.getDistanceMiles(dur2.getUnit(), dur2.getValue());
+                return new Duration(DistanceUnit.Miles, distance1 + distance2, estTime, estDistance);
+            }
+        }
+    }
+    static combineArray(durations) {
+        return durations.reduce(function (prev, cur) {
+            return Duration.combine(prev, cur);
+        });
+    }
+}
 exports.Duration = Duration;
-let Intensity = (() => {
-    class Intensity {
-        constructor(ifValue = 0, value = 0, unit = IntensityUnit.IF) {
-            PreconditionsCheck.assertIsNumber(ifValue, "ifValue");
-            PreconditionsCheck.assertIsNumber(value, "value");
-            PreconditionsCheck.assertIsNumber(unit, "unit");
-            if (ifValue > 10) {
-                ifValue = ifValue / 100;
+Duration.ZeroDuration = new Duration(TimeUnit.Seconds, 0, 0, 0);
+class Intensity {
+    constructor(ifValue = 0, value = 0, unit = IntensityUnit.IF) {
+        PreconditionsCheck.assertIsNumber(ifValue, "ifValue");
+        PreconditionsCheck.assertIsNumber(value, "value");
+        PreconditionsCheck.assertIsNumber(unit, "unit");
+        if (ifValue > 10) {
+            ifValue = ifValue / 100;
+        }
+        console.assert(ifValue <= 2 && ifValue >= 0, stringFormat("Invalid if {0}", ifValue));
+        if (unit == IntensityUnit.IF) {
+            if (value > 10) {
+                value = value / 100;
             }
-            console.assert(ifValue <= 2 && ifValue >= 0, stringFormat("Invalid if {0}", ifValue));
-            if (unit == IntensityUnit.IF) {
-                if (value > 10) {
-                    value = value / 100;
-                }
-                if (value == 0) {
-                    value = ifValue;
-                }
-                this.ifValue = ifValue;
-                this.originalUnit = IntensityUnit.IF;
-                this.originalValue = value;
+            if (value == 0) {
+                value = ifValue;
+            }
+            this.ifValue = ifValue;
+            this.originalUnit = IntensityUnit.IF;
+            this.originalValue = value;
+        }
+        else {
+            this.ifValue = ifValue;
+            this.originalUnit = unit;
+            this.originalValue = value;
+        }
+    }
+    getValue() {
+        return this.ifValue;
+    }
+    toString() {
+        if (this.originalUnit == IntensityUnit.IF) {
+            return MyMath.round10(100 * this.originalValue, -1) + "%";
+        }
+        else {
+            if (this.originalUnit == IntensityUnit.MinMi) {
+                return FormatterHelper.formatNumber(this.originalValue, 60, ":", IntensityUnitHelper.toString(IntensityUnit.MinMi));
+            }
+            else if (this.originalUnit == IntensityUnit.Per100Yards || this.originalUnit == IntensityUnit.Per100Meters || this.originalUnit == IntensityUnit.Per400Meters || this.originalUnit == IntensityUnit.Per25Yards) {
+                return FormatterHelper.formatNumber(this.originalValue, 60, ":", IntensityUnitHelper.toString(this.originalUnit));
             }
             else {
-                this.ifValue = ifValue;
-                this.originalUnit = unit;
-                this.originalValue = value;
-            }
-        }
-        getValue() {
-            return this.ifValue;
-        }
-        toString() {
-            if (this.originalUnit == IntensityUnit.IF) {
-                return MyMath.round10(100 * this.originalValue, -1) + "%";
-            }
-            else {
-                if (this.originalUnit == IntensityUnit.MinMi) {
-                    return FormatterHelper.formatNumber(this.originalValue, 60, ":", IntensityUnitHelper.toString(IntensityUnit.MinMi));
-                }
-                else if (this.originalUnit == IntensityUnit.Per100Yards || this.originalUnit == IntensityUnit.Per100Meters || this.originalUnit == IntensityUnit.Per400Meters || this.originalUnit == IntensityUnit.Per25Yards) {
-                    return FormatterHelper.formatNumber(this.originalValue, 60, ":", IntensityUnitHelper.toString(this.originalUnit));
-                }
-                else {
-                    if (this.originalUnit == IntensityUnit.OffsetSeconds) {
-                        if (this.originalValue > 0) {
-                            return stringFormat("CSS+{0}", this.originalValue);
-                        }
-                        else if (this.originalValue < 0) {
-                            return stringFormat("CSS{0}", this.originalValue);
-                        }
-                        else {
-                            return "CSS";
-                        }
+                if (this.originalUnit == IntensityUnit.OffsetSeconds) {
+                    if (this.originalValue > 0) {
+                        return stringFormat("CSS+{0}", this.originalValue);
                     }
-                    else if (this.originalUnit == IntensityUnit.FreeRide) {
-                        return "*";
+                    else if (this.originalValue < 0) {
+                        return stringFormat("CSS{0}", this.originalValue);
                     }
                     else {
-                        return MyMath.round10(this.originalValue, -1) + IntensityUnitHelper.toString(this.originalUnit);
+                        return "CSS";
                     }
+                }
+                else if (this.originalUnit == IntensityUnit.FreeRide) {
+                    return "*";
+                }
+                else {
+                    return MyMath.round10(this.originalValue, -1) + IntensityUnitHelper.toString(this.originalUnit);
                 }
             }
         }
-        getOriginalUnit() {
-            return this.originalUnit;
-        }
-        getOriginalValue() {
-            return this.originalValue;
-        }
-        static combine(intensities, weights) {
-            if (weights.length != intensities.length) {
-                console.assert(false, "The size of intensities and weights should be the same");
-                throw new Error("The size of intensities and weights should be the same");
-            }
-            var sum1 = 0;
-            var sum2 = 0;
-            for (var i = 0; i < intensities.length; i++) {
-                sum1 += Math.pow(intensities[i].ifValue, 2) * weights[i];
-                sum2 += weights[i];
-            }
-            if (sum1 == 0) {
-                return Intensity.ZeroIntensity;
-            }
-            return new Intensity(Math.sqrt(sum1 / sum2));
-        }
-        isEasy() {
-            return Intensity.equals(this, Intensity.EasyIntensity);
-        }
-        static equals(i1, i2) {
-            return (i1.ifValue == i2.ifValue
-                && i1.originalValue == i2.originalValue
-                && i1.originalUnit == i2.originalUnit);
-        }
     }
-    Intensity.ZeroIntensity = new Intensity(0, 0, IntensityUnit.IF);
-    Intensity.EasyIntensity = new Intensity(0.01, -1, IntensityUnit.IF);
-    return Intensity;
-})();
+    getOriginalUnit() {
+        return this.originalUnit;
+    }
+    getOriginalValue() {
+        return this.originalValue;
+    }
+    static combine(intensities, weights) {
+        if (weights.length != intensities.length) {
+            console.assert(false, "The size of intensities and weights should be the same");
+            throw new Error("The size of intensities and weights should be the same");
+        }
+        var sum1 = 0;
+        var sum2 = 0;
+        for (var i = 0; i < intensities.length; i++) {
+            sum1 += Math.pow(intensities[i].ifValue, 2) * weights[i];
+            sum2 += weights[i];
+        }
+        if (sum1 == 0) {
+            return Intensity.ZeroIntensity;
+        }
+        return new Intensity(Math.sqrt(sum1 / sum2));
+    }
+    isEasy() {
+        return Intensity.equals(this, Intensity.EasyIntensity);
+    }
+    static equals(i1, i2) {
+        return (i1.ifValue == i2.ifValue
+            && i1.originalValue == i2.originalValue
+            && i1.originalUnit == i2.originalUnit);
+    }
+}
 exports.Intensity = Intensity;
+Intensity.ZeroIntensity = new Intensity(0, 0, IntensityUnit.IF);
+Intensity.EasyIntensity = new Intensity(0.01, -1, IntensityUnit.IF);
 class BaseInterval {
     constructor(title) {
         this.title = title;

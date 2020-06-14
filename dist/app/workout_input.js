@@ -82,7 +82,8 @@ class WorkoutInput extends React.Component {
     }
     _onWorkoutTextChange(e) {
         let workoutText = this.refs['workout_text'];
-        let wp = new PreProcessor.TextPreprocessor(this.getSportType());
+        let is_indoor = this.getSportType() == Core.SportType.Swim && this.getUnitType() == Core.IntensityUnit.Watts;
+        let wp = new PreProcessor.TextPreprocessor(new PreProcessor.TextPreprocessorContext(this.getSportType(), is_indoor));
         workoutText.value = wp.process(workoutText.value);
         if (workoutText.value == "") {
             let workoutTitle = this.refs['workout_title'];
