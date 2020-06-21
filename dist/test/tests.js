@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const UI = require("./ui");
-const Core = require("./core");
-const Model = require("./builder");
-const User = require("./user");
-const PreProcessor = require("./preprocessor");
-const Parser = require("./parser");
-const Player = require("./player");
-const Visitor = require("./visitor");
+const UI = require("../ui");
+const Core = require("../core");
+const Model = require("../builder");
+const User = require("../user");
+const PreProcessor = require("../preprocessor");
+const Parser = require("../parser");
+const Player = require("../player");
+const Visitor = require("../visitor");
 const mocha_1 = require("mocha");
 const Assert = require("assert");
 function string_format(format, ...args) {
@@ -224,13 +224,13 @@ mocha_1.describe('Player Helper', function () {
 });
 mocha_1.describe('Golden Test', function () {
     mocha_1.it('swim', function () {
-        GoldenTestGeneric(of_swim, "./swim_test.input", "./swim_test.golden", GoldenTestCase);
+        GoldenTestGeneric(of_swim, "swim_test.input", "swim_test.golden", GoldenTestCase);
     });
     mocha_1.it('bike', function () {
-        GoldenTestGeneric(of_bike, "./bike_test.input", "./bike_test.golden", GoldenTestCase);
+        GoldenTestGeneric(of_bike, "bike_test.input", "bike_test.golden", GoldenTestCase);
     });
     mocha_1.it('run', function () {
-        GoldenTestGeneric(of_run, "./run_test.input", "./run_test.golden", GoldenTestCase);
+        GoldenTestGeneric(of_run, "run_test.input", "run_test.golden", GoldenTestCase);
     });
 });
 function GoldenTestCase(of, input) {
@@ -327,10 +327,10 @@ function GoldenTestCase(of, input) {
 }
 function GoldenTestGeneric(of, input_file, golden_file, callback) {
     let fs = require('fs');
-    let input = fs.readFileSync(input_file).toString();
+    let input = fs.readFileSync(`./test/${input_file}`).toString();
     let test_cases = input.toString().split("-- EOT\n");
     let separator = "----------------------------\n";
-    let expected_output = fs.readFileSync(golden_file).toString();
+    let expected_output = fs.readFileSync(`./test/${golden_file}`).toString();
     let expected_outputs = expected_output.split(separator);
     let generate_golden = false;
     let final_output = "";
@@ -352,7 +352,7 @@ function GoldenTestGeneric(of, input_file, golden_file, callback) {
 }
 mocha_1.describe('Golden Test Player', function () {
     mocha_1.it('swim', function () {
-        GoldenTestGeneric(of_swim, "./swim_player.input", "./swim_player.golden", GoldenPlayerTestCase);
+        GoldenTestGeneric(of_swim, "swim_player.input", "swim_player.golden", GoldenPlayerTestCase);
     });
 });
 function GoldenPlayerTestCase(of, input) {

@@ -1,11 +1,11 @@
-import * as UI from './ui';
-import * as Core from './core';
-import * as Model from './builder';
-import * as User from './user';
-import * as PreProcessor from './preprocessor';
-import * as Parser from './parser';
-import * as Player from './player';
-import * as Visitor from './visitor';
+import * as UI from '../ui';
+import * as Core from '../core';
+import * as Model from '../builder';
+import * as User from '../user';
+import * as PreProcessor from '../preprocessor';
+import * as Parser from '../parser';
+import * as Player from '../player';
+import * as Visitor from '../visitor';
 import {describe, it} from 'mocha';
 import * as Assert from 'assert'
 
@@ -258,13 +258,13 @@ describe('Player Helper', function () {
 
 describe('Golden Test', function () {
 	it('swim', function () {
-		GoldenTestGeneric(of_swim, "./swim_test.input", "./swim_test.golden", GoldenTestCase);
+		GoldenTestGeneric(of_swim, "swim_test.input", "swim_test.golden", GoldenTestCase);
 	});
 	it('bike', function () {
-		GoldenTestGeneric(of_bike, "./bike_test.input", "./bike_test.golden", GoldenTestCase);
+		GoldenTestGeneric(of_bike, "bike_test.input", "bike_test.golden", GoldenTestCase);
 	});
 	it('run', function () {
-		GoldenTestGeneric(of_run, "./run_test.input", "./run_test.golden", GoldenTestCase);
+		GoldenTestGeneric(of_run, "run_test.input", "run_test.golden", GoldenTestCase);
 	});
 });
 
@@ -367,10 +367,10 @@ function GoldenTestCase(of: User.ObjectFactory, input: string) : string {
 
 function GoldenTestGeneric(of: any, input_file: string, golden_file: string, callback: ( of: any, input: string ) => string) {
 	let fs = require('fs');
-	let input: string = fs.readFileSync(input_file).toString();
+	let input: string = fs.readFileSync(`./test/${input_file}`).toString();
 	let test_cases = input.toString().split("-- EOT\n");
 	let separator = "----------------------------\n";
-	let expected_output: string = fs.readFileSync(golden_file).toString();
+	let expected_output: string = fs.readFileSync(`./test/${golden_file}`).toString();
 	let expected_outputs: string[] = expected_output.split(separator);
 	let generate_golden = false;
 	let final_output: string = "";
@@ -397,7 +397,7 @@ function GoldenTestGeneric(of: any, input_file: string, golden_file: string, cal
 
 describe('Golden Test Player', function () {
 	it('swim', function () {
-		GoldenTestGeneric(of_swim, "./swim_player.input", "./swim_player.golden", GoldenPlayerTestCase);
+		GoldenTestGeneric(of_swim, "swim_player.input", "swim_player.golden", GoldenPlayerTestCase);
 	});
 });
 

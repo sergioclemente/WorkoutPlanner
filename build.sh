@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rm -rf dist/
+
 node_modules/typescript/bin/tsc -p tsconfig.json
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
@@ -7,7 +9,7 @@ if [[ "$?" != 0 ]]; then
 fi
 echo Compiled TSC files
 
-node_modules/mocha/bin/mocha dist/tests.js
+node_modules/mocha/bin/mocha dist/test/tests.js
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1
