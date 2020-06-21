@@ -13,11 +13,7 @@ module.exports = {
   plugins: [
     new CopyPlugin({
       patterns: [
-        { from: 'canvasjs.min.js', to: dist_folder },
-        { from: 'fixed-data-table.css', to: dist_folder },
-        { from: 'index.html', to: dist_folder },
-        { from: '*.png', to: dist_folder },
-        { from: '*.wav', to: dist_folder },
+        { from: 'public/*', flatten: true, to: dist_folder },
         { from: 'sql/app.db', to: dist_folder },
       ],
     }),
