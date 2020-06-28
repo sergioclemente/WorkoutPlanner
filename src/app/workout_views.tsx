@@ -1,5 +1,3 @@
-/// <reference path="../type_definitions/canvasjs.d.ts" />
-
 import * as React from 'react';
 import { Table, Column, Cell } from 'fixed-data-table';
 import Select from './select';

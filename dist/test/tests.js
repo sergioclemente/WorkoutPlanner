@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const UI = require("../ui");
-const Core = require("../core");
-const Model = require("../builder");
-const User = require("../user");
-const PreProcessor = require("../preprocessor");
-const Parser = require("../parser");
-const Player = require("../player");
-const Visitor = require("../visitor");
+const UI = require("../src/ui");
+const Core = require("../src/core");
+const Model = require("../src/builder");
+const User = require("../src/user");
+const PreProcessor = require("../src/preprocessor");
+const Parser = require("../src/parser");
+const Player = require("../src/player");
+const Visitor = require("../src/visitor");
 const mocha_1 = require("mocha");
 const Assert = require("assert");
 function string_format(format, ...args) {

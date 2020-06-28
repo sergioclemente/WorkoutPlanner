@@ -1,4 +1,4 @@
-/// <reference path="../type_definitions/canvasjs.d.ts" />
+/// <reference path="../../type_definitions/canvasjs.d.ts" />
 
 import * as React from 'react';
 import * as UI from '../ui';

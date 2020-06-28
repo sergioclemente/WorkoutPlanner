@@ -1,11 +1,11 @@
-import * as UI from '../ui';
-import * as Core from '../core';
-import * as Model from '../builder';
-import * as User from '../user';
-import * as PreProcessor from '../preprocessor';
-import * as Parser from '../parser';
-import * as Player from '../player';
-import * as Visitor from '../visitor';
+import * as UI from '../src/ui';
+import * as Core from '../src/core';
+import * as Model from '../src/builder';
+import * as User from '../src/user';
+import * as PreProcessor from '../src/preprocessor';
+import * as Parser from '../src/parser';
+import * as Player from '../src/player';
+import * as Visitor from '../src/visitor';
 import {describe, it} from 'mocha';
 import * as Assert from 'assert'
 

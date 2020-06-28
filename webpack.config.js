@@ -5,7 +5,7 @@ let dist_folder = path.resolve(__dirname, 'dist') + "/";
 
 module.exports = {
   mode: 'development',
-  entry: './dist/index.js',
+  entry: './dist/src/index.js',
   output: {
     path: dist_folder,
     filename: 'index.min.js'
