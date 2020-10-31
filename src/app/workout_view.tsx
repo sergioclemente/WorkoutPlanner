@@ -24,7 +24,9 @@ export default class WorkoutView extends React.Component<any, any> {
 
 		Visitor.VisitorHelper.visitAndFinalize(pv, intervals);
 
-		// - Massaging the time component
+		// Transforms the received data:
+		// - Converts the time from seconds to minutes
+		// - Converts intensity from [0:1] to [0:100]
 		var list = pv.data.map(function (item) {
 			let duration = item.x;
 			let intensity = item.y;
