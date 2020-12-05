@@ -2,6 +2,7 @@ import * as Parser from './parser';
 import * as Visitor from './visitor';
 import * as Core from './core';
 import * as User from './user'
+import * as PreProcessor from './preprocessor';
 
 export class WorkoutBuilder {
 	private userProfile: User.UserProfile;
@@ -32,6 +33,10 @@ export class WorkoutBuilder {
 		return this.workoutTitle;
 	}
 
+	getWorkoutDefinition(): string {
+		return this.workoutDefinition
+	}
+
 	getNormalizedWorkoutDefinition(): string {
 		let object_factory = new User.ObjectFactory(this.userProfile, this.sportType);
 		return Parser.IntervalParser.normalize(object_factory, this.workoutDefinition);
@@ -39,6 +44,14 @@ export class WorkoutBuilder {
 
 	withDefinition(workoutTitle: string, workoutDefinition: string): WorkoutBuilder {
 		let object_factory = new User.ObjectFactory(this.userProfile, this.sportType);
+		{
+			// HACK: Right now only time we can safely detect if its indoor its if its swim and output unit
+			// its watts.
+			let is_indoor = this.getSportType() == Core.SportType.Swim && this.outputUnit == Core.IntensityUnit.Watts;
+			let wp = new PreProcessor.TextPreprocessor(new PreProcessor.TextPreprocessorContext(this.getSportType(), /*is_indoor=*/is_indoor));
+			workoutDefinition = wp.process(workoutDefinition);
+		}
+		
 		this.intervals = Parser.IntervalParser.parse(
 			object_factory,
 			workoutDefinition

@@ -5,6 +5,7 @@ const Parser = require("./parser");
 const Visitor = require("./visitor");
 const Core = require("./core");
 const User = require("./user");
+const PreProcessor = require("./preprocessor");
 class WorkoutBuilder {
     constructor(userProfile, sportType, outputUnit) {
         Core.PreconditionsCheck.assertIsNumber(sportType, "sportType");
@@ -22,12 +23,20 @@ class WorkoutBuilder {
     getWorkoutTitle() {
         return this.workoutTitle;
     }
+    getWorkoutDefinition() {
+        return this.workoutDefinition;
+    }
     getNormalizedWorkoutDefinition() {
         let object_factory = new User.ObjectFactory(this.userProfile, this.sportType);
         return Parser.IntervalParser.normalize(object_factory, this.workoutDefinition);
     }
     withDefinition(workoutTitle, workoutDefinition) {
         let object_factory = new User.ObjectFactory(this.userProfile, this.sportType);
+        {
+            let is_indoor = this.getSportType() == Core.SportType.Swim && this.outputUnit == Core.IntensityUnit.Watts;
+            let wp = new PreProcessor.TextPreprocessor(new PreProcessor.TextPreprocessorContext(this.getSportType(), is_indoor));
+            workoutDefinition = wp.process(workoutDefinition);
+        }
         this.intervals = Parser.IntervalParser.parse(object_factory, workoutDefinition);
         this.workoutTitle = workoutTitle;
         this.workoutDefinition = workoutDefinition;

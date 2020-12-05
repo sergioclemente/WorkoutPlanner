@@ -107,7 +107,7 @@ class QueryParamsList extends BaseQueryParams {
     constructor() {
         super();
         this.sport_type_ = new ParamArg("sport_type", "st", true, true);
-        this.title_ = new ParamArg("title", "title", false, true);
+        this.title_ = new ParamArg("title", "title", false, false);
         this.page_ = new ParamArg("page", "p", false, false);
         this.loadFromStorage();
         this.loadFromURL();

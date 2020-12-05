@@ -98,7 +98,8 @@ export default class WorkoutView extends React.Component<any, any> {
 					time_in_zones_data: time_in_zones_data,
 					workout_steps: workout_steps,
 					workout_pretty: builder.getPrettyPrint(),
-					workout_text: params.workout_text.value,
+					// Get workout from WorkoutBuilder as it could have changed due to text preprocessor.
+					workout_text: builder.getWorkoutDefinition(),
 				}
 			);
 		} catch (err) {

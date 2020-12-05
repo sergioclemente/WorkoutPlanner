@@ -124,7 +124,7 @@ class BaseQueryParams {
 
 export class QueryParamsList extends BaseQueryParams {
 	private sport_type_ = new ParamArg("sport_type", "st", /*required=*/true, /*persist=*/true);
-	private title_ = new ParamArg("title", "title", /*required=*/false, /*persist=*/true);
+	private title_ = new ParamArg("title", "title", /*required=*/false, /*persist=*/false);
 	private page_ = new ParamArg("page", "p", /*required=*/false, /*persist=*/false);
 
 	constructor() {

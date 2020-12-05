@@ -75,7 +75,7 @@ class WorkoutView extends React.Component {
                 time_in_zones_data: time_in_zones_data,
                 workout_steps: workout_steps,
                 workout_pretty: builder.getPrettyPrint(),
-                workout_text: params.workout_text.value,
+                workout_text: builder.getWorkoutDefinition(),
             });
         }
         catch (err) {

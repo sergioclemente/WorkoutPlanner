@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as Core from '../core';
-import * as PreProcessor from '../preprocessor'
 import * as UI from '../ui';
 import Select from './select';
 import SelectOption from './select_option';
@@ -52,7 +51,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 		return workoutTitle.value;
 	}
 
-	_onSportTypeChange(sport_type_str) {
+	_onSportTypeChange(sport_type_str: string) {
 		this._enableCompatibleOutputUnits(sport_type_str);
 		this._loadWorkout();
 	}
@@ -95,24 +94,11 @@ export default class WorkoutInput extends React.Component<any, any> {
 		}
 	}
 
-	_onUnitChanged(e) {
+	_onUnitChanged() {
 		this._loadWorkout();
 	}
 
-	_onWorkoutTextChange(e) {
-		let workoutText = this.refs['workout_text'] as HTMLTextAreaElement;
-		// HACK: Right now only time we can safely detect if its indoor its if its swim and output unit
-		// its watts.
-		let is_indoor = this.getSportType() == Core.SportType.Swim && this.getUnitType() == Core.IntensityUnit.Watts;
-		let wp = new PreProcessor.TextPreprocessor(new PreProcessor.TextPreprocessorContext(this.getSportType(), /*is_indoor=*/is_indoor));
-		workoutText.value = wp.process(workoutText.value);
-		if (workoutText.value == "") {
-			// clear the title if the user cleared the value. this
-			// is assuming the workflow usually is writing the workout
-			// then writing the title.
-			let workoutTitle = this.refs['workout_title'] as HTMLInputElement;
-			workoutTitle.value = "";
-		}
+	_onWorkoutTextChange() {
 		this._loadWorkout();
 	}
 
@@ -145,7 +131,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 				</Select>
 				<br />
 				Unit:
-					<Select ref="unit" defaultValue={this.output_unit} onChange={e => this._onUnitChanged(e)}>
+					<Select ref="unit" defaultValue={this.output_unit} onChange={e => this._onUnitChanged()}>
 					<SelectOption ref="watts" value={Core.IntensityUnit.Watts}>Watts</SelectOption>
 					<SelectOption ref="minmi" value={Core.IntensityUnit.MinMi}>min/mi</SelectOption>
 					<SelectOption ref="mih" value={Core.IntensityUnit.Mph}>mi/h</SelectOption>
@@ -158,7 +144,7 @@ export default class WorkoutInput extends React.Component<any, any> {
 					<SelectOption ref="per400m" value={Core.IntensityUnit.Per400Meters}>/400m</SelectOption>
 				</Select>
 				<br />
-				<textarea ref="workout_text" defaultValue={this.workout_text} style={{ height: "200px", width: "100%" }} onChange={e => this._onWorkoutTextChange(e)}>
+				<textarea ref="workout_text" defaultValue={this.workout_text} style={{ height: "200px", width: "100%" }} onChange={e => this._onWorkoutTextChange()}>
 				</textarea>
 				<br />
 			</form>
