@@ -13,7 +13,11 @@ module.exports = {
   plugins: [
     new CopyPlugin({
       patterns: [
-        { from: 'public/*', flatten: true, to: dist_folder },
+        { from: 'public/*.js', to: dist_folder},
+        { from: 'public/*.wav', to: dist_folder},
+        { from: 'public/*.css', to: dist_folder},
+        { from: 'public/*.png', to: dist_folder},
+        { from: 'public/*.html', to: dist_folder},
         { from: 'sql/app.db', to: dist_folder },
       ],
     }),

@@ -1,4 +1,3 @@
-import * as sqlite3 from 'sqlite3'
 import * as fs from 'fs'
 import * as pg from 'pg'
 import * as Config from './config';
@@ -113,10 +112,11 @@ module ModelServer {
 
 	export class WorkoutDBFactory {
 		public static createWorkoutDB() : IWorkoutDB{
-			if (Config.Values.dbtype == "sqlite3")  {
-				console.log(`Sqlite3 path ${Config.Values.mysql}`);
-				return new WorkoutDBSqlite3(Config.Values.mysql);
-			} else if (Config.Values.dbtype == "pgsql") {
+			// if (Config.Values.dbtype == "sqlite3")  {
+			// 	console.log(`Sqlite3 path ${Config.Values.mysql}`);
+			// 	return new WorkoutDBSqlite3(Config.Values.mysql);
+			// } else
+			if (Config.Values.dbtype == "pgsql") {
 				console.log(`Pgsql connstr ${Config.Values.pgsql.connectionString}`);
 				return new WorkoutDBPosgresql(Config.Values.pgsql.connectionString);
 			} else {
@@ -125,56 +125,56 @@ module ModelServer {
 		}
 	}
 
-	export class WorkoutDBSqlite3 implements IWorkoutDB {
-		private connection_string = null;
+	// export class WorkoutDBSqlite3 implements IWorkoutDB {
+	// 	private connection_string = null;
 
-		constructor(connection_string: string) {
-			this.connection_string = connection_string;
-		}
+	// 	constructor(connection_string: string) {
+	// 		this.connection_string = connection_string;
+	// 	}
 
-		add(workout: Workout, callback: (err:string) => void): void {
-			var db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READWRITE);
-			try {
-				// Use prepared statements since it takes care of escaping the parameters.
-				var stmt = db.prepare("INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES (?, ?, ?, ?, ?, ?)");
-				stmt.run(workout.title, workout.value, workout.tags, workout.duration_sec, workout.tss, workout.sport_type);
-				stmt.finalize();
-				callback("");
-			} catch (error) {
-				Logger.error(JSON.stringify(error));
-				callback("Error while adding workout");
-			} finally {
-				db.close();
-			}
-		}
+	// 	add(workout: Workout, callback: (err:string) => void): void {
+	// 		var db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READWRITE);
+	// 		try {
+	// 			// Use prepared statements since it takes care of escaping the parameters.
+	// 			var stmt = db.prepare("INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES (?, ?, ?, ?, ?, ?)");
+	// 			stmt.run(workout.title, workout.value, workout.tags, workout.duration_sec, workout.tss, workout.sport_type);
+	// 			stmt.finalize();
+	// 			callback("");
+	// 		} catch (error) {
+	// 			Logger.error(JSON.stringify(error));
+	// 			callback("Error while adding workout");
+	// 		} finally {
+	// 			db.close();
+	// 		}
+	// 	}
 
-		getAll(callback: (err: string, w: Workout[]) => void): void {
-			var db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READONLY);
-			var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id DESC";
+	// 	getAll(callback: (err: string, w: Workout[]) => void): void {
+	// 		var db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READONLY);
+	// 		var sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id DESC";
 
-			db.all(sql, function (err, rows) {
-				if (err) {
-					Logger.error(err);
-					callback("Error while reading row from db", null);
-				} else {
-					let result = [];
-					for (let i = 0; i < rows.length; i++) {
-						var workout = new Workout();
-						workout.id = rows[i].id;
-						workout.title = rows[i].title;
-						workout.value = rows[i].value;
-						workout.tags = rows[i].tags;
-						workout.duration_sec = rows[i].duration_sec;
-						workout.tss = rows[i].tss;
-						workout.sport_type = rows[i].sport_type;
-						result.push(workout);
-					}
-					callback("", result);
-				}
-				db.close();
-			}.bind(this));
-		}
-	}
+	// 		db.all(sql, function (err, rows) {
+	// 			if (err) {
+	// 				Logger.error(err);
+	// 				callback("Error while reading row from db", null);
+	// 			} else {
+	// 				let result = [];
+	// 				for (let i = 0; i < rows.length; i++) {
+	// 					var workout = new Workout();
+	// 					workout.id = rows[i].id;
+	// 					workout.title = rows[i].title;
+	// 					workout.value = rows[i].value;
+	// 					workout.tags = rows[i].tags;
+	// 					workout.duration_sec = rows[i].duration_sec;
+	// 					workout.tss = rows[i].tss;
+	// 					workout.sport_type = rows[i].sport_type;
+	// 					result.push(workout);
+	// 				}
+	// 				callback("", result);
+	// 			}
+	// 			db.close();
+	// 		}.bind(this));
+	// 	}
+	// }
 
 	export class WorkoutDBPosgresql implements IWorkoutDB {
 		private connection_string = null;
