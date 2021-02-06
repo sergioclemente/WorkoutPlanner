@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Table, Column, Cell } from 'fixed-data-table';
+import { Table, Column, Cell } from 'fixed-data-table-2';
 import Select from './select';
 import SelectOption from './select_option';
 import * as UI from '../ui';

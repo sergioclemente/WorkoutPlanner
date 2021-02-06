@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
-const fixed_data_table_1 = require("fixed-data-table");
+const fixed_data_table_2_1 = require("fixed-data-table-2");
 const select_1 = require("./select");
 const select_option_1 = require("./select_option");
 const UI = require("../ui");
@@ -10,7 +10,7 @@ class TitleCell extends React.Component {
     render() {
         var title = this.props.data[this.props.rowIndex][this.props.field];
         var link = this.props.data[this.props.rowIndex][this.props.link];
-        return (React.createElement(fixed_data_table_1.Cell, Object.assign({}, this.props),
+        return (React.createElement(fixed_data_table_2_1.Cell, Object.assign({}, this.props),
             React.createElement("a", { href: link }, title)));
     }
 }
@@ -18,7 +18,7 @@ class SportTypeCell extends React.Component {
     render() {
         let sportType = this.props.data[this.props.rowIndex][this.props.field];
         let sportTypeString = UI.SportTypeHelper.convertToString(sportType);
-        return (React.createElement(fixed_data_table_1.Cell, Object.assign({}, this.props), sportTypeString));
+        return (React.createElement(fixed_data_table_2_1.Cell, Object.assign({}, this.props), sportTypeString));
     }
 }
 class TagsCell extends React.Component {
@@ -30,7 +30,7 @@ class TagsCell extends React.Component {
             tags_string += prefix + v;
             prefix = ", ";
         });
-        return (React.createElement(fixed_data_table_1.Cell, Object.assign({}, this.props), tags_string));
+        return (React.createElement(fixed_data_table_2_1.Cell, Object.assign({}, this.props), tags_string));
     }
 }
 class DurationCell extends React.Component {
@@ -45,7 +45,7 @@ class DurationCell extends React.Component {
         else {
             format_str = time_component.minutes + "min";
         }
-        return (React.createElement(fixed_data_table_1.Cell, Object.assign({}, this.props), format_str));
+        return (React.createElement(fixed_data_table_2_1.Cell, Object.assign({}, this.props), format_str));
     }
 }
 class WorkoutViews extends React.Component {
@@ -146,11 +146,11 @@ class WorkoutViews extends React.Component {
             React.createElement("br", null),
             "Filter: ",
             React.createElement("input", { ref: "text", value: this._params.title.value, onChange: e => this._onTextFilterChange(e) }),
-            React.createElement(fixed_data_table_1.Table, { ref: "tbl", rowsCount: filteredRows.length, rowHeight: 50, headerHeight: 50, width: 900, height: 800 },
-                React.createElement(fixed_data_table_1.Column, { header: React.createElement(fixed_data_table_1.Cell, null, "Type"), cell: React.createElement(SportTypeCell, { data: filteredRows, field: "sport_type" }, " "), width: 60 }),
-                React.createElement(fixed_data_table_1.Column, { header: React.createElement(fixed_data_table_1.Cell, null, "Title"), cell: React.createElement(TitleCell, { data: filteredRows, field: "title", link: "link" }, " "), width: 300 }),
-                React.createElement(fixed_data_table_1.Column, { header: React.createElement(fixed_data_table_1.Cell, null, "Duration"), cell: React.createElement(DurationCell, { data: filteredRows, field: "duration_sec" }, " "), width: 80 }),
-                React.createElement(fixed_data_table_1.Column, { header: React.createElement(fixed_data_table_1.Cell, null, "Tags"), cell: React.createElement(TagsCell, { data: filteredRows, field: "tags" }, " "), width: 200 }))));
+            React.createElement(fixed_data_table_2_1.Table, { ref: "tbl", rowsCount: filteredRows.length, rowHeight: 50, headerHeight: 50, width: 900, height: 800 },
+                React.createElement(fixed_data_table_2_1.Column, { header: React.createElement(fixed_data_table_2_1.Cell, null, "Type"), cell: React.createElement(SportTypeCell, { data: filteredRows, field: "sport_type" }, " "), width: 60 }),
+                React.createElement(fixed_data_table_2_1.Column, { header: React.createElement(fixed_data_table_2_1.Cell, null, "Title"), cell: React.createElement(TitleCell, { data: filteredRows, field: "title", link: "link" }, " "), width: 300 }),
+                React.createElement(fixed_data_table_2_1.Column, { header: React.createElement(fixed_data_table_2_1.Cell, null, "Duration"), cell: React.createElement(DurationCell, { data: filteredRows, field: "duration_sec" }, " "), width: 80 }),
+                React.createElement(fixed_data_table_2_1.Column, { header: React.createElement(fixed_data_table_2_1.Cell, null, "Tags"), cell: React.createElement(TagsCell, { data: filteredRows, field: "tags" }, " "), width: 200 }))));
     }
 }
 exports.default = WorkoutViews;
