@@ -3,6 +3,5 @@ compiler:
   - clang
   - gcc
 node_js:
-  - "node"
   - 14
   
