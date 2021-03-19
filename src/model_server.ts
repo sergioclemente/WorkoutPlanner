@@ -184,7 +184,14 @@ module ModelServer {
 		}
 
 		add(workout: Workout, callback: (err: string) => void): void {
-			const client = new pg.Client({connectionString: this.connection_string});
+			const client = new pg.Client(
+				{
+					connectionString: this.connection_string,
+					ssl: {
+						rejectUnauthorized: false
+					}
+				}
+			);
 			client.connect();
 			client.query("INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES ($1, $2, $3, $4, $5, $6)",
 				[workout.title, workout.value, workout.tags, workout.duration_sec, Math.round(workout.tss), workout.sport_type],
