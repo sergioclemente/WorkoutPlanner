@@ -184,13 +184,15 @@ module ModelServer {
 		}
 
 		add(workout: Workout, callback: (err: string) => void): void {
-			const client = new pg.Client(
-				{
-					connectionString: this.connection_string,
-					ssl: {
-						rejectUnauthorized: false
-					}
+			let pg_options = {
+				connectionString: this.connection_string,
+				ssl: {
+					rejectUnauthorized: false
 				}
+			}
+			console.log("Pg options: " + pg_options)
+			const client = new pg.Client(
+				pg_options
 			);
 			client.connect();
 			client.query("INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES ($1, $2, $3, $4, $5, $6)",
