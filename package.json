@@ -34,7 +34,7 @@
   "keywords": [],
   "license": "GNU GPL",
   "devDependencies": {
-    "@types/pg": "^7.14.3",
+    "@types/pg": "^8.6.0",
     "sentry-testkit": "^3.2.1"
   }
 }
