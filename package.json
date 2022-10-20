@@ -35,6 +35,6 @@
   "license": "GNU GPL",
   "devDependencies": {
     "@types/pg": "^8.6.0",
-    "sentry-testkit": "^3.2.1"
+    "sentry-testkit": "^5.0.0"
   }
 }
