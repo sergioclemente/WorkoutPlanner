@@ -37,24 +37,24 @@ class TreePrinterVisitor {
     }
     visitCommentInterval(interval) {
         this.indent();
-        this.output += core_1.stringFormat("Comment({0})\n", interval.getTitle());
+        this.output += (0, core_1.stringFormat)("Comment({0})\n", interval.getTitle());
     }
     visitSimpleInterval(interval) {
         this.indent();
         if (interval.getRestDuration().getValue() > 0) {
-            this.output += core_1.stringFormat("SimpleInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getIntensity()), interval.getTitle(), interval.getRestDuration().toString());
+            this.output += (0, core_1.stringFormat)("SimpleInterval({0}, {1}, {2}, {3})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getIntensity()), interval.getTitle(), interval.getRestDuration().toString());
         }
         else {
-            this.output += core_1.stringFormat("SimpleInterval({0}, {1}, {2})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getIntensity()), interval.getTitle());
+            this.output += (0, core_1.stringFormat)("SimpleInterval({0}, {1}, {2})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getIntensity()), interval.getTitle());
         }
     }
     visitRampBuildInterval(interval) {
         this.indent();
-        this.output += core_1.stringFormat("RampBuildInterval({0}, {1}, {2}, {3}, {4})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getStartIntensity()), TreePrinterVisitor.getIntensityPretty(interval.getEndIntensity()), interval.getTitle(), interval.getRestDuration().toString());
+        this.output += (0, core_1.stringFormat)("RampBuildInterval({0}, {1}, {2}, {3}, {4})\n", interval.getWorkDuration().toString(), TreePrinterVisitor.getIntensityPretty(interval.getStartIntensity()), TreePrinterVisitor.getIntensityPretty(interval.getEndIntensity()), interval.getTitle(), interval.getRestDuration().toString());
     }
     visitRepeatInterval(interval) {
         this.indent();
-        this.output += core_1.stringFormat("RepeatInterval(count={0}, {1}\n", interval.getRepeatCount(), interval.getTitle());
+        this.output += (0, core_1.stringFormat)("RepeatInterval(count={0}, {1}\n", interval.getRepeatCount(), interval.getTitle());
         this.indentation++;
         for (var i = 0; i < interval.getIntervals().length; i++) {
             VisitorHelper.visit(this, interval.getIntervals()[i]);
@@ -522,7 +522,7 @@ class MRCCourseDataVisitor extends BaseVisitor {
         this.content += "[COURSE HEADER]\n";
         this.content += "VERSION=2\n";
         this.content += "UNITS=ENGLISH\n";
-        this.content += core_1.stringFormat("FILE NAME={0}\n", this.fileName);
+        this.content += (0, core_1.stringFormat)("FILE NAME={0}\n", this.fileName);
         this.content += "MINUTES\tPERCENT\n";
         this.content += "[END COURSE HEADER]\n";
         this.content += "[COURSE DATA]\n";
@@ -582,10 +582,10 @@ class PPSMRXCourseDataVisitor extends BaseVisitor {
         }
     }
     visitSimpleInterval(interval) {
-        this.content += core_1.stringFormat(`\t\t["{0}",{1},{2},{2},"{3}",1,{4},0,90],\n`, this.getTitlePretty(interval), interval.getWorkDuration().getSeconds(), this.getIntensity(interval), this.getMode(interval), this.getGroupId());
+        this.content += (0, core_1.stringFormat)(`\t\t["{0}",{1},{2},{2},"{3}",1,{4},0,90],\n`, this.getTitlePretty(interval), interval.getWorkDuration().getSeconds(), this.getIntensity(interval), this.getMode(interval), this.getGroupId());
     }
     visitRampBuildInterval(interval) {
-        this.content += core_1.stringFormat(`\t\t["{0}",{1},{2},{3},"M",1,{3},0,90],\n`, this.getTitlePretty(interval), interval.getWorkDuration().getSeconds(), Math.round(interval.getStartIntensity().getValue() * 100), Math.round(interval.getEndIntensity().getValue() * 100), this.getGroupId());
+        this.content += (0, core_1.stringFormat)(`\t\t["{0}",{1},{2},{3},"M",1,{3},0,90],\n`, this.getTitlePretty(interval), interval.getWorkDuration().getSeconds(), Math.round(interval.getStartIntensity().getValue() * 100), Math.round(interval.getEndIntensity().getValue() * 100), this.getGroupId());
     }
     visitRepeatInterval(interval) {
         this.repeatCountMax.push(interval.getRepeatCount());
@@ -605,7 +605,7 @@ class PPSMRXCourseDataVisitor extends BaseVisitor {
             this.content = this.content.substr(0, this.content.length - 2);
             this.content += "\n";
         }
-        this.content = core_1.stringFormat(`{
+        this.content = (0, core_1.stringFormat)(`{
 "type":"json",
 "createdby":"PerfPRO Studio v5.80.25",
 "version":5.00,
@@ -824,7 +824,7 @@ class WorkoutTextVisitor {
                 ftp = this.userProfile.swim_ftp;
             }
             else {
-                console.assert(false, core_1.stringFormat("Invalid sportType {0}", this.sportType));
+                console.assert(false, (0, core_1.stringFormat)("Invalid sportType {0}", this.sportType));
             }
             let value = Math.round(ftp * intensity.getValue());
             if (this.roundValues) {
@@ -875,7 +875,7 @@ class WorkoutTextVisitor {
                 }
             }
             else {
-                console.assert(false, core_1.stringFormat("Invalid output unit {0}", this.outputUnit));
+                console.assert(false, (0, core_1.stringFormat)("Invalid output unit {0}", this.outputUnit));
                 return "";
             }
         }
@@ -926,7 +926,7 @@ class UnparserVisitor {
         }
     }
     visitCommentInterval(interval) {
-        this.output += core_1.stringFormat("\"{0}\"", interval.getTitle());
+        this.output += (0, core_1.stringFormat)("\"{0}\"", interval.getTitle());
         this.addSeparator();
     }
     visitSimpleInterval(interval) {
@@ -947,7 +947,7 @@ class UnparserVisitor {
             console.assert(duration_rest_pretty.length > 0, "" + interval.getRestDuration());
             params.push(duration_rest_pretty);
         }
-        this.output += core_1.stringFormat("({0})", params.join(", "));
+        this.output += (0, core_1.stringFormat)("({0})", params.join(", "));
         this.addSeparator();
     }
     visitRampBuildInterval(interval) {
@@ -964,7 +964,7 @@ class UnparserVisitor {
             console.assert(duration_rest_pretty.length > 0, "" + interval.getRestDuration());
             params.push(duration_rest_pretty);
         }
-        this.output += core_1.stringFormat("({0})", params.join(", "));
+        this.output += (0, core_1.stringFormat)("({0})", params.join(", "));
         this.level--;
         this.addSeparator();
     }

@@ -83,7 +83,7 @@ class ObjectFactory {
                 ifValue = value;
             }
             else {
-                console.assert(false, core_1.stringFormat("Invalid unit {0}", unit));
+                console.assert(false, (0, core_1.stringFormat)("Invalid unit {0}", unit));
                 throw new Error("Invalid unit : " + unit);
             }
         }
@@ -108,7 +108,7 @@ class ObjectFactory {
                 ifValue = running_mph / running_tpace_mph;
             }
             else {
-                console.assert(false, core_1.stringFormat("Unit {0} is not implemented"));
+                console.assert(false, (0, core_1.stringFormat)("Unit {0} is not implemented"));
                 throw new Error("Not implemented");
             }
         }
@@ -134,7 +134,7 @@ class ObjectFactory {
                 ifValue = speed_mph / this.userProfile_.getSwimCSSMph();
             }
             else {
-                console.assert(false, core_1.stringFormat("Invalid intensity unit {0}", unit));
+                console.assert(false, (0, core_1.stringFormat)("Invalid intensity unit {0}", unit));
             }
         }
         else {

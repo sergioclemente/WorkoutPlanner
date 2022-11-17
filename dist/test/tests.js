@@ -38,26 +38,26 @@ var of_swim = new User.ObjectFactory(up, Core.SportType.Swim);
 var of_bike = new User.ObjectFactory(up, Core.SportType.Bike);
 var of_run = new User.ObjectFactory(up, Core.SportType.Run);
 var of_other = new User.ObjectFactory(up, Core.SportType.Other);
-mocha_1.describe('DistanceUnitHelper', function () {
-    mocha_1.it('convert miles to kilometers', function () {
+(0, mocha_1.describe)('DistanceUnitHelper', function () {
+    (0, mocha_1.it)('convert miles to kilometers', function () {
         let res = Core.DistanceUnitHelper.convertTo(1000, Core.DistanceUnit.Miles, Core.DistanceUnit.Kilometers);
         expect_eq_nbr(1609.344, res);
     });
 });
-mocha_1.describe('TimeUnitHelper', function () {
-    mocha_1.it('convert hours to seconds', function () {
+(0, mocha_1.describe)('TimeUnitHelper', function () {
+    (0, mocha_1.it)('convert hours to seconds', function () {
         let res = Core.TimeUnitHelper.convertTo(1, Core.TimeUnit.Hours, Core.TimeUnit.Seconds);
         expect_eq_nbr(3600, res);
     });
 });
-mocha_1.describe('Intensity', function () {
-    mocha_1.it('IF Average', function () {
+(0, mocha_1.describe)('Intensity', function () {
+    (0, mocha_1.it)('IF Average', function () {
         var i90 = new Core.Intensity(0.90, 0.90);
         var i80 = new Core.Intensity(0.80, 0.80);
         let res = Core.Intensity.combine([i90, i80], [1, 1]).getValue();
         expect_eq_nbr(0.85, res);
     });
-    mocha_1.it('hr conversion', function () {
+    (0, mocha_1.it)('hr conversion', function () {
         var hr_visitor = new Visitor.WorkoutTextVisitor(up, Core.SportType.Bike, Core.IntensityUnit.HeartRate, false);
         expect_eq_str("155bpm", hr_visitor.getIntensityPretty(intensity_100_pct));
         var intensity_90_pct = new Core.Intensity(0.9, 0.9);
@@ -66,15 +66,15 @@ mocha_1.describe('Intensity', function () {
         expect_eq_str("132bpm", hr_visitor.getIntensityPretty(intensity_85_pct));
     });
 });
-mocha_1.describe('Other Sport Type', function () {
-    mocha_1.it('1min @ 55%-75%', function () {
+(0, mocha_1.describe)('Other Sport Type', function () {
+    (0, mocha_1.it)('1min @ 55%-75%', function () {
         let builder = new Model.WorkoutBuilder(up, of_other.sport_type, Core.IntensityUnit.IF);
         builder.withDefinition("title", "(1min, 55, 75)");
         expect_eq_nbr(0.8, Visitor.TSSCalculator.compute(builder.getInterval()));
     });
 });
-mocha_1.describe('Bugs', function () {
-    mocha_1.it('text causes distance to become miles', function () {
+(0, mocha_1.describe)('Bugs', function () {
+    (0, mocha_1.it)('text causes distance to become miles', function () {
         let d1 = new Core.Duration(Core.DistanceUnit.Yards, 400, 60, 0);
         let d2 = new Core.Duration(Core.TimeUnit.Seconds, 0, 0, 0);
         let cd1 = Core.Duration.combine(d1, d2);
@@ -85,65 +85,65 @@ mocha_1.describe('Bugs', function () {
         expect_eq_nbr(400, cd2.getValue());
     });
 });
-mocha_1.describe('Combine duration', function () {
-    mocha_1.it('Combine two distances', function () {
+(0, mocha_1.describe)('Combine duration', function () {
+    (0, mocha_1.it)('Combine two distances', function () {
         let dur = Core.Duration.combine(new Core.Duration(Core.DistanceUnit.Yards, 100, 0, 0), new Core.Duration(Core.DistanceUnit.Yards, 200, 0, 0));
         expect_eq_nbr(Core.DistanceUnit.Yards, dur.getUnit());
         expect_eq_nbr(300, dur.getValue());
     });
 });
-mocha_1.describe('IntervalParser', function () {
-    mocha_1.it('Parse double', function () {
+(0, mocha_1.describe)('IntervalParser', function () {
+    (0, mocha_1.it)('Parse double', function () {
         expect_eq_nbr(123, Parser.IntervalParser.parseDouble("123", 0).value);
         expect_eq_nbr(123.456, Parser.IntervalParser.parseDouble("123.456", 0).value);
     });
 });
-mocha_1.describe('UserProfile', function () {
-    mocha_1.it('6min/mi to other paces', function () {
+(0, mocha_1.describe)('UserProfile', function () {
+    (0, mocha_1.it)('6min/mi to other paces', function () {
         var up_6tpace = new User.UserProfile(310, "6:00min/mi", 100, "1:10/100yards", "foo@bar.com");
         expect_eq_nbr(6, up_6tpace.getRunningPaceMinMi(new Core.Intensity(1, 1)));
         expect_eq_nbr(7.05, up_6tpace.getRunningPaceMinMi(new Core.Intensity(0.85, 0.85)));
         expect_eq_nbr(8, up_6tpace.getRunningPaceMinMi(new Core.Intensity(0.75, 0.75)));
     });
 });
-mocha_1.describe('zone visitor', function () {
-    mocha_1.it('1', function () {
+(0, mocha_1.describe)('zone visitor', function () {
+    (0, mocha_1.it)('1', function () {
         expect_eq_nbr(1, Visitor.ZonesVisitor.getZone(Core.SportType.Bike, 0.50));
     });
-    mocha_1.it('2', function () {
+    (0, mocha_1.it)('2', function () {
         expect_eq_nbr(2, Visitor.ZonesVisitor.getZone(Core.SportType.Bike, 0.55));
     });
-    mocha_1.it('3', function () {
+    (0, mocha_1.it)('3', function () {
         expect_eq_nbr(3, Visitor.ZonesVisitor.getZone(Core.SportType.Bike, 0.75));
     });
-    mocha_1.it('4', function () {
+    (0, mocha_1.it)('4', function () {
         expect_eq_nbr(4, Visitor.ZonesVisitor.getZone(Core.SportType.Bike, 0.90));
     });
-    mocha_1.it('5', function () {
+    (0, mocha_1.it)('5', function () {
         expect_eq_nbr(5, Visitor.ZonesVisitor.getZone(Core.SportType.Bike, 1.05));
     });
 });
-mocha_1.describe('UI field validator', function () {
-    mocha_1.it('email', function () {
+(0, mocha_1.describe)('UI field validator', function () {
+    (0, mocha_1.it)('email', function () {
         expect_true(!UI.FieldValidator.validateEmail(""));
         expect_true(!UI.FieldValidator.validateEmail("invalid"));
         expect_true(!UI.FieldValidator.validateEmail("@bar.com"));
         expect_true(UI.FieldValidator.validateEmail("foo@bar.com"));
     });
-    mocha_1.it('number', function () {
+    (0, mocha_1.it)('number', function () {
         expect_true(!UI.FieldValidator.validateNumber(""));
         expect_true(!UI.FieldValidator.validateNumber("asd123asd"));
         expect_true(UI.FieldValidator.validateNumber("123"));
     });
-    mocha_1.it('speed mph', function () {
+    (0, mocha_1.it)('speed mph', function () {
         expect_eq_nbr(8, Core.SpeedParser.getSpeedInMph("7:30min/mi"));
         expect_eq_nbr(8, Core.SpeedParser.getSpeedInMph("8mi/h"));
         expect_eq_nbr(8.44, Core.SpeedParser.getSpeedInMph("4:25min/km"));
         expect_eq_nbr(9.94, Core.SpeedParser.getSpeedInMph("1:30/400meters"));
     });
 });
-mocha_1.describe('Formatter', function () {
-    mocha_1.it('number formatter', function () {
+(0, mocha_1.describe)('Formatter', function () {
+    (0, mocha_1.it)('number formatter', function () {
         expect_eq_str("8:00min/mi", Core.FormatterHelper.formatNumber(8, 60, ":", "min/mi", 0));
         expect_eq_str("8:00min/mi", Core.FormatterHelper.formatNumber(8, 60, ":", "min/mi", 5));
         expect_eq_str("7:30min/mi", Core.FormatterHelper.formatNumber(7.5, 60, ":", "min/mi", 0));
@@ -155,7 +155,7 @@ mocha_1.describe('Formatter', function () {
         expect_eq_str("7:14min/mi", Core.FormatterHelper.formatNumber(7.23, 60, ":", "min/mi", 0));
         expect_eq_str("7:10min/mi", Core.FormatterHelper.formatNumber(7.23, 60, ":", "min/mi", 5));
     });
-    mocha_1.it('number rounder (up)', function () {
+    (0, mocha_1.it)('number rounder (up)', function () {
         expect_eq_nbr(240, Core.FormatterHelper.roundNumberUp(240, 5));
         expect_eq_nbr(245, Core.FormatterHelper.roundNumberUp(241, 5));
         expect_eq_nbr(245, Core.FormatterHelper.roundNumberUp(242, 5));
@@ -164,7 +164,7 @@ mocha_1.describe('Formatter', function () {
         expect_eq_nbr(245, Core.FormatterHelper.roundNumberUp(245, 5));
         expect_eq_nbr(250, Core.FormatterHelper.roundNumberUp(246, 5));
     });
-    mocha_1.it('number rounder (down)', function () {
+    (0, mocha_1.it)('number rounder (down)', function () {
         expect_eq_nbr(240, Core.FormatterHelper.roundNumberDown(240, 5));
         expect_eq_nbr(240, Core.FormatterHelper.roundNumberDown(241, 5));
         expect_eq_nbr(240, Core.FormatterHelper.roundNumberDown(242, 5));
@@ -173,19 +173,19 @@ mocha_1.describe('Formatter', function () {
         expect_eq_nbr(245, Core.FormatterHelper.roundNumberDown(245, 5));
         expect_eq_nbr(245, Core.FormatterHelper.roundNumberDown(246, 5));
     });
-    mocha_1.it('time', function () {
+    (0, mocha_1.it)('time', function () {
         expect_eq_str("01:00:30", Core.FormatterHelper.formatTime(3630000));
     });
 });
-mocha_1.describe('Swim', function () {
-    mocha_1.it('speed conversion', function () {
+(0, mocha_1.describe)('Swim', function () {
+    (0, mocha_1.it)('speed conversion', function () {
         expect_eq_nbr(2.41, Core.IntensityUnitHelper.convertTo(1.41, Core.IntensityUnit.Per100Yards, Core.IntensityUnit.Mph));
         expect_eq_nbr(1.42, Core.IntensityUnitHelper.convertTo(2.4, Core.IntensityUnit.Mph, Core.IntensityUnit.Per100Yards));
         expect_eq_nbr(2.40, Core.SpeedParser.getSpeedInMph("1:25/100yards"));
         expect_eq_nbr(2.55, Core.SpeedParser.getSpeedInMph("0:20/25yards"));
         expect_eq_nbr(2.63, Core.SpeedParser.getSpeedInMph("1:25/100meters"));
     });
-    mocha_1.it('intensity conversion', function () {
+    (0, mocha_1.it)('intensity conversion', function () {
         expect_eq_str("1:30/100yards", new Core.Intensity(1, 1.5, Core.IntensityUnit.Per100Yards).toString());
         expect_eq_str("0:20/25yards", new Core.Intensity(1, 0.33333, Core.IntensityUnit.Per25Yards).toString());
         var swim_visitor_mph = new Visitor.WorkoutTextVisitor(up, Core.SportType.Swim, Core.IntensityUnit.Mph, true);
@@ -193,7 +193,7 @@ mocha_1.describe('Swim', function () {
         expect_eq_str("2.4mi/h", swim_visitor_mph.getIntensityPretty(intensity_100_pct));
         expect_eq_str("1:25/100yards", swim_visitor_per100.getIntensityPretty(intensity_100_pct));
     });
-    mocha_1.it('speed conversion (meters)', function () {
+    (0, mocha_1.it)('speed conversion (meters)', function () {
         expect_eq_str("500 warmup on 8'36'' (1:43/100meters)", Visitor.WorkoutTextVisitor.getIntervalTitle(Parser.IntervalParser.parse(of_swim, `(500m, 90, warmup)`), up, Core.SportType.Swim, Core.IntensityUnit.Per100Meters));
         expect_eq_str("100 strong on 1'32''", Visitor.WorkoutTextVisitor.getIntervalTitle(Parser.IntervalParser.parse(of_swim, `(100m, 100, strong)`), up, Core.SportType.Swim, Core.IntensityUnit.Per100Meters));
         expect_eq_nbr(2.48, Core.IntensityUnitHelper.convertTo(1.5, Core.IntensityUnit.Per100Meters, Core.IntensityUnit.Mph));
@@ -204,15 +204,15 @@ mocha_1.describe('Swim', function () {
         expect_eq_str("2.4mi/h", swim_visitor_mph.getIntensityPretty(intensity_100_pct));
         expect_eq_str("1:33/100meters", swim_visitor_per100.getIntensityPretty(intensity_100_pct));
     });
-    mocha_1.it('speed', function () {
+    (0, mocha_1.it)('speed', function () {
         expect_eq_nbr(60 + 25, new User.ObjectFactory(up, Core.SportType.Swim).createDuration(intensity_100_pct, Core.DistanceUnit.Yards, 100).getSeconds());
     });
-    mocha_1.it('speed (meters)', function () {
+    (0, mocha_1.it)('speed (meters)', function () {
         expect_eq_nbr(92.95, new User.ObjectFactory(up, Core.SportType.Swim).createDuration(intensity_100_pct, Core.DistanceUnit.Meters, 100).getSeconds());
     });
 });
-mocha_1.describe('Player Helper', function () {
-    mocha_1.it('Two intervals, 2 boundaries', function () {
+(0, mocha_1.describe)('Player Helper', function () {
+    (0, mocha_1.it)('Two intervals, 2 boundaries', function () {
         let interval = Parser.IntervalParser.parse(of_swim, "(10min, 55, t1), (20min, 60, t2)");
         let ph = new Player.PlayerHelper(of_other, interval);
         expect_eq_str("t1", ph.get(0).getInterval().getTitle());
@@ -222,14 +222,14 @@ mocha_1.describe('Player Helper', function () {
         expect_true(null == ph.get(40 * 60));
     });
 });
-mocha_1.describe('Golden Test', function () {
-    mocha_1.it('swim', function () {
+(0, mocha_1.describe)('Golden Test', function () {
+    (0, mocha_1.it)('swim', function () {
         GoldenTestGeneric(of_swim, "swim_test.input", "swim_test.golden", GoldenTestCase);
     });
-    mocha_1.it('bike', function () {
+    (0, mocha_1.it)('bike', function () {
         GoldenTestGeneric(of_bike, "bike_test.input", "bike_test.golden", GoldenTestCase);
     });
-    mocha_1.it('run', function () {
+    (0, mocha_1.it)('run', function () {
         GoldenTestGeneric(of_run, "run_test.input", "run_test.golden", GoldenTestCase);
     });
 });
@@ -350,8 +350,8 @@ function GoldenTestGeneric(of, input_file, golden_file, callback) {
         fs.writeFileSync(golden_file, final_output);
     }
 }
-mocha_1.describe('Golden Test Player', function () {
-    mocha_1.it('swim', function () {
+(0, mocha_1.describe)('Golden Test Player', function () {
+    (0, mocha_1.it)('swim', function () {
         GoldenTestGeneric(of_swim, "swim_player.input", "swim_player.golden", GoldenPlayerTestCase);
     });
 });
@@ -380,8 +380,8 @@ function GoldenPlayerTestCase(of, input) {
     }
     return actual_output;
 }
-mocha_1.describe('NumberAndUnitParser', function () {
-    mocha_1.it('Per400m', function () {
+(0, mocha_1.describe)('NumberAndUnitParser', function () {
+    (0, mocha_1.it)('Per400m', function () {
         let p = new Parser.NumberAndUnitParser();
         p.evaluate("1:30/400m", 0);
         expect_eq_nbr(1.5, p.getValue());
@@ -393,8 +393,8 @@ function textPreprocessor(input, expected) {
     let actual = tp.process(input);
     expect_eq_str(expected, actual);
 }
-mocha_1.describe('text processor', function () {
-    mocha_1.it('simple', function () {
+(0, mocha_1.describe)('text processor', function () {
+    (0, mocha_1.it)('simple', function () {
         let tp = new PreProcessor.TextPreprocessor(new PreProcessor.TextPreprocessorContext(Core.SportType.Bike, false));
         let actual = tp.process("#wu");
         console.assert(actual.indexOf("#wu") == -1);
@@ -414,8 +414,8 @@ function movingAverage(input, window_size, expected_average) {
     }
     expect_eq_nbr(ma.get_moving_average(), expected_average, string_format("input: {0} window_size: {1}", JSON.stringify(input), window_size));
 }
-mocha_1.describe('moving average', function () {
-    mocha_1.it('simple', function () {
+(0, mocha_1.describe)('moving average', function () {
+    (0, mocha_1.it)('simple', function () {
         movingAverage([], 1, null);
         movingAverage([1], 1, 1.0);
         movingAverage([2, 2], 2, 2.0);
@@ -425,13 +425,13 @@ mocha_1.describe('moving average', function () {
         movingAverage([1, 3], 1, 3.0);
     });
 });
-mocha_1.describe('File Generation', function () {
-    mocha_1.it('Golden Files', function () {
+(0, mocha_1.describe)('File Generation', function () {
+    (0, mocha_1.it)('Golden Files', function () {
         GoldenTestGeneric(of_bike, "file_generation.input", "file_generation.golden", GoldenFileGenerationTestCase);
     });
 });
-mocha_1.describe('Data Point Visitor', function () {
-    mocha_1.it('Golden Files', function () {
+(0, mocha_1.describe)('Data Point Visitor', function () {
+    (0, mocha_1.it)('Golden Files', function () {
         GoldenTestGeneric(of_swim, "data_point.input", "data_point.golden", DataPointGenerationTestCase);
     });
 });
@@ -482,8 +482,8 @@ function computePower(input_workout, expected_np, expected_avg) {
     let avg_power = interval.getIntensity().getValue() * up.bike_ftp;
     expect_eq_nbr(expected_avg, avg_power);
 }
-mocha_1.describe('np computation', function () {
-    mocha_1.it('simple', function () {
+(0, mocha_1.describe)('np computation', function () {
+    (0, mocha_1.it)('simple', function () {
         computePower("(30s, 100)", 310, 310);
         computePower("(30s, 100), (30s, 55)", 279, 250.17);
     });

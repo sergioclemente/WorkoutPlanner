@@ -171,16 +171,16 @@ class TextPreprocessor {
         return number_repeats + "[(" + work_duration_sec + "s,*," + title + "), (" + rest_duration_sec + "s,55,Relaxed)]";
     }
     _change_dd(dd_door) {
-        return core_1.stringFormat("(10s, Change to DD{0})", dd_door);
+        return (0, core_1.stringFormat)("(10s, Change to DD{0})", dd_door);
     }
     _alternate_arm_pull(duration) {
-        return core_1.stringFormat("({0}, Alternate arm pull)", duration);
+        return (0, core_1.stringFormat)("({0}, Alternate arm pull)", duration);
     }
     _double_arm_pull(duration) {
-        return core_1.stringFormat("({0}, Double arm pull)", duration);
+        return (0, core_1.stringFormat)("({0}, Double arm pull)", duration);
     }
     _back_pull(duration) {
-        return core_1.stringFormat("({0}, Back pull)", duration);
+        return (0, core_1.stringFormat)("({0}, Back pull)", duration);
     }
     processOne(input) {
         let funcs = [

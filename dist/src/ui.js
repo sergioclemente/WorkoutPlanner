@@ -131,23 +131,6 @@ class QueryParamsList extends BaseQueryParams {
 }
 exports.QueryParamsList = QueryParamsList;
 class QueryParamsWorkoutView extends BaseQueryParams {
-    constructor() {
-        super();
-        this.ftp_watts_ = new ParamArg("ftp_watts", "ftp", true, true);
-        this.t_pace_ = new ParamArg("t_pace", "tpace", true, true);
-        this.swim_ftp_ = new ParamArg("swim_ftp", "swim_ftp", true, true);
-        this.swim_css_ = new ParamArg("swim_css", "css", true, true);
-        this.email_ = new ParamArg("email", "email", true, true);
-        this.efficiency_factor_ = new ParamArg("efficiency_factor", "ef", true, true);
-        this.workout_title_ = new ParamArg("workout_title", "t", false, true);
-        this.workout_text_ = new ParamArg("workout_text", "w", false, true);
-        this.sport_type_ = new ParamArg("sport_type", "st", true, true);
-        this.output_unit_ = new ParamArg("output_unit", "ou", true, true);
-        this.page_ = new ParamArg("page", "p", false, false);
-        this.should_round_ = new ParamArg("should_round", "sr", false, true);
-        this.loadFromStorage();
-        this.loadFromURL();
-    }
     getParams() {
         return [
             this.ftp_watts_,
@@ -199,6 +182,23 @@ class QueryParamsWorkoutView extends BaseQueryParams {
     }
     get should_round() {
         return this.should_round_;
+    }
+    constructor() {
+        super();
+        this.ftp_watts_ = new ParamArg("ftp_watts", "ftp", true, true);
+        this.t_pace_ = new ParamArg("t_pace", "tpace", true, true);
+        this.swim_ftp_ = new ParamArg("swim_ftp", "swim_ftp", true, true);
+        this.swim_css_ = new ParamArg("swim_css", "css", true, true);
+        this.email_ = new ParamArg("email", "email", true, true);
+        this.efficiency_factor_ = new ParamArg("efficiency_factor", "ef", true, true);
+        this.workout_title_ = new ParamArg("workout_title", "t", false, true);
+        this.workout_text_ = new ParamArg("workout_text", "w", false, true);
+        this.sport_type_ = new ParamArg("sport_type", "st", true, true);
+        this.output_unit_ = new ParamArg("output_unit", "ou", true, true);
+        this.page_ = new ParamArg("page", "p", false, false);
+        this.should_round_ = new ParamArg("should_round", "sr", false, true);
+        this.loadFromStorage();
+        this.loadFromURL();
     }
     static createCopy(other) {
         let ret = new QueryParamsWorkoutView();
