@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
 class Select extends React.Component {
     render() {
-        return (React.createElement("select", Object.assign({ ref: "sel" }, this.props, { onChange: e => this._change(e) }), this.props.children));
+        return (React.createElement("select", { ref: "sel", ...this.props, onChange: e => this._change(e) }, this.props.children));
     }
     _change(e) {
         if (this.props.onChange) {

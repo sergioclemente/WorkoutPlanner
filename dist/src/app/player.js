@@ -144,7 +144,7 @@ class PlayerView extends React.Component {
                 React.createElement("input", { type: "button", value: "Next Set (N)", onClick: e => this._next(e) }),
                 React.createElement("input", { type: "button", value: "Reset (R)", onClick: e => this._reset(e) }),
                 React.createElement("br", null)),
-            React.createElement(workout_view_1.default, Object.assign({}, this.props, { ref: 'view' })),
+            React.createElement(workout_view_1.default, { ...this.props, ref: 'view' }),
             React.createElement("audio", { ref: "countdown", hidden: false },
                 React.createElement("source", { src: "countdown.wav", type: "audio/wav" }),
                 "Your browser does not support the audio element."),

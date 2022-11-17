@@ -10,7 +10,7 @@ class TitleCell extends React.Component {
     render() {
         var title = this.props.data[this.props.rowIndex][this.props.field];
         var link = this.props.data[this.props.rowIndex][this.props.link];
-        return (React.createElement(fixed_data_table_2_1.Cell, Object.assign({}, this.props),
+        return (React.createElement(fixed_data_table_2_1.Cell, { ...this.props },
             React.createElement("a", { href: link }, title)));
     }
 }
@@ -18,7 +18,7 @@ class SportTypeCell extends React.Component {
     render() {
         let sportType = this.props.data[this.props.rowIndex][this.props.field];
         let sportTypeString = UI.SportTypeHelper.convertToString(sportType);
-        return (React.createElement(fixed_data_table_2_1.Cell, Object.assign({}, this.props), sportTypeString));
+        return (React.createElement(fixed_data_table_2_1.Cell, { ...this.props }, sportTypeString));
     }
 }
 class TagsCell extends React.Component {
@@ -30,7 +30,7 @@ class TagsCell extends React.Component {
             tags_string += prefix + v;
             prefix = ", ";
         });
-        return (React.createElement(fixed_data_table_2_1.Cell, Object.assign({}, this.props), tags_string));
+        return (React.createElement(fixed_data_table_2_1.Cell, { ...this.props }, tags_string));
     }
 }
 class DurationCell extends React.Component {
@@ -45,7 +45,7 @@ class DurationCell extends React.Component {
         else {
             format_str = time_component.minutes + "min";
         }
-        return (React.createElement(fixed_data_table_2_1.Cell, Object.assign({}, this.props), format_str));
+        return (React.createElement(fixed_data_table_2_1.Cell, { ...this.props }, format_str));
     }
 }
 class WorkoutViews extends React.Component {

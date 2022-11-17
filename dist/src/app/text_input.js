@@ -11,7 +11,7 @@ class TextInput extends React.Component {
     }
     render() {
         return (React.createElement("span", null,
-            React.createElement("input", Object.assign({ ref: "input" }, this.props, { value: this.state.value, onChange: e => this._change(e), onBlur: e => this._blur(e) })),
+            React.createElement("input", { ref: "input", ...this.props, value: this.state.value, onChange: e => this._change(e), onBlur: e => this._blur(e) }),
             React.createElement(error_label_1.default, { ref: 'errorLabel', message: '' })));
     }
     _change(e) {

@@ -140,8 +140,8 @@ class Workout extends React.Component {
     }
     render() {
         return (React.createElement("div", null,
-            React.createElement(user_settings_1.default, Object.assign({}, this.props, { ref: 'settings', onChange: (f, t, c, sf, e, ef) => this._onUserSettingsChanged(f, t, c, sf, e, ef) })),
-            React.createElement(workout_input_1.default, Object.assign({}, this.props, { ref: 'input', onChange: (s, o, t, w) => this._onWorkoutInputChanged(s, o, t, w) })),
+            React.createElement(user_settings_1.default, { ...this.props, ref: 'settings', onChange: (f, t, c, sf, e, ef) => this._onUserSettingsChanged(f, t, c, sf, e, ef) }),
+            React.createElement(workout_input_1.default, { ...this.props, ref: 'input', onChange: (s, o, t, w) => this._onWorkoutInputChanged(s, o, t, w) }),
             React.createElement("table", null,
                 React.createElement("tbody", null,
                     React.createElement("tr", null,
@@ -160,7 +160,7 @@ class Workout extends React.Component {
             React.createElement("input", { type: "checkbox", ref: "round", onChange: this._onCheckedChanged.bind(this) }),
             "Round intensities ",
             React.createElement("br", null),
-            React.createElement(workout_view_1.default, Object.assign({}, this.props, { ref: 'view' }))));
+            React.createElement(workout_view_1.default, { ...this.props, ref: 'view' })));
     }
 }
 exports.default = Workout;
