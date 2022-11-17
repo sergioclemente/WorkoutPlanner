@@ -3,5 +3,5 @@ compiler:
   - clang
   - gcc
 node_js:
-  - 14
+  - 18
   
