@@ -8,7 +8,7 @@
     "test": "./build.sh"
   },
   "dependencies": {
-    "@sentry/node": "^7.20.0",
+    "@sentry/node": "^9.22.0",
     "@types/fixed-data-table-2": "^0.8.4",
     "@types/node": "^18.11.9",
     "@types/react": "^18.0.28",
