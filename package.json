@@ -10,7 +10,7 @@
   "dependencies": {
     "@sentry/node": "^7.20.0",
     "@types/fixed-data-table-2": "^0.8.4",
-    "@types/node": "^18.11.9",
+    "@types/node": "^22.15.29",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.0",
     "copy-webpack-plugin": "^10.2.0",
