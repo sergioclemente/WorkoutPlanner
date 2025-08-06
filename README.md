@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/sergioclemente/WorkoutPlanner.svg?branch=master)](https://travis-ci.com/sergioclemente/WorkoutPlanner)
+[![CI](https://github.com/sergioclemente/WorkoutPlanner/actions/workflows/ci.yml/badge.svg)](https://github.com/sergioclemente/WorkoutPlanner/actions/workflows/ci.yml)
 
 # Installing dependencies
 
