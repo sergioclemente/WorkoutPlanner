@@ -1,9 +1,10 @@
 import * as React from 'react';
 
 export default class Select extends React.Component<any, any> {
+	private sel = React.createRef<HTMLSelectElement>();
 
 	render() {
-		return (<select ref="sel" {...this.props} onChange={e => this._change(e)}>
+		return (<select ref={this.sel} {...this.props} onChange={e => this._change(e)}>
 			{this.props.children}
 		</select>);
 	}
@@ -15,12 +16,12 @@ export default class Select extends React.Component<any, any> {
 	}
 
 	getSelectedValue(): string {
-		var selectOption: HTMLSelectElement = this.refs['sel'] as HTMLSelectElement;
-		return selectOption.value;
+		return this.sel.current?.value || '';
 	}
 
 	setSelectedValue(val: string): void {
-		var selectOption: HTMLSelectElement = this.refs['sel'] as HTMLSelectElement;
-		selectOption.value = val;
+		if (this.sel.current) {
+			this.sel.current.value = val;
+		}
 	}
 }

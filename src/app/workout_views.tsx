@@ -70,6 +70,9 @@ export default class WorkoutViews extends React.Component<any, any> {
 	private _rows: any;
 	private _global_tags: Set<string>;
 	private _params: UI.QueryParamsList;
+	private sportTypeRef = React.createRef<Select>();
+	private textRef = React.createRef<HTMLInputElement>();
+	private tblRef = React.createRef<Table>();
 
 	constructor(params: any) {
 		super(params);
@@ -139,11 +142,8 @@ export default class WorkoutViews extends React.Component<any, any> {
 	}
 
 	_filterData() {
-		let sportTypeComp: Select = this.refs["sportType"] as Select;
-		let filterTextComp: HTMLInputElement = this.refs["text"] as HTMLInputElement;
-
-		var sportTypeEnum: Core.SportType = parseInt(sportTypeComp.getSelectedValue());
-		var filterText = filterTextComp.value;
+		var sportTypeEnum: Core.SportType = parseInt(this.sportTypeRef.current?.getSelectedValue() || '0');
+		var filterText = this.textRef.current?.value || '';
 		var filteredRows = [];
 
 		// I am not a UI guy, so lets do things a bit implict here. If the user types
@@ -186,16 +186,16 @@ export default class WorkoutViews extends React.Component<any, any> {
 
 		var { filteredRows } = this.state;
 		return (<div>Workouts
-			<Select ref="sportType" defaultValue={this.props.sport_type} onChange={e => this._onSportTypeChange(e)}>
+			<Select ref={this.sportTypeRef} defaultValue={this.props.sport_type} onChange={e => this._onSportTypeChange(e)}>
 				<SelectOption value={Core.SportType.Unknown}>All</SelectOption>
 				<SelectOption value={Core.SportType.Swim}>Swim</SelectOption>
 				<SelectOption value={Core.SportType.Bike}>Bike</SelectOption>
 				<SelectOption value={Core.SportType.Run}>Run</SelectOption>
 				<SelectOption value={Core.SportType.Other}>Other</SelectOption>
 			</Select> <br />
-			Filter: <input ref="text" value={this._params.title.value} onChange={e => this._onTextFilterChange(e)}></input>
+			Filter: <input ref={this.textRef} value={this._params.title.value} onChange={e => this._onTextFilterChange(e)}></input>
 			<Table
-				ref="tbl"
+				ref={this.tblRef}
 				rowsCount={filteredRows.length}
 				rowHeight={50}
 				headerHeight={50}

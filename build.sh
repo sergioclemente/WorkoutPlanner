@@ -2,14 +2,7 @@
 
 rm -rf dist/
 
-npx tsc -p tsconfig.json
-if [[ "$?" != 0 ]]; then
-	echo "Build error." 1>&2
-	exit 1
-fi
-echo Compiled TSC files
-
-npx mocha dist/test/tests.js
+npx ts-mocha test/tests.ts
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1

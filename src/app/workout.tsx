@@ -8,6 +8,14 @@ import { DominantUnitVisitor } from '../visitor';
 
 export default class Workout extends React.Component<any, any> {
 	params: UI.QueryParamsWorkoutView;
+	private input = React.createRef<WorkoutInput>();
+	private view = React.createRef<WorkoutView>();
+	private playerLink = React.createRef<HTMLAnchorElement>();
+	private listLink = React.createRef<HTMLAnchorElement>();
+	private emailSendWorkout = React.createRef<HTMLAnchorElement>();
+	private saveWorkout = React.createRef<HTMLAnchorElement>();
+	private round = React.createRef<HTMLInputElement>();
+	private settings = React.createRef<UserSettings>();
 
 	constructor(props: any) {
 		super(props);
@@ -34,8 +42,7 @@ export default class Workout extends React.Component<any, any> {
 		if (dominant_unit != null &&
 			dominant_unit != Core.IntensityUnit.Unknown &&
 			dominant_unit != Core.IntensityUnit.IF) {
-			let input: WorkoutInput = this.refs['input'] as WorkoutInput;
-			input.setOutputUnit(dominant_unit);
+			this.input.current?.setOutputUnit(dominant_unit);
 		}
 
 		this.refresh();
@@ -59,8 +66,7 @@ export default class Workout extends React.Component<any, any> {
 	}
 
 	refresh() {
-		var view: WorkoutView = this.refs['view'] as WorkoutView;
-		view.refresh(this.params);
+		this.view.current?.refresh(this.params);
 
 		this.refreshUrls();
 
@@ -70,22 +76,24 @@ export default class Workout extends React.Component<any, any> {
 	refreshUrls() {
 		let params = UI.QueryParamsWorkoutView.createCopy(this.params);
 		window.history.pushState('Object', 'Title', this.params.getURL());
-		
+
 		params.page.value = "player";
-		this._setHref("player_link", params.getURL());	
-		
+		this._setHref(this.playerLink, params.getURL());
+
 		params.page.value = "list";
-		this._setHref("list_link", params.getURL());
+		this._setHref(this.listLink, params.getURL());
 	}
 
-	_setHref(element_ref: string, url: string) {
-		var anchor = this.refs[element_ref] as HTMLAnchorElement;
-		anchor.href = url;
+	_setHref(element_ref: React.RefObject<HTMLAnchorElement>, url: string) {
+		if (element_ref.current) {
+			element_ref.current.href = url;
+		}
 	}
 
-	_setVisibility(element_ref: string, visible: boolean) {
-		var anchor = this.refs[element_ref] as HTMLAnchorElement;
-		anchor.hidden = !visible;
+	_setVisibility(element_ref: React.RefObject<HTMLAnchorElement>, visible: boolean) {
+		if (element_ref.current) {
+			element_ref.current.hidden = !visible;
+		}
 	}
 
 	_onEmailWorkout() {
@@ -142,7 +150,7 @@ export default class Workout extends React.Component<any, any> {
 	}
 
 	_shouldRound() : boolean {
-		return (this.refs["round"] as HTMLInputElement).checked;
+		return this.round.current?.checked || false;
 	}
 
 	_onCheckedChanged() : void {
@@ -160,30 +168,28 @@ export default class Workout extends React.Component<any, any> {
 	}
 
 	_onPrettyPrint() {
-		let input: WorkoutInput = this.refs['input'] as WorkoutInput;
-
 		let builder = this.params.createWorkoutBuilder();
-		input.setWorkoutText(builder.getNormalizedWorkoutDefinition());
+		this.input.current?.setWorkoutText(builder.getNormalizedWorkoutDefinition());
 	}
 
 	render() {
 		return (<div>
-			<UserSettings {...this.props} ref='settings' onChange={(f, t, c, sf, e, ef) => this._onUserSettingsChanged(f, t, c, sf, e, ef)}></UserSettings>
-			<WorkoutInput {...this.props} ref='input' onChange={(s, o, t, w) => this._onWorkoutInputChanged(s, o, t, w)}></WorkoutInput>
+			<UserSettings {...this.props} ref={this.settings} onChange={(f, t, c, sf, e, ef) => this._onUserSettingsChanged(f, t, c, sf, e, ef)}></UserSettings>
+			<WorkoutInput {...this.props} ref={this.input} onChange={(s, o, t, w) => this._onWorkoutInputChanged(s, o, t, w)}></WorkoutInput>
 			<table>
 				<tbody>
 					<tr>
 						<td><a href="#" onClick={(e) => this._onClickLink()}>Download Files</a></td>
-						<td><a ref="player_link">Player</a></td>
+						<td><a ref={this.playerLink}>Player</a></td>
 						<td><a href="#" onClick={(e) => this._onPrettyPrint()}>Pretty print</a></td>
-						<td><a ref="email_send_workout" href="#" onClick={(e) => this._onEmailWorkout()}>Email Workout</a></td>
-						<td><a ref="save_workout" href="#" onClick={(e) => this._onSaveWorkout()}>Save Workout</a></td>
-						<td><a ref="list_link">List Workouts</a></td>
+						<td><a ref={this.emailSendWorkout} href="#" onClick={(e) => this._onEmailWorkout()}>Email Workout</a></td>
+						<td><a ref={this.saveWorkout} href="#" onClick={(e) => this._onSaveWorkout()}>Save Workout</a></td>
+						<td><a ref={this.listLink}>List Workouts</a></td>
 					</tr>
 				</tbody>
 			</table>
-			<input type="checkbox" ref="round" onChange={this._onCheckedChanged.bind(this)} />Round intensities <br />			
-			<WorkoutView {...this.props} ref='view'></WorkoutView>
+			<input type="checkbox" ref={this.round} onChange={this._onCheckedChanged.bind(this)} />Round intensities <br />
+			<WorkoutView {...this.props} ref={this.view}></WorkoutView>
 		</div>);
 	}
 }

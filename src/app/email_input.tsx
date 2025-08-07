@@ -10,6 +10,8 @@ export interface EmailInputProps {
 }
 
 export default class EmailInput extends React.Component<EmailInputProps, any> {
+	private errorLabel = React.createRef<ErrorLabel>();
+
 	constructor(props: EmailInputProps) {
 		super(props);
 		this.state = {
@@ -22,7 +24,7 @@ export default class EmailInput extends React.Component<EmailInputProps, any> {
 		const { defaultValue, width } = this.props;
 		return (<span>
 			<input width={width} placeholder={defaultValue} type='string' value={value} onChange={e => this._change(e)} onBlur={e => this._blur(e)} />
-			<ErrorLabel ref='errorLabel' message=''></ErrorLabel>
+			<ErrorLabel ref={this.errorLabel} message=''></ErrorLabel>
 		</span>);
 	}
 
@@ -41,7 +43,6 @@ export default class EmailInput extends React.Component<EmailInputProps, any> {
 	}
 
 	_setError(msg: string) {
-		var errorLabel: ErrorLabel = this.refs['errorLabel'] as ErrorLabel;
-		errorLabel.setError(msg);
+		this.errorLabel.current?.setError(msg);
 	}
 }

@@ -5,6 +5,8 @@ import ErrorLabel from './error_label';
 // inspired from react-formal/src/inputs/Number.jsx
 
 export default class NumberInput extends React.Component<any, any> {
+	private errorLabel = React.createRef<ErrorLabel>();
+
 	constructor(props: any) {
 		super(props);
 		this.state = {
@@ -15,7 +17,7 @@ export default class NumberInput extends React.Component<any, any> {
 	render() {
 		return (<span>
 			<input {...this.props} type='number' value={this.state.value} onChange={e => this._change(e)} onBlur={e => this._blur(e)} />
-			<ErrorLabel ref='errorLabel' message=''></ErrorLabel>
+			<ErrorLabel ref={this.errorLabel} message=''></ErrorLabel>
 		</span>);
 	}
 
@@ -32,7 +34,6 @@ export default class NumberInput extends React.Component<any, any> {
 	}
 
 	setError(msg: string) {
-		var errorLabel: ErrorLabel = this.refs['errorLabel'] as ErrorLabel;
-		errorLabel.setError(msg);
+		this.errorLabel.current?.setError(msg);
 	}
 }

@@ -11,6 +11,10 @@ export default class PlayerView extends React.Component<any, any> {
 	private params_: UI.QueryParamsWorkoutView = null;
 	private playerHelper_: Player.PlayerHelper = null;
 	private intervalId_: NodeJS.Timeout = null;
+	private workoutSummary = React.createRef<HTMLTableElement>();
+	private view = React.createRef<WorkoutView>();
+	private countdown = React.createRef<HTMLAudioElement>();
+	private end = React.createRef<HTMLAudioElement>();
 
 	constructor(params: any) {
 		super(params);
@@ -60,15 +64,14 @@ export default class PlayerView extends React.Component<any, any> {
 		}
 	}
 
-	_pauseAudioElement(elementName: string, pause: boolean) {
-		var element = this.refs[elementName] as HTMLAudioElement;
+	_pauseAudioElement(element: React.RefObject<HTMLAudioElement>, pause: boolean) {
 		if (pause) {
-			if (!element.paused) {
-				element.pause();
+			if (!element.current?.paused) {
+				element.current?.pause();
 			}
 		} else {
-			if (element.paused) {
-				element.play();
+			if (element.current?.paused) {
+				element.current?.play();
 			}
 		}
 	}
@@ -80,7 +83,7 @@ export default class PlayerView extends React.Component<any, any> {
 		// Check current interval duration and play sound accordingly.
 		let bei = this.playerHelper_.get(this._getElapsedTimeSeconds());
 		if (bei == null) {
-			this._pauseAudioElement("end", false);
+			this._pauseAudioElement(this.end, false);
 			clearInterval(this.intervalId_);
 			this.intervalId_ = null;
 			return;
@@ -89,7 +92,7 @@ export default class PlayerView extends React.Component<any, any> {
 		let durationIntervalMilliseconds = bei.getDurationSeconds() * 1000;
 		// If the interval lasts more than 3.5, we will plan the countdown.
 		if (durationIntervalMilliseconds > 3500 && this._getRemainingTimeMilliseconds(bei) < 3500) {
-			this._pauseAudioElement("countdown", false);
+			this._pauseAudioElement(this.countdown, false);
 		}
 	}
 
@@ -142,8 +145,7 @@ export default class PlayerView extends React.Component<any, any> {
 		window.addEventListener("keypress", this._onKeyPress.bind(this));
 
 		// Get the WorkoutView and fill with the parameters.
-		var view: WorkoutView = this.refs['view'] as WorkoutView;
-		view.refresh(this.params_);
+		this.view.current?.refresh(this.params_);
 	}
 
 	render() {
@@ -154,7 +156,7 @@ export default class PlayerView extends React.Component<any, any> {
 			<hr />
 			<div> Total workout duration: <span />{this.state.total_time_workout}</div>
 			<div> Total workout elapsed: <span>{this.state.total_time_elapsed}</span></div>
-			<table ref="workout_summary" ></table>
+			<table ref={this.workoutSummary} ></table>
 			<form>
 				<input type="button" value="Start (S)" onClick={e => this._start(e)} />
 				<input type="button" value="Pause (P)" onClick={e => this._pause(e)} />
@@ -162,12 +164,12 @@ export default class PlayerView extends React.Component<any, any> {
 				<input type="button" value="Reset (R)" onClick={e => this._reset(e)} />
 				<br />
 			</form>
-			<WorkoutView {...this.props} ref='view'></WorkoutView>
-			<audio ref="countdown" hidden={false}>
+			<WorkoutView {...this.props} ref={this.view}></WorkoutView>
+			<audio ref={this.countdown} hidden={false}>
 				<source src="countdown.wav" type="audio/wav" />
 				Your browser does not support the audio element.
 			</audio>
-			<audio ref="end" hidden={false}>
+			<audio ref={this.end} hidden={false}>
 				<source src="end.wav" type="audio/wav" />
 				Your browser does not support the audio element.
 			</audio>

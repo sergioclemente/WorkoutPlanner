@@ -2,6 +2,9 @@ import * as React from 'react';
 import ErrorLabel from './error_label';
 
 export default class TextInput extends React.Component<any, any> {
+	private input = React.createRef<HTMLInputElement>();
+	private errorLabel = React.createRef<ErrorLabel>();
+
 	constructor(props: any) {
 		super(props);
 
@@ -12,8 +15,8 @@ export default class TextInput extends React.Component<any, any> {
 
 	render() {
 		return (<span>
-			<input ref="input" {...this.props} value={this.state.value} onChange={e => this._change(e)} onBlur={e => this._blur(e)} />
-			<ErrorLabel ref='errorLabel' message=''></ErrorLabel>
+			<input ref={this.input} {...this.props} value={this.state.value} onChange={e => this._change(e)} onBlur={e => this._blur(e)} />
+			<ErrorLabel ref={this.errorLabel} message=''></ErrorLabel>
 		</span>
 		);
 	}
@@ -27,8 +30,7 @@ export default class TextInput extends React.Component<any, any> {
 	}
 
 	setError(msg: string) {
-		var errorLabel: ErrorLabel = this.refs['errorLabel'] as ErrorLabel;
-		errorLabel.setError(msg);
+		this.errorLabel.current?.setError(msg);
 	}
 
 	getValue() {

@@ -1,16 +1,18 @@
 import * as React from 'react';
 
 export default class SelectOption extends React.Component<any, any> {
+	private opt = React.createRef<HTMLOptionElement>();
 
 	render() {
-		return (<option ref="opt" {...this.props}>
+		return (<option ref={this.opt} {...this.props}>
 			{this.props.children}
 		</option>);
 	}
 
 	setEnabled(value: boolean): void {
-		var option: HTMLOptionElement = this.refs["opt"] as HTMLOptionElement;
-		option.hidden = !value;
+		if (this.opt.current) {
+			this.opt.current.hidden = !value;
+		}
 	}
 }
 

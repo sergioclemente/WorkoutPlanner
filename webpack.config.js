@@ -5,10 +5,22 @@ let dist_folder = path.resolve(__dirname, 'dist') + "/";
 
 module.exports = {
   mode: 'development',
-  entry: './dist/src/index.js',
+  entry: './src/index.ts',
   output: {
     path: dist_folder,
     filename: 'index.min.js'
+  },
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
   },
   plugins: [
     new CopyPlugin({
