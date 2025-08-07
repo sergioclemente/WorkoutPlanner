@@ -28,8 +28,6 @@ To install the protocol handler:
 -- navigator.registerProtocolHandler("web+wp", "http://<url>/?wh=%s", "Workout Planner handler");
 
 # Bugs/Feature requests
-- Can we add a "hint" for * intervals so that it computes IF better?
-
 Server
 * Refactor validation of parameters on server.js (params.w && params.ftp && params.tpace ...)
 
