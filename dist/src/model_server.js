@@ -3,6 +3,7 @@ const fs = require("fs");
 const pg = require("pg");
 const Config = require("./config");
 const Sentry = require("@sentry/node");
+const sqlite3 = require("sqlite3");
 var ModelServer;
 (function (ModelServer) {
     class ScopedFilename {
@@ -86,7 +87,12 @@ var ModelServer;
     ModelServer.Workout = Workout;
     class WorkoutDBFactory {
         static createWorkoutDB() {
-            if (Config.Values.dbtype == "pgsql") {
+            const dbType = (Config.Values.dbtype || '').toLowerCase();
+            if (dbType === "sqlite" || dbType === "sqlite3") {
+                console.log(`Sqlite3 path ${Config.Values.mysql}`);
+                return new WorkoutDBSqlite3(Config.Values.mysql);
+            }
+            else if (dbType === "pgsql" || dbType === "postgres" || dbType === "postgresql") {
                 console.log(`Pgsql connstr ${Config.Values.pgsql.connectionString}`);
                 return new WorkoutDBPosgresql(Config.Values.pgsql.connectionString);
             }
@@ -96,6 +102,81 @@ var ModelServer;
         }
     }
     ModelServer.WorkoutDBFactory = WorkoutDBFactory;
+    class WorkoutDBSqlite3 {
+        constructor(connection_string) {
+            this.connection_string = null;
+            this.connection_string = connection_string;
+        }
+        add(workout, callback) {
+            const db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READWRITE, (openErr) => {
+                if (openErr) {
+                    Logger.error(openErr.message);
+                    callback("Error while connecting to sqlite database");
+                    return;
+                }
+                const sql = "INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES ($title, $value, $tags, $duration_sec, $tss, $sport_type)";
+                const params = {
+                    $title: workout.title,
+                    $value: workout.value,
+                    $tags: workout.tags,
+                    $duration_sec: workout.duration_sec,
+                    $tss: Math.round(workout.tss),
+                    $sport_type: workout.sport_type
+                };
+                db.run(sql, params, (err) => {
+                    if (err) {
+                        Logger.error(err.message);
+                        callback("Error while adding workout");
+                    }
+                    else {
+                        callback("");
+                    }
+                    db.close((closeErr) => {
+                        if (closeErr) {
+                            Logger.error(closeErr.message);
+                        }
+                    });
+                });
+            });
+        }
+        getAll(callback) {
+            const db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READONLY, (openErr) => {
+                if (openErr) {
+                    Logger.error(openErr.message);
+                    callback("Error while connecting to sqlite database", null);
+                    return;
+                }
+                const sql = "SELECT id, title, value, tags, duration_sec, tss, sport_type FROM workouts order by id DESC";
+                db.all(sql, (err, rows) => {
+                    if (err) {
+                        Logger.error(err.message);
+                        callback("Error while reading row from db", null);
+                    }
+                    else {
+                        const result = [];
+                        for (const row of rows ?? []) {
+                            const workout = new Workout();
+                            workout.id = row.id;
+                            workout.title = row.title;
+                            workout.value = row.value;
+                            workout.tags = row.tags;
+                            workout.duration_sec = row.duration_sec;
+                            workout.tss = row.tss;
+                            workout.sport_type = row.sport_type;
+                            result.push(workout);
+                        }
+                        callback("", result);
+                    }
+                    db.close((closeErr) => {
+                        if (closeErr) {
+                            Logger.error(closeErr.message);
+                        }
+                    });
+                });
+            });
+        }
+    }
+    ModelServer.WorkoutDBSqlite3 = WorkoutDBSqlite3;
     class WorkoutDBPosgresql {
         constructor(connection_string) {
             this.connection_string = null;
