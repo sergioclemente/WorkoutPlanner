@@ -12,6 +12,9 @@ class Workout extends React.Component {
         super(props);
         this.params = UI.QueryParamsWorkoutView.createCopy(props);
     }
+    _isEditingWorkout() {
+        return this.params.workout_id.hasValue();
+    }
     getDominantUnit(params) {
         try {
             let workout_builder = params.createWorkoutBuilder();
@@ -94,7 +97,7 @@ class Workout extends React.Component {
     }
     _onWorkoutSaved(req) {
         if (req.status == 200) {
-            alert("Workout saved");
+            alert(this._isEditingWorkout() ? "Workout updated" : "Workout saved");
         }
         else {
             alert("Error while saving workouts");
@@ -139,6 +142,7 @@ class Workout extends React.Component {
         input.setWorkoutText(builder.getNormalizedWorkoutDefinition());
     }
     render() {
+        let isEditing = this._isEditingWorkout();
         return (React.createElement("div", null,
             React.createElement(user_settings_1.default, { ...this.props, ref: 'settings', onChange: (f, t, c, sf, e, ef) => this._onUserSettingsChanged(f, t, c, sf, e, ef) }),
             React.createElement(workout_input_1.default, { ...this.props, ref: 'input', onChange: (s, o, t, w) => this._onWorkoutInputChanged(s, o, t, w) }),
@@ -154,7 +158,7 @@ class Workout extends React.Component {
                         React.createElement("td", null,
                             React.createElement("a", { ref: "email_send_workout", href: "#", onClick: (e) => this._onEmailWorkout() }, "Email Workout")),
                         React.createElement("td", null,
-                            React.createElement("a", { ref: "save_workout", href: "#", onClick: (e) => this._onSaveWorkout() }, "Save Workout")),
+                            React.createElement("a", { ref: "save_workout", href: "#", onClick: (e) => this._onSaveWorkout() }, isEditing ? "Update Workout" : "Save Workout")),
                         React.createElement("td", null,
                             React.createElement("a", { ref: "list_link" }, "List Workouts"))))),
             React.createElement("input", { type: "checkbox", ref: "round", onChange: this._onCheckedChanged.bind(this) }),

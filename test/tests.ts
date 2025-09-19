@@ -9,6 +9,8 @@ import * as Visitor from '../src/visitor';
 import {describe, it} from 'mocha';
 import * as Assert from 'assert'
 
+declare const global: any;
+
 // Usage: 
 // string_format("Parameter1: {0}, Parameter2: {1}", val1, val2)
 function string_format(format, ...args) {
@@ -44,6 +46,51 @@ var of_swim = new User.ObjectFactory(up, Core.SportType.Swim);
 var of_bike = new User.ObjectFactory(up, Core.SportType.Bike);
 var of_run = new User.ObjectFactory(up, Core.SportType.Run);
 var of_other = new User.ObjectFactory(up, Core.SportType.Other);
+
+describe('QueryParamsWorkoutView', function () {
+	it('propagates workout id into copied params', function () {
+		let g: any = global || {};
+		if (!g.window) {
+			g.window = {};
+		}
+		if (!g.window.localStorage) {
+			let storage: Map<string, string> = new Map<string, string>();
+			g.window.localStorage = {
+				getItem: (key: string) => storage.has(key) ? storage.get(key) : '',
+				setItem: (key: string, value: string) => { storage.set(key, value); }
+			};
+		}
+		if (!g.window.history) {
+			g.window.history = { pushState: (_a: any, _b: any, _c: any) => { } };
+		}
+		if (!g.document) {
+			g.document = {};
+		}
+		if (!g.document.location) {
+			g.document.location = { search: '' };
+		}
+
+		let params = new UI.QueryParamsWorkoutView();
+		params.ftp_watts.value = '255';
+		params.t_pace.value = '6:40';
+		params.swim_ftp.value = '80';
+		params.swim_css.value = '1:25';
+		params.email.value = 'test@example.com';
+		params.efficiency_factor.value = '2';
+		params.workout_title.value = 'Test';
+		params.workout_text.value = 'Workout';
+		params.sport_type.value = Core.SportType.Bike.toString();
+		params.output_unit.value = Core.IntensityUnit.Watts.toString();
+		params.page.value = 'wv';
+		params.workout_id.value = '123';
+
+		let wrapper = Object.assign({}, params);
+		let copy = UI.QueryParamsWorkoutView.createCopy(wrapper);
+		expect_eq_str('123', copy.workout_id.value);
+		let url = copy.getURL();
+		expect_true(url.indexOf('wid=123') >= 0, 'wid parameter missing from url');
+	});
+});
 
 describe('DistanceUnitHelper', function () {
 	it('convert miles to kilometers', function () {

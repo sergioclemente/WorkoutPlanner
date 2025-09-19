@@ -14,6 +14,10 @@ export default class Workout extends React.Component<any, any> {
 		this.params = UI.QueryParamsWorkoutView.createCopy(props);
 	}
 
+	private _isEditingWorkout(): boolean {
+		return this.params.workout_id.hasValue();
+	}
+
 	getDominantUnit(params: UI.QueryParamsWorkoutView) {
 		try {
 			let workout_builder = params.createWorkoutBuilder();
@@ -113,7 +117,7 @@ export default class Workout extends React.Component<any, any> {
 
 	_onWorkoutSaved(req: XMLHttpRequest) {
 		if (req.status == 200) {
-			alert("Workout saved");
+			alert(this._isEditingWorkout() ? "Workout updated" : "Workout saved");
 		} else {
 			alert("Error while saving workouts");
 			console.log(req.responseText);
@@ -166,7 +170,8 @@ export default class Workout extends React.Component<any, any> {
 		input.setWorkoutText(builder.getNormalizedWorkoutDefinition());
 	}
 
-	render() {
+		render() {
+		let isEditing = this._isEditingWorkout();
 		return (<div>
 			<UserSettings {...this.props} ref='settings' onChange={(f, t, c, sf, e, ef) => this._onUserSettingsChanged(f, t, c, sf, e, ef)}></UserSettings>
 			<WorkoutInput {...this.props} ref='input' onChange={(s, o, t, w) => this._onWorkoutInputChanged(s, o, t, w)}></WorkoutInput>
@@ -177,7 +182,7 @@ export default class Workout extends React.Component<any, any> {
 						<td><a ref="player_link">Player</a></td>
 						<td><a href="#" onClick={(e) => this._onPrettyPrint()}>Pretty print</a></td>
 						<td><a ref="email_send_workout" href="#" onClick={(e) => this._onEmailWorkout()}>Email Workout</a></td>
-						<td><a ref="save_workout" href="#" onClick={(e) => this._onSaveWorkout()}>Save Workout</a></td>
+						<td><a ref="save_workout" href="#" onClick={(e) => this._onSaveWorkout()}>{isEditing ? "Update Workout" : "Save Workout"}</a></td>
 						<td><a ref="list_link">List Workouts</a></td>
 					</tr>
 				</tbody>

@@ -151,25 +151,47 @@ function handleSaveWorkout(req: http.IncomingMessage, res: http.ServerResponse, 
     let w = <string>(params.w)
 
     let userProfile = new User.UserProfile(ftp, tpace, swim_ftp, css, email);
-    let builder = new Builder.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
-    let db = ModelServer.WorkoutDBFactory.createWorkoutDB();
-    let workout = new ModelServer.Workout();
-    workout.title = t;
-    workout.value = builder.getNormalizedWorkoutDefinition();
-    workout.tags = "";
-    workout.duration_sec = builder.getInterval().getTotalDuration().getSeconds();
-    workout.tss = builder.getTSS();
-    workout.sport_type = st;
+	let builder = new Builder.WorkoutBuilder(userProfile, st, ou).withDefinition(t, w);
+	let db = ModelServer.WorkoutDBFactory.createWorkoutDB();
+	let workout = new ModelServer.Workout();
+	workout.title = t;
+	workout.value = builder.getNormalizedWorkoutDefinition();
+	workout.tags = "";
+	workout.duration_sec = builder.getInterval().getTotalDuration().getSeconds();
+	workout.tss = builder.getTSS();
+	workout.sport_type = st;
 
-    db.add(workout, function (err: string) {
-        if (err != null && err.length > 0) {
-            res.writeHead(500);
-        }
-        res.end();
-    });
+	if (db == null) {
+		res.writeHead(500);
+		res.end();
+		return true;
+	}
+
+	const workoutIdParam = params.wid;
+	let workoutId: number = null;
+	if (typeof workoutIdParam === 'string') {
+		workoutId = parseInt(workoutIdParam);
+	} else if (Array.isArray(workoutIdParam) && workoutIdParam.length > 0) {
+		workoutId = parseInt(workoutIdParam[0]);
+	}
+	const isUpdate = workoutId != null && !isNaN(workoutId);
+
+	const finalize = function (err: string) {
+		if (err != null && err.length > 0) {
+			res.writeHead(500);
+		}
+		res.end();
+	};
+
+	if (isUpdate) {
+		workout.id = workoutId;
+		db.update(workout, finalize);
+	} else {
+		db.add(workout, finalize);
+	}
 
 
-    return true;
+	return true;
 }
 
 ModelServer.Logger.init();

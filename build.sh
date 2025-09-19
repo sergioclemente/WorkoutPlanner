@@ -17,7 +17,7 @@ fi
 echo Ran Tests
 
 # Bundle now
-npx webpack --config webpack.config.js
+npx webpack --config webpack.config.js --progress
 if [[ "$?" != 0 ]]; then
 	echo "Build error." 1>&2
 	exit 1

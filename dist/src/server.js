@@ -138,12 +138,33 @@ function handleSaveWorkout(req, res, uri, params) {
     workout.duration_sec = builder.getInterval().getTotalDuration().getSeconds();
     workout.tss = builder.getTSS();
     workout.sport_type = st;
-    db.add(workout, function (err) {
+    if (db == null) {
+        res.writeHead(500);
+        res.end();
+        return true;
+    }
+    const workoutIdParam = params.wid;
+    let workoutId = null;
+    if (typeof workoutIdParam === 'string') {
+        workoutId = parseInt(workoutIdParam);
+    }
+    else if (Array.isArray(workoutIdParam) && workoutIdParam.length > 0) {
+        workoutId = parseInt(workoutIdParam[0]);
+    }
+    const isUpdate = workoutId != null && !isNaN(workoutId);
+    const finalize = function (err) {
         if (err != null && err.length > 0) {
             res.writeHead(500);
         }
         res.end();
-    });
+    };
+    if (isUpdate) {
+        workout.id = workoutId;
+        db.update(workout, finalize);
+    }
+    else {
+        db.add(workout, finalize);
+    }
     return true;
 }
 ModelServer.Logger.init();

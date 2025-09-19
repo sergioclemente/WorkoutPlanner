@@ -106,6 +106,7 @@ export default class WorkoutViews extends React.Component<any, any> {
 				params.workout_text.value = rows[i].value;
 				params.workout_title.value = rows[i].title;
 				params.sport_type.value = rows[i].sport_type.toString();
+				params.workout_id.value = rows[i].id != null ? rows[i].id.toString() : "";
 				params.page.value = "wv";
 				// Tags are separated by comma. e.g. speed, awc
 				let tags_array = rows[i].tags.split(",").map(x => x.trim());

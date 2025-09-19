@@ -38,6 +38,48 @@ var of_swim = new User.ObjectFactory(up, Core.SportType.Swim);
 var of_bike = new User.ObjectFactory(up, Core.SportType.Bike);
 var of_run = new User.ObjectFactory(up, Core.SportType.Run);
 var of_other = new User.ObjectFactory(up, Core.SportType.Other);
+(0, mocha_1.describe)('QueryParamsWorkoutView', function () {
+    (0, mocha_1.it)('propagates workout id into copied params', function () {
+        let g = global || {};
+        if (!g.window) {
+            g.window = {};
+        }
+        if (!g.window.localStorage) {
+            let storage = new Map();
+            g.window.localStorage = {
+                getItem: (key) => storage.has(key) ? storage.get(key) : '',
+                setItem: (key, value) => { storage.set(key, value); }
+            };
+        }
+        if (!g.window.history) {
+            g.window.history = { pushState: (_a, _b, _c) => { } };
+        }
+        if (!g.document) {
+            g.document = {};
+        }
+        if (!g.document.location) {
+            g.document.location = { search: '' };
+        }
+        let params = new UI.QueryParamsWorkoutView();
+        params.ftp_watts.value = '255';
+        params.t_pace.value = '6:40';
+        params.swim_ftp.value = '80';
+        params.swim_css.value = '1:25';
+        params.email.value = 'test@example.com';
+        params.efficiency_factor.value = '2';
+        params.workout_title.value = 'Test';
+        params.workout_text.value = 'Workout';
+        params.sport_type.value = Core.SportType.Bike.toString();
+        params.output_unit.value = Core.IntensityUnit.Watts.toString();
+        params.page.value = 'wv';
+        params.workout_id.value = '123';
+        let wrapper = Object.assign({}, params);
+        let copy = UI.QueryParamsWorkoutView.createCopy(wrapper);
+        expect_eq_str('123', copy.workout_id.value);
+        let url = copy.getURL();
+        expect_true(url.indexOf('wid=123') >= 0, 'wid parameter missing from url');
+    });
+});
 (0, mocha_1.describe)('DistanceUnitHelper', function () {
     (0, mocha_1.it)('convert miles to kilometers', function () {
         let res = Core.DistanceUnitHelper.convertTo(1000, Core.DistanceUnit.Miles, Core.DistanceUnit.Kilometers);

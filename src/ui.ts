@@ -168,6 +168,7 @@ export class QueryParamsWorkoutView extends BaseQueryParams {
 	private output_unit_ = new ParamArg("output_unit", "ou", /*required=*/true, /*persist=*/true);
 	private page_ = new ParamArg("page", "p", /*required=*/false, /*persist=*/false);
 	private should_round_ = new ParamArg("should_round", "sr", /*required=*/false, /*persist=*/true);
+	private workout_id_ = new ParamArg("workout_id", "wid", /*required=*/false, /*persist=*/false);
 
 	protected getParams() : ParamArg[] {
 		return [
@@ -183,6 +184,7 @@ export class QueryParamsWorkoutView extends BaseQueryParams {
 			this.output_unit_,
 			this.page_,
 			this.should_round_,
+			this.workout_id_,
 		]
 	}
 
@@ -233,6 +235,10 @@ export class QueryParamsWorkoutView extends BaseQueryParams {
 		return this.should_round_;
 	}
 
+	get workout_id() : ParamArg {
+		return this.workout_id_;
+	}
+
 	constructor() {
 		super();
 
@@ -242,9 +248,58 @@ export class QueryParamsWorkoutView extends BaseQueryParams {
 
 	static createCopy(other: QueryParamsWorkoutView): QueryParamsWorkoutView {
 		let ret = new QueryParamsWorkoutView();
-		for (let param_arg of Object.values(other)) {
-			ret.setPropParamValue(param_arg.property_name, param_arg.value);
+		if (other == null) {
+			return ret;
 		}
+
+		let assignValue = (propertyName: string, value: any) => {
+			if (typeof value === 'undefined' || value === null) {
+				return;
+			}
+			let stringValue = value;
+			if (typeof value !== 'string') {
+				stringValue = value.toString();
+			}
+			if (stringValue.trim().length === 0) {
+				return;
+			}
+			ret.setPropParamValue(propertyName, stringValue);
+		};
+
+		let copyFromParam = (paramArg: ParamArg) => {
+			if (paramArg instanceof ParamArg) {
+				assignValue(paramArg.property_name, paramArg.value);
+			}
+		};
+
+		if (other instanceof QueryParamsWorkoutView) {
+			for (let param of other.getParams()) {
+				copyFromParam(param);
+			}
+			return ret;
+		}
+
+		let otherAny: any = other as any;
+		for (let targetParam of ret.getParams()) {
+			let candidate = otherAny[targetParam.property_name + '_'];
+			if (candidate instanceof ParamArg || (candidate && typeof candidate === 'object' && 'value' in candidate)) {
+				assignValue(targetParam.property_name, candidate.value);
+				continue;
+			}
+
+			candidate = otherAny[targetParam.property_name];
+			if (candidate instanceof ParamArg || (candidate && typeof candidate === 'object' && 'value' in candidate)) {
+				assignValue(targetParam.property_name, candidate.value);
+				continue;
+			}
+
+			let rawValue = otherAny[targetParam.url_name];
+			if (typeof rawValue === 'undefined') {
+				rawValue = otherAny[targetParam.property_name];
+			}
+			assignValue(targetParam.property_name, rawValue);
+		}
+
 		return ret;
 	}
 

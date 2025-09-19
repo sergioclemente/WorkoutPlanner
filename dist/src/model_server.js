@@ -139,6 +139,43 @@ var ModelServer;
                 });
             });
         }
+        update(workout, callback) {
+            if (workout.id == null || isNaN(workout.id)) {
+                callback("Invalid workout id");
+                return;
+            }
+            const db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READWRITE, (openErr) => {
+                if (openErr) {
+                    Logger.error(openErr.message);
+                    callback("Error while connecting to sqlite database");
+                    return;
+                }
+                const sql = "UPDATE workouts SET title = $title, value = $value, tags = $tags, duration_sec = $duration_sec, tss = $tss, sport_type = $sport_type WHERE id = $id";
+                const params = {
+                    $id: workout.id,
+                    $title: workout.title,
+                    $value: workout.value,
+                    $tags: workout.tags,
+                    $duration_sec: workout.duration_sec,
+                    $tss: Math.round(workout.tss),
+                    $sport_type: workout.sport_type
+                };
+                db.run(sql, params, (err) => {
+                    if (err) {
+                        Logger.error(err.message);
+                        callback("Error while updating workout");
+                    }
+                    else {
+                        callback("");
+                    }
+                    db.close((closeErr) => {
+                        if (closeErr) {
+                            Logger.error(closeErr.message);
+                        }
+                    });
+                });
+            });
+        }
         getAll(callback) {
             const db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READONLY, (openErr) => {
                 if (openErr) {
@@ -193,6 +230,24 @@ var ModelServer;
             const client = new pg.Client(pg_options);
             client.connect();
             client.query("INSERT INTO workouts (title, value, tags, duration_sec, tss, sport_type) VALUES ($1, $2, $3, $4, $5, $6)", [workout.title, workout.value, workout.tags, workout.duration_sec, Math.round(workout.tss), workout.sport_type], (err, res) => {
+                client.end();
+                if (err) {
+                    Logger.error(err.message);
+                    callback(err.message);
+                }
+                else {
+                    callback("");
+                }
+            });
+        }
+        update(workout, callback) {
+            if (workout.id == null || isNaN(workout.id)) {
+                callback("Invalid workout id");
+                return;
+            }
+            const client = new pg.Client({ connectionString: this.connection_string });
+            client.connect();
+            client.query("UPDATE workouts SET title = $1, value = $2, tags = $3, duration_sec = $4, tss = $5, sport_type = $6 WHERE id = $7", [workout.title, workout.value, workout.tags, workout.duration_sec, Math.round(workout.tss), workout.sport_type, workout.id], (err, res) => {
                 client.end();
                 if (err) {
                     Logger.error(err.message);

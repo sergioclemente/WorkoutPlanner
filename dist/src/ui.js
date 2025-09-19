@@ -145,6 +145,7 @@ class QueryParamsWorkoutView extends BaseQueryParams {
             this.output_unit_,
             this.page_,
             this.should_round_,
+            this.workout_id_,
         ];
     }
     get ftp_watts() {
@@ -183,6 +184,9 @@ class QueryParamsWorkoutView extends BaseQueryParams {
     get should_round() {
         return this.should_round_;
     }
+    get workout_id() {
+        return this.workout_id_;
+    }
     constructor() {
         super();
         this.ftp_watts_ = new ParamArg("ftp_watts", "ftp", true, true);
@@ -197,13 +201,56 @@ class QueryParamsWorkoutView extends BaseQueryParams {
         this.output_unit_ = new ParamArg("output_unit", "ou", true, true);
         this.page_ = new ParamArg("page", "p", false, false);
         this.should_round_ = new ParamArg("should_round", "sr", false, true);
+        this.workout_id_ = new ParamArg("workout_id", "wid", false, false);
         this.loadFromStorage();
         this.loadFromURL();
     }
     static createCopy(other) {
         let ret = new QueryParamsWorkoutView();
-        for (let param_arg of Object.values(other)) {
-            ret.setPropParamValue(param_arg.property_name, param_arg.value);
+        if (other == null) {
+            return ret;
+        }
+        let assignValue = (propertyName, value) => {
+            if (typeof value === 'undefined' || value === null) {
+                return;
+            }
+            let stringValue = value;
+            if (typeof value !== 'string') {
+                stringValue = value.toString();
+            }
+            if (stringValue.trim().length === 0) {
+                return;
+            }
+            ret.setPropParamValue(propertyName, stringValue);
+        };
+        let copyFromParam = (paramArg) => {
+            if (paramArg instanceof ParamArg) {
+                assignValue(paramArg.property_name, paramArg.value);
+            }
+        };
+        if (other instanceof QueryParamsWorkoutView) {
+            for (let param of other.getParams()) {
+                copyFromParam(param);
+            }
+            return ret;
+        }
+        let otherAny = other;
+        for (let targetParam of ret.getParams()) {
+            let candidate = otherAny[targetParam.property_name + '_'];
+            if (candidate instanceof ParamArg || (candidate && typeof candidate === 'object' && 'value' in candidate)) {
+                assignValue(targetParam.property_name, candidate.value);
+                continue;
+            }
+            candidate = otherAny[targetParam.property_name];
+            if (candidate instanceof ParamArg || (candidate && typeof candidate === 'object' && 'value' in candidate)) {
+                assignValue(targetParam.property_name, candidate.value);
+                continue;
+            }
+            let rawValue = otherAny[targetParam.url_name];
+            if (typeof rawValue === 'undefined') {
+                rawValue = otherAny[targetParam.property_name];
+            }
+            assignValue(targetParam.property_name, rawValue);
         }
         return ret;
     }

@@ -76,6 +76,7 @@ class WorkoutViews extends React.Component {
                 params.workout_text.value = rows[i].value;
                 params.workout_title.value = rows[i].title;
                 params.sport_type.value = rows[i].sport_type.toString();
+                params.workout_id.value = rows[i].id != null ? rows[i].id.toString() : "";
                 params.page.value = "wv";
                 let tags_array = rows[i].tags.split(",").map(x => x.trim());
                 for (let j = 0; j < tags_array.length; j++) {
