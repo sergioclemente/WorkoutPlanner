@@ -133,6 +133,45 @@ function handleGetWorkouts(req: http.IncomingMessage, res: http.ServerResponse, 
     return true;
 }
 
+function parseWorkoutId(params: ParsedUrlQuery): number {
+    const workoutIdParam = params.wid ?? params.id;
+    if (typeof workoutIdParam === 'string') {
+        const parsed = parseInt(workoutIdParam);
+        return isNaN(parsed) ? null : parsed;
+    }
+    if (Array.isArray(workoutIdParam) && workoutIdParam.length > 0) {
+        const parsed = parseInt(workoutIdParam[0]);
+        return isNaN(parsed) ? null : parsed;
+    }
+    return null;
+}
+
+function handleDeleteWorkout(req: http.IncomingMessage, res: http.ServerResponse, uri: string, params: ParsedUrlQuery) {
+    const workoutId = parseWorkoutId(params);
+    if (workoutId == null) {
+        res.writeHead(400);
+        res.end();
+        return true;
+    }
+
+    const db = ModelServer.WorkoutDBFactory.createWorkoutDB();
+    if (db == null) {
+        res.writeHead(500);
+        res.end();
+        return true;
+    }
+
+    db.deleteWorkout(workoutId, (err) => {
+        if (err != null && err.length > 0) {
+            res.writeHead(500);
+        } else {
+            res.writeHead(200);
+        }
+        res.end();
+    });
+    return true;
+}
+
 function show404(req: http.IncomingMessage, res: http.ServerResponse) {
     res.writeHead(404, { "Content-Type": "text/plain" });
     res.write("404 Not Found\n");
@@ -224,7 +263,8 @@ http.createServer(function (req: http.IncomingMessage, res: http.ServerResponse)
             let handler_map = {
                 "/send_mail": handleSendEmail,
                 "/save_workout": handleSaveWorkout,
-                "/workouts": handleGetWorkouts
+                "/workouts": handleGetWorkouts,
+                "/delete_workout": handleDeleteWorkout
             };
     
             fs.exists(filename, function (exists: boolean) {
