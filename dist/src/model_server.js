@@ -176,6 +176,35 @@ var ModelServer;
                 });
             });
         }
+        deleteWorkout(workoutId, callback) {
+            if (workoutId == null || isNaN(workoutId)) {
+                callback("Invalid workout id");
+                return;
+            }
+            const db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READWRITE, (openErr) => {
+                if (openErr) {
+                    Logger.error(openErr.message);
+                    callback("Error while connecting to sqlite database");
+                    return;
+                }
+                const sql = "DELETE FROM workouts WHERE id = $id";
+                const params = { $id: workoutId };
+                db.run(sql, params, (err) => {
+                    if (err) {
+                        Logger.error(err.message);
+                        callback("Error while deleting workout");
+                    }
+                    else {
+                        callback("");
+                    }
+                    db.close((closeErr) => {
+                        if (closeErr) {
+                            Logger.error(closeErr.message);
+                        }
+                    });
+                });
+            });
+        }
         getAll(callback) {
             const db = new sqlite3.Database(this.connection_string, sqlite3.OPEN_READONLY, (openErr) => {
                 if (openErr) {
@@ -248,6 +277,24 @@ var ModelServer;
             const client = new pg.Client({ connectionString: this.connection_string });
             client.connect();
             client.query("UPDATE workouts SET title = $1, value = $2, tags = $3, duration_sec = $4, tss = $5, sport_type = $6 WHERE id = $7", [workout.title, workout.value, workout.tags, workout.duration_sec, Math.round(workout.tss), workout.sport_type, workout.id], (err, res) => {
+                client.end();
+                if (err) {
+                    Logger.error(err.message);
+                    callback(err.message);
+                }
+                else {
+                    callback("");
+                }
+            });
+        }
+        deleteWorkout(workoutId, callback) {
+            if (workoutId == null || isNaN(workoutId)) {
+                callback("Invalid workout id");
+                return;
+            }
+            const client = new pg.Client({ connectionString: this.connection_string });
+            client.connect();
+            client.query("DELETE FROM workouts WHERE id = $1", [workoutId], (err, res) => {
                 client.end();
                 if (err) {
                     Logger.error(err.message);

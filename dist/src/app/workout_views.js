@@ -48,6 +48,16 @@ class DurationCell extends React.Component {
         return (React.createElement(fixed_data_table_2_1.Cell, { ...this.props }, format_str));
     }
 }
+class DeleteCell extends React.Component {
+    render() {
+        const workoutId = this.props.data[this.props.rowIndex][this.props.field];
+        const onDelete = this.props.onDelete;
+        return (React.createElement(fixed_data_table_2_1.Cell, { ...this.props },
+            React.createElement("button", { onClick: (e) => { e.preventDefault(); if (typeof onDelete === 'function') {
+                    onDelete(workoutId);
+                } } }, "Delete")));
+    }
+}
 class WorkoutViews extends React.Component {
     constructor(params) {
         super(params);
@@ -133,6 +143,27 @@ class WorkoutViews extends React.Component {
         this._params.pushToHistory();
         this.setState({ filteredRows: filteredRows });
     }
+    _onDeleteWorkout(workoutId) {
+        if (workoutId == null || isNaN(workoutId)) {
+            return;
+        }
+        if (!confirm("Delete this workout?")) {
+            return;
+        }
+        var req = new XMLHttpRequest();
+        req.addEventListener("load", this._onWorkoutDeleted.bind(this, req, workoutId));
+        req.open("DELETE", "delete_workout?wid=" + encodeURIComponent(workoutId.toString()));
+        req.send();
+    }
+    _onWorkoutDeleted(req, workoutId) {
+        if (req.status == 200) {
+            this._rows = this._rows.filter(row => row.id !== workoutId);
+            this._filterData();
+        }
+        else {
+            alert("Error while deleting workout");
+        }
+    }
     render() {
         var { filteredRows } = this.state;
         return (React.createElement("div", null,
@@ -151,7 +182,8 @@ class WorkoutViews extends React.Component {
                 React.createElement(fixed_data_table_2_1.Column, { header: React.createElement(fixed_data_table_2_1.Cell, null, "Type"), cell: React.createElement(SportTypeCell, { data: filteredRows, field: "sport_type" }, " "), width: 60 }),
                 React.createElement(fixed_data_table_2_1.Column, { header: React.createElement(fixed_data_table_2_1.Cell, null, "Title"), cell: React.createElement(TitleCell, { data: filteredRows, field: "title", link: "link" }, " "), width: 300 }),
                 React.createElement(fixed_data_table_2_1.Column, { header: React.createElement(fixed_data_table_2_1.Cell, null, "Duration"), cell: React.createElement(DurationCell, { data: filteredRows, field: "duration_sec" }, " "), width: 80 }),
-                React.createElement(fixed_data_table_2_1.Column, { header: React.createElement(fixed_data_table_2_1.Cell, null, "Tags"), cell: React.createElement(TagsCell, { data: filteredRows, field: "tags" }, " "), width: 200 }))));
+                React.createElement(fixed_data_table_2_1.Column, { header: React.createElement(fixed_data_table_2_1.Cell, null, "Tags"), cell: React.createElement(TagsCell, { data: filteredRows, field: "tags" }, " "), width: 200 }),
+                React.createElement(fixed_data_table_2_1.Column, { header: React.createElement(fixed_data_table_2_1.Cell, null, "Actions"), cell: React.createElement(DeleteCell, { data: filteredRows, field: "id", onDelete: (id) => this._onDeleteWorkout(id) }, " "), width: 120 }))));
     }
 }
 exports.default = WorkoutViews;
