@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -rf dist/
+find dist -mindepth 1 -depth -not -path "dist/app.db" -delete
 
 npx tsc -p tsconfig.json
 if [[ "$?" != 0 ]]; then
