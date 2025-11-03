@@ -66,6 +66,18 @@ class DurationCell extends React.Component<any, any> {
 	}
 }
 
+class DeleteCell extends React.Component<any, any> {
+	render() {
+		const workoutId = this.props.data[this.props.rowIndex][this.props.field];
+		const onDelete = this.props.onDelete;
+		return (
+			<Cell {...this.props}>
+				<button onClick={(e) => { e.preventDefault(); if (typeof onDelete === 'function') { onDelete(workoutId); } }}>Delete</button>
+			</Cell>
+		);
+	}
+}
+
 export default class WorkoutViews extends React.Component<any, any> {
 	private _rows: any;
 	private _global_tags: Set<string>;
@@ -183,6 +195,29 @@ export default class WorkoutViews extends React.Component<any, any> {
 		this.setState({ filteredRows: filteredRows });
 	}
 
+	_onDeleteWorkout(workoutId: number) {
+		if (workoutId == null || isNaN(workoutId)) {
+			return;
+		}
+		if (!confirm("Delete this workout?")) {
+			return;
+		}
+
+		var req = new XMLHttpRequest();
+		req.addEventListener("load", this._onWorkoutDeleted.bind(this, req, workoutId));
+		req.open("DELETE", "delete_workout?wid=" + encodeURIComponent(workoutId.toString()));
+		req.send();
+	}
+
+	_onWorkoutDeleted(req: XMLHttpRequest, workoutId: number) {
+		if (req.status == 200) {
+			this._rows = this._rows.filter(row => row.id !== workoutId);
+			this._filterData();
+		} else {
+			alert("Error while deleting workout");
+		}
+	}
+
 	render() {
 
 		var { filteredRows } = this.state;
@@ -221,6 +256,11 @@ export default class WorkoutViews extends React.Component<any, any> {
 					header={<Cell>Tags</Cell>}
 					cell={<TagsCell data={filteredRows} field="tags"> </TagsCell>}
 					width={200}
+				/>
+				<Column
+					header={<Cell>Actions</Cell>}
+					cell={<DeleteCell data={filteredRows} field="id" onDelete={(id) => this._onDeleteWorkout(id)}> </DeleteCell>}
+					width={120}
 				/>
 			</Table>
 		</div>);
